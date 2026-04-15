@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <script src="../../js/components/i18n.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="notifications_title_page">แจ้งเตือน | AGRIPRICE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/shared-pages/notifications.css" />
+  <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+<body data-active="notifications">
+
+  <script src="../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <main class="noti-page">
+
+    <!-- Header -->
+    <header class="noti-header">
+      <div class="noti-header-left">
+        <div class="noti-header-icon">
+          <span class="material-icons-outlined">notifications</span>
+        </div>
+        <h1 class="noti-header-title" data-i18n="notifications_heading">การแจ้งเตือน</h1>
+      </div>
+      <button class="noti-refresh-btn" id="btnRefresh" type="button" aria-label="รีเฟรช" data-i18n-aria-label="refresh" data-i18n-title="refresh">
+        <span class="material-icons-outlined">refresh</span>
+      </button>
+    </header>
+
+    <!-- Tabs -->
+    <div class="noti-tabs" role="tablist">
+      <button class="noti-tab is-active" data-tab="all" role="tab" type="button" data-i18n="all">ทั้งหมด</button>
+      <button class="noti-tab" data-tab="unread" role="tab" type="button">
+        <span data-i18n="unread">ยังไม่อ่าน</span>
+        <span class="noti-tab-badge" id="unreadBadge">0</span>
+      </button>
+    </div>
+
+    <!-- List -->
+    <section class="noti-list-wrap" id="notiList">
+      <!-- notifications จะถูก inject โดย notifications.js -->
+    </section>
+
+    <!-- Empty State -->
+    <div class="noti-empty" id="emptyState" hidden>
+      <div class="empty-icon">
+        <span class="material-icons-outlined">notifications_off</span>
+      </div>
+      <h3 data-i18n="no_notifications_title">ยังไม่มีการแจ้งเตือน</h3>
+      <p data-i18n="no_notifications_sub">เมื่อมีการอัปเดตราคา หรือใกล้ถึงคิวการจอง ระบบจะแจ้งให้คุณทราบที่นี่</p>
+    </div>
+
+  </main>
+
+  <div id="bottomNavMount"></div>
+  <script src="../../js/components.js"></script>
+  <script src="../../js/shared-pages/notifications.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>การแจ้งเตือน | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-notifications/setup-notifications.css" />
+</head>
+<body>
+  <main class="notify-page">
+  <div class="notify-page fade-slide">
+    <header class="notify-header">
+      <a class="notify-back" href="../account.html" aria-label="ย้อนกลับ">
+        <span class="material-icons-outlined">chevron_left</span>
+      </a>
+      <h1 class="notify-title">จัดการการแจ้งเตือน</h1>
+    </header>
+
+    <section class="notify-card" aria-label="ตั้งค่าการแจ้งเตือน">
+      <form id="notifyForm" class="notify-form"></form>
+      <p id="notifyMessage" class="notify-message" aria-live="polite"></p>
+    </section>
+  </div>
+
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/account/manage-notifications/setup-notifications.js"></script>
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+</body>
+</html>

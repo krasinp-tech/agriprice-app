@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>เข้าสู่ระบบ | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/login2.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Login Screen">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="Login media">
+        <video
+          id="loginVideo"
+          class="media-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="../../assets/images/story-1.jpg"
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          disablepictureinpicture
+        >
+          <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+        </video>
+
+        <!-- ถ้าวิดีโอเล่นไม่ได้/ไม่เจอไฟล์ จะโชว์พื้นหลังแทน -->
+        <div class="media-fallback" id="mediaFallback" aria-hidden="true"></div>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <header class="head">
+          <h1 class="h1">ยินดีต้อนรับกลับมา</h1>
+          <p class="sub">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบ</p>
+        </header>
+
+        <form class="form" id="loginForm" novalidate>
+          <div class="field">
+            <label class="label" for="identifier">อีเมล / เบอร์โทรศัพท์</label>
+            <input
+              id="identifier"
+              name="identifier"
+              class="input"
+              type="text"
+              inputmode="text"
+              autocomplete="username"
+              placeholder="อีเมล / เบอร์โทรศัพท์"
+              required
+            />
+            <p class="help" id="idHelp"></p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="password">รหัสผ่าน</label>
+
+            <div class="input-wrap">
+              <input
+                id="password"
+                name="password"
+                class="input input-password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="รหัสผ่าน"
+                required
+                minlength="4"
+              />
+              <button class="eye" id="togglePwd" type="button" aria-label="แสดง/ซ่อน รหัสผ่าน">
+                <!-- eye icon (inline svg) -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="row">
+              <p class="help" id="pwHelp"></p>
+              <a class="link" href="./forgot-password.html" id="forgotLink">ลืมรหัสผ่าน</a>
+            </div>
+          </div>
+
+          <div class="error" id="formError" role="alert" aria-live="polite"></div>
+
+          <button class="btn" id="loginBtn" type="submit">
+            <span class="btn-text">เข้าสู่ระบบ</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <p class="foot">
+            <a class="link strong" href="./forgot-password.html" id="goForgot">ลืมรหัสผ่าน?</a>
+            <span style="margin-left:8px">|</span>
+            <span>ยังไม่มีบัญชีใช่ไหม?</span>
+            <a class="link strong" href="./register1.html" id="goRegister">สมัครสมาชิก</a>
+          </p>
+        </form>
+      </div>
+
+    </section>
+  </main>
+  <script src="../../js/auth/guard.js"></script>
+  <script src="../../js/auth/login2.js"></script>
+</body>
+</html>

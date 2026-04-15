@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <script src="../../js/components/i18n.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="chat_title">แชท | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/shared-pages/chat.css" />
+  <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body data-active="chat">
+
+  <main class="chat-page">
+    <!-- Header -->
+    <header class="chat-header">
+      <div class="chat-header-inner">
+        <div class="chat-title">
+          <span class="material-icons-outlined">chat_bubble_outline</span>
+          <span data-i18n="chat_heading">แชท</span>
+        </div>
+
+        <div class="chat-search">
+          <span class="material-icons-outlined">search</span>
+          <input id="chatSearchInput" type="text" placeholder="ค้นหาแชท / ผู้รับซื้อ" data-i18n-placeholder="chat_search_placeholder" />
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout -->
+    <section class="chat-shell">
+      <!-- Left: conversation list -->
+      <aside class="chat-list" aria-label="รายการแชท" data-i18n-aria-label="chat_list_label">
+        <div class="chat-list-top">
+          <div class="chat-list-title" data-i18n="chat_recent_messages">ข้อความล่าสุด</div>
+          <button class="chat-refresh" id="chatRefreshBtn" type="button" title="รีเฟรช" data-i18n-title="refresh">
+            <span class="material-icons-outlined">refresh</span>
+          </button>
+        </div>
+
+        <div class="chat-list-items" id="chatListMount">
+          <!-- JS render -->
+        </div>
+      </aside>
+
+      <!-- Right: conversation detail -->
+      <section class="chat-room" aria-label="ห้องแชท" data-i18n-aria-label="chat_room_label">
+        <!-- Empty state -->
+        <div class="chat-empty" id="chatEmptyState">
+          <div class="chat-empty-card">
+            <div class="chat-empty-icon"><span class="material-icons-outlined" aria-hidden="true">forum</span></div>
+            <div class="chat-empty-title" data-i18n="chat_empty_title">เลือกแชทเพื่อเริ่มพูดคุย</div>
+            <div class="chat-empty-sub" data-i18n="chat_empty_sub">คุณสามารถติดต่อผู้รับซื้อและนัดหมายการจองคิวได้</div>
+          </div>
+        </div>
+
+        <!-- Room header -->
+        <div class="room-header" id="roomHeader" style="display:none;">
+          <button class="room-back" id="roomBackBtn" type="button" title="ย้อนกลับ" data-i18n-title="back">
+            <span class="material-icons-outlined">arrow_back</span>
+          </button>
+
+          <div class="room-user">
+            <div class="room-avatar" id="roomAvatar"><span class="material-icons-outlined" aria-hidden="true">person</span></div>
+            <div class="room-user-text">
+              <div class="room-name" id="roomName">-</div>
+              <div class="room-sub" id="roomSub" data-i18n="online">ออนไลน์</div>
+            </div>
+          </div>
+
+          <div class="room-actions">
+            <button class="room-action" type="button" id="btnOpenProfile" title="ดูโปรไฟล์" data-i18n-title="view_profile">
+              <span class="material-icons-outlined">person_outline</span>
+            </button>
+            <button class="room-action" type="button" data-action="call" title="โทร" data-i18n-title="call">
+              <span class="material-icons-outlined">call</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="room-messages" id="roomMessages" style="display:none;">
+          <!-- JS render -->
+        </div>
+
+        <!-- Image preview before send -->
+        <div class="composer-preview" id="composerPreview" style="display:none;">
+          <div class="preview-item">
+            <img id="previewImage" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" />
+            <button type="button" class="preview-remove" id="previewRemoveBtn" title="ลบรูป" data-i18n-title="remove_image">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Composer -->
+        <form class="room-composer" id="chatComposer" style="display:none;">
+          <button type="button" class="composer-btn" data-action="attach" title="แนบรูป" data-i18n-title="attach_image">
+            <span class="material-icons-outlined">add_circle_outline</span>
+          </button>
+
+          <input id="chatImageInput" type="file" accept="image/*" hidden />
+          <input id="chatMessageInput" type="text" placeholder="พิมพ์ข้อความ..." autocomplete="off" data-i18n-placeholder="type_message" />
+
+          <button type="submit" class="composer-send" title="ส่ง" data-i18n-title="send">
+            <span class="material-icons-outlined">send</span>
+          </button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <!-- Bottom Nav -->
+<div id="bottomNavMount"></div>
+<script src="../../js/components.js"></script>
+<script src="../../js/shared-pages/chat.js"></script>
+
+
+<script src="../../js/auth/guard.js"></script>
+<script>window.AuthGuard.requireLogin();</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

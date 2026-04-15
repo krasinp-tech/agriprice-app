@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ภาษา | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-language/language.css" />
+</head>
+<body>
+  <main class="ud-page fade-slide">
+    <header class="ud-header fade-slide">
+      <a class="ud-back" href="../account.html" aria-label="ย้อนกลับ">
+        <span class="material-icons-outlined">chevron_left</span>
+      </a>
+      <h1 class="ud-title" data-i18n="language_title">ภาษา</h1>
+    </header>
+
+    <section class="ud-card lang-card fade-slide">
+      <div class="lang-icon">
+        <span class="material-icons-outlined" style="font-size:32px;color:#2ecc40;">translate</span>
+      </div>
+      <div class="lang-desc" data-i18n="select_language">เลือกภาษา</div>
+      <div id="langSelector" class="lang-selector-ui"></div>
+      <div class="lang-note">* การเปลี่ยนภาษาจะมีผลกับทุกหน้าของแอป</div>
+    </section>
+  </main>
+
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/account/manage-language/i18n.js"></script>
+  <script src="../../../js/account/manage-language/language.js"></script>
+</body>
+</html>

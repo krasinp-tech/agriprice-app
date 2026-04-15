@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../../js/components/i18n.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เพิ่มการรับซื้อผลผลิต | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../../css/buyer/setbooking/setbooking-step1.css" />
+  <script src="../../../js/auth/guard.js"></script>
+  <script>
+    window.AuthGuard.requireLogin();
+    // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
+    (function() {
+      try {
+        var u = JSON.parse(localStorage.getItem('user') || 'null');
+        var role = (u && u.role) ? u.role.toLowerCase() : (localStorage.getItem('role') || '').toLowerCase();
+        if (role && role !== 'buyer') { window.location.href = '../../../index.html'; }
+      } catch(_) {}
+    })();
+  </script>
+</head>
+
+<body>
+    <!-- Language Switcher (top-right) -->
+    <div class="page">
+
+    <!-- Header -->
+    <header class="topbar">
+      <button class="back-btn" type="button" aria-label="ย้อนกลับ" onclick="history.back()">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+
+      <div class="topbar-center">
+        <h1 class="title">เพิ่มการรับซื้อผลผลิต</h1>
+        <div class="step-indicator" aria-label="ขั้นตอน 1 จาก 2">
+          <span class="dot active" aria-hidden="true"></span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="dot" aria-hidden="true"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <section class="card">
+        <!-- Product Search -->
+        <div class="field">
+          <label class="label" for="productInput">ค้นหาผลผลิต</label>
+
+          <div class="combo" data-combo="product">
+            <input id="productInput" class="combo-input" type="text" placeholder="เช่น ทุเรียน หมอนทอง" autocomplete="off" />
+            <button class="combo-btn" type="button" aria-label="เปิดรายการผลผลิต">
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+
+            <div class="combo-menu" role="listbox" aria-label="รายการผลผลิต"></div>
+          </div>
+
+          <p class="hint" id="productHint">พิมพ์เพื่อค้นหา หรือกดลูกศรเพื่อเลือก</p>
+        </div>
+
+        <!-- Variety Search -->
+        <div class="field">
+          <label class="label" for="varietyInput">ค้นหาผลผลิตสายพันธุ์</label>
+
+          <div class="combo disabled" data-combo="variety" aria-disabled="true">
+            <input id="varietyInput" class="combo-input" type="text" placeholder="ค้นหาหรือกรอกสายพันธุ์" autocomplete="off" disabled />
+            <button class="combo-btn" type="button" aria-label="เปิดรายการสายพันธุ์" disabled>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+
+            <div class="combo-menu" role="listbox" aria-label="รายการสายพันธุ์"></div>
+          </div>
+
+          <p class="hint">เลือก “ผลผลิต” ก่อน เพื่อเปิดการค้นหาสายพันธุ์</p>
+        </div>
+
+        <!-- Details -->
+        <div class="field">
+          <label class="label" for="details">รายละเอียดเพิ่มเติม</label>
+          <div class="textarea-wrap">
+            <textarea id="details" class="textarea" rows="5" placeholder=""></textarea>
+          </div>
+        </div>
+
+        <!-- Grade & Price -->
+        <div class="field">
+          <label class="label">เกรดและราคา</label>
+
+          <div class="grade-row" id="gradeRow">
+            <!-- cards injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <button class="primary-btn" id="nextBtn" type="button">ถัดไป</button>
+
+      <!-- debug (optional) -->
+      <pre class="debug" id="debugBox" hidden></pre>
+    </main>
+  </div>
+
+  <!-- Modal: Add Grade -->
+  <div class="modal-overlay" id="gradeModal" inert>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="เพิ่มเกรดใหม่">
+      <button class="modal-title-btn" type="button" id="modalTitleBtn" aria-label="เพิ่มเกรดใหม่">
+        เพิ่มเกรดใหม่
+      </button>
+
+      <div class="modal-body">
+        <div class="field">
+          <label class="label">ประเภทเกรด</label>
+          <div class="grade-grid" id="gradeGrid">
+            <!-- buttons injected by JS -->
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="customGrade">อื่นๆ (กรอกเอง)</label>
+          <input id="customGrade" class="text-input" type="text" placeholder="ตัวอย่างเช่น คาโต้" />
+          <p class="hint">ถ้ากรอกช่องนี้ จะใช้ค่านี้แทนการกดปุ่มประเภทเกรด</p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="unitPrice">ราคาต่อหน่วย</label>
+          <div class="price-input">
+            <input id="unitPrice" class="price-number" type="number" inputmode="numeric" min="0" step="1" placeholder="0" />
+            <span class="price-suffix">บาท/กก.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancelModalBtn" type="button">ยกเลิก</button>
+        <button class="btn solid" id="saveModalBtn" type="button">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/components/ui-common.js"></script>
+  <script src="../../../js/buyer/setbooking/setbooking-step1.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ตั้งรหัสผ่าน | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/register4.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Register Step 4 Password">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="Password media">
+        <video
+          id="registerVideo"
+          class="media-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="../../assets/images/story-1.jpg"
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          disablepictureinpicture
+        >
+        </video>
+        <div class="media-fallback" id="mediaFallback" aria-hidden="true"></div>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <header class="head">
+          <h1 class="h1">กรุณาตั้งรหัสผ่านสำหรับ<br>เข้าใช้งานระบบ</h1>
+        </header>
+
+        <form class="form" id="pwForm" novalidate>
+          <div class="field">
+            <label class="label" for="password">รหัสผ่านใหม่</label>
+
+            <div class="input-wrap">
+              <input
+                class="input input-password"
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
+                minlength="8"
+                required
+              />
+              <button class="eye" id="togglePw1" type="button" aria-label="แสดง/ซ่อน รหัสผ่านใหม่">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8" />
+                </svg>
+              </button>
+            </div>
+            <p class="help" id="pwHelp"></p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="password2">ยืนยันรหัสผ่าน</label>
+
+            <div class="input-wrap">
+              <input
+                class="input input-password"
+                id="password2"
+                name="password2"
+                type="password"
+                autocomplete="new-password"
+                placeholder="กรุณากรอกรหัสผ่านอีกครั้ง"
+                minlength="8"
+                required
+              />
+              <button class="eye" id="togglePw2" type="button" aria-label="แสดง/ซ่อน ยืนยันรหัสผ่าน">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8" />
+                </svg>
+              </button>
+            </div>
+            <p class="help" id="pw2Help"></p>
+          </div>
+
+          <div class="error" id="formError" role="alert" aria-live="polite"></div>
+
+          <button class="btn" id="submitBtn" type="submit">
+            <span class="btn-text">เข้าสู่ระบบ</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <p class="hint" id="hintText" aria-live="polite"></p>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+
+  <script src="../../js/auth/guard.js"></script>
+  <script src="../../js/auth/register4.js"></script>
+</body>
+</html>

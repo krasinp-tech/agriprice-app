@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Farmer Avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#39b87a"/>
+      <stop offset="1" stop-color="#1d8f56"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <circle cx="64" cy="48" r="20" fill="#ffd9b3"/>
+  <path d="M24 112c5-20 19-30 40-30s35 10 40 30" fill="#f5f7f9"/>
+  <path d="M36 40l28-14 28 14-4 8H40z" fill="#e8bf58"/>
+  <rect x="52" y="78" width="24" height="10" rx="5" fill="#2a6f42"/>
+  <path d="M58 24c2-8 8-12 16-12" stroke="#b8f18f" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M74 16c5 1 9 4 12 9" stroke="#b8f18f" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

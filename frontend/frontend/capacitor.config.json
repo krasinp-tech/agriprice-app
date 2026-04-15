@@ -1,0 +1,24 @@
+{
+  "appId": "com.agriprice.app",
+  "appName": "AGRIPRICE",
+  "webDir": "www",
+  "server": {
+    "cleartext": true
+  },
+  "cordova": {
+    "preferences": {
+      "Orientation": "portrait",
+      "target-device": "universal",
+      "fullscreen": "false",
+      "webviewbounce": "false",
+      "UIWebViewBounce": "false",
+      "DisallowOverscroll": "true",
+      "android:usesCleartextTraffic": "true",
+      "EnableViewportScale": "false",
+      "MediumInstanceSize": "600x800",
+      "StatusBarOverlaysWebView": "true",
+      "StatusBarStyle": "lightcontent",
+      "iosExtraFilesystems": "library,library-nosync,documents,documents-nosync,cache,bundle,root"
+    }
+  }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แก้ไขอีเมล | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-accounts/account-detail.css" />
+</head>
+<body data-auth="required">
+  <main class="detail-page">
+    <section class="detail-shell">
+      <header class="detail-header">
+        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน">
+          <span class="material-icons-outlined">chevron_left</span>
+        </a>
+        <div>
+          <h1 class="detail-title">อีเมล</h1>
+          <p class="detail-subtitle">ตั้งค่าอีเมลสำหรับการติดต่อและการกู้คืนบัญชี</p>
+        </div>
+      </header>
+
+      <section class="detail-card">
+        <h2 class="detail-section-title">จัดการอีเมล</h2>
+        <p class="detail-note">เพิ่มอีเมลเพื่อเพิ่มความปลอดภัยให้บัญชีของคุณ</p>
+
+        <form id="emailForm" class="detail-form" novalidate>
+          <div class="field-group">
+            <label class="field-label" for="emailInput">อีเมล</label>
+            <input
+              class="field-input"
+              id="emailInput"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="name@example.com"
+            />
+            <p class="field-hint">หากยังไม่ต้องการตั้งค่า สามารถปล่อยว่างได้</p>
+          </div>
+
+          <div class="detail-actions">
+            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+            <button type="button" class="btn btn-muted" id="clearEmailBtn">ลบอีเมล</button>
+            <a class="btn btn-ghost" href="my-account.html">ยกเลิก</a>
+          </div>
+        </form>
+
+        <p id="pageMessage" class="page-message" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+  <script src="../../../js/account/manage-accounts/edit-email.js"></script>
+
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+</body>
+</html>

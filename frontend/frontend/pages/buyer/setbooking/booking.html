@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <script src="../../../js/components/i18n.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="booking_title_page">การจอง | AGRIPRICE</title>
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+   <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css" />
+  <link rel="stylesheet" href="../../../css/buyer/setbooking/booking.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/api-client.js"></script>
+</head>
+
+<body data-active="booking">
+  <main class="page-shell">
+
+    <!-- Header Section -->
+    <section class="booking-header">
+      <h1 class="booking-title" data-i18n="booking_title">การจอง</h1>
+      <p class="booking-subtitle" data-i18n="booking_subtitle_buyer">รายการการจอง</p>
+    </section>
+
+    <section class="controls">
+      <div class="segmented" role="tablist" aria-label="ตัวกรองการจอง" data-i18n-aria-label="booking_filter_label">
+        <button class="seg-btn active" data-filter="all" data-i18n="all">ทั้งหมด</button>
+        <button class="seg-btn" data-filter="waiting" data-i18n="waiting">รอคิว</button>
+        <button class="seg-btn" data-filter="success" data-i18n="success">สำเร็จ</button>
+        <button class="seg-btn" data-filter="cancel" data-i18n="cancel">ยกเลิก</button>
+      </div>
+
+      <div class="searchbox">
+        <span class="material-icons-outlined">search</span>
+        <input id="searchInput" type="text" placeholder="ค้นหาด้วยเลขจอง / ร้าน / คิว" data-i18n-placeholder="booking_search_placeholder" />
+      </div>
+    </section>
+
+    <section class="list" id="bookingList"></section>
+
+    <div class="empty" id="emptyState" hidden>
+      <div class="empty-card">
+        <div class="empty-emoji"><span class="material-icons-outlined" aria-hidden="true">receipt_long</span></div>
+        <div class="empty-title" data-i18n="booking_empty_title">ยังไม่มีรายการจองที่ตรงกับเงื่อนไข</div>
+        <div class="empty-desc" data-i18n="booking_empty_desc">ลองเปลี่ยนตัวกรอง หรือพิมพ์ค้นหาใหม่อีกครั้ง</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- QR Scan Button (corner) -->
+  <button id="scanBtn" class="scan-btn" aria-label="สแกนคิว QR" data-i18n-aria-label="scan_qr_queue" data-i18n-title="scan_qr_queue">
+    <span class="material-icons-outlined">qr_code_scanner</span>
+  </button>
+
+  <!-- Scan Modal -->
+  <div id="scanModal" class="scan-modal" aria-hidden="true">
+    <div class="scan-modal-content">
+      <button id="closeScanBtn" class="scan-close" aria-label="ปิด" data-i18n-aria-label="close"><span class="material-icons-outlined" aria-hidden="true">close</span></button>
+      <div class="scan-title" data-i18n="scan_booking_qr">สแกน QR รหัสการจอง</div>
+      <video id="scanVideo" autoplay playsinline></video>
+      <div class="scan-actions">
+        <input id="scanManualInput" placeholder="กรอกรหัสการจอง (ทดสอบ)" data-i18n-placeholder="manual_booking_code_placeholder" />
+        <button id="scanManualBtn" class="btn" data-i18n="search">ค้นหา</button>
+      </div>
+      <div class="scan-hint" data-i18n="camera_permission_hint">ระบบจะขอสิทธิ์เปิดกล้องเพื่อสแกน QR code</div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav (component) -->
+  <div id="bottomNavMount"></div>
+
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/components/ui-common.js"></script>
+  <script src="../../../js/components/escape-html.js"></script>
+  <script src="../../../js/buyer/setbooking/booking.js"></script>
+
+
+<script src="../../../js/auth/guard.js"></script>
+<script>window.AuthGuard.requireLogin();</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

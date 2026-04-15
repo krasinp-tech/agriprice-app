@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แก้ไขวันเดือนปีเกิด | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-accounts/account-detail.css" />
+</head>
+<body data-auth="required">
+  <main class="detail-page">
+    <section class="detail-shell">
+      <header class="detail-header">
+        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน">
+          <span class="material-icons-outlined">chevron_left</span>
+        </a>
+        <div>
+          <h1 class="detail-title">วันเดือนปีเกิด</h1>
+          <p class="detail-subtitle">อัปเดตข้อมูลวันเกิดให้ถูกต้องเพื่อยืนยันตัวตน</p>
+        </div>
+      </header>
+
+      <section class="detail-card">
+        <h2 class="detail-section-title">แก้ไขวันเกิด</h2>
+        <p class="detail-note">ข้อมูลปัจจุบัน: <strong id="currentBirthDate">1 ม.ค. ค.ศ. 2004</strong></p>
+
+        <form id="birthDateForm" class="detail-form" novalidate>
+          <div class="field-group">
+            <label class="field-label" for="birthDateInput">วันเดือนปีเกิด</label>
+            <input
+              class="field-input"
+              id="birthDateInput"
+              name="birthDate"
+              type="date"
+              required
+            />
+            <p class="field-hint" id="birthDatePreview">ตัวอย่างที่จะแสดง: -</p>
+          </div>
+
+          <div class="detail-actions">
+            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+            <a class="btn btn-ghost" href="my-account.html">ยกเลิก</a>
+          </div>
+        </form>
+
+        <p id="pageMessage" class="page-message" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+  <script src="../../../js/account/manage-accounts/edit-birthdate.js"></script>
+
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+</body>
+</html>

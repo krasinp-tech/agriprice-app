@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายการโปรดทั้งหมด - AGRIPRICE</title>
+
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../product-card/product-card.css" />
+  <link rel="stylesheet" href="./allfavorites.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+
+  <script src="../../js/config.js"></script>
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || "https://agriprice-app.onrender.com";
+    window.AUTH_TOKEN_KEY = window.AUTH_TOKEN_KEY || "token";
+    window.AUTH_USER_KEY = window.AUTH_USER_KEY || "user";
+  </script>
+</head>
+<body>
+  <main class="allfavorites-page">
+    <header class="allfavorites-header">
+      <a class="back-btn" href="../../index.html" aria-label="กลับหน้าแรก">
+        <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+      </a>
+      <h1 class="allfavorites-title">รายการโปรดทั้งหมด</h1>
+      <span class="header-spacer" aria-hidden="true"></span>
+    </header>
+
+    <section class="allfavorites-content" aria-label="รายการที่ถูกใจ">
+      <div id="allFavoritesMount" class="allfavorites-cards"></div>
+
+      <div id="allFavoritesEmpty" class="allfavorites-empty" hidden>
+        <span class="material-icons-outlined" aria-hidden="true">favorite_border</span>
+        <p>ยังไม่มีรายการโปรด</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../js/components.js"></script>
+  <script src="../../js/utils/favorites-helpers.js"></script>
+  <script src="./allfavorites.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+/* ================================================
+   register4.css — Password Setup Screen
+   ================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root{
+  --bg:           #EDF3F3;
+  --card:         #FFFFFF;
+  --ink:          #0B1B3A;
+  --navy:         #0A2E6E;
+  --brand:        #0B66FF;
+  --muted:        rgba(11, 27, 58, 0.55);
+
+  --radius-card:  28px;
+  --radius-sheet: 34px;
+
+  --shadow-card:  0 24px 60px rgba(8, 26, 61, 0.13),
+                  0 4px  16px rgba(8, 26, 61, 0.07);
+  --shadow-sheet: 0 -18px 40px rgba(8, 26, 61, 0.10);
+  --shadow-btn:   0 14px 30px rgba(10, 46, 110, 0.22);
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body{ height: 100%; min-height: 100%; }
+
+body{
+  font-family: "Kanit", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--card);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.screen{
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.card{
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ===== TOP MEDIA ===== */
+.media{
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  height: clamp(220px, 36vh, 360px);
+  background: #0E8A3A;
+}
+
+.media-video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transform-origin: 50% 38%;
+  display: block;
+}
+
+.media-fallback{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0E8A3A 0%, #0A7C34 100%);
+  opacity: 0;
+}
+.media-fallback.is-show{ opacity: 1; }
+
+/* ===== CONTENT SHEET ===== */
+.content{
+  position: relative;
+  z-index: 2;
+
+  background: #FBF7F7;
+  margin-top: -28px;
+
+  border-top-left-radius: var(--radius-sheet);
+  border-top-right-radius: var(--radius-sheet);
+  box-shadow: var(--shadow-sheet);
+
+  padding: 22px 22px calc(22px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.head{ margin-bottom: 8px; }
+
+.h1{
+  font-size: clamp(28px, 6.0vw, 40px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: 0.2px;
+}
+
+.form{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.field{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label{
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(11, 27, 58, 0.45);
+}
+
+.input-wrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input{
+  width: 100%;
+  padding: 12px 42px 10px 2px;
+  border: none;
+  border-bottom: 1.6px solid rgba(11, 27, 58, 0.35);
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--ink);
+}
+
+.input::placeholder{ color: rgba(11, 27, 58, 0.30); }
+
+.input:focus{
+  border-bottom-color: rgba(11, 102, 255, 0.65);
+}
+
+.eye{
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: rgba(11, 27, 58, 0.55);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.help{
+  min-height: 16px;
+  font-size: 12px;
+  color: rgba(11, 27, 58, 0.42);
+}
+
+.error{
+  display: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 59, 48, 0.10);
+  color: rgba(160, 0, 0, 0.95);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.error.is-show{ display: block; }
+
+.btn{
+  margin-top: auto;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(175deg, #0E3480 0%, #081E5A 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  position: relative;
+}
+
+.btn:disabled{
+  opacity: .65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-spinner{
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: rgba(255,255,255,0.95);
+  transform: translateY(-50%);
+  display: none;
+  animation: spin .8s linear infinite;
+}
+.btn.is-loading .btn-spinner{ display: inline-block; }
+
+@keyframes spin{
+  to{ transform: translateY(-50%) rotate(360deg); }
+}
+
+.hint{
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(11, 27, 58, 0.45);
+  min-height: 16px;
+  text-align: center;
+}
+
+/* ===== RESPONSIVE (ตาม pattern เดิม) ===== */
+
+/* Tablet+ ให้มีพื้นหลังนอกการ์ด (แต่ยังเต็มจอ) */
+@media (min-width: 600px){
+  body{ background: var(--bg); }
+  .card{
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Desktop: ทำเป็นการ์ดกลาง */
+@media (min-width: 1024px){
+  .screen{
+    display: grid;
+    place-items: center;
+    padding: 40px 24px;
+  }
+
+  .card{
+    width: 100%;
+    min-height: unset;
+
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .media{
+    height: 440px;
+    width: 100%;
+    transform: scale(1.15);
+  }
+}
+
+/* จอเตี้ย/แนวนอน: ลดวิดีโอ และซ่อน subtitle เพื่อให้ปุ่มไม่หลุด */
+@media (max-height: 600px) and (orientation: landscape){
+  .media{ height: clamp(220px, 42vh, 300px); }
+  .content{ padding: 16px 20px calc(16px + var(--safe-bottom)); }
+}
+
+/* Touch devices: กัน hover flicker */
+@media (hover: none){
+  .seg-primary:hover{ box-shadow: var(--shadow-btn); }
+  .seg-ghost:hover{ background: transparent; }
+}

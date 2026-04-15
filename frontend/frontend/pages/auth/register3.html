@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ยืนยันตัวตน OTP | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/register3.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Register Step 3 OTP">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="OTP media">
+        <div class="media-fallback is-show" id="mediaFallback" aria-hidden="true"></div>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <header class="head">
+          <h1 class="h1">ยืนยันตัวตน&nbsp;&nbsp;OTP</h1>
+
+          <p class="subtitle">
+            กรุณากรอกรหัสยืนยันที่ส่งไปยังหมายเลขโทรศัพท์ของคุณ
+          </p>
+
+          <p class="to" id="otpTo">
+            ส่งรหัสไปที่หมายเลข <span class="to-num">0XX-XXX-488</span>
+          </p>
+        </header>
+
+        <div class="timer" aria-live="polite">
+          <span class="timer-label">รหัสจะหมดอายุใน</span>
+          <span class="timer-value" id="timerText">02:00</span>
+          <span class="timer-label">นาที</span>
+        </div>
+
+        <p class="hint" id="configSourceText" aria-live="polite"></p>
+
+        <!-- OTP BOXES -->
+        <form class="otp-form" id="otpForm" novalidate>
+          <div class="otp" role="group" aria-label="กรอกรหัส OTP 6 หลัก">
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="หลักที่ 1" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 2" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 3" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 4" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 5" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 6" />
+          </div>
+
+          <div id="recaptcha-container" style="display:flex; justify-content:center; margin:10px 0;"></div>
+
+          <button class="link" id="resendBtn" type="button" disabled>ขอรหัสใหม่</button>
+
+          <div class="error" id="formError" role="alert" aria-live="polite"></div>
+
+          <button class="btn" id="nextBtn" type="submit">
+            <span class="btn-text">ถัดไป</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <p class="hint" id="hintText" aria-live="polite"></p>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="../../js/auth/register3.js"></script>
+</body>
+</html>

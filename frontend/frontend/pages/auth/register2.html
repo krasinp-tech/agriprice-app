@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>สมัครสมาชิก | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/register2.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Register Step 2">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="Register media">
+        <video
+          id="registerVideo"
+          class="media-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="../../assets/images/story-1.jpg"
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          disablepictureinpicture
+        >
+          <!-- <source id="topVideoSource" src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+        </video>
+        <div class="media-fallback" id="mediaFallback" aria-hidden="true"></div>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <header class="head">
+          <h1 class="h1">สมัครสมาชิก</h1>
+          <p class="subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งาน</p>
+        </header>
+
+        <form class="form" id="registerForm" novalidate>
+          <div class="field">
+            <label class="label" for="firstName">ชื่อ</label>
+            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" />
+            <p class="help" id="firstNameHelp"></p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="lastName">นามสกุล</label>
+            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" />
+            <p class="help" id="lastNameHelp"></p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="email">อีเมล <span class="req">*</span>ถ้ามี</label>
+            <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" />
+            <p class="help" id="emailHelp"></p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="phone">เบอร์โทรศัพท์</label>
+            <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" />
+            <p class="help" id="phoneHelp"></p>
+          </div>
+
+          <div class="error" id="formError" role="alert" aria-live="polite"></div>
+
+          <button class="btn" id="nextBtn" type="submit">ถัดไป</button>
+          <p class="hint" id="hintText" aria-live="polite"></p>
+        </form>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="../../js/auth/register2.js"></script>
+</body>
+</html>

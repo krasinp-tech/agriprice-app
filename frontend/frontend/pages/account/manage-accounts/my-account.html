@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บัญชีของฉัน | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-accounts/my-account.css" />
+</head>
+<body data-auth="required">
+  <main class="ma-page">
+    <section class="ma-shell fade-slide">
+      <header class="ma-header">
+      <a class="ma-back" href="../account.html" aria-label="ย้อนกลับไปหน้าจัดการบัญชี">
+        <span class="material-icons-outlined">chevron_left</span>
+      </a>
+      <div>
+        <h1 class="ma-title">บัญชีของฉัน</h1>
+        <p class="ma-subtitle">จัดการข้อมูลส่วนตัว ความปลอดภัย และสถานะบัญชีของคุณ</p>
+      </div>
+      </header>
+
+      <section class="ma-card" aria-label="ข้อมูลบัญชี">
+        <h2 class="ma-card-title">ข้อมูลบัญชี</h2>
+
+        <a class="ma-row" href="edit-phone.html">
+          <div class="ma-row-copy">
+            <div class="ma-label">หมายเลขโทรศัพท์</div>
+            <div class="ma-value" id="phoneValue">+66*******361</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="edit-email.html">
+          <div class="ma-row-copy">
+            <div class="ma-label">อีเมล</div>
+            <div class="ma-value" id="emailValue">ยังไม่ได้เพิ่มอีเมล</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="edit-birthdate.html">
+          <div class="ma-row-copy">
+            <div class="ma-label">วันเดือนปีเกิด</div>
+            <div class="ma-value" id="birthDateValue">1 ม.ค. ค.ศ. 2004</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="change-password.html">
+          <div class="ma-row-copy">
+            <div class="ma-label">รหัสผ่าน</div>
+            <div class="ma-value">เปลี่ยนรหัสผ่าน</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row ma-row-danger" href="deactivate-account.html">
+          <div class="ma-row-copy">
+            <div class="ma-label">ปิดใช้งานหรือลบบัญชี</div>
+            <div class="ma-value" id="accountStateValue">ใช้งานปกติ</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+      </section>
+    </section>
+  </main>
+
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+  <script src="../../../js/account/manage-accounts/my-account.js"></script>
+
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+</body>
+</html>

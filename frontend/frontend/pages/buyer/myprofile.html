@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โปรไฟล์ผู้รับซื้อ - AGRIPRICE</title>
+
+<link rel="stylesheet" href="../../css/global.css">
+<link rel="stylesheet" href="../../css/buyer/myprofile.css">
+<link rel="stylesheet" href="../../components/product-card/product-card.css">
+
+<link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<script src="../../js/config.js"></script>
+</head>
+
+<body>
+    <!-- Language Switcher (top-right) -->
+    <!-- HERO -->
+<section class="profile-hero">
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="โปรไฟล์ผู้รับซื้อ" onerror="this.onerror=null;this.src='../../assets/images/hero.png';">
+    <button id="editCoverBtn" class="profile-hamburger" title="แก้ไขภาพปก">
+        <span class="material-icons-outlined">photo_camera</span>
+    </button>
+</section>
+
+
+
+<!-- PROFILE CARD -->
+<div class="profile-info-card">
+
+    <!-- Top Row -->
+    <div class="profile-top-row">
+        <div class="profile-avatar-frame">
+            <div class="profile-avatar-wrap">
+                <img id="profileAvatar" src="../../assets/images/avatar-buyer.svg" alt="รูปผู้รับซื้อ" onerror="this.onerror=null;this.src='../../assets/images/avatar-buyer.svg';">
+            </div>
+            <button id="editAvatarBtn" class="avatar-edit-btn" title="เปลี่ยนรูปโปรไฟล์">
+                <span class="material-icons-outlined">photo_camera</span>
+            </button>
+        </div>
+
+        <div class="profile-name-block">
+            <div class="profile-name" id="profileName"></div>
+            <div class="profile-tagline" id="profileTagline"></div>
+        </div>
+
+        <button id="editProfileCardBtn" class="card-edit-icon" title="แก้ไขโปรไฟล์">
+            <span class="material-icons-outlined">edit</span>
+        </button>
+    </div>
+
+    <!-- Status Row -->
+    <div class="profile-status-row">
+        <div class="status-online">
+            <span class="status-dot"></span> ออนไลน์
+        </div>
+        <div class="status-followers">
+            <span class="material-icons-outlined">person_outline</span>
+            ผู้ติดตาม <span id="followersCount"></span>
+        </div>
+    </div>
+
+    <!-- Action Row -->
+    <div class="profile-action-row">
+        <!-- แก้ไข เกี่ยวกับ -->
+        <button class="btn-edit-about" id="editAboutBtn" type="button">
+            <span class="material-icons-outlined">edit</span>
+            แก้ไข เกี่ยวกับ
+        </button>
+
+        <!-- เพิ่มการรับซื้อ -->
+        <button class="btn-map" id="addPurchaseBtn" type="button">
+            <span class="material-icons-outlined">add_circle</span>
+            เพิ่มการรับซื้อ
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs">
+        <button class="tab-btn active" data-tab="about">เกี่ยวกับ</button>
+        <button class="tab-btn" data-tab="reviews">
+            รีวิว <span class="tab-count" id="reviewCount"></span>
+        </button>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div class="tab-panel active" id="tab-about">
+        <p class="about-desc" id="aboutDesc"></p>
+
+        <!-- Contact (moved under About) -->
+        <div class="about-contact" id="aboutContact">
+            <div class="contact-item"><span class="material-icons-outlined">phone</span><div class="contact-phone" id="contactPhone"></div></div>
+            <div class="contact-item"><span class="material-icons-outlined">email</span><div class="contact-email" id="contactEmail"></div></div>
+            <div class="contact-links" id="contactLinks"></div>
+        </div>
+
+        <!-- Location Card -->
+        <div class="location-card">
+            <div class="location-header">
+                <div class="location-icon-wrap">
+                    <span class="material-icons-outlined">location_on</span>
+                </div>
+                <div class="location-text">
+                    <div class="location-address" id="addressLine1"></div>
+                    <div class="location-sub" id="addressLine2"></div>
+                </div>
+                <a id="mapLink" target="_blank" class="location-link">
+                    <span class="material-icons-outlined" style="font-size:14px">open_in_new</span>
+                    แสดงแผนที่
+                </a>
+            </div>
+
+            <div class="map-container">
+                <iframe id="mapIframe" allowfullscreen loading="lazy"></iframe>
+            </div>
+        </div>
+
+        <!-- Product List -->
+        <div class="products-list-title">รายการการรับซื้อ</div>
+        <div id="productListContainer"></div>
+    </div>
+
+    <!-- REVIEWS TAB -->
+    <div class="tab-panel" id="tab-reviews">
+        <div id="reviewListContainer"></div>
+        <div id="reviewProductsPlaceholder" class="review-products-placeholder"></div>
+    </div>
+
+</div>
+
+<!-- Bottom Nav (component) -->
+<div id="bottomNavMount"></div>
+
+<!-- Hidden file inputs for image upload -->
+<input type="file" id="coverInput" accept="image/*" hidden>
+<input type="file" id="avatarInput" accept="image/*" hidden>
+
+<!-- Edit Profile Modal (About / Contact / Map / Links) -->
+<div id="editAboutModal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <h3>แก้ไขโปรไฟล์</h3>
+        
+        <label>ชื่อร้าน</label>
+        <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์">
+
+        <label>Tagline / คำอธิบายสั้น</label>
+        <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี">
+        
+        <label>เกี่ยวกับ</label>
+        <textarea id="aboutEditor" rows="4"></textarea>
+
+        <label>โทรศัพท์</label>
+        <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์">
+
+        <label>อีเมล</label>
+        <input id="emailEditor" type="email" placeholder="อีเมล">
+
+        <label>ที่อยู่ </label>
+        <input id="addr1Editor" type="text" placeholder="ที่อยู่">
+
+        <label>ที่อยู่ </label>
+        <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด">
+
+        <label>ลิงก์แผนที่ (URL)</label>
+        <input id="mapLinkEditor" type="url" placeholder="https://maps.google.com/?q=...">
+
+        <label>ลิงก์เพิ่มเติม</label>
+        <textarea id="linksEditor" rows="3" placeholder="https://...\nhttps://..."></textarea>
+
+        <div class="modal-actions">
+            <button id="cancelAboutBtn" class="btn-outline">ยกเลิก</button>
+            <button id="saveAboutBtn" class="btn-map">บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/components.js"></script>
+<script src="../../js/components/ui-common.js"></script>
+<script src="../../js/config.js"></script>
+<script src="../../js/api-client.js"></script>
+<script src="../../js/buyer/myprofile.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.i18nInit) window.i18nInit();
+    });
+    // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'lang') {
+            if (window.i18nInit) window.i18nInit();
+        }
+    });
+</script>
+</body>
+</html>

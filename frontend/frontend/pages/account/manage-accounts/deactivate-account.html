@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ปิดใช้งานหรือลบบัญชี | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-accounts/account-detail.css" />
+</head>
+<body data-auth="required">
+  <main class="detail-page">
+    <section class="detail-shell">
+      <header class="detail-header">
+        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน">
+          <span class="material-icons-outlined">chevron_left</span>
+        </a>
+        <div>
+          <h1 class="detail-title">ปิดใช้งานหรือลบบัญชี</h1>
+          <p class="detail-subtitle">คุณสามารถปิดใช้งานชั่วคราว หรือเลือกการลบบัญชีถาวร</p>
+        </div>
+      </header>
+
+      <section class="detail-card">
+        <h2 class="detail-section-title">สถานะบัญชี</h2>
+        <p class="detail-note" id="statusDescription">บัญชีของคุณกำลังใช้งานตามปกติ</p>
+
+        <div class="status-row">
+          <span>สถานะปัจจุบัน</span>
+          <span class="status-pill" id="statusPill">ใช้งานปกติ</span>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="confirmActionCheck" />
+          <label for="confirmActionCheck">ฉันยืนยันว่าต้องการดำเนินการเปลี่ยนสถานะบัญชี</label>
+        </div>
+
+        <div class="detail-actions">
+          <button type="button" class="btn btn-primary" id="deactivateBtn">ปิดใช้งานบัญชี</button>
+          <button type="button" class="btn btn-ghost" id="reactivateBtn">เปิดใช้งานอีกครั้ง</button>
+        </div>
+
+        <p id="statusMessage" class="page-message" aria-live="polite"></p>
+      </section>
+
+      <section class="detail-card">
+        <h2 class="detail-section-title">ลบบัญชีถาวร</h2>
+        <p class="detail-note">หากลบบัญชีแล้ว จะไม่สามารถกู้คืนข้อมูลได้</p>
+
+        <div class="divider"></div>
+
+        <div class="danger-zone">
+          <div class="field-group">
+            <label class="field-label" for="deleteKeywordInput">พิมพ์คำว่า DELETE เพื่อยืนยัน</label>
+            <input class="field-input" id="deleteKeywordInput" type="text" autocomplete="off" placeholder="DELETE" />
+          </div>
+
+          <div class="detail-actions">
+            <button type="button" class="btn btn-danger" id="deleteAccountBtn">ลบบัญชีถาวร</button>
+          </div>
+        </div>
+
+        <p id="deleteMessage" class="page-message" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+  <script src="../../../js/account/manage-accounts/deactivate-account.js"></script>
+
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+</body>
+</html>

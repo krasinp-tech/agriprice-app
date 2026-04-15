@@ -1,0 +1,15 @@
+{
+  "name": "agriprice-frontend",
+  "private": true,
+  "scripts": {
+    "prepare:web": "node scripts/prepare-web.js",
+    "cap:copy": "npm run prepare:web && npx cap copy android",
+    "cap:sync": "npm run prepare:web && npx cap sync android",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0"
+  }
+}

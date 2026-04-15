@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ยินดีต้อนรับ | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/login1.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Welcome Screen">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="Welcome media">
+        <video
+          id="welcomeVideo"
+          class="media-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster="../../assets/images/story-1.jpg"
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          disablepictureinpicture
+        >
+          <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+        </video>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <h1 class="title">
+          <span class="title-th">ยินดีต้อนรับสู่</span>
+          <span class="title-brand">Agriprice</span>
+        </h1>
+
+        <p class="subtitle">
+          ติดตามราคาสินค้าเกษตรแบบ real-time<br />
+          รู้ก่อน ตัดสินใจได้ไว ขายได้กำไรมากกว่า
+        </p>
+
+        <div class="segmented-wrap">
+          <div class="segmented" role="group" aria-label="Welcome actions">
+            <button class="seg-btn seg-primary" id="goLogin" type="button">
+              เข้าสู่ระบบ
+            </button>
+            <button class="seg-btn seg-ghost" id="goRegister" type="button">
+              สมัครสมาชิก
+            </button>
+          </div>
+          <p class="hint" id="hintText" aria-live="polite"></p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Navigation Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      const hint = document.getElementById("hintText");
+      const goLogin = document.getElementById("goLogin");
+      const goRegister = document.getElementById("goRegister");
+
+      goLogin.addEventListener("click", function (e) {
+        e.preventDefault();
+        hint.textContent = "กำลังไปยังหน้าเข้าสู่ระบบ…";
+        window.location.href = "./login2.html";
+      });
+
+      goRegister.addEventListener("click", function (e) {
+        e.preventDefault();
+        hint.textContent = "กำลังไปยังหน้าสมัครสมาชิก…";
+        window.location.href = "./register1.html";
+      });
+
+    });
+  </script>
+
+</body>
+</html>

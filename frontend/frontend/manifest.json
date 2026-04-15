@@ -1,0 +1,59 @@
+{
+  "name": "AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร",
+  "short_name": "AGRIPRICE",
+  "description": "แพลตฟอร์มเชื่อมต่อเกษตรกรและผู้ซื้อผลผลิตการเกษตร",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#2F8D46",
+  "background_color": "#ffffff",
+  "categories": ["shopping", "productivity"],
+  "screenshots": [
+    {
+      "src": "assets/images/hero.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/images/hero.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "icons": [
+    {
+      "src": "assets/images/hero.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/hero.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/hero.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "เข้าสู่ระบบ",
+      "short_name": "Login",
+      "description": "เข้าสู่ระบบ AGRIPRICE",
+      "url": "/auth/login",
+      "icons": [
+        {
+          "src": "assets/images/hero.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

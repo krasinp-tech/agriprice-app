@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>สมัครสมาชิก | Agriprice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/auth/register1.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+</head>
+
+<body>
+  <main class="screen" role="main" aria-label="Agriprice Register Step 1">
+    <section class="card">
+
+      <!-- TOP MEDIA AREA -->
+      <div class="media" aria-label="Register media">
+        <video
+          id="registerVideo"
+          class="media-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          disablepictureinpicture
+        >
+          <!-- <source id="topVideoSource" src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+        </video>
+        <div class="media-fallback" id="mediaFallback" aria-hidden="true"></div>
+      </div>
+
+      <!-- CONTENT SHEET -->
+      <div class="content">
+        <header class="head">
+          <h1 class="h1">กรุณาเลือกประเภทผู้ใช้งานของคุณ</h1>
+          <p class="subtitle">เลือกประเภทผู้ใช้เพื่อให้ระบบตั้งค่าการใช้งานที่เหมาะสม</p>
+        </header>
+
+        <!-- ROLE CARDS -->
+        <section class="role-grid" aria-label="เลือกประเภทผู้ใช้">
+
+          <!-- Farmer -->
+          <button class="role-card" type="button" data-role="farmer" aria-pressed="false">
+            <div class="role-illus" aria-hidden="true">
+              <video
+                class="role-video"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="auto"
+                controlslist="nodownload noplaybackrate noremoteplayback"
+                disablepictureinpicture
+                tabindex="-1"
+              >
+                <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+              </video>
+            </div>
+            <div class="role-name">เกษตรกร</div>
+            <div class="role-desc">สำหรับผู้ผลิตหรือเจ้าของผลผลิตทางการเกษตร</div>
+          </button>
+
+          <!-- Buyer -->
+          <button class="role-card" type="button" data-role="buyer" aria-pressed="false">
+            <div class="role-illus" aria-hidden="true">
+              <video
+                class="role-video"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="auto"
+                controlslist="nodownload noplaybackrate noremoteplayback"
+                disablepictureinpicture
+                tabindex="-1"
+              >
+                <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+              </video>
+            </div>
+            <div class="role-name">ผู้รับซื้อ</div>
+            <div class="role-desc">สำหรับผู้รับซื้อหรือผู้ประกอบการรับซื้อผลผลิต</div>
+          </button>
+
+        </section>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+          <button class="btn" id="nextBtn" type="button" disabled>ถัดไป</button>
+          <p class="hint" id="hintText" aria-live="polite"></p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal" id="confirmModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="true"></div>
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-icon" aria-hidden="true">
+        <span class="check"></span>
+      </div>
+
+      <h2 class="modal-title" id="modalTitle">ยืนยันการสมัครสมาชิก</h2>
+      <p class="modal-text" id="modalText">คุณต้องการสมัครเป็น…</p>
+
+      <div class="modal-actions">
+        <button class="m-btn m-ghost" id="cancelBtn" type="button">ยกเลิก</button>
+        <button class="m-btn m-primary" id="confirmBtn" type="button">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/auth/register1.js"></script>
+</body>
+</html>

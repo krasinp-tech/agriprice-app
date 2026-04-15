@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+      <script src="../../../js/components/i18n.js"></script>
+      <!-- Language Switcher (top-right) -->
+      <script src="../../../js/components/ui-common.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จองคิว - เลือกวันและเวลา | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../../css/global.css">
+  <link rel="stylesheet" href="../../../css/farmer/booking/booking-step1.css">
+  <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css">
+</head>
+
+<body data-active="booking">
+
+  <!-- Main Container -->
+  <main class="booking-step1">
+    <div class="booking-container">
+
+    <!-- Header Card -->
+    <section class="header-card">
+      <button class="btn-back" id="btnBack" aria-label="ย้อนกลับ">
+        <span class="material-icons-outlined">arrow_back_ios</span>
+      </button>
+
+      <div class="progress-bar">
+        <div class="progress-step active"></div>
+        <div class="progress-step"></div>
+        <div class="progress-step"></div>
+        <div class="progress-step"></div>
+      </div>
+
+      <div class="header-content">
+        <div class="product-icon">
+          <img src="../../../assets/images/durian.png" alt="ทุเรียน" id="productIcon">
+        </div>
+        <h1 class="header-title" id="headerTitle"></h1>
+        <p class="header-subtitle">จองคิว</p>
+        <p class="header-description">เลือกวันและเวลา</p>
+      </div>
+    </section>
+
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+      <div class="section-header">
+        <span class="material-icons-outlined section-icon">event</span>
+        <h2 class="section-title">เลือกวันที่</h2>
+      </div>
+
+      <div class="calendar-container">
+        <div class="calendar-controls">
+          <button class="calendar-nav" id="prevMonth" aria-label="เดือนก่อนหน้า">
+            <span class="material-icons-outlined">chevron_left</span>
+          </button>
+          <div class="calendar-month" id="calendarMonth">ธันวาคม 2025</div>
+          <button class="calendar-nav" id="nextMonth" aria-label="เดือนถัดไป">
+            <span class="material-icons-outlined">chevron_right</span>
+          </button>
+        </div>
+
+        <div class="calendar-grid" id="calendarDays">
+          <div class="calendar-weekday">อา</div>
+          <div class="calendar-weekday">จ</div>
+          <div class="calendar-weekday">อ</div>
+          <div class="calendar-weekday">พ</div>
+          <div class="calendar-weekday">พฤ</div>
+          <div class="calendar-weekday">ศ</div>
+          <div class="calendar-weekday">ส</div>
+          <!-- Days will be injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Time Slots Section -->
+    <section class="timeslots-section">
+      <div class="section-header">
+        <span class="material-icons-outlined section-icon">schedule</span>
+        <h2 class="section-title">เลือกช่วงเวลา</h2>
+      </div>
+
+      <div class="timeslots-container" id="timeSlotsContainer">
+        <!-- Time slots will be injected by JS -->
+      </div>
+    </section>
+
+    <!-- Submit Button -->
+    <div class="submit-container">
+      <button class="btn-submit" id="btnSubmit">
+        <span>ถัดไป</span>
+        <span class="material-icons-outlined">arrow_forward</span>
+      </button>
+    </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <div id="bottomNavMount"></div>
+
+  <!-- Scripts -->
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/farmer/booking/booking-step1.js"></script>
+
+
+<script src="../../../js/auth/guard.js"></script>
+<script>window.AuthGuard.requireLogin();</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

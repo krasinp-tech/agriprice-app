@@ -1,0 +1,313 @@
+/* ================================================
+   login2.css — Agriprice Login Screen
+   - Same style language as login1: top video + white rounded sheet overlap
+   - Responsive: mobile/tablet full screen, desktop centered card
+   ================================================ */
+
+*, *::before, *::after{ box-sizing: border-box; margin: 0; padding: 0; }
+
+:root{
+  --bg:           #EDF3F3;
+  --card:         #FFFFFF;
+  --ink:          #0B1B3A;
+  --brand:        #0B66FF;
+  --navy:         #0A2E6E;
+  --muted:        rgba(11, 27, 58, 0.55);
+
+  --radius-card:  28px;
+  --radius-sheet: 34px;
+
+  --shadow-card:  0 24px 60px rgba(8, 26, 61, 0.13),
+                  0 4px  16px rgba(8, 26, 61, 0.07);
+  --shadow-sheet: 0 -18px 40px rgba(8, 26, 61, 0.10);
+  --shadow-btn:   0 14px 30px rgba(10, 46, 110, 0.22);
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body{
+  height: 100%;
+  min-height: 100%;
+}
+
+body{
+  font-family: "Kanit", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--card);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.screen{
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.card{
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ===== TOP MEDIA ===== */
+.media{
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  /* ใช้ vh เพื่อให้ tablet/landscape ขยับตาม */
+  height: clamp(220px, 36vh, 360px);
+
+  background: #0E8A3A; /* โทนเขียวแบบในรูป */
+}
+
+.media-video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* crop เล็กน้อย */
+  transform: scale(1.06);
+  transform-origin: 50% 38%;
+
+  display: block;
+}
+
+.media-fallback{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0E8A3A 0%, #0A7C34 100%);
+  opacity: 0;
+}
+
+.media-fallback.is-show{ opacity: 1; }
+
+/* ===== CONTENT SHEET ===== */
+.content{
+  position: relative;
+  z-index: 2;
+
+  background: var(--card);
+
+  margin-top: -28px; /* ทับวิดีโอ */
+  border-top-left-radius: var(--radius-sheet);
+  border-top-right-radius: var(--radius-sheet);
+  box-shadow: var(--shadow-sheet);
+
+  padding: 22px 22px calc(22px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.head{ margin-bottom: 12px; }
+
+.h1{
+  font-size: clamp(28px, 5.2vw, 38px);
+  font-weight: 800;
+  line-height: 1.06;
+  color: var(--ink);
+}
+
+.sub{
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #148A3A; /* เขียวแบบในรูป */
+}
+
+.form{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.field{ display: flex; flex-direction: column; gap: 8px; }
+
+.label{
+  font-size: 13px;
+  color: rgba(11, 27, 58, 0.55);
+  font-weight: 600;
+}
+
+.input{
+  width: 100%;
+  padding: 14px 2px 12px;
+  border: none;
+  border-bottom: 1.6px solid rgba(11, 27, 58, 0.30);
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+}
+
+.input::placeholder{
+  color: rgba(11, 27, 58, 0.35);
+}
+
+.input:focus{
+  border-bottom-color: rgba(11, 102, 255, 0.65);
+}
+
+.input-wrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-password{
+  padding-right: 44px;
+}
+
+.eye{
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: rgba(11, 27, 58, 0.55);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.link{
+  color: rgba(11, 102, 255, 0.95);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.link.strong{ font-size: 14px; }
+
+.help{
+  min-height: 16px;
+  font-size: 12px;
+  color: rgba(11, 27, 58, 0.45);
+}
+
+.error{
+  display: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 59, 48, 0.10);
+  color: rgba(160, 0, 0, 0.95);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.error.is-show{ display: block; }
+
+.btn{
+  margin-top: 8px;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(175deg, #0E3480 0%, #081E5A 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled{
+  opacity: 0.70;
+  cursor: not-allowed;
+}
+
+.btn-text{ position: relative; z-index: 2; }
+
+.btn-spinner{
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: rgba(255,255,255,0.95);
+  transform: translateY(-50%);
+  display: none;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn.is-loading .btn-spinner{ display: inline-block; }
+
+@keyframes spin{
+  to{ transform: translateY(-50%) rotate(360deg); }
+}
+
+.foot{
+  margin-top: 6px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(11, 27, 58, 0.55);
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 600px){
+  body{ background: var(--bg); }
+
+
+    .media{
+    height: 440px;
+    width: 100%;
+  transform: scale(1.15);
+
+  }
+}
+
+@media (min-width: 1024px){
+  .screen{
+    display: grid;
+    place-items: center;
+    padding: 40px 24px;
+  }
+
+
+    .card{
+    width: 100%;
+    min-height: unset;
+
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape){
+  .media{ height: clamp(180px, 34vh, 260px); }
+  .sub{ display: none; }
+  .btn{ height: 50px; }
+}

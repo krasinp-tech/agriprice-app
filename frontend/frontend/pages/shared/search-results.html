@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="search_results_title_page">ผลการค้นหา - AGRIPRICE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/global.css">
+    <link rel="stylesheet" href="../../css/shared-pages/search.css">
+    <link rel="stylesheet" href="../../components/product-card/product-card.css">
+    <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api-client.js"></script>
+</head>
+
+<body  data-active="home">
+    <!-- ── Search Header ─────────────────────────────────── -->
+    <section class="search-header-section">
+        <div class="search-header-container">
+            <button class="back-btn" id="backBtn">
+                <span class="material-icons-outlined">arrow_back</span>
+            </button>
+            <div class="search-box-header">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input-header" id="searchInput" data-i18n-placeholder="search_buyer">
+                <button class="search-button-header" id="searchBtn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                        <defs>
+                            <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%"   stop-color="#0B853C"/>
+                                <stop offset="100%" stop-color="#00EC5F"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="11" cy="11" r="8" stroke="url(#sg)"/>
+                        <path d="m21 21-4.35-4.35" stroke="url(#sg)"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">
+                <span class="material-icons-outlined">filter_alt</span><span data-i18n="filter">ตัวกรอง</span>
+            </button>
+            <button class="filter-btn" data-filter="recent" data-i18n="near_me">ใกล้ฉัน</button>
+            <button class="filter-btn" data-filter="price-high" data-i18n="highest_price">ราคาสูงสุด</button>
+            <button class="filter-btn" data-filter="price-low" data-i18n="lowest_price">ราคาต่ำสุด</button>
+        </div>
+    </section>
+
+    <!-- ── Results Summary ───────────────────────────────── -->
+    <section class="results-summary">
+        <div class="container">
+            <p class="results-title"><span data-i18n="search_results_title">ผลการค้นหา</span> <span class="results-count"><span id="resultCount">5</span> <span data-i18n="results_count_suffix">รายการ</span></span></p>
+        </div>
+    </section>
+
+<!-- ── Results ───────────────────────────────────────── -->
+<section class="search-results-section">
+  <div class="container">
+    <!-- mount point -->
+    <div id="searchResultsMount"></div>
+  </div>
+</section>
+
+
+    <!-- ── Bottom Nav ─────────────────────────────────────── -->
+<div id="bottomNavMount"></div>
+
+
+
+<!-- ── Scripts ───────────────────────────────────────── -->
+    <script src="../../js/components.js"></script>
+    <script src="../../js/shared-pages/search.js"></script>
+    <script src="../../components/product-card/product-card.js"></script>
+    
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.i18nInit) window.i18nInit();
+    });
+    // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'lang') {
+            if (window.i18nInit) window.i18nInit();
+        }
+    });
+</script>
+</body>
+</html>

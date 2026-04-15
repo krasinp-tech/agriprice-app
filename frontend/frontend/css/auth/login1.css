@@ -1,0 +1,273 @@
+/* ================================================
+   login1.css — Agriprice Welcome Screen (Final)
+   - Video autoplay muted loop (no controls)
+   - Crop video slightly + focus
+   - White content sheet overlaps video
+   - Rounded sheet top corners
+   - Responsive: mobile/tablet full screen, desktop centered card
+   ================================================ */
+
+/* ===== RESET ===== */
+*, *::before, *::after{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root{
+  --bg:           #EDF3F3;
+  --card:         #FFFFFF;
+  --ink:          #0B1B3A;
+  --brand:        #0B66FF;
+  --navy:         #0A2E6E;
+  --muted:        rgba(11, 27, 58, 0.55);
+
+  --radius-card:  28px;
+  --radius-sheet: 34px;
+  --radius-seg:   999px;
+
+  --shadow-card:  0 24px 60px rgba(8, 26, 61, 0.13),
+                  0 4px  16px rgba(8, 26, 61, 0.07);
+  --shadow-sheet: 0 -18px 40px rgba(8, 26, 61, 0.10);
+  --shadow-btn:   0 10px 28px rgba(10, 46, 110, 0.30);
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body{
+  height: 100%;
+  min-height: 100%;
+}
+
+body{
+  font-family: "Kanit", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--card);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ===== PAGE WRAPPER ===== */
+.screen{
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== CARD =====
+   Mobile/Tablet: full screen
+*/
+.card{
+  width: 100%;
+  min-height: 100dvh;
+
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  /* บน mobile/tablet ให้เต็มจอ — ไม่จำเป็นต้องมีเงา */
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ===== MEDIA (TOP VIDEO) ===== */
+.media{
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  /* สำคัญ: ผูกกับความสูงจอ (vh) เพื่อให้ tablet/landscape ขยับตาม */
+  height: clamp(300px, 52vh, 520px);
+
+  background: radial-gradient(ellipse 160% 80% at 70% 0%,
+    #D4F3EF 0%, #B8E8E4 45%, #A8DDD9 100%);
+}
+
+/* วิดีโอเต็มพื้นที่ + ครอปเล็กน้อย */
+.media-video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* crop/zoom นิดนึงให้เหมือนต้นฉบับ */
+  transform: scale(1.06);
+  transform-origin: 50% 38%;
+
+  display: block;
+}
+
+/* ===== CONTENT SHEET (WHITE) ===== */
+.content{
+  position: relative;
+  z-index: 2;
+
+  background: var(--card);
+
+  /* ทำให้แผ่นขาว "ทับ" วิดีโอ */
+  margin-top: -36px;
+
+  border-top-left-radius: var(--radius-sheet);
+  border-top-right-radius: var(--radius-sheet);
+  box-shadow: var(--shadow-sheet);
+
+  padding: 26px 24px calc(22px + var(--safe-bottom));
+
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Title */
+.title{
+  line-height: 1.08;
+  margin-bottom: 10px;
+}
+
+.title-th{
+  display: block;
+  font-size: clamp(28px, 4.6vw, 36px);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.title-brand{
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(34px, 5.4vw, 46px);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  color: var(--brand);
+}
+
+/* Subtitle */
+.subtitle{
+  font-size: clamp(13px, 1.9vw, 15px);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 42ch;
+}
+
+/* ===== SEGMENTED CONTROL ===== */
+.segmented-wrap{
+  margin-top: auto;
+  padding-top: 22px;
+}
+
+.segmented{
+  width: 100%;
+  border-radius: var(--radius-seg);
+  padding: 5px;
+  border: 1.8px solid rgba(10, 46, 110, 0.28);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+
+  background: #FFFFFF;
+}
+
+.seg-btn{
+  height: 54px;
+  border-radius: var(--radius-seg);
+
+  font-family: "Kanit", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+
+  border: none;
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+
+  transition:
+    transform 0.13s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.seg-btn:active{ transform: scale(0.98); }
+
+.seg-primary{
+  background: linear-gradient(175deg, #0E3480 0%, #081E5A 100%);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-btn);
+}
+
+.seg-ghost{
+  background: transparent;
+  color: var(--navy);
+}
+
+.hint{
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(11, 27, 58, 0.45);
+  min-height: 16px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet+ ให้มีพื้นหลังนอกการ์ด (แต่ยังเต็มจอ) */
+@media (min-width: 600px){
+  body{ background: var(--bg); }
+  .card{
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Desktop: ทำเป็นการ์ดกลาง */
+@media (min-width: 1024px){
+  .screen{
+    display: grid;
+    place-items: center;
+    padding: 40px 24px;
+  }
+
+  .card{
+    width: 100%;
+    min-height: unset;
+
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .media{
+    height: 440px;
+    width: 100%;
+  transform: scale(1.15);
+
+  }
+}
+
+/* จอเตี้ย/แนวนอน: ลดวิดีโอ และซ่อน subtitle เพื่อให้ปุ่มไม่หลุด */
+@media (max-height: 600px) and (orientation: landscape){
+  .media{ height: clamp(220px, 42vh, 300px); }
+  .content{ padding: 16px 20px calc(16px + var(--safe-bottom)); }
+  .subtitle{ display: none; }
+  .seg-btn{ height: 46px; font-size: 14px; }
+}
+
+/* Touch devices: กัน hover flicker */
+@media (hover: none){
+  .seg-primary:hover{ box-shadow: var(--shadow-btn); }
+  .seg-ghost:hover{ background: transparent; }
+}

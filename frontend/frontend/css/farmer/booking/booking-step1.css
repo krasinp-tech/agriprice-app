@@ -1,0 +1,594 @@
+/* ================================
+   AGRIPRICE - Booking Step 1
+   จองคิู: เลือกวันและเวลา
+================================ */
+
+/* Responsive Container Wrapper */
+.booking-container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .booking-container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .booking-container {
+    max-width: 1024px;
+    padding: 0 40px;
+  }
+}
+
+/* Main Container */
+.booking-step1 {
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 90px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ================================
+   Header Card (Green Gradient)
+================================ */
+.header-card {
+  background: linear-gradient(135deg, #0B853C 0%, #00C853 100%);
+  border-radius: 0 0 32px 32px;
+  padding: 16px 16px 28px;
+  position: relative;
+  box-shadow: 0 6px 24px rgba(11, 133, 60, 0.2);
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.btn-back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.btn-back .material-icons-outlined {
+  color: #fff;
+  font-size: 20px;
+}
+
+/* Progress Bar */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px auto 28px;
+  max-width: 200px;
+}
+
+.progress-step {
+  width: 40px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  transition: all 0.4s ease;
+}
+
+.progress-step.active {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+/* Header Content */
+.header-content {
+  text-align: center;
+  padding-top: 16px;
+}
+
+.product-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+}
+
+.product-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.header-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.header-description {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 4px 0 0;
+}
+
+/* ================================
+   Calendar Section
+================================ */
+.calendar-section {
+  margin: 24px auto;
+  max-width: 100%;
+  padding: 0 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.section-icon {
+  color: #0B853C;
+  font-size: 24px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.calendar-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  max-width: 100%;
+  width: 100%;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calendar-nav {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #F5F5F5;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.calendar-nav:hover {
+  background: #E8F5E9;
+  transform: scale(1.05);
+}
+
+.calendar-nav .material-icons-outlined {
+  color: #0B853C;
+  font-size: 20px;
+}
+
+.calendar-month {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  padding: 4px 0;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  min-height: 32px;
+}
+
+.calendar-day:hover:not(.disabled):not(.other-month) {
+  background: #E8F5E9;
+  transform: scale(1.08);
+}
+
+.calendar-day.selected {
+  background: linear-gradient(135deg, #0B853C 0%, #00C853 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(11, 133, 60, 0.3);
+}
+
+.calendar-day.today {
+  border: 2px solid #0B853C;
+}
+
+.calendar-day.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.calendar-day.other-month {
+  color: #bbb;
+  opacity: 0.4;
+}
+
+/* ================================
+   Time Slots Section
+================================ */
+.timeslots-section {
+  margin: 0 auto 24px;
+  max-width: 100%;
+  padding: 0 16px 180px;
+}
+
+.timeslots-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  max-width: 100%;
+  width: 100%;
+}
+
+.timeslot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px;
+  margin-bottom: 10px;
+  border: 2px solid #E8E8E8;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.timeslot:last-child {
+  margin-bottom: 0;
+}
+
+.timeslot:hover:not(.disabled) {
+  border-color: #0B853C;
+  background: #F9FFF9;
+  transform: translateX(4px);
+}
+
+.timeslot.selected {
+  border: 2px solid #0B853C;
+  background: linear-gradient(90deg, rgba(11, 133, 60, 0.05) 0%, rgba(0, 200, 83, 0.05) 100%);
+  box-shadow: 0 4px 16px rgba(11, 133, 60, 0.15);
+}
+
+.timeslot.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #F5F5F5;
+}
+
+.timeslot.disabled:hover {
+  border-color: #E8E8E8;
+  transform: none;
+}
+
+.timeslot-time {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.timeslot.disabled .timeslot-time {
+  color: #999;
+}
+
+.timeslot-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.timeslot-status.available {
+  color: #0B853C;
+}
+
+.timeslot-status.full {
+  color: #FF5252;
+}
+
+.timeslot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.timeslot-badge.full {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+/* ================================
+   Submit Button
+================================ */
+.submit-container {
+  
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 16px 25px;
+  background: linear-gradient(to top, #F5F5F5 80%, transparent);
+  z-index: 30;
+  max-width: 100%;
+  
+}
+
+.btn-submit {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #0B853C 0%, #00C853 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(11, 133, 60, 0.3);
+  pointer-events: auto;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(11, 133, 60, 0.4);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.btn-submit .material-icons-outlined {
+  font-size: 20px;
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-submit:disabled:hover {
+  transform: none;
+}
+
+/* ================================
+   Responsive - Tablet
+================================ */
+@media (min-width: 768px) {
+  .booking-step1 {
+    padding-bottom: 40px;
+  }
+
+  .header-card {
+    max-width: 600px;
+    margin: 20px auto 0;
+    border-radius: 24px;
+    padding: 20px 24px 32px;
+  }
+
+  .calendar-section,
+  .timeslots-section {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+  }
+
+  .timeslots-section {
+    padding-bottom: 100px;
+  }
+
+  .calendar-container {
+    padding: 20px 18px;
+  }
+
+  .calendar-grid {
+    gap: 8px;
+  }
+
+  .calendar-weekday {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+
+  .calendar-day {
+    font-size: 14px;
+    border-radius: 10px;
+    min-height: 40px;
+  }
+
+  .timeslots-container {
+    padding: 16px;
+  }
+
+  .timeslot {
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+  }
+
+  .submit-container {
+    position: relative;
+    bottom: auto;
+    max-width: 600px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    background: transparent;
+  }
+
+  .btn-submit {
+    max-width: 100%;
+  }
+}
+
+/* ================================
+   Responsive - Desktop
+================================ */
+@media (min-width: 1024px) {
+  .header-card {
+    max-width: 700px;
+    margin-top: 32px;
+    padding: 24px 32px 36px;
+  }
+
+  .calendar-section,
+  .timeslots-section {
+    max-width: 700px;
+    padding: 0 32px;
+  }
+
+  .product-icon {
+    width: 110px;
+    height: 110px;
+  }
+
+  .header-title {
+    font-size: 24px;
+  }
+
+  .calendar-container {
+    padding: 24px 20px;
+  }
+
+  .calendar-grid {
+    gap: 10px;
+  }
+
+  .calendar-weekday {
+    font-size: 14px;
+  }
+
+  .calendar-day {
+    font-size: 15px;
+    border-radius: 12px;
+    min-height: 44px;
+  }
+
+  .timeslots-container {
+    padding: 18px;
+  }
+
+  .timeslot {
+    padding: 18px 24px;
+  }
+
+  .timeslot-time {
+    font-size: 17px;
+  }
+
+  .submit-container {
+    max-width: 700px;
+    padding: 0 32px;
+  }
+}
+
+/* ================================
+   Animations
+================================ */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-section,
+.timeslots-section {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.timeslot {
+  animation: slideInUp 0.3s ease-out backwards;
+}
+
+.timeslot:nth-child(1) { animation-delay: 0.05s; }
+.timeslot:nth-child(2) { animation-delay: 0.1s; }
+.timeslot:nth-child(3) { animation-delay: 0.15s; }
+.timeslot:nth-child(4) { animation-delay: 0.2s; }
+.timeslot:nth-child(5) { animation-delay: 0.25s; }

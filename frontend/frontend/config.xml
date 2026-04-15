@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.agriprice.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>AGRIPRICE</name>
+    <description>แพลตฟอร์มเชื่อมต่อเกษตรกรและผู้ซื้อผลผลิตการเกษตร</description>
+    <author email="info@agriprice.com" href="https://agriprice.com">AGRIPRICE Team</author>
+    <content src="index.html" />
+    
+    <!-- Preferences -->
+    <preference name="Orientation" value="portrait" />
+    <preference name="target-device" value="universal" />
+    <preference name="fullscreen" value="false" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="UIWebViewBounce" value="false" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="android:usesCleartextTraffic" value="true" />
+    
+    <!-- Viewport Settings -->
+    <preference name="EnableViewportScale" value="false" />
+    <preference name="MediumInstanceSize" value="600x800" />
+    
+    <!-- iOS specific preferences -->
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="iosExtraFilesystems" value="library,library-nosync,documents,documents-nosync,cache,bundle,root" />
+    
+    <!-- Permissions -->
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <allow-intent href="http://*/*" />
+        <allow-intent href="https://*/*" />
+    </platform>
+    
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+    </platform>
+    
+    <!-- Access to network -->
+    <access origin="*" />
+    
+    <!-- Icons and Splash screens -->
+    <platform name="android">
+        <icon src="assets/images/hero.png" density="ldpi" />
+        <icon src="assets/images/hero.png" density="mdpi" />
+        <icon src="assets/images/hero.png" density="hdpi" />
+        <icon src="assets/images/hero.png" density="xhdpi" />
+        <icon src="assets/images/hero.png" density="xxhdpi" />
+        <icon src="assets/images/hero.png" density="xxxhdpi" />
+        
+        <splash src="assets/images/hero.png" density="land-ldpi" />
+        <splash src="assets/images/hero.png" density="land-mdpi" />
+        <splash src="assets/images/hero.png" density="land-hdpi" />
+        <splash src="assets/images/hero.png" density="land-xhdpi" />
+        
+        <splash src="assets/images/hero.png" density="port-ldpi" />
+        <splash src="assets/images/hero.png" density="port-mdpi" />
+        <splash src="assets/images/hero.png" density="port-hdpi" />
+        <splash src="assets/images/hero.png" density="port-xhdpi" />
+    </platform>
+    
+    <platform name="ios">
+        <icon src="assets/images/hero.png" width="40" height="40" />
+        <icon src="assets/images/hero.png" width="50" height="50" />
+        <icon src="assets/images/hero.png" width="60" height="60" />
+        <icon src="assets/images/hero.png" width="76" height="76" />
+        <icon src="assets/images/hero.png" width="120" height="120" />
+        <icon src="assets/images/hero.png" width="152" height="152" />
+        <icon src="assets/images/hero.png" width="167" height="167" />
+        <icon src="assets/images/hero.png" width="180" height="180" />
+        
+        <splash src="assets/images/hero.png" width="320" height="480" />
+        <splash src="assets/images/hero.png" width="640" height="960" />
+        <splash src="assets/images/hero.png" width="640" height="1136" />
+        <splash src="assets/images/hero.png" width="750" height="1334" />
+        <splash src="assets/images/hero.png" width="1242" height="2208" />
+    </platform>
+    
+    <!-- Plugins (common Cordova plugins) -->
+    <plugin name="cordova-plugin-statusbar" spec="~2.4.3" />
+    <plugin name="cordova-plugin-splashscreen" spec="~6.0.0" />
+    <plugin name="cordova-plugin-device" spec="~2.0.2" />
+    <plugin name="cordova-plugin-network-information" spec="~2.0.2" />
+    <plugin name="cordova-plugin-screen-orientation" spec="^3.0.4" />
+</widget>

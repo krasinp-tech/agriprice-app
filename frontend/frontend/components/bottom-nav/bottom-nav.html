@@ -1,0 +1,32 @@
+<!-- ================================
+     Bottom Navigation Bar
+================================ -->
+<nav class="bottom-nav" id="bottomNav">
+
+    <a href="index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+    </a>
+
+    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </a>
+
+    <!-- booking จะถูกปรับตาม role โดย js/components.js (farmer/buyer) -->
+    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+    </a>
+
+    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+    </a>
+
+    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+    </a>
+</nav>

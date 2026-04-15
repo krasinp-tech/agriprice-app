@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../../js/components/i18n.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>กำหนดวันที่และรอบคิวรับซื้อ | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../../css/buyer/setbooking/setbooking-step2.css" />
+  <script src="../../../js/auth/guard.js"></script>
+  <script>
+    window.AuthGuard.requireLogin();
+    // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
+    (function() {
+      try {
+        var u = JSON.parse(localStorage.getItem('user') || 'null');
+        var role = (u && u.role) ? u.role.toLowerCase() : (localStorage.getItem('role') || '').toLowerCase();
+        if (role && role !== 'buyer') { window.location.href = '../../../index.html'; }
+      } catch(_) {}
+    })();
+  </script>
+</head>
+
+<body>
+    <!-- Language Switcher (top-right) -->
+    <div class="page">
+
+    <!-- Header -->
+    <header class="topbar">
+      <button class="back-btn" type="button" aria-label="ย้อนกลับ" id="btnBack">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+
+      <div class="topbar-center">
+        <h1 class="title">กำหนดวันที่และรอบคิวรับซื้อ</h1>
+        <div class="step-indicator" aria-label="ขั้นตอน 2 จาก 2">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="dot active" aria-hidden="true"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Summary of step1 (populated when coming from step1) -->
+    <div id="step1Summary" class="card" style="display:none; margin: 16px;">
+      <!-- injected by JS -->
+    </div>
+
+    <main class="content">
+      <!-- Card 1: Date range -->
+      <section class="card">
+        <div class="section-head">
+          <div class="section-title">ช่วงวันที่รับซื้อ</div>
+          <div class="section-sub">กำหนดช่วงเวลาที่เปิดรับซื้อผลผลิต</div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="dateStart">วันที่เริ่มต้น</label>
+          <div class="icon-input">
+            <input id="dateStart" type="date" class="input" />
+            <span class="material-icons-outlined">calendar_month</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="dateEnd">วันที่สิ้นสุด</label>
+          <div class="icon-input">
+            <input id="dateEnd" type="date" class="input" />
+            <span class="material-icons-outlined">calendar_month</span>
+          </div>
+        </div>
+
+        <div class="info-chip">
+          <span class="material-icons-outlined">info</span>
+          <span>ช่วงวันที่ที่เลือกจะเป็นช่วงเวลาที่เกษตรกรสามารถจองคิวรับซื้อได้</span>
+        </div>
+      </section>
+
+      <!-- Card 2: Rounds -->
+      <section class="card">
+        <div class="rounds-head">
+          <div>
+            <div class="section-title">รอบคิวรับซื้อ</div>
+            <div class="section-sub">กำหนดรอบเวลาและจำนวนคิวในแต่ละรอบ</div>
+          </div>
+
+          <button class="add-round-btn" id="addRoundBtn" type="button">
+            <span class="material-icons-outlined">add</span>
+            เพิ่มรอบ
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="rounds-table" aria-label="ตารางรอบคิวรับซื้อ">
+            <thead>
+              <tr>
+                <th>ชื่อรอบ</th>
+                <th>เวลาเริ่มต้น</th>
+                <th>เวลาสิ้นสุด</th>
+                <th>จำนวนคิว</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="roundTbody">
+              <!-- rows injected -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <button class="primary-btn" id="saveAllBtn" type="button">บันทึก</button>
+
+      <pre class="debug" id="debugBox" hidden></pre>
+    </main>
+  </div>
+
+  <!-- Modal: Add Round -->
+  <div class="modal-overlay" id="roundModal" inert>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="เพิ่มรอบคิวใหม่">
+      <div class="modal-top">
+        <div class="modal-title">เพิ่มรอบคิวใหม่</div>
+        <button class="modal-close" id="closeModalBtn" type="button" aria-label="ปิด">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="field">
+          <label class="label" for="roundName">ชื่อรอบคิว</label>
+          <input id="roundName" class="input" type="text" placeholder="เช่น รอบที่ 1" />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label class="label" for="timeStart">เวลาเริ่มต้น</label>
+            <div class="icon-input">
+              <input id="timeStart" class="input" type="time" />
+              <span class="material-icons-outlined">schedule</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="timeEnd">เวลาสิ้นสุด</label>
+            <div class="icon-input">
+              <input id="timeEnd" class="input" type="time" />
+              <span class="material-icons-outlined">schedule</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="capacity">จำนวนคิว</label>
+          <input id="capacity" class="input" type="number" inputmode="numeric" min="1" step="1" placeholder="เช่น 5" />
+        </div>
+
+        <button class="modal-save" id="saveRoundBtn" type="button">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/buyer/setbooking/setbooking-step2.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+  });
+  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'lang') {
+      if (window.i18nInit) window.i18nInit();
+    }
+  });
+</script>
+</body>
+</html>

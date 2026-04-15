@@ -1,0 +1,103 @@
+/* ================================
+   Bottom Navigation Bar
+================================ */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #ffffff;
+    border-top: 1px solid #EFEFEF;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 200;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.07);
+    max-width: 100%;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    cursor: pointer;
+    text-decoration: none;
+    color: #AAAAAA;
+    transition: color 0.2s ease;
+    border: none;
+    background: transparent;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+}
+
+.bottom-nav-item span.material-icons-outlined {
+    font-size: 26px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.bottom-nav-item .nav-label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* Active State */
+.bottom-nav-item.active,
+.bottom-nav-item.is-active {
+    color: #0B853C;
+}
+
+.bottom-nav-item.active span.material-icons-outlined,
+.bottom-nav-item.is-active span.material-icons-outlined {
+    transform: scale(1.08);
+}
+
+.bottom-nav-item.active .nav-label,
+.bottom-nav-item.is-active .nav-label {
+    font-weight: 700;
+}
+
+/* Hover */
+.bottom-nav-item:active {
+    color: #0B853C;
+    transform: translateY(-1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bottom-nav-item:hover {
+        color: #0B853C;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .bottom-nav {
+        max-width: 720px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 20px 20px 0 0;
+        border-left: 1px solid #EFEFEF;
+        border-right: 1px solid #EFEFEF;
+    }
+}
+
+/* Desktop - ซ่อน bottom nav ถ้าต้องการ */
+@media (min-width: 1024px) {
+    .bottom-nav {
+        max-width: var(--app-shell-width, 430px);
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 0 0 26px 26px;
+        border-left: 1px solid #EFEFEF;
+        border-right: 1px solid #EFEFEF;
+        border-bottom: 1px solid #EFEFEF;
+    }
+}
