@@ -1,0 +1,462 @@
+/* ================================
+   AGRIPRICE - Global Styles (NEW)
+   - Fix: Tablet side squeeze
+   - Mobile-first responsive container
+================================ */
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+html,
+body {
+  width: 100%;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Prevent horizontal drag that feels like "back" in browsers */
+  touch-action: pan-y;
+}
+
+:root {
+  --app-shell-width: 430px;
+  --app-shell-radius: 34px;
+  --tap-target-min: 44px;
+  --page-gutter: 16px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  min-height: 100dvh;
+  
+  /* กัน horizontal scroll จาก element ที่ล้น */
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom));
+
+  /* Mobile app-like rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Make viewport height stable on mobile browser chrome show/hide */
+:root {
+  --app-vh: 1vh;
+}
+
+body {
+  min-height: calc(var(--app-vh) * 100);
+}
+
+/* Critical flows in PWA/Cordova: stricter app-like interaction model */
+html.app-strict-mode,
+html.app-strict-mode body {
+  overscroll-behavior: none;
+}
+
+html.app-strict-mode body {
+  touch-action: manipulation;
+}
+
+.soft-guard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+
+.soft-guard-modal.show {
+  display: block;
+}
+
+.soft-guard-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.44);
+  backdrop-filter: blur(2px);
+}
+
+.soft-guard-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.24);
+  padding: 16px;
+}
+
+.soft-guard-sheet h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.soft-guard-sheet p {
+  margin: 0;
+  color: #5d6778;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.soft-guard-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.soft-guard-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.soft-guard-btn.ghost {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.soft-guard-btn.danger {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Hide selection tint that causes "blue screen" feeling on long press/select */
+::selection {
+  background: transparent;
+  color: inherit;
+}
+
+/* Default app-like behavior: no drag/select outside editable controls */
+*:not(input):not(textarea):not([contenteditable="true"]):not(.allow-select) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+img,
+svg,
+video {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Keep form fields usable */
+input,
+textarea,
+[contenteditable="true"],
+.allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Touch-friendly defaults */
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  font: inherit;
+}
+
+button,
+[role="button"],
+.bottom-nav-item {
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Mobile polish baseline */
+:where(.menu-item, .logout-item) {
+  min-height: 52px;
+}
+
+:where(
+  .ud-back,
+  .back-btn,
+  .btn-back,
+  .ma-back,
+  .detail-back,
+  .notify-back,
+  .room-back
+) {
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+:where(
+  .ud-header,
+  .detail-header,
+  .ma-header,
+  .notify-header,
+  .dash-header,
+  .search-header-container,
+  .booking-header,
+  .noti-header,
+  .chat-header-inner
+) {
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+input,
+select,
+textarea {
+  font-size: 16px; /* Prevent iOS zoom on focus */
+}
+
+/* App-like press feedback */
+.menu-item,
+.logout-item,
+.bottom-nav-item,
+button {
+  transition: transform 0.14s ease, opacity 0.14s ease, background-color 0.18s ease;
+}
+
+.menu-item:active,
+.logout-item:active,
+.bottom-nav-item:active,
+.search-button:active,
+.back-btn:active,
+button:active {
+  transform: scale(0.965);
+  opacity: 0.85;
+}
+
+/* Fix: Tap Highlight on some android browsers */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Clear Search Button */
+.clear-search {
+  border: none;
+  background: transparent;
+  padding: 8px;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: -4px;
+}
+.clear-search span {
+  font-size: 20px;
+}
+
+/* Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  animation: fadeIn 0.4s ease;
+}
+.empty-state span.material-icons-outlined {
+  font-size: 64px;
+  color: #E0E0E0;
+  margin-bottom: 16px;
+}
+.empty-state p {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+.empty-state .sub-text {
+  font-size: 13px;
+  color: #AAA;
+  margin-top: 4px;
+}
+
+/* Hide desktop scrollbar visuals for cleaner app feel */
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* =================================
+   Container (Mobile-first)
+   Mobile: จำกัดเหมาะกับมือถือ
+   Tablet+: ขยายเต็ม/ตามขนาดจอ (แก้บีบ)
+================================= */
+.container {
+  width: 100%;
+  max-width: 428px;     /* มือถือ */
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 20px;
+  }
+
+  .container {
+    max-width: 100%; 
+    padding: 0 24px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1440px;
+    padding: 0 80px;
+  }
+}
+
+/* =================================
+   Desktop App Shell (phone-like frame)
+================================= */
+@media (min-width: 1200px) {
+  body {
+    position: relative;
+    background:
+      radial-gradient(1200px 520px at 50% -180px, #f8fbff 0%, #eef2f7 55%, #e9edf3 100%);
+    min-height: 100dvh;
+    padding-top: 26px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    isolation: isolate;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    left: 50%;
+    top: 14px;
+    transform: translateX(-50%);
+    width: calc(var(--app-shell-width) + 24px);
+    height: calc(100dvh - 28px);
+    border-radius: calc(var(--app-shell-radius) + 10px);
+    background: linear-gradient(165deg, #181c22 0%, #101319 100%);
+    box-shadow:
+      0 36px 70px rgba(17, 24, 39, 0.30),
+      0 10px 20px rgba(0, 0, 0, 0.16);
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    left: 50%;
+    top: 26px;
+    transform: translateX(-50%);
+    width: var(--app-shell-width);
+    height: calc(100dvh - 52px);
+    border-radius: var(--app-shell-radius);
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  body > :not(script):not(style) {
+    width: min(100%, var(--app-shell-width));
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* =================================
+   Section Title (for Home page)
+================================= */
+.section-title-home {
+  font-size: 15px;
+  font-weight: 500;
+  color: #7e7e7e;
+  margin-bottom: 5px;
+  padding: 0 16px;
+}
+
+/* Tablet/Desk: เพิ่มระยะข้างให้พอดีกับ container */
+@media (min-width: 768px) {
+  .section-title-home {
+    padding: 0 24px;
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-title-home {
+    padding: 0 80px;
+    font-size: 16px;
+  }
+}
+
+/* ================================
+   Animations
+================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================
+   Native-like Page Transition
+================================ */
+body.page-enter {
+  animation: pageEnter 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.page-leave {
+  pointer-events: none;
+  animation: pageLeave 0.18s ease both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.996);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pageLeave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.998);
+  }
+}

@@ -15,6 +15,6 @@ Thumbs.db
 *.log
 
 # Generated mobile/web artifacts
-frontend/frontend/www/
-frontend/frontend/android/app/capacitor.build.gradle
-frontend/frontend/android/capacitor.settings.gradle
+frontend/www/
+frontend/android/app/capacitor.build.gradle
+frontend/android/capacitor.settings.gradle

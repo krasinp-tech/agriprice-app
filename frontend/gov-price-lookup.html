@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ราคาสินค้าเกษตร - AGRIPRICE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green:       #0B853C;
+      --green-light: #00c951;
+      --green-bg:    #f0faf4;
+      --red:         #e53935;
+      --blue:        #0ea5e9;
+      --gray-50:     #f8f9fa;
+      --gray-100:    #f1f3f5;
+      --gray-200:    #e9ecef;
+      --gray-400:    #adb5bd;
+      --gray-600:    #6c757d;
+      --gray-800:    #343a40;
+      --text:        #1a1a2e;
+      --radius:      16px;
+      --radius-sm:   10px;
+    }
+
+    html, body {
+      font-family: 'Sarabun', sans-serif;
+      background: #f5f5f5;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 430px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .page-header {
+      background: linear-gradient(135deg, #0B853C 0%, #00a844 100%);
+      padding: 16px 16px 32px;
+      position: relative;
+    }
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 24px;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .back-btn {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-info { flex: 1; }
+    .header-title { font-size: 17px; font-weight: 800; color: #fff; }
+    .header-sub { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
+    .header-date {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Body */
+    .page-body { padding: 0 16px 100px; }
+
+    /* Category badge */
+    .category-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-bg);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(11,133,60,0.2);
+      margin-bottom: 14px;
+    }
+
+    /* Filter card */
+    .filter-card {
+      background: var(--gray-50);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--gray-200);
+    }
+    .filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-label::before {
+      content: '';
+      width: 3px; height: 12px;
+      background: var(--green);
+      border-radius: 2px;
+    }
+
+    .select-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+    .select-wrap select {
+      width: 100%;
+      height: 46px;
+      padding: 0 40px 0 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .select-wrap select:focus { border-color: var(--green); }
+    .select-wrap select:disabled { background: var(--gray-100); color: var(--gray-400); cursor: not-allowed; }
+    .select-arrow {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gray-400);
+      font-size: 11px;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .date-row input[type="date"] {
+      width: 100%;
+      height: 46px;
+      padding: 0 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .date-row input:focus { border-color: var(--green); }
+    .date-sep { font-size: 12px; color: var(--gray-400); font-weight: 700; text-align: center; }
+
+    .btn-search {
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(135deg, #0B853C, #00c951);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(11,133,60,0.3);
+      transition: opacity 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-search:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-search:disabled { background: var(--gray-200); color: var(--gray-400); box-shadow: none; cursor: not-allowed; }
+
+    /* Loading */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 14px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: var(--gray-600); font-weight: 600; }
+
+    /* Empty */
+    .empty-wrap { text-align: center; padding: 40px 20px; }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-title { font-size: 15px; font-weight: 700; color: var(--gray-800); }
+
+    /* Result header */
+    .result-header {
+      background: var(--green-bg);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(11,133,60,0.12);
+    }
+    .result-product-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .result-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .meta-chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(11,133,60,0.1);
+      color: var(--green);
+    }
+
+    /* Avg cards */
+    .avg-price-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .avg-card {
+      background: #fff;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      border: 1px solid var(--gray-200);
+      text-align: center;
+    }
+    .avg-card-label { font-size: 11px; font-weight: 700; color: var(--gray-400); margin-bottom: 6px; }
+    .avg-card-value { font-size: 22px; font-weight: 800; }
+    .avg-card-unit { font-size: 11px; color: var(--gray-400); font-weight: 600; margin-top: 2px; }
+    .avg-card.low .avg-card-value { color: var(--blue); }
+    .avg-card.high .avg-card-value { color: var(--red); }
+
+    /* Price table */
+    .price-table-wrap {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .table-header {
+      background: var(--gray-50);
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .th-cell {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      text-align: center;
+    }
+    .th-cell:first-child { text-align: left; }
+    .price-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      align-items: center;
+    }
+    .price-row:last-child { border-bottom: none; }
+    .row-date { font-size: 12px; font-weight: 700; color: var(--gray-800); }
+    .row-range { font-size: 12px; font-weight: 600; text-align: center; }
+    .row-avg { font-size: 13px; font-weight: 800; color: var(--green); text-align: right; }
+    .range-low { color: var(--blue); }
+    .range-high { color: var(--red); }
+
+    /* Source */
+    .source-footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--gray-400);
+      padding: 6px 0 12px;
+      font-weight: 600;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" onclick="history.back()">&#8592;</button>
+      <div class="header-info">
+        <div class="header-title">ราคาสินค้าเกษตร</div>
+        <div class="header-sub">ข้อมูลจากกรมการค้าภายใน</div>
+      </div>
+      <div class="header-date" id="headerDate">--/--/----</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <div class="category-badge" id="categoryBadge">
+      <span id="categoryLabel"></span>
+    </div>
+
+    <div class="filter-card">
+      <div class="filter-label">ค้นหาราคาสินค้า</div>
+
+      <div class="select-wrap">
+        <select id="selProduct">
+          <option value="">-- เลือกสินค้า --</option>
+        </select>
+        <span class="select-arrow">&#9660;</span>
+      </div>
+
+      <div class="select-wrap">
+        <select id="selVariety" disabled>
+          <option value="">-- เลือกสายพันธุ์ (ถ้ามี) --</option>
+        </select>
+        <span class="select-arrow">&#9660;</span>
+      </div>
+
+      <div class="date-row">
+        <input type="date" id="dateFrom">
+        <span class="date-sep">ถึง</span>
+        <input type="date" id="dateTo">
+      </div>
+
+      <button class="btn-search" id="btnSearch" onclick="doSearch()">ค้นหาราคา</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="source-footer">
+      ข้อมูลจาก กรมการค้าภายใน กระทรวงพาณิชย์<br>
+      dataapi.moc.go.th
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = (window.API_BASE_URL || "").replace(/\/$/, "");
+
+function toThaiDate(dateObj) {
+  var d = dateObj.getDate().toString().padStart(2, '0');
+  var m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  var y = dateObj.getFullYear() + 543;
+  return d + '/' + m + '/' + y;
+}
+
+function round1(n) {
+  return Math.round(n * 10) / 10;
+}
+
+async function loadInitialData() {
+  document.getElementById('headerDate').textContent = toThaiDate(new Date());
+
+  var today = new Date();
+  var from30 = new Date(today);
+  from30.setDate(from30.getDate() - 29);
+  document.getElementById('dateTo').value   = today.toISOString().slice(0, 10);
+  document.getElementById('dateFrom').value = from30.toISOString().slice(0, 10);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/fruits`);
+    const json = await res.json();
+    if (json.success && json.data) {
+      const selProduct = document.getElementById('selProduct');
+      json.data.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name; // Use name for commodity lookup
+        opt.dataset.id = p.fruit_id;
+        opt.textContent = p.name;
+        selProduct.appendChild(opt);
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load fruits:', e);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadInitialData);
+
+async function doSearch() {
+  var commodity = document.getElementById('selProduct').value;
+  var fromDate  = document.getElementById('dateFrom').value;
+  var toDate    = document.getElementById('dateTo').value;
+  var results   = document.getElementById('results');
+  var btn       = document.getElementById('btnSearch');
+
+  if (!commodity) {
+    results.innerHTML = '<div class="empty-wrap"><div class="empty-icon">&#128203;</div><div class="empty-title">กรุณาเลือกสินค้า</div></div>';
+    return;
+  }
+  if (!fromDate || !toDate) {
+    results.innerHTML = '<div class="empty-wrap"><div class="empty-icon">&#128197;</div><div class="empty-title">กรุณาเลือกช่วงวันที่</div></div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'กำลังโหลด...';
+  results.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">กำลังดึงข้อมูลจากกรมการค้าภายใน...</div></div>';
+
+  try {
+    // Note: Our real API (/api/gov-prices/:commodity) currently returns LATEST price rows.
+    // If the teacher expects a history, we might need a dedicated history endpoint.
+    // For now, we fetch the latest real data.
+    const res = await fetch(`${API_BASE}/api/gov-prices/${encodeURIComponent(commodity)}?date=${toDate}`);
+    const json = await res.json();
+    
+    if (json.success) {
+      renderResults(json, commodity);
+    } else {
+      results.innerHTML = `<div class="empty-wrap"><div class="empty-icon">&#10060;</div><div class="empty-title">${json.message || 'ไม่พบข้อมูล'}</div></div>`;
+    }
+  } catch (e) {
+    results.innerHTML = '<div class="empty-wrap"><div class="empty-icon">&#9888;</div><div class="empty-title">เกิดข้อผิดพลาดในการเชื่อมต่อ</div></div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ค้นหาราคา';
+  }
+}
+
+function renderResults(json, commodityName) {
+  var results = document.getElementById('results');
+  const data = json.rows || [];
+
+  if (data.length === 0) {
+    results.innerHTML = '<div class="empty-wrap"><div class="empty-icon">&#128203;</div><div class="empty-title">ไม่พบข้อมูลราคาสินค้าในวันที่ระบุ</div></div>';
+    return;
+  }
+
+  var html = '';
+  html += '<div class="result-header">';
+  html += '<div class="result-product-name">' + commodityName + '</div>';
+  html += '<div class="result-meta">';
+  html += '<span class="meta-chip">ข้อมูลวันที่ ' + (json.date || '-') + '</span>';
+  html += '</div></div>';
+
+  html += '<div class="price-table-wrap">';
+  html += '<div class="table-header"><div class="th-cell">ชั้นพืช/สายพันธุ์</div><div class="th-cell">ช่วงราคา</div><div class="th-cell">เฉลี่ย</div></div>';
+
+  data.forEach(function(row) {
+    html += '<div class="price-row">';
+    html += '<div class="row-date">' + (row.variety || 'ทั่วไป') + '</div>';
+    html += '<div class="row-range"><span class="range-low">' + (row.min || '-') + '</span> - <span class="range-high">' + (row.max || '-') + '</span></div>';
+    html += '<div class="row-avg">' + (row.avg || '-') + '</div>';
+    html += '</div>';
+  });
+
+  html += '</div>';
+  
+  html += '<div class="source-footer" style="margin-top:0">';
+  html += 'แหล่งที่มา: ' + (json.source || 'กรมการค้าภายใน') + '<br>';
+  if (json.updated_at) html += 'อัปเดตล่าสุด: ' + new Date(json.updated_at).toLocaleString('th-TH');
+  html += '</div>';
+
+  results.innerHTML = html;
+}
+</script>
+</body>
+</html>

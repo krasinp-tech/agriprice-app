@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="th">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0B853C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title data-i18n="home_title">AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    
+    <link rel="stylesheet" href="components/bottom-nav/bottom-nav.css">
+
+    <link rel="stylesheet" href="components/favorites/favorites.css">
+    <link rel="stylesheet" href="components/product-card/product-card.css">
+
+    <script src="js/config.js"></script>
+    <script>
+        window.AUTH_TOKEN_KEY = 'token';
+        window.AUTH_USER_KEY = 'user';
+    </script>
+    <script src="js/api-client.js"></script>
+</head>
+
+<body data-active="home">
+        <!-- Language Switcher (top-right) -->
+        <!-- ── Hero ──────────────────────────────────────────── -->
+    <section class="hero-background">
+        <div class="hero-carousel" id="heroCarousel" aria-label="Hero slider">
+            <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกรหญิง"></div>
+            <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลไม้สดใหม่"></div>
+            <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="ภาพโปรโมชัน">
+            </div>
+        </div>
+
+        <div class="hero-indicator" id="heroIndicator" aria-hidden="true"></div>
+
+    </section>
+
+
+
+    <!-- ── Search ────────────────────────────────────────── -->
+    <section class="search-section">
+        <div class="search-box">
+            <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input" id="searchInput" data-i18n-placeholder="search_buyer">
+            <button class="clear-search" id="clearSearchBtn" style="display: none;">
+                <span class="material-icons-outlined">close</span>
+            </button>
+            <button class="search-button" id="searchBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                    <defs>
+                        <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0B853C" />
+                            <stop offset="100%" stop-color="#00EC5F" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="11" cy="11" r="8" stroke="url(#sg)" />
+                    <path d="m21 21-4.35-4.35" stroke="url(#sg)" />
+                </svg>
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ✅ Search Results Mount (สำหรับ js/shared-pages/search.js) -->
+    <section class="search-results-section">
+        <div id="searchResultsMount"></div>
+    </section>
+
+    <!-- ── รายการโปรด ─────────────────────────────────────── -->
+    <section class="favorites-section" aria-label="รายการโปรด" data-i18n-aria-label="favorites_title" hidden>
+      <div class="container">
+        <div class="favorites-header">
+          <h3 class="section-title" data-i18n="favorites_title">รายการโปรด</h3>
+          <a class="view-all-btn" id="favoritesViewAll" href="components/favorites/allfavorites.html" aria-label="ดูทั้งหมด" data-i18n-aria-label="view_all">
+            <span data-i18n="view_all">ดูทั้งหมด</span>
+            <span class="material-icons-outlined" aria-hidden="true">chevron_right</span>
+          </a>
+        </div>
+        <div class="favorites-grid" id="favoritesTrack" role="list"></div>
+        <div class="favorites-dots" id="favoritesDots" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ── หมวดหมู่สินค้า ────────────────────────────── -->
+    <section class="product-tabs-section">
+      <div class="container">
+        <h3 class="section-title">
+          <span class="section-title-left">
+            <span class="section-title-icon"><span class="material-icons-outlined">grid_view</span></span>
+            หมวดหมู่สินค้า
+          </span>
+        </h3>
+        <div class="product-grid-wrap" aria-label="Product categories">
+          <div class="product-grid">
+            <a class="product-item" href="gov-price-lookup.html?category=fruit"><div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้"></div><span>ผลไม้</span></a>
+            <a class="product-item" href="gov-price-lookup.html?category=oil"><div class="cat-icon"><span class="material-icons-outlined">opacity</span></div><span>น้ำมัน</span></a>
+            <a class="product-item" href="gov-price-lookup.html?category=organic"><div class="cat-icon"><span class="material-icons-outlined">spa</span></div><span>อินทรีย์</span></a>
+            <a class="product-item" href="gov-price-lookup.html?category=vegetable"><div class="cat-icon"><span class="material-icons-outlined">eco</span></div><span>ผัก</span></a>
+            <a class="product-item" href="gov-price-lookup.html?category=retail-rice"><div class="cat-icon"><span class="material-icons-outlined">rice_bowl</span></div><span>ข้าว</span></a>
+            <a class="product-item" href="gov-price-lookup.html?category=seedlings"><div class="cat-icon"><span class="material-icons-outlined">yard</span></div><span>พืชพันธุ์</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── รายการแนะนำ ────────────────────────────────────── -->
+     <section class="products-section">
+  <div class="container">
+    <h3 class="section-title" data-i18n="recommend">รายการแนะนำ</h3>
+
+    <!-- mount point -->
+    <div id="productCardsMount"></div>
+
+    <button class="btn-load-more"><span class="material-icons-outlined load-more-icon">expand_more</span><span data-i18n="load_more">ดูเพิ่มเติม</span></button>
+  </div>
+</section>
+
+    
+   
+    <!-- ── Banner ─────────────────────────────────────────── -->
+<!-- ── Banner ───────────────────────────────────── -->
+<section class="banner-section">
+  <div class="container">
+    <h3 class="section-title" data-i18n="announcement">ประชาสัมพันธ์</h3>
+
+    <div class="banner-carousel" id="bannerCarousel" aria-label="Announcements">
+      <div class="banner-item"><img src="assets/images/hero.png" alt="ผลไม้สดใหม่"></div>
+      <div class="banner-item"><img src="assets/images/hero.png" alt="ทุเรียน King of Fruit"></div>
+      <div class="banner-item"><img src="assets/images/promo-banner-1.png" alt="โปรโมชัน"></div>
+      <div class="banner-item"><img src="assets/images/hero.png" alt="ผลไม้สดใหม่"></div>
+      <div class="banner-item"><img src="assets/images/hero.png" alt="ทุเรียน King of Fruit"></div>
+      <div class="banner-item"><img src="assets/images/promo-banner-1.png" alt="โปรโมชัน"></div>
+    </div>
+
+    <div class="page-indicator" id="bannerDots" aria-hidden="true"></div>
+  </div>
+</section>
+
+
+<!-- Side Menu + Bottom Nav (injected) -->
+
+<div id="bottomNavMount"></div>
+
+<!-- Scripts -->
+
+<script src="js/components/i18n.js"></script>
+<script src="js/utils/favorites-helpers.js" defer></script>
+
+<!-- Components Loader (ต้องมาก่อน เพื่อ inject nav/menu) -->
+<script src="js/components.js" defer></script>
+
+<!-- Home specific -->
+<script src="js/home-sliders.js" defer></script>
+
+<!-- Government Prices -->
+<script src="js/gov-prices.js" defer></script>
+
+<!-- Favorites (ถ้าใช้จริง) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.i18nInit) window.i18nInit();
+    });
+
+    window.addEventListener('storage', function (e) {
+        if (e.key === 'lang' && window.i18nInit) {
+            window.i18nInit();
+        }
+    });
+
+    setTimeout(() => {
+        let role = "";
+        try {
+            const raw = localStorage.getItem(window.AUTH_USER_KEY || "user");
+            const user = raw ? JSON.parse(raw) : null;
+            role = String(user?.role || localStorage.getItem("role") || "").toLowerCase();
+        } catch (_) {
+            role = String(localStorage.getItem("role") || "").toLowerCase();
+        }
+        if (role !== "farmer") return;
+    const script = document.createElement("script");
+    script.src = "components/favorites/favorites.js";
+    script.defer = true;
+    document.body.appendChild(script);
+  }, 50);
+</script>
+
+
+
+
+</body>
+
+
+</html>

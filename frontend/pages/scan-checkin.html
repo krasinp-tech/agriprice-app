@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ยืนยันการจองคิว | AGRIPRICE</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { background: #F5F5F5; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; font-family: 'Inter', sans-serif; }
+    .status-card { background: white; border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .status-icon { width: 80px; height: 80px; background: #0B853C; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .status-icon .material-icons-outlined { font-size: 48px; }
+    .status-title { font-size: 24px; font-weight: 800; color: #1a1a1a; margin-bottom: 12px; }
+    .status-msg { font-size: 16px; color: #666; margin-bottom: 30px; line-height: 1.6; }
+    .booking-info { background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: left; }
+    .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+    .info-label { color: #888; }
+    .info-value { font-weight: 700; color: #1a1a1a; }
+    .btn-done { display: block; width: 100%; padding: 16px; background: #0B853C; color: white; border-radius: 14px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
+    .btn-done:hover { background: #097534; transform: scale(1.02); }
+    .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0B853C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="status-card" id="statusCard">
+    <div id="loadingSec">
+      <div class="loading-spinner"></div>
+      <p>กำลังยืนยันตัวตนและบันทึกคิว...</p>
+    </div>
+    
+    <div id="successSec" style="display: none;">
+      <div class="status-icon"><span class="material-icons-outlined">check_circle</span></div>
+      <h2 class="status-title">ยืนยันสำเร็จ!</h2>
+      <p class="status-msg">รหัสคิวนี้ได้รับการบันทึกเข้าสู่ระบบเรียบร้อยแล้ว</p>
+      <div class="booking-info">
+        <div class="info-row"><span class="info-label">หมายเลขคิว:</span> <span class="info-value" id="resQueue">-</span></div>
+        <div class="info-row"><span class="info-label">Booking ID:</span> <span class="info-value" id="resId">-</span></div>
+        <div class="info-row"><span class="info-label">สถานะ:</span> <span class="info-value" style="color: #0B853C;">สำเร็จ</span></div>
+      </div>
+      <a href="buyer/myprofile.html" class="btn-done">กลับไปหน้าหลัก</a>
+    </div>
+
+    <div id="errorSec" style="display: none;">
+      <div class="status-icon" style="background: #E53935;"><span class="material-icons-outlined">error_outline</span></div>
+      <h2 class="status-title">เกิดข้อผิดพลาด</h2>
+      <p class="status-msg" id="errorMsg">ไม่สามารถระบุตัวตนหรือพบข้อมูลการจอง</p>
+      <a href="javascript:history.back()" class="btn-done" style="background: #666;">ย้อนกลับ</a>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const bid = params.get('bid') || params.get('bookingId');
+      const API_BASE = (window.API_BASE_URL || '').replace(/\/$/, '');
+      const TOKEN = localStorage.getItem('token') || '';
+
+      const loadingSec = document.getElementById('loadingSec');
+      const successSec = document.getElementById('successSec');
+      const errorSec = document.getElementById('errorSec');
+
+      if (!bid || !TOKEN || !API_BASE) {
+        loadingSec.style.display = 'none';
+        errorSec.style.display = 'block';
+        if (!TOKEN) document.getElementById('errorMsg').textContent = 'กรุณาเข้าสู่ระบบก่อนสแกน';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/bookings/${bid}/checkin`, {
+          method: 'PATCH',
+          headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }
+        });
+
+        const json = await res.json();
+        loadingSec.style.display = 'none';
+
+        if (res.ok) {
+          document.getElementById('resQueue').textContent = json.data?.queue_no || '-';
+          document.getElementById('resId').textContent = json.data?.booking_no || json.data?.booking_id || bid;
+          successSec.style.display = 'block';
+        } else {
+          document.getElementById('errorMsg').textContent = json.message || 'ไม่สามารถยืนยันคิวได้';
+          errorSec.style.display = 'block';
+        }
+      } catch (e) {
+        loadingSec.style.display = 'none';
+        errorSec.style.display = 'block';
+        document.getElementById('errorMsg').textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -80,7 +80,7 @@ function downloadBuffer(url) {
     const client = parsedUrl.protocol === 'https:' ? https : http;
     const req = client.request(options, function(res) {
       if (res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 303) {
-        const loc = res.headers.location;
+        let loc = res.headers.location;
         if (!loc) return reject(new Error('Redirect without location'));
         if (loc.startsWith('/')) loc = parsedUrl.protocol + '//' + parsedUrl.hostname + loc;
         return downloadBuffer(loc).then(resolve).catch(reject);
