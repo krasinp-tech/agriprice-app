@@ -32,6 +32,7 @@ window.API_BASE_URL = window.API_BASE_URL || DEFAULT_API_BASE_URL;
 window.AGRIPRICE_DEBUG = window.AGRIPRICE_DEBUG ?? (
 	new URLSearchParams(window.location.search).has('debug') || localStorage.getItem('agriprice_debug') === '1'
 );
+console.log('%c[AgriPrice] Build: 2026.04.24.01 (APK-Fix) %c✅', 'color: #0B853C; font-weight: bold;', 'color: green;');
 
 const FALLBACK_FIREBASE_CONFIG = {
 	apiKey: 'AIzaSyBUdCFBGSS0S1bbmsvJM7Lc3b4S2kNt5SE',
