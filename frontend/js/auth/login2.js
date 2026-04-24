@@ -189,7 +189,8 @@
       // ไปหน้าที่ควรไปหลัง login
       redirectAfterLogin();
     } catch (err) {
-      showError(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
+      // ใช้ Native Alert แทนตัวหนังสือสีแดงเพื่อให้ดูเป็นระบบมากขึ้น
+      alert(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
     } finally {
       setLoading(false);
     }

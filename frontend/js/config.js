@@ -6,6 +6,10 @@ const DEFAULT_API_BASE_URL = (() => {
 
 	// 1. Manual override from localStorage (Highest priority)
 	try {
+		// Force clear stale dev values if they exist
+		if (localStorage.getItem('agriprice_api_base_url')?.includes('localhost')) {
+			localStorage.removeItem('agriprice_api_base_url');
+		}
 		const runtimeBase = localStorage.getItem('agriprice_api_base_url');
 		if (runtimeBase) return normalize(runtimeBase);
 	} catch (_) {}

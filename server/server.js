@@ -22,9 +22,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- CORS Configuration ---
-const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({
-  origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(o => o.trim()),
+  origin: true, // Always allow any origin (for dev/mobile simplicity)
   credentials: true
 }));
 
