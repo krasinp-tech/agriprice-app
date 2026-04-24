@@ -86,15 +86,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         const convos = (json.data || []).map(r => ({
-          chatId:      r.chatId,
-          sellerId:    r.other_id,
-          sellerName:  `${r.first_name||''} ${r.last_name||''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
+          chatId:      r.room_id,
+          sellerId:    r.other_user?.id || '',
+          sellerName:  `${r.other_user?.first_name||''} ${r.other_user?.last_name||''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
           sellerSub:   '',
-          avatar:      normalizeProfileImageUrl(r.avatar || ''),
-          phone:       r.phone  || '',
-          lastMessage: r.lastMessage || '',
-          lastTime:    r.lastTime ? new Date(r.lastTime).getTime() : Date.now(),
-          unread:      r.unread || 0,
+          avatar:      normalizeProfileImageUrl(r.other_user?.avatar || ''),
+          phone:       r.other_user?.phone || '',
+          lastMessage: r.last_message || '',
+          lastTime:    r.last_time ? new Date(r.last_time).getTime() : Date.now(),
+          unread:      r.unread_count || 0,
         }));
         if (DEBUG_CHAT) console.log('[chat] Loaded conversations:', convos.length, convos);
         return convos;
@@ -463,6 +463,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function closeRoomOnMobile() {
     if (isDesktop()) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("chatId") && document.referrer) {
+      window.history.back();
+      return;
+    }
+
     activeChatId = null;
     activeConversation = null;
     setMobileRoomMode(false);
@@ -673,10 +680,16 @@ document.addEventListener("DOMContentLoaded", () => {
     showRoom(convo, arr);
   });
 
-  // attach image
-  composer?.addEventListener("click", (e) => {
+  // attach image — ขอ Camera permission ก่อน (แบบ native)
+  composer?.addEventListener("click", async (e) => {
     const btn = e.target.closest('[data-action="attach"]');
     if (!btn) return;
+
+    // ถ้ามี AgriPermission ให้ขอผ่าน bottom-sheet ก่อน
+    if (window.AgriPermission) {
+      const result = await window.AgriPermission.requestCamera();
+      if (!result.granted) return; // ผู้ใช้ปฏิเสธ → ไม่เปิด picker
+    }
     imgInput?.click();
   });
 
@@ -739,17 +752,17 @@ document.addEventListener("DOMContentLoaded", () => {
           const roomRes = await fetch(`${API_BASE}/api/chats`, { headers: authHeaders() });
           if (roomRes.ok) {
             const roomJson = await roomRes.json();
-            const found = (roomJson.data || []).find(r => String(r.chatId) === String(urlChatId));
+            const found = (roomJson.data || []).find(r => String(r.room_id) === String(urlChatId));
             if (found) pseudo = {
-              chatId:      found.chatId,
-              sellerId:    found.other_id,
-              sellerName:  `${found.first_name||''} ${found.last_name||''}`.trim() || 'สนทนา',
+              chatId:      found.room_id,
+              sellerId:    found.other_user?.id || '',
+              sellerName:  `${found.other_user?.first_name||''} ${found.other_user?.last_name||''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
               sellerSub:   '',
-              avatar:      found.avatar || '',
-              phone:       found.phone  || '',
-              lastMessage: found.lastMessage || '',
-              lastTime:    found.lastTime ? new Date(found.lastTime).getTime() : Date.now(),
-              unread:      found.unread || 0,
+              avatar:      found.other_user?.avatar || '',
+              phone:       found.other_user?.phone  || '',
+              lastMessage: found.last_message || '',
+              lastTime:    found.last_time ? new Date(found.last_time).getTime() : Date.now(),
+              unread:      found.unread_count || 0,
             };
           }
         } catch (_) {}
@@ -819,17 +832,26 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (_) {}
 
     // Browser notification (when permission is granted).
-    if (Notification.permission === 'granted' && document.hidden) {
-      new Notification(t('new_message_from', 'ข้อความใหม่จาก') + ' ' + convo.sellerName, {
-        body: convo.lastMessage || t('new_message', 'มีข้อความใหม่'),
-        icon: convo.avatar || '',
-      });
+    const title = t('new_message_from', 'ข้อความใหม่จาก') + ' ' + convo.sellerName;
+    if (window.AgriPermission && window.AgriPermission.showNotification) {
+      if (document.hidden) {
+        window.AgriPermission.showNotification(title, convo.lastMessage || t('new_message', 'มีข้อความใหม่'), { icon: convo.avatar });
+      }
+    } else {
+      if (Notification.permission === 'granted' && document.hidden) {
+        new Notification(title, { body: convo.lastMessage || t('new_message', 'มีข้อความใหม่'), icon: convo.avatar || '' });
+      }
     }
   }
 
-  // Request notification permission on page load.
+  // Request notification permission — ใช้ AgriPermission ถ้ามี
   if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+    if (window.AgriPermission) {
+      // ใช้ bottom-sheet UI แทน raw browser prompt
+      setTimeout(() => window.AgriPermission.requestNotification(), 2000);
+    } else {
+      Notification.requestPermission();
+    }
   }
 
   // Update unread badge on bottom nav.

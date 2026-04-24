@@ -3,22 +3,61 @@
   "appName": "AGRIPRICE",
   "webDir": "www",
   "server": {
-    "cleartext": true
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "useLegacyBridge": false,
+    "loggingBehavior": "none"
+  },
+  "plugins": {
+    "Geolocation": {
+      "plistSuffix": "agriprice"
+    },
+    "Camera": {
+      "presentationStyle": "fullscreen",
+      "saveToGallery": false,
+      "promptLabelHeader": "เลือกรูปภาพ",
+      "promptLabelCancel": "ยกเลิก",
+      "promptLabelPhoto": "เลือกจากคลัง",
+      "promptLabelPicture": "ถ่ายรูป"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#0B853C",
+      "sound": "default"
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0B853C",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0B853C",
+      "overlaysWebView": false
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "DARK",
+      "resizeOnFullScreen": true
+    }
   },
   "cordova": {
     "preferences": {
       "Orientation": "portrait",
-      "target-device": "universal",
       "fullscreen": "false",
       "webviewbounce": "false",
       "UIWebViewBounce": "false",
       "DisallowOverscroll": "true",
-      "android:usesCleartextTraffic": "true",
       "EnableViewportScale": "false",
-      "MediumInstanceSize": "600x800",
-      "StatusBarOverlaysWebView": "true",
-      "StatusBarStyle": "lightcontent",
-      "iosExtraFilesystems": "library,library-nosync,documents,documents-nosync,cache,bundle,root"
+      "StatusBarOverlaysWebView": "false",
+      "StatusBarStyle": "lightcontent"
     }
   }
 }

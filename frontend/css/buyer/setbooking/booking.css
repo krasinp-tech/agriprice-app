@@ -1,12 +1,13 @@
 .page-shell{
   min-height: 100vh;
-  padding: 16px 16px 92px;
+  padding: 16px 16px calc(92px + var(--safe-bottom, 0px));
   background: var(--background, #F7F7F7);
+  font-family: var(--font-main);
 }
 
 /* Booking Header */
 .booking-header {
-  padding: 20px 0 16px;
+  padding: calc(20px + var(--safe-top, 0px)) 0 16px;
   text-align: center;
 }
 

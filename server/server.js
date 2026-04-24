@@ -52,6 +52,7 @@ app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/categories-data', require('./routes/categories'));
 app.use('/api/presence', require('./routes/presence'));
+app.use('/api/dashboard', require('./routes/dashboard'));
 
 // Alias for frontend standard paths
 app.use('/api/categories', (req, res, next) => { req.url = '/categories'; next(); }, require('./routes/categories'));

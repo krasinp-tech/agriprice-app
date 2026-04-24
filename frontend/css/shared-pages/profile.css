@@ -17,10 +17,35 @@
     filter: brightness(0.82);
 }
 
+.profile-back-btn {
+    position: absolute;
+    top: calc(16px + var(--safe-top, 0px));
+    left: 16px;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.profile-back-btn:active {
+    transform: scale(0.92);
+    background: rgba(0, 0, 0, 0.6);
+}
+
 /* ป้ายชื่อสวน */
 .hero-badge {
     position: absolute;
-    top: 28px;
+    top: calc(28px + var(--safe-top, 0px));
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
@@ -205,6 +230,7 @@
     cursor: pointer;
     transition: all 0.2s;
     flex-shrink: 0;
+    font-family: var(--font-main);
 }
 
 .btn-follow:hover, .btn-follow.active {

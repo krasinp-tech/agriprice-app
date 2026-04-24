@@ -5,7 +5,8 @@
 .chat-page{
   min-height: 100vh;
   background: #F7F7F7;
-  padding-bottom: 90px; /* กัน bottom-nav */
+  padding-bottom: calc(90px + var(--safe-bottom, 0px));
+  font-family: var(--font-main);
 }
 
 /* Header */
@@ -20,7 +21,7 @@
 .chat-header-inner{
   max-width: 428px;
   margin: 0 auto;
-  padding: 14px 16px 12px;
+  padding: calc(14px + var(--safe-top, 0px)) 16px 12px;
 }
 
 .chat-title{
@@ -286,8 +287,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 12px;
+  padding: calc(12px + var(--safe-top, 0px)) 12px 12px;
   border-bottom: 1px solid #f0f0f0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .room-back{
@@ -472,7 +476,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 10px 12px;
+  padding: 10px 10px calc(12px + var(--safe-bottom, 0px));
   border-top: 1px solid #f0f0f0;
   background: #fff;
 }

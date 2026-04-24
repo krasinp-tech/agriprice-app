@@ -1,75 +1,101 @@
-# Build AGRIPRICE as APK - Quick Guide
+# 📱 Build AGRIPRICE Android APK
 
-## Prerequisites
-- Node.js & npm
-- Cordova CLI: `npm install -g cordova`
-- Android SDK & Android Studio
-- Java Development Kit (JDK)
+## เครื่องมือที่ต้องติดตั้ง
+- [Node.js](https://nodejs.org/) v18+
+- [Android Studio](https://developer.android.com/studio) (พร้อม Android SDK)
+- [JDK 17+](https://adoptium.net/)
 
-## Step 1: Setup Project
+---
+
+## วิธี Build APK (ใช้ Capacitor)
+
+### ขั้นตอนทั้งหมด
+
 ```bash
-# ถ้ายังไม่มี cordova project
-cordova create agriprice-apk com.agriprice.app AGRIPRICE
+# 1. เข้าไปที่ frontend folder
+cd frontend
 
-# Copy files from frontend folder
-cp -r frontend/* agriprice-apk/www/
-cd agriprice-apk
+# 2. ติดตั้ง dependencies (ครั้งแรกครั้งเดียว)
+npm install
+
+# 3. Build web assets แล้ว sync ไป Android
+npm run cap:sync
+
+# 4. เปิด Android Studio
+npm run cap:open
 ```
 
-## Step 2: Add Android Platform
+จากนั้นใน **Android Studio**:
+- รอ Gradle sync เสร็จ
+- กด **Build → Build Bundle(s) / APK(s) → Build APK(s)**
+- APK จะอยู่ที่: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+## Capacitor Plugins ที่ใช้งาน
+
+| Plugin | ฟีเจอร์ | เวอร์ชัน |
+|--------|---------|---------|
+| `@capacitor/geolocation` | GPS / ตำแหน่งใกล้เคียง | 8.x |
+| `@capacitor/camera` | ถ่ายรูป / เลือกรูป | 8.x |
+| `@capacitor/local-notifications` | การแจ้งเตือน | 8.x |
+
+---
+
+## Android Permissions ที่ขอ (AndroidManifest.xml)
+
+```xml
+INTERNET                  → เชื่อมต่อ API
+ACCESS_FINE_LOCATION      → GPS แม่นยำ
+ACCESS_COARSE_LOCATION    → GPS คร่าวๆ
+CAMERA                    → กล้องถ่ายรูป
+READ_MEDIA_IMAGES         → อ่านรูปภาพ (Android 13+)
+READ_EXTERNAL_STORAGE     → อ่านไฟล์ (Android ≤12)
+POST_NOTIFICATIONS        → แจ้งเตือน (Android 13+)
+VIBRATE                   → สั่น
+```
+
+---
+
+## Script ที่ใช้ได้
+
 ```bash
-cordova platform add android
+npm run prepare:web   # copy web assets → www/
+npm run cap:copy      # prepare:web + copy ไป android เท่านั้น (ไม่ update plugins)
+npm run cap:sync      # prepare:web + sync ทุกอย่าง (แนะนำ)
+npm run cap:open      # เปิด Android Studio
 ```
 
-## Step 3: Build APK
-### Development Build (Debug APK)
+---
+
+## Native App Behaviors ที่ตั้งค่าแล้ว
+
+| พฤติกรรม | สถานะ |
+|---------|-------|
+| ✅ Lock Portrait (แนวตั้งเสมอ) | ตั้งค่าใน capacitor.config.json |
+| ✅ ไม่มี Overscroll/Bounce | DisallowOverscroll = true |
+| ✅ ไม่ zoom ได้เลย | user-scalable=no ทุกหน้า |
+| ✅ ไม่ copy text ได้ | global.css + global-anim.js |
+| ✅ ไม่มี context menu | global-anim.js |
+| ✅ Permission UI แบบ native | permission-manager.js |
+| ✅ GPS ขอผ่าน Capacitor | @capacitor/geolocation |
+| ✅ Camera ขอผ่าน Capacitor | @capacitor/camera |
+| ✅ Notification ผ่าน Capacitor | @capacitor/local-notifications |
+
+---
+
+## ทดสอบบนมือถือ (USB Debugging)
+
 ```bash
-cordova build android
+# เชื่อม USB กับมือถือ เปิด Developer Mode + USB Debugging
+# แล้วรันจาก Android Studio: Run → Run 'app'
 ```
-Find APK at: `platforms/android/app/build/outputs/apk/debug/app-debug.apk`
 
-### Release Build (Production APK)
+หรือผ่าน Capacitor CLI:
 ```bash
-cordova build android --release
-
-# Then sign with keystore:
-jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
-  -keystore agriprice.keystore \
-  app-release-unsigned.apk alias_name
-
-# Align:
-zipalign 4 app-release-unsigned.apk app-release.apk
+npx cap run android
 ```
 
-## Step 4: Update API Configuration
-Edit `frontend/js/config.js`:
-```javascript
-// Change from localhost to production server
-window.API_BASE_URL = 'https://your-api-domain.com';
-```
+---
 
-## Key Mobile Optimizations Applied:
-✅ Viewport locked (no zoom)
-✅ Safe area support for notch
-✅ PWA manifest added
-✅ Optimized touch interactions
-✅ Responsive CSS for mobile
-✅ Cordova config ready
-
-## Testing
-- Install on Android device: `cordova run android`
-- Test on emulator: `cordova emulate android`
-
-## Optional: Build APK via Capacitor (alternative)
-```bash
-npm install @capacitor/core @capacitor/cli
-npx cap init
-npx cap add android
-npx cap sync
-# Open in Android Studio and build
-```
-
-## Resources
-- Cordova Docs: https://cordova.apache.org/
-- Android Build Guide: https://developer.android.com/build
-- Capacitor: https://capacitorjs.com/
+*โปรเจกต์นี้พัฒนาด้วย Capacitor v8 + Vanilla HTML/CSS/JS*

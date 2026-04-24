@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ราคาสินค้าเกษตร - AGRIPRICE</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -42,7 +42,7 @@
     /* Header */
     .page-header {
       background: linear-gradient(135deg, #0B853C 0%, #00a844 100%);
-      padding: 16px 16px 32px;
+      padding: calc(16px + env(safe-area-inset-top)) 16px 32px;
       position: relative;
     }
     .page-header::after {
@@ -373,7 +373,10 @@
   </div>
 </div>
 
-<script>
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api-client.js"></script>
+  <script>
 const API_BASE = (window.API_BASE_URL || "").replace(/\/$/, "");
 
 function toThaiDate(dateObj) {
@@ -397,20 +400,19 @@ async function loadInitialData() {
   document.getElementById('dateFrom').value = from30.toISOString().slice(0, 10);
 
   try {
-    const res = await fetch(`${API_BASE}/api/fruits`);
+    const res = await fetch(`${API_BASE}/api/gov-prices`);
     const json = await res.json();
-    if (json.success && json.data) {
+    if (json.success && json.commodities) {
       const selProduct = document.getElementById('selProduct');
-      json.data.forEach(p => {
+      json.commodities.forEach(c => {
         const opt = document.createElement('option');
-        opt.value = p.name; // Use name for commodity lookup
-        opt.dataset.id = p.fruit_id;
-        opt.textContent = p.name;
+        opt.value = c.commodity;
+        opt.textContent = c.commodity.charAt(0).toUpperCase() + c.commodity.slice(1);
         selProduct.appendChild(opt);
       });
     }
   } catch (e) {
-    console.error('Failed to load fruits:', e);
+    console.error('Failed to load gov-commodities:', e);
   }
 }
 

@@ -399,19 +399,34 @@ function formatTimeAgo(dateStr) {
       try {
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
 
-        // ดึง GPS ก่อน (ถ้าผู้ใช้อนุญาต)
+        // ดึง GPS — ใช้ AgriPermission (ซึ่งจะใช้ Capacitor plugin บน native)
         let userLat = null, userLng = null;
         try {
-          if (navigator.geolocation) {
-            await new Promise((resolve) => {
-              navigator.geolocation.getCurrentPosition(
-                (pos) => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; resolve(); },
-                () => resolve(),
-                { timeout: 4000, maximumAge: 60000 }
-              );
-            });
+          if (window.AgriPermission) {
+            const locResult = await window.AgriPermission.requestLocation();
+            if (locResult.granted && locResult.position) {
+              // Capacitor: position.coords | browser: position.coords
+              const coords = locResult.position.coords || locResult.position;
+              userLat = coords.latitude;
+              userLng = coords.longitude;
+            } else if (locResult.granted && !locResult.position) {
+              // already_granted state — ดึงพิกัดตรงผ่าน Capacitor หรือ browser
+              const Geo = window.Capacitor?.Plugins?.Geolocation;
+              if (Geo) {
+                const pos = await Geo.getCurrentPosition({ enableHighAccuracy: false, timeout: 6000 });
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+              } else if (navigator.geolocation) {
+                await new Promise((resolve) => {
+                  navigator.geolocation.getCurrentPosition(
+                    (p) => { userLat = p.coords.latitude; userLng = p.coords.longitude; resolve(); },
+                    () => resolve(), { timeout: 6000, maximumAge: 300000 }
+                  );
+                });
+              }
+            }
           }
-        } catch(_) {}
+        } catch (_) {}
 
         let apiUrl = API_BASE + '/api/products?limit=50';
         if (userLat !== null && userLng !== null) {
@@ -722,7 +737,7 @@ function formatTimeAgo(dateStr) {
           fetch(apiBase + '/api/chats/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ other_id: sellerId }),
+            body: JSON.stringify({ target_user_id: sellerId }),
           }).then(r => r.json()).then(j => {
             if (j.chatId) {
               const nextHref = 'pages/shared/chat.html?chatId=' + j.chatId;

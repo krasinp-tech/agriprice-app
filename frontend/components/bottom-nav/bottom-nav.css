@@ -7,8 +7,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 68px;
-    padding-bottom: env(safe-area-inset-bottom);
+    min-height: 68px;
+    padding-bottom: var(--safe-bottom);
     background: #ffffff;
     border-top: 1px solid #EFEFEF;
     display: flex;
@@ -44,9 +44,10 @@
 }
 
 .bottom-nav-item .nav-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     line-height: 1;
+    font-family: var(--font-main);
 }
 
 /* Active State */

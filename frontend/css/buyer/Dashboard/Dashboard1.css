@@ -34,11 +34,11 @@
 }
 
 body {
-  font-family: 'Sarabun', sans-serif;
+  font-family: var(--font-main, 'Sarabun', sans-serif);
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  padding-bottom: var(--bottom-nav-h);
+  padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom, 0px));
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -46,12 +46,14 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--card);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: calc(14px + var(--safe-top, 0px)) 16px 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,.04);
 }
 

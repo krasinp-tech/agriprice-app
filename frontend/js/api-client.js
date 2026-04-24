@@ -1,4 +1,4 @@
-﻿/**
+/**
  * js/api-client.js - AgriPrice v2
  * เชื่อม frontend กับ server.js
  *
@@ -90,7 +90,7 @@
 
   // โ”€โ”€โ”€ chat โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
   const getChats         = ()      => call('GET',  '/api/chats');
-  const startChat        = other_id => call('POST', '/api/chats/start', { other_id });
+  const startChat        = target_user_id => call('POST', '/api/chats/start', { target_user_id });
   const getChatMessages  = id      => call('GET',  '/api/chats/'+id+'/messages');
   async function sendMessage(chatId, message, imageFile) {
     if (imageFile) {

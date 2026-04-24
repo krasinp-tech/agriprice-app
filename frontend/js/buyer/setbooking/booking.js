@@ -239,6 +239,11 @@ function renderCard(b) {
 
   async function startScanner() {
     try {
+      if (window.AgriPermission) {
+        const perm = await window.AgriPermission.requestCamera();
+        if (!perm.granted) return; // User denied or closed the bottom sheet
+      }
+      
       openModal();
 
       stream = await navigator.mediaDevices.getUserMedia({

@@ -3,7 +3,7 @@
 <head>
     <script src="../../js/components/i18n.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>โปรไฟล์ผู้รับซื้อ - AGRIPRICE</title>
 
 <link rel="stylesheet" href="../../css/global.css">
@@ -13,12 +13,17 @@
 <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 <script src="../../js/config.js"></script>
+  <script src="../../js/global-anim.js"></script>
+  <script src="../../js/permission-manager.js"></script>
 </head>
 
 <body>
     <!-- Language Switcher (top-right) -->
     <!-- HERO -->
 <section class="profile-hero">
+    <button class="profile-back-btn" onclick="window.history.back()" aria-label="ย้อนกลับ">
+        <span class="material-icons-outlined">arrow_back</span>
+    </button>
     <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="โปรไฟล์ผู้รับซื้อ" onerror="this.onerror=null;this.src='../../assets/images/hero.png';">
     <div class="hero-badge">
         <span class="hero-badge-title" id="heroBadgeTitle"></span>

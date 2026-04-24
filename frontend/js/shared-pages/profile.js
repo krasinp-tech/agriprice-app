@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             fetch(`${API_BASE}/api/chats/start`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-              body: JSON.stringify({ other_id: uid }),
+              body: JSON.stringify({ target_user_id: uid }),
             }).then(r => r.json()).then(j => {
               if (j.chatId) {
                 const nextHref = `../shared/chat.html?chatId=${j.chatId}`;

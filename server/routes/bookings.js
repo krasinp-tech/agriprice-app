@@ -55,8 +55,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const bookingData = {
       booking_no,
-      farmer_id: req.user.id,
-      buyer_id: prodData.user_id,
+      farmer_id: prodData.user_id,
+      buyer_id: req.user.id,
       product_id,
       scheduled_time,
       license_plate,

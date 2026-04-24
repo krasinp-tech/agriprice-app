@@ -65,6 +65,7 @@
   const chartCanvas = document.getElementById("purchaseChart");
   const topProductsEl = document.getElementById("topProducts");
   const topSellersEl = document.getElementById("topSellers");
+  const marketPricesEl = document.getElementById("marketPrices");
 
   const waitingCountEl = document.getElementById("waitingCount");
   const waitingPercentEl = document.getElementById("waitingPercent");
@@ -265,6 +266,52 @@
   }
 
   // ============================================================
+  // RENDER MARKET PRICES
+  // ============================================================
+  function renderMarketPrices(prices) {
+    if (!marketPricesEl) return;
+
+    if (!Array.isArray(prices) || prices.length === 0) {
+      marketPricesEl.innerHTML = `<div class="empty-state"><span class="material-icons-outlined empty-state-icon">receipt_long</span><div class="empty-state-title">ไม่พบข้อมูลราคากลาง</div></div>`;
+      return;
+    }
+
+    const html = prices.map(p => {
+      let trendIcon = 'trending_flat';
+      let trendColor = '#666';
+      let changeText = '0%';
+      
+      if (p.trend === 'up') {
+        trendIcon = 'trending_up';
+        trendColor = '#10B981';
+        changeText = `+${p.change}%`;
+      } else if (p.trend === 'down') {
+        trendIcon = 'trending_down';
+        trendColor = '#EF4444';
+        changeText = `${p.change}%`;
+      }
+
+      return `
+        <div class="seller-item">
+          <div class="menu-icon-wrap" style="background: ${trendColor}15; color: ${trendColor}; border-radius: 12px; margin-right: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+            <span class="material-icons-outlined">${trendIcon}</span>
+          </div>
+          <div class="seller-info">
+            <div class="seller-name">${p.name}</div>
+            <div class="seller-stats">อัปเดตเมื่อ ${p.date}</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="seller-badge" style="background: #fff; color: var(--green); border: 1px solid var(--green); font-weight: 700; padding: 4px 10px; border-radius: 10px;">฿${p.price}</div>
+            <div style="font-size: 11px; color: ${trendColor}; font-weight: 700; margin-top: 2px;">${changeText}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    marketPricesEl.innerHTML = html;
+  }
+
+  // ============================================================
   // RENDER BOOKING STATS
   // ============================================================
   function renderBookingStats(stats) {
@@ -341,7 +388,8 @@
         waiting: Number(src.booking_stats?.waiting || 0),
         success: Number(src.booking_stats?.success || 0),
         cancel: Number(src.booking_stats?.cancel || 0),
-      }
+      },
+      market_prices: Array.isArray(src.market_prices) ? src.market_prices : []
     };
   }
 
@@ -368,6 +416,7 @@
       renderChart(currentPeriod, "line");
       renderTopProducts(data.topProducts);
       renderTopSellers(data.topSellers);
+      renderMarketPrices(data.market_prices);
       renderBookingStats(data.bookingStats);
       
       log("Dashboard initialized");

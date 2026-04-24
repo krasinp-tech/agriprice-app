@@ -30,10 +30,13 @@ body {
   --app-shell-radius: 34px;
   --tap-target-min: 44px;
   --page-gutter: 16px;
+  --font-main: 'Sarabun', 'Inter', -apple-system, system-ui, sans-serif;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   background: #ffffff;
   color: #333;
   line-height: 1.6;

@@ -1,4 +1,4 @@
-﻿/* js/login/register/login2.js
+/* js/login/register/login2.js
    - Login flow with Future DB support
    - If window.API_BASE_URL is set: POST to `${API_BASE_URL}/api/auth/login`
    - Store token/user to localStorage (ready for guards)
@@ -172,10 +172,22 @@
     try {
       const result = await loginViaApi(identifier, password);
 
-      // จุดที่คุณถาม: ใส่ตรงนี้เลย หลัง login success
+      // Login สำเร็จ — บันทึก auth
       persistAuth(result.token, result.user);
 
-      // แล้วเรียกตัวนี้เพื่อกลับไปหน้าที่กดมา
+      // ขอ Notification permission หลัง login (แบบ native เงียบๆ ถ้าไม่เคยถามมาก่อน)
+      try {
+        if (window.AgriPermission) {
+          const prefs = window.AgriPermission.getPrefs();
+          if (!prefs.notification && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+            // รอ 800ms ให้หน้าจอ settle ก่อนแสดง permission sheet
+            await new Promise(resolve => setTimeout(resolve, 800));
+            await window.AgriPermission.requestNotification();
+          }
+        }
+      } catch (_) {}
+
+      // ไปหน้าที่ควรไปหลัง login
       redirectAfterLogin();
     } catch (err) {
       showError(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
