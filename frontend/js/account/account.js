@@ -1,4 +1,4 @@
-﻿// js/account/account.js
+// js/account/account.js
 (function () {
   "use strict";
 
@@ -323,7 +323,6 @@
         Accept: "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      credentials: "include", // สำหรับ backend ที่ใช้ cookie session
     });
 
     if (!res.ok) {
