@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="th">
 <head>
   <meta charset="utf-8" />
@@ -95,6 +95,8 @@
           </div>
 
           <div class="error" id="formError" role="alert" aria-live="polite"></div>
+          <!-- DEBUG BOX: แสดงข้อมูล Error จริงๆ -->
+          <div id="debugBox" style="display:none; margin-top:8px; padding:10px; background:#1a1a2e; border-radius:8px; font-size:11px; font-family:monospace; color:#00ff88; word-break:break-all; max-height:150px; overflow-y:auto;"></div>
 
           <button class="btn" id="loginBtn" type="submit">
             <span class="btn-text">เข้าสู่ระบบ</span>
@@ -114,5 +116,35 @@
   </main>
   <script src="../../js/auth/guard.js"></script>
   <script src="../../js/auth/login2.js"></script>
+  <script>
+  // DEBUG INTERCEPTOR
+  (function() {
+    var debugBox = document.getElementById('debugBox');
+    function dbg(msg, color) {
+      debugBox.style.display = 'block';
+      var line = document.createElement('div');
+      line.style.color = color || '#00ff88';
+      line.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+      debugBox.appendChild(line);
+      debugBox.scrollTop = debugBox.scrollHeight;
+    }
+    // แสดง API URL ที่ใช้งาน
+    window.addEventListener('load', function() {
+      dbg('API: ' + (window.API_BASE_URL || 'NOT SET'), '#ffff00');
+    });
+    // ดัก fetch ทุกครั้ง
+    var origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      dbg('→ ' + (opts && opts.method || 'GET') + ' ' + url, '#88ccff');
+      return origFetch.apply(this, arguments).then(function(res) {
+        dbg('← ' + res.status + ' ' + url, res.ok ? '#00ff88' : '#ff6666');
+        return res;
+      }).catch(function(err) {
+        dbg('✗ ERROR: ' + err.message + ' [' + url + ']', '#ff4444');
+        throw err;
+      });
+    };
+  })();
+  </script>
 </body>
 </html>
