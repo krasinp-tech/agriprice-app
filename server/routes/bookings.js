@@ -205,9 +205,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
     // เพิ่ม booked_count ใน slot ถ้ามี slot_id
     if (slot_id) {
-      await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id }).catch((e) => {
-          console.error('❌ RPC Error (Non-critical):', e);
-      });
+      const { error: rpcErr } = await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id });
+      if (rpcErr) console.error('❌ RPC Error (Non-critical):', rpcErr);
     }
 
     res.status(201).json(response.success('จองคิวสำเร็จ', data));
