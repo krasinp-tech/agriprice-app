@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AGRIPRICE - Booking Step 3 JavaScript
  * เธเธตเน€เธเธญเธฃเน: เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ, เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธฒเธ step 1-2, เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธ
  * เธฃเธญเธเธฃเธฑเธ: Desktop, Tablet, Mobile
@@ -29,14 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ================================
   // ๐”ต DATABASE-READY API LAYER
+  // 🔘 DATABASE-READY API LAYER
   // ================================
   const BookingAPI = {
     /**
-     * เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธชเธฃเธธเธเธเธฒเธฃเธเธญเธเธเธฒเธ Database
+     * โหลดข้อมูลสรุปการจองจาก Database
      * @returns {Promise<Object>}
      */
     async loadBookingSummary() {
-      // เธญเนเธฒเธเธเธฒเธ localStorage โ€” เธเนเธญเธกเธนเธฅเธ–เธนเธเธเธฑเธเธ—เธถเธเนเธงเนเธเธฒเธ step1 เนเธฅเธฐ step2
+      // อ่านจาก localStorage — ข้อมูลถูกบันทึกไว้จาก step1 และ step2
       const step1 = localStorage.getItem("bookingStep1");
       const step2 = localStorage.getItem("bookingStep2");
       return {
@@ -52,42 +53,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (API_BASE && token) {
         try {
-          // buyer_id = เธฅเนเธ/เธเธนเนเธฃเธฑเธเธเธทเนเธญเธ—เธตเนเธเธฑเธ”เธซเธกเธฒเธข (เธเธฑเธเธ—เธถเธเนเธงเนเธเธฒเธ step1)
           const buyer_id = bookingData.buyer_id || localStorage.getItem('bookingFarmerId') || null;
-
-          // scheduled_time: เนเธเน date (ISO) + time_start เธเธฒเธ slot
           let scheduled_time;
           try {
             if (bookingData.date && typeof bookingData.date === 'string') {
-              // bookingData.date เธญเธฒเธเน€เธเนเธ ISO string เธซเธฃเธทเธญ plain date "2026-03-10"
               let dateOnly = bookingData.date.includes('T') ? bookingData.date.split('T')[0] : bookingData.date;
-              // timeSlot.time เน€เธเนเธ "08:00-10:00" โ’ เนเธเนเนเธเนเธชเนเธงเธเนเธฃเธ
               const rawTime = bookingData.timeSlot?.time || '08:00';
-              const timeStart = rawTime.split('-')[0].trim(); // "08:00"
+              const timeStart = rawTime.split('-')[0].trim();
               scheduled_time = new Date(dateOnly + 'T' + timeStart + ':00').toISOString();
             } else {
               scheduled_time = new Date().toISOString();
             }
           } catch (e) {
-            if (DEBUG_BOOKING) console.warn('Date parsing error, using current time:', e.message);
             scheduled_time = new Date().toISOString();
           }
 
-          const payloadBase = {
+          const payload = {
             buyer_id,
             farmer_id: bookingData.farmer_id || null,
             product_id: bookingData.product_id ? String(bookingData.product_id) : null,
             slot_id: bookingData.slot_id ? String(bookingData.slot_id) : null,
             scheduled_time,
-            note: bookingData.note || null,  // หมายเหตุจากผู้ใช้เท่านั้น
+            note: bookingData.note || null,
             address: bookingData.address || '',
-          };
-
-          const payload = {
-            ...payloadBase,
             contact_name: bookingData.contact?.name || '',
             contact_phone: bookingData.contact?.phone || '',
             product_amount: bookingData.productAmount || null,
+            vehicle_plates: bookingData.vehicles?.map(v => v.plate).join(', ') || '',
           };
 
           const res = await fetch(API_BASE + '/api/bookings', {
@@ -96,41 +88,18 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(payload),
           });
 
+          const result = await res.json().catch(() => ({}));
+
           if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            const errMsg = err.message || 'ยืนยันการจองไม่สำเร็จ';
-
-            // Backward-compat: backend เธเธฒเธเน€เธเธฃเธทเนเธญเธเธขเธฑเธเนเธเน schema เน€เธเนเธฒ (เนเธกเนเธฃเธฑเธ contact_name/contact_phone/product_amount)
-            if (res.status === 400 && /is not allowed/i.test(errMsg)) {
-              const retryRes = await fetch(API_BASE + '/api/bookings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify(payloadBase),
-              });
-
-              if (!retryRes.ok) {
-                const retryErr = await retryRes.json().catch(() => ({}));
-                throw new Error(retryErr.message || errMsg);
-              }
-
-              const retryResult = await retryRes.json();
-              const retryBkData = retryResult.data?.booking || retryResult.booking || {};
-              const retryQueueNo = retryResult.data?.queue_no || retryResult.queue_no || '';
-              const retryBookingId = retryBkData.booking_no || String(retryBkData.booking_id || '') || null;
-              const retryConfirmed = { ...bookingData, bookingId: retryBookingId, queue_no: retryQueueNo };
-              localStorage.setItem('confirmedBooking', JSON.stringify(retryConfirmed));
-              return { success: true, bookingId: retryBookingId, queue_no: retryQueueNo, message: 'จองคิวสำเร็จ' };
-            }
-
+            const errMsg = result.message || result.error || 'ยืนยันการจองไม่สำเร็จ';
             throw new Error(errMsg);
           }
 
-          const result = await res.json();
-          // server เธชเนเธ { data: { booking, queue_no } }
-          const bkData   = result.data?.booking || result.booking || {};
-          const queue_no = result.data?.queue_no || result.queue_no || '';
+          const bkData   = result.data?.booking || result.data || result.booking || {};
+          const q_no     = result.data?.queue_no || result.queue_no || '';
           const bookingId = bkData.booking_no || String(bkData.booking_id || '') || null;
-          const confirmed = { ...bookingData, bookingId, queue_no };
+          
+          const confirmed = { ...bookingData, bookingId, queue_no: q_no };
           localStorage.setItem('confirmedBooking', JSON.stringify(confirmed));
           return { success: true, bookingId, queue_no, message: 'จองคิวสำเร็จ' };
         } catch (e) {
