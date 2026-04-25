@@ -191,19 +191,29 @@ router.post('/', authMiddleware, async (req, res) => {
     const { data, error } = await supabaseAdmin.from('bookings').insert(bookingData).select().single();
     if (error) {
       console.error('❌ Supabase Booking Error:', error);
-      throw new Error(`Database Error: ${error.message}`);
+      
+      // แปลง Error ของฐานข้อมูลเป็นภาษาที่เข้าใจง่าย
+      let userMessage = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
+      if (error.code === '23503') {
+        userMessage = 'ไม่สามารถจองได้เนื่องจากสินค้าหรือรอบคิวนี้ไม่มีอยู่ในระบบแล้ว (อาจถูกแก้ไขหรือลบโดยผู้ซื้อ)';
+      } else if (error.code === '23505') {
+        userMessage = 'หมายเลขการจองซ้ำ กรุณาลองใหม่อีกครั้ง';
+      }
+      
+      return res.status(400).json(response.error(userMessage, error));
     }
 
     // เพิ่ม booked_count ใน slot ถ้ามี slot_id
     if (slot_id) {
       await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id }).catch((e) => {
-          console.error('❌ RPC Error:', e);
+          console.error('❌ RPC Error (Non-critical):', e);
       });
     }
 
     res.status(201).json(response.success('จองคิวสำเร็จ', data));
   } catch (e) {
-    res.status(500).json(response.error(e.message));
+    console.error('❌ Internal Server Error:', e);
+    res.status(500).json(response.error('เกิดข้อผิดพลาดที่เซิร์ฟเวอร์: ' + e.message));
   }
 });
 
