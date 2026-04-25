@@ -18,12 +18,7 @@ router.get('/', async (req, res) => {
 
     let query = supabaseAdmin
       .from('products')
-      .select(
-        'product_id, name, variety, grade, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
-        'product_grades(grade, price), ' +
-        'profiles!user_id(first_name, last_name, phone, avatar)',
-        { count: 'exact' }
-      )
+      .select('*, product_grades(grade, price), profiles:user_id(*)', { count: 'exact' })
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -64,7 +59,10 @@ router.get('/', async (req, res) => {
     }
 
     const { data, count, error } = await query;
-    if (error) throw error;
+    if (error) {
+      console.error('[GET /api/products] Supabase Error:', error);
+      throw error;
+    }
 
     res.json({
       success: true,
@@ -73,6 +71,29 @@ router.get('/', async (req, res) => {
       page: Number(page),
       limit: Number(limit)
     });
+  } catch (e) {
+    console.error('[GET /api/products] Catch Error:', e);
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * GET /api/products/:id
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select(
+        'product_id, name, variety, grade, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
+        'product_grades(grade, price), ' +
+        'profiles!user_id(profile_id, first_name, last_name, phone, avatar)'
+      )
+      .eq('product_id', req.params.id)
+      .single();
+
+    if (error) return res.status(404).json(response.error('ไม่พบสินค้า'));
+    res.json(response.success('ดึงข้อมูลสำเร็จ', data));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }
@@ -84,15 +105,23 @@ router.get('/', async (req, res) => {
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, category, variety, price, grade, unit, grades } = req.body;
-    if (!name || !price) return res.status(400).json(response.error('กรุณาระบุชื่อและราคาโปรโมชัน'));
+    
+    // If grades array is provided, price at top level becomes optional
+    if (!name) return res.status(400).json(response.error('กรุณาระบุชื่อผลผลิต'));
+    if (!price && (!grades || JSON.parse(grades).length === 0)) {
+      return res.status(400).json(response.error('กรุณาระบุราคา'));
+    }
+
+    const parsedGrades = grades ? JSON.parse(grades) : [];
+    const firstGrade = parsedGrades[0] || {};
 
     const updates = {
       user_id: req.user.id,
       name,
       category,
       variety,
-      price: Number(price),
-      grade: grade || 'คละ',
+      price: Number(price || firstGrade.price || 0),
+      grade: grade || firstGrade.grade || 'คละ',
       unit: unit || 'กก.',
       is_active: true
     };
@@ -179,6 +208,47 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     
     if (error) throw error;
     res.json(response.success('ลบรายการสำเร็จ'));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * GET /api/products/:id/slots
+ */
+router.get('/:id/slots', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('product_slots')
+      .select('*')
+      .eq('product_id', req.params.id)
+      .eq('is_active', true)
+      .order('time_start');
+
+    if (error) throw error;
+    res.json(response.success('ดึงข้อมูลสำเร็จ', data || []));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * POST /api/products/:id/slots
+ */
+router.post('/:id/slots', authMiddleware, async (req, res) => {
+  try {
+    const payload = {
+      ...req.body,
+      product_id: req.params.id
+    };
+    const { data, error } = await supabaseAdmin
+      .from('product_slots')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(response.success('สร้างคิวสำเร็จ', data));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }

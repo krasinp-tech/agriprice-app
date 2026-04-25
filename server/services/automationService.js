@@ -29,7 +29,7 @@ async function autoCompleteDueBookings() {
     const ids = dueRows.map(r => r.booking_id);
     const { data: updatedRows, error: updErr } = await supabaseAdmin
       .from('bookings')
-      .update({ status: 'missed' })
+      .update({ status: 'cancel' })
       .in('booking_id', ids)
       .select('booking_id');
 
@@ -38,7 +38,7 @@ async function autoCompleteDueBookings() {
     for (const row of (updatedRows || [])) {
       await db.query(
         'INSERT INTO booking_status_logs (booking_id, old_status, new_status, note) VALUES ($1,$2,$3,$4)',
-        [row.booking_id, 'waiting', 'missed', 'auto-expire (no-show) after delay']
+        [row.booking_id, 'waiting', 'cancel', 'auto-expire (no-show) after delay']
       ).catch(() => {});
     }
 

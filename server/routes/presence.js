@@ -29,7 +29,7 @@ router.get('/:userId', async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from('profiles')
       .select('last_seen')
-      .eq('id', req.params.userId)
+      .eq('profile_id', req.params.userId)
       .single();
 
     if (error) throw error;

@@ -98,6 +98,10 @@ function downloadBuffer(url) {
 
 // Parse Excel/HTML buffer จาก DIT
 function parseExcelBuffer(buffer, commodityKey, commodityLabel) {
+  if (buffer.slice(0, 5).toString() === '<!DOC' || buffer.slice(0, 5).toString() === '<html') {
+    console.warn(`[DIT Parse] ${commodityLabel}: Received HTML instead of Excel. (Website might be down or blocked)`);
+    return [];
+  }
   let workbook;
   try {
     workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
@@ -257,8 +261,8 @@ async function tryCommodityWindow(commodity, mode, fromDate, toDate) {
 
 // ดึงข้อมูล 1 สินค้า — ไล่จากรายวัน → รายสัปดาห์ → รายเดือน
 // ปรับให้ค้นหาเร็วขึ้น: รายวัน 14 วันล่าสุด, รายสัปดาห์ 12 สัปดาห์, รายเดือน 6 เดือน
-async function fetchOneCommodity(commodity, dateStr) {
-  var baseDate = new Date();
+async function fetchOneCommodity(commodity, date) {
+  var baseDate = date || new Date();
   var attempt;
 
   // 1) รายวัน: ไล่ย้อนหลังทีละวันก่อน (ล่าสุด 14 วัน)
@@ -296,17 +300,22 @@ async function fetchOneCommodity(commodity, dateStr) {
   }
 
   console.log('[DIT] ' + commodity.label + ': ไม่พบข้อมูลในรายวัน/รายสัปดาห์/รายเดือน');
-  return { rows: [], rangeUsed: { from: dateStr, to: dateStr, fallback: false, mode: 'day' } };
+  const dStr = typeof date === 'string' ? date : toThaiDateStr(date);
+  return { rows: [], rangeUsed: { from: dStr, to: dStr, fallback: false, mode: 'day' } };
 }
 
 // upsert ลง Supabase
 async function upsertPrices(rows) {
   if (!rows.length) return 0;
+  console.log(`[DIT] Upserting ${rows.length} rows...`);
   var result = await supabaseAdmin
     .from('gov_prices')
     .upsert(rows, { onConflict: 'commodity,variety,price_date', ignoreDuplicates: false })
     .select('id');
-  if (result.error) throw new Error(result.error.message);
+  if (result.error) {
+    console.error('[DIT] Upsert Error:', result.error.message);
+    throw new Error(result.error.message);
+  }
   return result.data ? result.data.length : rows.length;
 }
 
@@ -323,7 +332,7 @@ async function syncDITPrices(targetDate) {
   for (var i = 0; i < COMMODITIES.length; i++) {
     var commodity = COMMODITIES[i];
     try {
-      var fetched = await fetchOneCommodity(commodity, dateStr);
+      var fetched = await fetchOneCommodity(commodity, date);
       var rows = fetched.rows || [];
       var saved = await upsertPrices(rows.map(function(row) {
         return Object.assign({}, row, {

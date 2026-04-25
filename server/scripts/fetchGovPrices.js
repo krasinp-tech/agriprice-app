@@ -38,13 +38,9 @@ async function runScraper() {
     
     for (const item of COMMODITY_MAP) {
       // Logic สำหรับดึงข้อมูลและจำลองกรณีถ้าเว็บต้นทางมีการเปลี่ยนแปลง
-      const basePrice = getBasePrice(item.name);
-      
-      // จำลองความแกว่งไกวของราคา (Fluctuation) เพื่อให้ระบบ Trend ใน Dashboard ทำงานได้
-      const fluctuation = (Math.random() * 6) - 3; // +/- 3 บาท
-      const avgPrice = Math.max(1, Math.round((basePrice + fluctuation) * 10) / 10);
-      const minPrice = Math.max(1, avgPrice - 2);
-      const maxPrice = avgPrice + 2;
+      const avgPrice = getBasePrice(item.name);
+      const minPrice = avgPrice - 5;
+      const maxPrice = avgPrice + 5;
 
       records.push({
         commodity: item.name,
@@ -78,12 +74,12 @@ async function runScraper() {
 
 function getBasePrice(name) {
   const prices = {
-    'ทุเรียน': 155,
-    'มังคุด': 48,
-    'ลองกอง': 32,
-    'เงาะ': 28,
-    'ปาล์มน้ำมัน': 5.8,
-    'ยางพารา': 62
+    'ทุเรียน': 165,
+    'มังคุด': 75,
+    'ลองกอง': 45,
+    'เงาะ': 35,
+    'ปาล์มน้ำมัน': 6.2,
+    'ยางพารา': 68
   };
   return prices[name] || 50;
 }

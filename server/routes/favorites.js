@@ -30,7 +30,7 @@ router.get('/', authMiddleware, async (req, res) => {
       created_at: fav.created_at,
     }));
 
-    res.json(result);
+    res.json(response.success('ดึงรายการโปรดสำเร็จ', result));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }

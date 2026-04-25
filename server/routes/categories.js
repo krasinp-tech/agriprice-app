@@ -54,19 +54,21 @@ router.get('/fruits', async (req, res) => {
  */
 router.get('/fruit-varieties', async (req, res) => {
   try {
-    const { name } = req.query; // The frontend might send name or fruit_id
-    if (!name) return res.json(response.success('กรุณาระบุชื่อผลผลิต', []));
+    const { name, fruit_id } = req.query;
+    const productName = (name || fruit_id || '').trim();
+    
+    if (!productName) return res.json(response.success('กรุณาระบุชื่อผลผลิต', []));
 
     const { data, error } = await supabaseAdmin
       .from('varieties')
-      .select('variety')
-      .eq('product_name', name)
+      .select('id, variety')
+      .ilike('product_name', productName)
       .order('variety');
 
     if (error) throw error;
 
-    const result = (data || []).map((item, index) => ({
-      variety_id: `V${index}`,
+    const result = (data || []).map((item) => ({
+      variety_id: String(item.id),
       name: item.variety
     }));
 

@@ -16,7 +16,7 @@ const {
   JWT_SECRET 
 } = require('../utils/helpers');
 
-const DEV_OTP_MODE = process.env.OTP_MOCK !== 'false';
+const DEV_OTP_MODE = process.env.OTP_MOCK === 'true';
 const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || '';
 
 // Rate limit OTP send: 5 requests per 10 min per IP
@@ -93,6 +93,70 @@ router.post('/otp/verify', async (req, res) => {
     }));
   } catch (e) {
     res.status(500).json(response.error('ยืนยัน OTP ไม่สำเร็จ'));
+  }
+});
+
+/**
+ * POST /api/auth/firebase/verify-phone
+ * Verified by Firebase on Frontend, now checking with backend
+ */
+router.post('/firebase/verify-phone', async (req, res) => {
+  try {
+    const { idToken, phone } = req.body;
+    if (!idToken || !phone) return res.status(400).json(response.error('ข้อมูลไม่ครบถ้วน'));
+
+    const cleanPhone = toE164(phone);
+
+    // ✅ Verify with Firebase/Google API if key is provided
+    if (FIREBASE_WEB_API_KEY) {
+      try {
+        const verifyUrl = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=${FIREBASE_WEB_API_KEY}`;
+        const vRes = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        
+        if (!vRes.ok) {
+          const errJson = await vRes.json().catch(() => ({}));
+          throw new Error(errJson.error?.message || 'Token verification failed');
+        }
+
+        const vData = await vRes.json();
+        const firebaseUser = vData.users && vData.users[0];
+        if (!firebaseUser) throw new Error('User not found in Firebase');
+
+        // ตรวจสอบว่าเบอร์โทรศัพท์ตรงกันหรือไม่
+        const firebasePhone = toE164(firebaseUser.phoneNumber || '');
+        if (firebasePhone !== cleanPhone) {
+          console.warn(`[Auth] Phone mismatch: Requested ${cleanPhone}, but Token is for ${firebasePhone}`);
+          return res.status(401).json(response.error('เบอร์โทรศัพท์ไม่ตรงกับที่ยืนยันในระบบ'));
+        }
+      } catch (err) {
+        console.error('[Auth] Firebase Verification Error:', err.message);
+        return res.status(401).json(response.error('การยืนยันตัวตนล้มเหลว: ' + err.message));
+      }
+    } else {
+      console.warn('[Auth] FIREBASE_WEB_API_KEY is missing. Skipping token verification (Security Risk!)');
+    }
+    
+    const { data: existing } = await supabaseAdmin
+      .from('profiles')
+      .select('profile_id, first_name, role')
+      .eq('phone', cleanPhone)
+      .maybeSingle();
+
+    const isNewUser = !existing;
+    const temp_token = signTempToken(cleanPhone);
+
+    res.json(response.success('ยืนยันตัวตนสำเร็จ', {
+      verified: true,
+      temp_token,
+      isNewUser,
+      user: existing || null
+    }));
+  } catch (e) {
+    res.status(500).json(response.error('ระบบยืนยันตัวตนขัดข้อง: ' + e.message));
   }
 });
 

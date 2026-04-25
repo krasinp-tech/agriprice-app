@@ -49,14 +49,15 @@ app.use('/api/gov-prices', require('./routes/govPrices'));
 app.use('/api/chats', require('./routes/chats'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/categories-data', require('./routes/categories'));
+app.use('/api', require('./routes/categories'));
 app.use('/api/presence', require('./routes/presence'));
 app.use('/api/dashboard', require('./routes/dashboard'));
-
-// Alias for frontend standard paths
-app.use('/api/categories', (req, res, next) => { req.url = '/categories'; next(); }, require('./routes/categories'));
-app.use('/api/fruits', (req, res, next) => { req.url = '/fruits'; next(); }, require('./routes/categories'));
-app.use('/api/fruit-varieties', (req, res, next) => { req.url = '/fruit-varieties'; next(); }, require('./routes/categories'));
+app.use('/api/product-slots', require('./routes/product-slots'));
+app.use('/api/search', require('./routes/search'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/follow', require('./routes/follow'));
+app.use('/api/notification-settings', require('./routes/notificationSettings'));
+app.use('/api/public-config', require('./routes/publicConfig'));
 
 app.use('/api/device-sessions', require('./middlewares/auth'), require('./routes/deviceSessions').router);
 
