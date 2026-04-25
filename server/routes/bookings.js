@@ -189,11 +189,16 @@ router.post('/', authMiddleware, async (req, res) => {
     };
 
     const { data, error } = await supabaseAdmin.from('bookings').insert(bookingData).select().single();
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase Booking Error:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
 
     // เพิ่ม booked_count ใน slot ถ้ามี slot_id
     if (slot_id) {
-      await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id }).catch(() => {});
+      await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id }).catch((e) => {
+          console.error('❌ RPC Error:', e);
+      });
     }
 
     res.status(201).json(response.success('จองคิวสำเร็จ', data));

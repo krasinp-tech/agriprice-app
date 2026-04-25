@@ -27,8 +27,9 @@ function getDefaultAvatarByRole(role) {
 }
 
 function makeBookingNo() {
-  const randPart = Math.floor(1000 + Math.random() * 9000);
-  return `A${randPart}`;
+  const datePart = new Date().getTime().toString().slice(-4);
+  const randPart = Math.floor(100 + Math.random() * 900);
+  return `A${datePart}${randPart}`;
 }
 
 function getOptionalAuthUser(req) {
