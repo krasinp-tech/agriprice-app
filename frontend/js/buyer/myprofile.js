@@ -160,6 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         products: [],
         reviews: [],
+        profile_id: '',
     };
 
     // โหลดจาก API ก่อน (ถ้ามี) แล้วค่อย fallback localStorage
@@ -173,6 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     phone: apiData.phone || profileData.phone,
                     avatar: normalizeProfileImageUrl(apiData.avatar),
                     heroImage: normalizeProfileImageUrl(apiData.hero_image),
+                    profile_id: apiData.profile_id || apiData.id || '',
                 });
         const merged = {
           name:    name || '',
@@ -249,7 +251,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                 }
                             };
                         }
-                    } catch (_) {
+                    } catch (e) {
+                        console.error('Failed to load products:', e);
                         showLoading(false);
                         showAlert('โหลดสินค้าไม่สำเร็จ', 'error');
                     }
@@ -466,6 +469,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     renderServices();
 
+     function showEmptyState(container, msg) {
+        if (!container) return;
+        container.innerHTML = `<div class="empty-state" style="padding:20px; text-align:center; color:#666; font-size:14px;">${msg}</div>`;
+     }
+     function hideEmptyState(container) {
+        // Handled by container.innerHTML = ""
+     }
+
      /* ==========================================================
          RENDER PRODUCTS
          ========================================================== */
@@ -486,8 +497,11 @@ document.addEventListener("DOMContentLoaded", function () {
             card.dataset.isOpen = isOpen ? "true" : "false";
             card.dataset.index = String(idx);
             card.dataset.productId = String(product._id || '');
+            // ดึง ID จากข้อมูล profileData
+            const currentUid = profileData.profile_id || localStorage.getItem('userId') || '';
+            card.dataset.sellerId = String(currentUid);
+            card.dataset.sellerName = profileData.name || '';
             card.innerHTML = `
-                <div class="product-header">
                     <div class="seller-info" style="cursor:default">
                         <div class="seller-avatar">
                             <img src="${profileData.avatar || fallbackAvatarImage}" onerror="this.onerror=null;this.src='${fallbackAvatarImage}';">
@@ -500,7 +514,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             ${isOpen ? 'เปิดรับซื้อ' : 'ปิดรับซื้อ'}
                         </div>
                     </div>
-                </div>
                 <div class="price-row">
                     ${Object.keys(product.prices || {}).filter(g => product.prices[g]).map(g =>
                         `<div class="price-box">

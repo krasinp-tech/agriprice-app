@@ -130,7 +130,25 @@ router.post('/', authMiddleware, async (req, res) => {
     const { error: schemaErr, value: validBody } = bookingSchema.validate(req.body);
     if (schemaErr) return res.status(400).json(response.error(schemaErr.details[0].message));
 
-    const { product_id, slot_id, scheduled_time, note, address, contact_name, contact_phone, product_amount, vehicle_plates } = validBody;
+    const { product_id, slot_id, scheduled_time, note, address } = validBody;
+    
+    // ดึงข้อมูลเพิ่มเติมจาก note (กรณีหน้าบ้านส่งรวมมาใน note)
+    let extracted = {};
+    try { 
+      if (typeof note === 'string') extracted = JSON.parse(note);
+      else if (typeof note === 'object') extracted = note;
+    } catch(e) {}
+
+    const final_contact_name = validBody.contact_name || extracted.contact_name || extracted.fullName || '';
+    const final_contact_phone = validBody.contact_phone || extracted.contact_phone || extracted.phone || '';
+    const final_product_amount = validBody.product_amount || extracted.product_amount || extracted.amount || 0;
+    
+    // จัดการเรื่องทะเบียนรถ (แปลงจาก Array เป็น String ถ้าจำเป็น)
+    let final_plates = validBody.vehicle_plates || extracted.vehicle_plates || extracted.vehicles || '';
+    if (Array.isArray(final_plates)) {
+      final_plates = final_plates.map(v => typeof v === 'object' ? (v.plate || v.no) : v).filter(Boolean).join(', ');
+    }
+    
     const booking_no = makeBookingNo();
 
     // หาข้อมูล product เพื่อดึง buyer_id (เจ้าของ product คือ buyer)
@@ -161,12 +179,12 @@ router.post('/', authMiddleware, async (req, res) => {
       product_id,
       slot_id: slot_id || null,
       scheduled_time,
-      note: note || null,
+      note: typeof note === 'object' ? JSON.stringify(note) : note,
       address: address || null,
-      contact_name: contact_name || null,
-      contact_phone: contact_phone || null,
-      product_amount: product_amount || null,
-      vehicle_plates: vehicle_plates || null,
+      contact_name: final_contact_name || null,
+      contact_phone: final_contact_phone || null,
+      product_amount: Number(final_product_amount || 0),
+      vehicle_plates: final_plates || null,
       status: 'waiting'
     };
 

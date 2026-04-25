@@ -23,14 +23,15 @@ const DEFAULT_API_BASE_URL = (() => {
 	// 	return 'http://localhost:5000';
 	// }
 
-	// 3. Deployed backend URL (Production)
+	// 2. Deployed backend URL (Production)
 	const CLOUD_API_BASE_URL = 'https://agriprice-app.onrender.com';
-	if (CLOUD_API_BASE_URL) {
-		return normalize(CLOUD_API_BASE_URL);
-	}
+
+	// 3. Emulator Testing URL (Uncomment if needed for local Android debugging)
+	// const EMULATOR_API_BASE_URL = 'http://10.0.2.2:5000';
+	// if (protocol === 'file:' || hostname === '10.0.2.2') return normalize(EMULATOR_API_BASE_URL);
 
 	// 4. Default fallback
-	return origin || 'https://agriprice-app.onrender.com';
+	return CLOUD_API_BASE_URL;
 })();
 window.API_BASE_URL = window.API_BASE_URL || DEFAULT_API_BASE_URL;
 window.AGRIPRICE_DEBUG = window.AGRIPRICE_DEBUG ?? (
@@ -96,3 +97,4 @@ window.APP_CONFIG_READY = window.APP_CONFIG_READY || (async function loadPublicC
 	}
 })();
 // เพิ่ม config อื่นๆ ได้ที่นี่
+window.FRONTEND_URL = 'https://agriprice-otp.web.app';

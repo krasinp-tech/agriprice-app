@@ -377,13 +377,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ================================
-  // QR Code (เนเธเน overflow + เธชเนเธเธเนเธฅเนเธงเนเธเนเนเธ”เนเธเธฃเธดเธ)
+  // QR Code (เน เธ เน‰ overflow + เธชเน เธ เธ™เน เธฅเน‰เธงเนƒเธŠเน‰เน„เธ”เน‰เธˆเธฃเธดเธ‡)
   // ================================
   function buildQrPayload(bookingId) {
-    // โ… เนเธเธฐเธเธณเนเธซเน QR เน€เธเนเธ โ€URL เธชเธฑเนเธโ€ เนเธฅเนเธงเธเธฑเนเธเธเธฅเธฒเธขเธ—เธฒเธเนเธเน bookingId เนเธ lookup DB
-    // เธชเนเธเธเนเธฅเนเธงเน€เธเธดเธ”เธซเธเนเธฒ step4 เธเธฃเนเธญเธก bid (เธ•เธญเธเธเธตเนเนเธเน localStorage fallback เนเธ”เน)
-    const base =
-      (window.location.origin || "") + resolveToRootUrl("pages/scan-checkin.html");
+    // ✅ ใช้ FRONTEND_URL จาก config.js เพื่อให้สแกนข้ามเครื่องได้จริง
+    const base = (window.FRONTEND_URL || window.location.origin || "").replace(/\/$/, '') + "/pages/scan-checkin.html";
     return `${base}?bid=${encodeURIComponent(bookingId)}`;
   }
 

@@ -85,17 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(API_BASE + '/api/chats', { headers: authHeaders() });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        const convos = (json.data || []).map(r => ({
-          chatId:      r.room_id,
-          sellerId:    r.other_user?.id || '',
-          sellerName:  `${r.other_user?.first_name||''} ${r.other_user?.last_name||''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
-          sellerSub:   '',
-          avatar:      normalizeProfileImageUrl(r.other_user?.avatar || ''),
-          phone:       r.other_user?.phone || '',
-          lastMessage: r.last_message || '',
-          lastTime:    r.last_time ? new Date(r.last_time).getTime() : Date.now(),
-          unread:      r.unread_count || 0,
-        }));
+        const convos = (json.data || []).map(r => {
+          const fName = (r.other_user?.first_name || '').trim();
+          const lName = (r.other_user?.last_name || '').trim();
+          let fullName = fName;
+          if (lName && lName !== fName) fullName += ' ' + lName;
+          if (!fullName) fullName = t('booking_unknown_name', 'ไม่ทราบชื่อ');
+
+          return {
+            chatId:      r.room_id,
+            sellerId:    r.other_user?.id || '',
+            sellerName:  fullName,
+            sellerSub:   '',
+            avatar:      normalizeProfileImageUrl(r.other_user?.avatar || ''),
+            phone:       r.other_user?.phone || '',
+            lastMessage: r.last_message || '',
+            lastTime:    r.last_time ? new Date(r.last_time).getTime() : Date.now(),
+            unread:      r.unread_count || 0,
+          };
+        });
         if (DEBUG_CHAT) console.log('[chat] Loaded conversations:', convos.length, convos);
         return convos;
       } catch (e) {
@@ -790,25 +798,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!userId || !API_BASE) return;
     try {
       const res = await fetch(`${API_BASE}/api/presence/${userId}`, { headers: authHeaders() });
-      if (!res.ok) return;
-      const json = await res.json();
       const dot = document.getElementById('onlineStatusDot');
       const txt = document.getElementById('onlineStatusText');
-      if (dot) dot.style.background = json.online ? '#22c55e' : '#9ca3af';
-      if (txt) {
-        if (json.online) {
-          txt.textContent = t('online', 'ออนไลน์');
-          txt.style.color = '#22c55e';
-        } else if (json.last_seen) {
-          const mins = Math.floor((Date.now() - new Date(json.last_seen).getTime()) / 60000);
-          txt.textContent = mins < 60 ? `${mins} ${t('minutes_ago', 'นาทีที่แล้ว')}` : t('offline', 'ออฟไลน์');
-          txt.style.color = '#9ca3af';
-        } else {
+
+      if (res.ok) {
+        const json = await res.json();
+        if (dot) dot.style.background = json.online ? '#22c55e' : '#9ca3af';
+        if (txt) {
+          if (json.online) {
+            txt.textContent = t('online', 'ออนไลน์');
+            txt.style.color = '#22c55e';
+          } else if (json.last_seen) {
+            const mins = Math.floor((Date.now() - new Date(json.last_seen).getTime()) / 60000);
+            txt.textContent = mins < 60 ? `${mins} ${t('minutes_ago', 'นาทีที่แล้ว')}` : t('offline', 'ออฟไลน์');
+            txt.style.color = '#9ca3af';
+          } else {
+            txt.textContent = t('offline', 'ออฟไลน์');
+            txt.style.color = '#9ca3af';
+          }
+        }
+      } else {
+        if (dot) dot.style.background = '#9ca3af';
+        if (txt) {
           txt.textContent = t('offline', 'ออฟไลน์');
           txt.style.color = '#9ca3af';
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      const txt = document.getElementById('onlineStatusText');
+      if (txt) {
+        txt.textContent = t('offline', 'ออฟไลน์');
+        txt.style.color = '#9ca3af';
+      }
+    }
   }
 
   // Notify when new messages arrive.

@@ -43,7 +43,6 @@
   const unitPrice = document.getElementById("unitPrice");
 
   const nextBtn = document.getElementById("nextBtn");
-  const debugBox = document.getElementById("debugBox");
 
   // ===================== HELPERS =====================
   function openCombo(comboEl) {
@@ -229,23 +228,43 @@
     if (API_BASE) {
       try {
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
-        const params = new URLSearchParams({ fruit_id: fruitId });
-        if (query) params.set('q', query);
+        // Send both name and fruit_id to support different backend versions
+        const params = new URLSearchParams({ 
+          name: fruitId,
+          fruit_id: fruitId,
+          q: query || ''
+        });
+        
         const res = await fetch(API_BASE + '/api/fruit-varieties?' + params.toString(),
           token ? { headers: { 'Authorization': 'Bearer ' + token } } : {});
+        
         if (res.ok) {
           const result = await res.json();
-          if ((result.data || []).length > 0) {
-            items = result.data.map(v => ({ id: v.variety_id || v.id, variety_id: v.variety_id || v.id, name: v.name || v.variety }));
+          if (result && result.success && Array.isArray(result.data)) {
+            items = result.data.map(v => ({ 
+              id: v.variety_id || v.id, 
+              variety_id: v.variety_id || v.id, 
+              name: v.name || v.variety 
+            }));
           }
         }
       } catch (e) {
-        if (window.AGRIPRICE_DEBUG) console.warn('[setbooking-step1] loadVarieties API failed, using fallback:', e.message);
+        if (window.AGRIPRICE_DEBUG) console.warn('[setbooking-step1] loadVarieties API failed:', e.message);
       }
     }
 
-    const q = (query || '').trim().toLowerCase();
-    return q ? items.filter(v => v.name.toLowerCase().includes(q)) : items;
+    // --- SMART FALLBACK ---
+    // If API returns nothing, try to guess from local VARIETY_FALLBACK
+    if (items.length === 0) {
+      const q = (query || '').trim().toLowerCase();
+      const fruitKey = Object.keys(VARIETY_FALLBACK).find(k => fruitId.includes(k) || k.includes(fruitId));
+      if (fruitKey) {
+        const fallbackList = VARIETY_FALLBACK[fruitKey].map(n => ({ id: n, name: n }));
+        items = q ? fallbackList.filter(v => v.name.toLowerCase().includes(q)) : fallbackList;
+      }
+    }
+
+    return items;
   }
 
   // ===================== COMBO RENDER =====================
@@ -323,8 +342,8 @@
 
   // ===================== VARIETY COMBO EVENTS =====================
   async function refreshVarietyMenu() {
-    if (!state.selectedProduct?.fruit_id) return;
-    const items = await loadVarieties(state.selectedProduct.fruit_id, varietyInput.value || "");
+    if (!state.selectedProduct?.name) return;
+    const items = await loadVarieties(state.selectedProduct.name, varietyInput.value || "");
     renderMenu(varietyMenu, items, (it) => {
       state.selectedVariety = { id: it.id, variety_id: it.variety_id || it.id, name: it.name };
       varietyInput.value = it.name;
@@ -443,9 +462,6 @@
       console.error("Failed to save step1 payload", err);
     }
 
-    // แสดง debug และไปหน้าถัดไป
-    debugBox.hidden = false;
-    debugBox.textContent = JSON.stringify(payload, null, 2);
     // ไปยัง step2 (same folder)
     if (window.navigateWithTransition) window.navigateWithTransition("./setbooking-step2.html"); else window.location.href = "./setbooking-step2.html";
   });

@@ -38,7 +38,7 @@ body{
 /* ===== Topbar ===== */
 .topbar{
   position: relative;
-  padding: 18px 18px 30px;
+  padding: calc(24px + var(--safe-top, 20px)) 18px 30px;
   background: linear-gradient(180deg, var(--g1), var(--g2));
   border-bottom-left-radius: 26px;
   border-bottom-right-radius: 26px;
@@ -47,7 +47,7 @@ body{
 .back-btn{
   position:absolute;
   left: 16px;
-  top: 16px;
+  top: calc(20px + var(--safe-top, 20px));
   width: 44px;
   height: 44px;
   border: none;

@@ -405,7 +405,6 @@ function formatTimeAgo(dateStr) {
           if (window.AgriPermission) {
             const locResult = await window.AgriPermission.requestLocation();
             if (locResult.granted && locResult.position) {
-              // Capacitor: position.coords | browser: position.coords
               const coords = locResult.position.coords || locResult.position;
               userLat = coords.latitude;
               userLng = coords.longitude;

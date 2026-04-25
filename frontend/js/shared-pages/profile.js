@@ -89,16 +89,19 @@ document.addEventListener("DOMContentLoaded", async function () {
   const uid    = params.get('uid') || params.get('id') || params.get('userId') || null;
   const nameQ  = params.get('name') || '';
 
-  if (DEBUG_PROFILE) console.log('[profile] uid:', uid, 'API_BASE:', API_BASE);
+  const myId    = getMyId();
+  const effectiveUid = uid || myId;
 
-  if (!uid) {
-    showAlert('ไม่พบ uid ใน URL กรุณากลับหน้าหลักแล้วลองใหม่', 'error');
+  if (DEBUG_PROFILE) console.log('[profile] uid:', uid, 'name:', nameQ, 'API_BASE:', API_BASE);
+
+  if (!effectiveUid) {
+    window.location.replace(resolveAssetPath('pages/auth/login1.html'));
+    return;
   }
 
-  const myId    = getMyId();
-  const isOwnProfile = uid && myId && uid === myId;
+  const isOwnProfile = effectiveUid === myId;
 
-  // โ”€โ”€ เธ”เธถเธเธเนเธญเธกเธนเธฅเธเธฒเธ API โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // ------------------------------------ ดึงข้อมูลจาก API ------------------------------------
   let profileData = {
     name: nameQ || '', tagline: '', followers: 0, following: 0,
     heroImage: '', avatar: '', role: '', badgeTitle: '', badgeSub: '', about: '',
@@ -107,16 +110,23 @@ document.addEventListener("DOMContentLoaded", async function () {
   let apiProducts = [];
   let isFollowing = false;
 
-  if (API_BASE && uid) {
+  if (API_BASE && (uid || nameQ)) {
     try {
       showLoading(true);
 
-      // เนเธซเธฅเธ”เธเธฃเนเธญเธกเธเธฑเธเธ—เธธเธเธญเธขเนเธฒเธ
+      const fetchUid = uid;
+      
+      if (!fetchUid) {
+        showLoading(false);
+        if (!nameQ) showAlert('ไม่พบข้อมูลผู้ใช้', 'error');
+        return;
+      }
+
       const [pRes, prodRes, statusRes] = await Promise.all([
-        fetch(`${API_BASE}/api/profiles/${uid}`,        { headers: authHeaders() }),
-        fetch(`${API_BASE}/api/products?user_id=${uid}`,{ headers: authHeaders() }),
-        uid && myId && !isOwnProfile
-          ? fetch(`${API_BASE}/api/follow/${uid}/status`, { headers: authHeaders() })
+        fetch(`${API_BASE}/api/profiles/${effectiveUid}`,        { headers: authHeaders() }),
+        fetch(`${API_BASE}/api/products?user_id=${effectiveUid}`,{ headers: authHeaders() }),
+        effectiveUid && myId && !isOwnProfile
+          ? fetch(`${API_BASE}/api/follow/${effectiveUid}/status`, { headers: authHeaders() })
           : Promise.resolve(null),
       ]);
 
@@ -348,6 +358,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       apiProducts.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
+        // เพิ่ม data attributes เพื่อให้ components.js ทำงานต่อได้
+        card.dataset.sellerId = uid || '';
+        card.dataset.productId = product._id || '';
+        card.dataset.sellerName = profileData.name || '';
+
         const priceHtml = Object.entries(product.prices || {}).map(([g, price]) => {
           if (!price) return '';
           return `<div class="price-box"><div class="grade">${g}</div><div class="price">${price} บ./${normalizeUnitLabel(product.unit)}</div></div>`;
@@ -359,7 +374,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           </div>` : '';
         card.innerHTML = `
           <div class="product-header">
-            <div class="seller-info" style="cursor:default">
+            <div class="seller-info">
               <div class="seller-avatar"><img src="${profileData.avatar || fallbackImages.profileAvatar}" alt="" onerror="this.onerror=null;this.src='${fallbackImages.profileAvatar}';"></div>
               <div class="seller-text">
                 <div class="seller-name">${profileData.name}</div>

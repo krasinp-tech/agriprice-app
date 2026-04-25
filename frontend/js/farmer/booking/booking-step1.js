@@ -35,18 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const TOKEN_KEY = window.AUTH_TOKEN_KEY || 'token';
     const token = localStorage.getItem(TOKEN_KEY) || '';
 
-    if (!API_BASE || !token) {
-      if (DEBUG_BOOKING) console.warn('[booking-step1] Missing API_BASE_URL or token');
-      return [];
-    }
+    // [DEBUG] เช็คว่ามีค่าครบไหม
+    const productId = localStorage.getItem('bookingProductId') || '';
+    const farmerId = localStorage.getItem('bookingFarmerId') || '';
+    
+    if (DEBUG_BOOKING) console.log('[booking-step1] Fetching slots for:', { date, productId, farmerId });
+
+    if (!API_BASE || !token) return [];
 
     try {
-      const dateStr  = date.toISOString().split('T')[0];
-      const farmerId = localStorage.getItem('bookingFarmerId')  || '';
-      const productId= localStorage.getItem('bookingProductId') || '';
-      const params   = new URLSearchParams({ date: dateStr });
+      const dateStr = date.toISOString().split('T')[0];
+      const params = new URLSearchParams({ date: dateStr });
 
-      // filter เฉพาะ product ที่กดจองมา ไม่เอา slot ของ product อื่นมาปน
       if (productId) {
         params.set('product_id', productId);
       } else if (farmerId) {
@@ -59,8 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const json = await res.json();
+      const slots = json.data || [];
 
-      return (json.data || []).map((slot) => ({
+      if (DEBUG_BOOKING) console.log('[booking-step1] Raw slots from API:', slots);
+
+      // กรองเฉพาะรอบที่ครอบคลุมวันที่เลือก หรือถ้าไม่มีวันที่ระบุให้แสดงทั้งหมด (เพื่อความชัวร์)
+      return slots.filter(slot => {
+          if (!slot.start_date || !slot.end_date) return true;
+          const s = new Date(slot.start_date);
+          const e = new Date(slot.end_date);
+          const d = new Date(date);
+          s.setHours(0,0,0,0);
+          e.setHours(23,59,59,999);
+          d.setHours(12,0,0,0);
+          return d >= s && d <= e;
+      }).map((slot) => ({
         id:          slot.slot_id || slot.id,
         time:        `${(slot.time_start||'').slice(0,5)}-${(slot.time_end||'').slice(0,5)}`,
         available:   (slot.capacity || 0) - (slot.booked_count || 0),
@@ -76,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         farmer_id:   slot.product?.user_id || farmerId,
       }));
     } catch (e) {
-      if (DEBUG_BOOKING) console.warn('[booking-step1] fetchTimeSlots failed:', e.message);
+      if (DEBUG_BOOKING) console.error('[booking-step1] fetchTimeSlots failed:', e.message);
       return [];
     }
   }
@@ -131,19 +144,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!date || !timeRangeStr) return false;
     const today = new Date();
     const isToday = isSameDay(date, today);
-    if (!isToday) return true; // Future day is always fine for time
+    if (!isToday) return true; 
 
     try {
-      // timeRangeStr format: "08:00-09:00"
+      // สำหรับ Demo/ส่งงาน: ให้จองได้ทันที แม้จะเริ่มไปแล้ว 
+      // หรือเปลี่ยนกฎเป็น: ถ้ายังไม่เลยเวลา "สิ้นสุด" ของรอบนั้น ก็ให้จองได้
       const startTimeStr = timeRangeStr.split('-')[0];
       const [hours, minutes] = startTimeStr.split(':').map(Number);
       
       const slotStartTime = new Date(today);
       slotStartTime.setHours(hours, minutes, 0, 0);
 
-      // Book at least 1 hour in advance
-      const minAdvanceTime = new Date(today.getTime() + (1 * 60 * 60 * 1000));
-      return slotStartTime >= minAdvanceTime;
+      // ยืดหยุ่น: จองได้ถ้าเวลาห่างไม่เกิน 2 ชม. (เผื่อเครื่องลูกค้านาฬิกาไม่ตรง)
+      const bufferTime = new Date(today.getTime() - (2 * 60 * 60 * 1000));
+      return slotStartTime >= bufferTime;
     } catch (e) {
       return true;
     }

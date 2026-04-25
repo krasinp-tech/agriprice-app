@@ -335,8 +335,10 @@
         variety:     state.step1.variety?.name || state.step1.variety?.variety || null,
         unit:        'กก.',
         quantity:    999999,
+        // ส่งราคาและเกรดตัวแรกไปเป็นค่าหลัก
+        price:       gradesArr[0]?.price || 0,
+        grade:       gradesArr[0]?.grade || 'คละ',
         // [NORMALIZED] ส่งแค่ grades array โดย server จะ insert ลง product_grades ให้
-        // ไม่ส่ง price และ grade แยกอีกต่อไป (column ถูก drop แล้ว)
         grades:      JSON.stringify(gradesArr),
       };
 
@@ -353,10 +355,11 @@
         productResult = await apiCall('POST', '/api/products', productData);
       }
       
-      const productId = productResult.id || productResult.data?.id || productResult.product_id || productIdFromStep1;
+      const productId = productResult.data?.product_id || productResult.product_id || productResult.id || productIdFromStep1;
 
       if (!productId) {
-        throw new Error('ไม่สามารถบันทึกข้อมูลผลผลิตได้');
+        console.error('Failed to get productId from response:', productResult);
+        throw new Error('ไม่สามารถรับหมายเลขสินค้าได้ กรุณาลองใหม่อีกครั้ง');
       }
 
       // สร้าง slots แบบ batch
