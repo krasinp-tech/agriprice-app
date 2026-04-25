@@ -188,7 +188,7 @@ router.post('/', authMiddleware, async (req, res) => {
       status: 'waiting'
     };
 
-    const { data, error } = await supabaseAdmin.from('bookings').insert(bookingData).select().single();
+    const { data, error } = await supabaseAdmin.from('bookings').insert(bookingData).select('booking_id, booking_no, queue_no, status').single();
     if (error) {
       console.error('❌ Supabase Booking Error:', error);
       
@@ -273,7 +273,7 @@ router.patch('/:id/checkin', authMiddleware, async (req, res) => {
 
     const { data: updated, error: updErr } = await supabaseAdmin
       .from('bookings')
-      .update({ status: 'success', actual_time: new Date().toISOString() })
+      .update({ status: 'success' })
       .eq('booking_id', booking.booking_id)
       .select()
       .single();
