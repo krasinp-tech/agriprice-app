@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
           
           const confirmed = { ...bookingData, bookingId, queue_no: q_no };
           localStorage.setItem('confirmedBooking', JSON.stringify(confirmed));
-          return { success: true, bookingId, queue_no, message: 'จองคิวสำเร็จ' };
+          return { success: true, bookingId, queue_no: q_no, message: 'จองคิวสำเร็จ' };
         } catch (e) {
           console.error('[step3] confirmBooking API failed:', e.message);
           throw e;
@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.navigateWithTransition) window.navigateWithTransition("booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "")); else window.location.href = "booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "");
     } catch (error) {
       console.error("Error confirming booking:", error);
-      window.appNotify("เกิดข้อผิดพลาดในการยืนยันการจอง กรุณาลองใหม่อีกครั้ง", "error");
+      window.appNotify(error.message || "เกิดข้อผิดพลาดในการยืนยันการจอง", "error");
     }
   }
 

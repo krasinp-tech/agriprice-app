@@ -17,6 +17,7 @@ const logger = require('./utils/logger');
 const { supabaseAdmin } = require('./utils/supabase');
 const { logRequestMiddleware, logErrorMiddleware } = require('./middlewares/log');
 const { autoCompleteDueBookings, autoCloseStaleProductsAndSlots, AUTO_SUCCESS_SCAN_MS } = require('./services/automationService');
+require('./services/ditScraper'); // Start DIT cron job
 
 const app = express();
 const PORT = process.env.PORT || 5000;
