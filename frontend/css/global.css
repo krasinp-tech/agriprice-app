@@ -196,16 +196,19 @@ html.app-strict-mode body {
 
 /* Default app-like behavior: no drag/select outside editable controls */
 *:not(input):not(textarea):not([contenteditable="true"]):not(.allow-select) {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
 }
 
 img,
 svg,
-video {
-  -webkit-user-drag: none;
-  user-select: none;
+video,
+a {
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
 }
 
 /* Keep form fields usable */
@@ -387,55 +390,13 @@ body::-webkit-scrollbar {
 }
 
 /* =================================
-   Desktop App Shell (phone-like frame)
+   Web App Layout (Sidebar for Desktop)
 ================================= */
-@media (min-width: 1200px) {
+@media (min-width: 1024px) {
   body {
-    position: relative;
-    background:
-      radial-gradient(1200px 520px at 50% -180px, #f8fbff 0%, #eef2f7 55%, #e9edf3 100%);
-    min-height: 100dvh;
-    padding-top: 26px;
-    padding-bottom: calc(120px + env(safe-area-inset-bottom));
-    isolation: isolate;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    left: 50%;
-    top: 14px;
-    transform: translateX(-50%);
-    width: calc(var(--app-shell-width) + 24px);
-    height: calc(100dvh - 28px);
-    border-radius: calc(var(--app-shell-radius) + 10px);
-    background: linear-gradient(165deg, #181c22 0%, #101319 100%);
-    box-shadow:
-      0 36px 70px rgba(17, 24, 39, 0.30),
-      0 10px 20px rgba(0, 0, 0, 0.16);
-    z-index: -2;
-    pointer-events: none;
-  }
-
-  body::after {
-    content: "";
-    position: fixed;
-    left: 50%;
-    top: 26px;
-    transform: translateX(-50%);
-    width: var(--app-shell-width);
-    height: calc(100dvh - 52px);
-    border-radius: var(--app-shell-radius);
-    background: #ffffff;
-    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  body > :not(script):not(style) {
-    width: min(100%, var(--app-shell-width));
-    margin-left: auto;
-    margin-right: auto;
+    padding-bottom: 0 !important;
+    padding-left: 240px !important; /* เว้นที่ให้ Sidebar 240px */
+    background: #f8f9fa !important; /* พื้นหลังเว็บปกติ */
   }
 }
 
@@ -476,6 +437,54 @@ body::-webkit-scrollbar {
 @keyframes slideInUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================
+   Skeleton Loading (UX Polish)
+================================ */
+.skeleton {
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite linear;
+  border-radius: 8px;
+  opacity: 0.7;
+}
+
+@keyframes skeletonLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 18px;
+  width: 70%;
+  margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.skeleton-card-content {
+  flex: 1;
 }
 
 /* ================================

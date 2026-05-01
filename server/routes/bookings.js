@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const response = require('../response');
+const response = require('../utils/response');
 const db = require('../db');
 const authMiddleware = require('../middlewares/auth');
 const bookingSchema = require('../validators/booking');
@@ -10,6 +10,7 @@ const { makeBookingNo } = require('../utils/helpers');
 
 /**
  * GET /api/bookings
+ * ดึงรายการการจองทั้งหมดของผู้ใช้ (แบ่งตาม Role: Farmer จะเห็นคิวที่ตัวเองจอง, Buyer จะเห็นคิวของลูกค้า)
  */
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -124,9 +125,12 @@ router.get('/:id/queue-status', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/bookings
+ * [Core Feature] ระบบสร้างการจองคิวใหม่
+ * ทำหน้าที่: ตรวจสอบข้อมูล -> หาเลขคิว -> บันทึกลงฐานข้อมูล Supabase
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    // 1. ตรวจสอบความถูกต้องของข้อมูล (Validation) ด้วย Joi Schema
     const { error: schemaErr, value: validBody } = bookingSchema.validate(req.body);
     if (schemaErr) return res.status(400).json(response.error(schemaErr.details[0].message));
 
@@ -149,9 +153,11 @@ router.post('/', authMiddleware, async (req, res) => {
       final_plates = final_plates.map(v => typeof v === 'object' ? (v.plate || v.no) : v).filter(Boolean).join(', ');
     }
     
+    // 2. สร้างหมายเลขการจองแบบสุ่ม (เช่น BK-123456)
     const booking_no = makeBookingNo();
 
-    // หาข้อมูล product เพื่อดึง buyer_id (เจ้าของ product คือ buyer)
+    // 3. หาข้อมูลผู้ซื้อ (Buyer) จากรหัสสินค้า (Product ID) 
+    // เพื่อให้รู้ว่า Farmer กำลังจองคิวไปหาใคร
     const { data: prodData } = await supabaseAdmin
       .from('products')
       .select('user_id')
@@ -159,21 +165,23 @@ router.post('/', authMiddleware, async (req, res) => {
       .single();
     if (!prodData) return res.status(404).json(response.error('ไม่พบสินค้านี้'));
 
-    // คำนวณลำดับคิว (Sequence) อัตโนมัติภายใน Slot นั้นๆ
+    // 4. คำนวณลำดับคิว (Queue Sequence) อัตโนมัติภายใน Slot เวลาที่เลือก
     let queue_no = 'Q-01';
     if (slot_id) {
+      // นับว่าใน Slot นี้นี้มีคนจองไปแล้วกี่คน แล้วบวก 1
       const { count } = await supabaseAdmin
         .from('bookings')
         .select('*', { count: 'exact', head: true })
         .eq('slot_id', slot_id);
       
       const sequence = (count || 0) + 1;
-      queue_no = `Q-${String(sequence).padStart(2, '0')}`;
+      queue_no = `Q-${String(sequence).padStart(2, '0')}`; // ผลลัพธ์: Q-01, Q-02
     }
 
+    // 5. เตรียมข้อมูลเตรียมบันทึกลงฐานข้อมูล
     const bookingData = {
       booking_no,
-      queue_no, // เพิ่มเลขคิวเข้าไปในฐานข้อมูล
+      queue_no, 
       farmer_id: req.user.id,  // คนจอง = farmer
       buyer_id: prodData.user_id, // เจ้าของ product = buyer
       product_id,
@@ -185,14 +193,15 @@ router.post('/', authMiddleware, async (req, res) => {
       contact_phone: final_contact_phone || null,
       product_amount: Number(final_product_amount || 0),
       vehicle_plates: final_plates || null,
-      status: 'waiting'
+      status: 'waiting' // สถานะเริ่มต้นคือ "รอดำเนินการ"
     };
 
+    // 6. บันทึกข้อมูลลงตาราง bookings ใน Supabase
     const { data, error } = await supabaseAdmin.from('bookings').insert(bookingData).select('booking_id, booking_no, queue_no, status').single();
     if (error) {
       console.error('❌ Supabase Booking Error:', error);
       
-      // แปลง Error ของฐานข้อมูลเป็นภาษาที่เข้าใจง่าย
+      // แปลง Error ระดับ Database ให้เป็นภาษาคน (User-friendly)
       let userMessage = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
       if (error.code === '23503') {
         userMessage = 'ไม่สามารถจองได้เนื่องจากสินค้าหรือรอบคิวนี้ไม่มีอยู่ในระบบแล้ว (อาจถูกแก้ไขหรือลบโดยผู้ซื้อ)';
@@ -203,7 +212,7 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json(response.error(userMessage, error));
     }
 
-    // เพิ่ม booked_count ใน slot ถ้ามี slot_id
+    // 7. เพิ่มจำนวนการจอง (booked_count) ใน Slot อัตโนมัติด้วย Database Function (RPC)
     if (slot_id) {
       const { error: rpcErr } = await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id });
       if (rpcErr) console.error('❌ RPC Error (Non-critical):', rpcErr);
@@ -249,7 +258,8 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 
 /**
  * PATCH /api/bookings/:id/checkin
- * Instant QR Check-in logic
+ * [Mobile Feature] ระบบสแกน QR Code เพื่อเช็คอินคิว
+ * ให้ Buyer สแกนมือถือ Farmer เพื่อยืนยันว่ามารับซื้อแล้ว
  */
 router.patch('/:id/checkin', authMiddleware, async (req, res) => {
   try {

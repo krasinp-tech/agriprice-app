@@ -1,0 +1,296 @@
+/* ================================
+   Subscription Plans Styles
+================================ */
+
+body {
+  background: #f0f7ff !important;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: transparent;
+}
+
+.back-btn {
+  background: #3b82f6;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.sub-main {
+  padding: 0 20px 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+.icon-container {
+  background: #3b82f6;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.header-text h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+
+.header-text p {
+  color: #64748b;
+  font-size: 15px;
+  margin: 0;
+}
+
+.swipe-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.plans-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.plans-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.plan-card {
+  flex: 0 0 85%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.plan-card.pro-plan {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
+}
+
+.plan-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+.plan-badge.premium {
+  background: #3b82f6;
+  color: white;
+}
+
+.plan-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #334155;
+  margin: 0 0 16px;
+  letter-spacing: 1px;
+}
+
+.plan-name.pro-text {
+  color: #3b82f6;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 30px;
+}
+
+.plan-price .currency {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-right: 2px;
+}
+
+.plan-price .amount {
+  font-size: 42px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.plan-price .period {
+  font-size: 14px;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px;
+  flex: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.feature-item:last-child {
+  margin-bottom: 0;
+}
+
+.feature-item .material-icons-outlined {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.check-icon {
+  color: #10b981;
+}
+
+.check-icon.pro {
+  color: #3b82f6;
+}
+
+.cross-icon {
+  color: #cbd5e1;
+}
+
+.feature-item.excluded {
+  color: #94a3b8;
+}
+
+.plan-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-current {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.btn-upgrade {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-upgrade:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+/* Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.dot {
+  width: 16px;
+  height: 6px;
+  border-radius: 4px;
+  background: #cbd5e1;
+}
+
+.dot.active {
+  background: #3b82f6;
+  width: 24px;
+}
+
+/* Why Upgrade Card */
+.why-upgrade-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+
+.why-icon {
+  background: #3b82f6;
+  color: white;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.why-icon span {
+  font-size: 28px;
+}
+
+.why-content h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.why-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}

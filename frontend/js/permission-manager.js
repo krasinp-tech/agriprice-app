@@ -1,7 +1,11 @@
 /**
  * permission-manager.js — AgriPrice Pure Native Permission v3
- *
- * ตัด Custom UI ออกทั้งหมด และเรียกใช้ Native System Dialog โดยตรง
+ * 
+ * [Mobile Feature] ไฟล์นี้จัดการเรื่องการขอสิทธิ์เข้าถึง (Permissions) บนมือถือทั้งหมด
+ * เช่น GPS, กล้องถ่ายรูป, และแจ้งเตือน
+ * จุดเด่น: 
+ * 1. เรียกใช้ Native System Dialog (ของ iOS/Android) ได้โดยตรงผ่าน Capacitor
+ * 2. มีระบบ "Deny Memory" จำได้ว่าผู้ใช้เคยกดปฏิเสธไปแล้ว จะไม่เด้งกวนใจซ้ำอีก (UX Best Practice)
  */
 (function () {
   'use strict';
@@ -25,68 +29,147 @@
   }
 
   /* ════════════════════════════════════════════
-     1. GPS / Location (Direct Native Call)
+     1. GPS / Location (หาตำแหน่งพิกัดเพื่อจัดเรียงใกล้สุด)
   ════════════════════════════════════════════ */
   async function requestLocation(options = {}) {
+    const prefs = getPrefs();
+    
+    // หากเคยปฏิเสธไปแล้ว จะไม่เด้งถามอีก (Deny Memory)
+    if (prefs.loc_denied) return { granted: false };
+
+    // กรณีรันเป็นแอปบนมือถือจริงๆ (Native Capacitor)
     if (isNative()) {
       const Geo = getPlugin('Geolocation');
       if (!Geo) return { granted: false };
       try {
-        const result = await Geo.requestPermissions({ permissions: ['location'] });
-        const granted = result.location === 'granted';
-        if (granted) {
+        // เช็คสิทธิ์ปัจจุบันก่อนว่าเคยอนุญาตไว้แล้วหรือไม่
+        const perm = await Geo.checkPermissions();
+        if (perm.location === 'granted') {
+          // ถ้ามีสิทธิ์แล้ว ดึงพิกัด (Lat, Lng) มาใช้งานทันที
           const pos = await Geo.getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
           return { granted: true, position: pos };
         }
-        return { granted: false };
+        if (perm.location === 'denied') {
+          setPref('loc_denied', true);
+          return { granted: false };
+        }
+
+        // กรณีต้องขอสิทธิ์ใหม่จาก OS
+        const result = await Geo.requestPermissions({ permissions: ['location'] });
+        const granted = result.location === 'granted';
+        if (granted) {
+          setPref('loc_denied', false);
+          const pos = await Geo.getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
+          return { granted: true, position: pos };
+        } else {
+          setPref('loc_denied', true); // จำว่าผู้ใช้ปฏิเสธ
+          return { granted: false };
+        }
       } catch (e) { return { granted: false }; }
     }
-    // Browser fallback
+    
+    // กรณีรันบนเว็บ (Browser Fallback) PWA
+    if (navigator.permissions) {
+       try {
+         const perm = await navigator.permissions.query({ name: 'geolocation' });
+         if (perm.state === 'denied') {
+            setPref('loc_denied', true);
+            return { granted: false };
+         }
+       } catch(e) {}
+    }
+    
     return new Promise((resolve) => {
       if (!navigator.geolocation) return resolve({ granted: false });
       navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ granted: true, position: pos }),
-        () => resolve({ granted: false }),
+        (pos) => {
+            setPref('loc_denied', false);
+            resolve({ granted: true, position: pos });
+        },
+        (err) => {
+            // Error code 1 = PERMISSION_DENIED
+            if (err.code === 1) {
+                setPref('loc_denied', true);
+            }
+            resolve({ granted: false });
+        },
         { timeout: 8000, maximumAge: 300000 }
       );
     });
   }
 
   /* ════════════════════════════════════════════
-     2. Notifications (Direct Native Call)
+     2. Notifications (แจ้งเตือนสถานะคิว)
   ════════════════════════════════════════════ */
   async function requestNotification() {
+    const prefs = getPrefs();
+    if (prefs.notif_denied) return { granted: false };
+
     if (isNative()) {
       const Notif = getPlugin('LocalNotifications');
       if (!Notif) return { granted: false };
       try {
+        const perm = await Notif.checkPermissions();
+        if (perm.display === 'granted') return { granted: true };
+        if (perm.display === 'denied') {
+            setPref('notif_denied', true);
+            return { granted: false };
+        }
+
         const result = await Notif.requestPermissions();
         const granted = result.display === 'granted';
+        if (!granted) setPref('notif_denied', true);
+        else setPref('notif_denied', false);
         return { granted };
       } catch (e) { return { granted: false }; }
     }
+    
     if (!('Notification' in window)) return { granted: false };
+    if (Notification.permission === 'denied') {
+        setPref('notif_denied', true);
+        return { granted: false };
+    }
     const res = await Notification.requestPermission();
+    if (res === 'denied') setPref('notif_denied', true);
+    else setPref('notif_denied', false);
     return { granted: res === 'granted' };
   }
 
   /* ════════════════════════════════════════════
-     3. Camera (Direct Native Call)
+     3. Camera (ขอสิทธิ์กล้องเพื่อใช้แสกน QR Code)
   ════════════════════════════════════════════ */
   async function requestCamera() {
+    const prefs = getPrefs();
+    if (prefs.cam_denied) return { granted: false };
+
     if (isNative()) {
       const Cam = getPlugin('Camera');
       if (!Cam) return { granted: false };
       try {
+        const perm = await Cam.checkPermissions();
+        if (perm.camera === 'granted' || perm.photos === 'granted') return { granted: true };
+        if (perm.camera === 'denied' && perm.photos === 'denied') {
+            setPref('cam_denied', true);
+            return { granted: false };
+        }
+
         const result = await Cam.requestPermissions({ permissions: ['camera', 'photos'] });
-        return { granted: result.camera === 'granted' || result.photos === 'granted' };
+        const granted = result.camera === 'granted' || result.photos === 'granted';
+        if (!granted) setPref('cam_denied', true);
+        else setPref('cam_denied', false);
+        return { granted };
       } catch (e) { return { granted: false }; }
     }
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach(t => t.stop());
+      setPref('cam_denied', false);
       return { granted: true };
-    } catch (e) { return { granted: false }; }
+    } catch (e) { 
+        setPref('cam_denied', true);
+        return { granted: false }; 
+    }
   }
 
   async function requestAll() {

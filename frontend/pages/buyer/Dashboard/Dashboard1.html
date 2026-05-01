@@ -17,146 +17,89 @@
   <link rel="stylesheet" href="../../../css/buyer/Dashboard/Dashboard1.css" />
   <script src="../../../js/global-anim.js"></script>
   <script src="../../../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <body data-active="account" data-auth="required">
   
   <!-- Header -->
-  <header class="dash-header">
-    <button class="back-btn" id="backBtn" aria-label="ย้อนกลับ">
-      <span class="material-icons-outlined">arrow_back</span>
+  <div class="dashboard-header-bg">
+    <button class="back-btn-light" id="backBtn" aria-label="ย้อนกลับ">
+      <span class="material-icons-outlined">arrow_back_ios</span>
     </button>
-    <h1 class="dash-title">Dashboard</h1>
-    <button class="refresh-btn" id="refreshBtn" aria-label="รีเฟรช">
-      <span class="material-icons-outlined">refresh</span>
-    </button>
-  </header>
+    <div class="header-titles">
+      <h1>Dashboard</h1>
+      <p>ยินดีต้อนรับกลับ, สิงกนก</p>
+    </div>
+  </div>
 
   <!-- Main Content -->
-  <main class="dash-main">
+  <main class="dash-main-pro">
     
     <!-- Period Filter -->
-    <section class="period-selector">
-      <button class="period-tab active" data-period="7">7 วัน</button>
-      <button class="period-tab" data-period="30">30 วัน</button>
-      <button class="period-tab" data-period="90">3 เดือน</button>
-      <button class="period-tab" data-period="365">1 ปี</button>
+    <section class="period-selector-pro">
+      <button class="period-tab active" data-period="today">วันนี้</button>
+      <button class="period-tab" data-period="week">สัปดาห์</button>
+      <button class="period-tab" data-period="month">เดือน</button>
     </section>
 
     <!-- KPI Cards -->
-    <section class="kpi-section">
+    <section class="kpi-grid">
       <div class="kpi-card">
-        <span class="material-icons-outlined kpi-icon">shopping_cart</span>
-        <div class="kpi-content">
-          <div class="kpi-value" id="totalOrders">0</div>
-          <div class="kpi-label">คำสั่งซื้อทั้งหมด</div>
+        <div class="icon-circle icon-green">
+          <span class="material-icons-outlined">attach_money</span>
         </div>
-      </div>
-
-      <div class="kpi-card">
-        <span class="material-icons-outlined kpi-icon">payments</span>
-        <div class="kpi-content">
-          <div class="kpi-value" id="totalSpent">฿0</div>
-          <div class="kpi-label">ยอดใช้จ่ายรวม</div>
-        </div>
+        <div class="kpi-label">รายได้รายเดือน</div>
+        <div class="kpi-value" id="monthlyRevenue">฿45,280</div>
+        <div class="kpi-trend trend-up">+12.5% จากเดือนที่แล้ว</div>
       </div>
 
       <div class="kpi-card">
-        <span class="material-icons-outlined kpi-icon">inventory_2</span>
-        <div class="kpi-content">
-          <div class="kpi-value" id="totalProducts">0</div>
-          <div class="kpi-label">สินค้าที่ซื้อ</div>
+        <div class="icon-circle icon-blue">
+          <span class="material-icons-outlined">work_outline</span>
         </div>
+        <div class="kpi-label">ยอดจองทั้งหมด</div>
+        <div class="kpi-value" id="totalBookings">127</div>
+        <div class="kpi-trend trend-blue">+8.2% สัปดาห์นี้</div>
       </div>
 
       <div class="kpi-card">
-        <span class="material-icons-outlined kpi-icon">trending_up</span>
-        <div class="kpi-content">
-          <div class="kpi-value" id="avgPrice">฿0</div>
-          <div class="kpi-label">ราคาเฉลี่ย</div>
+        <div class="icon-circle icon-orange">
+          <span class="material-icons-outlined">visibility</span>
+        </div>
+        <div class="kpi-label">ยอดเข้าชมทั้งหมด</div>
+        <div class="kpi-value" id="totalViews">3,842</div>
+        <div class="kpi-trend trend-orange">+24.1% เดือนนี้</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="icon-circle icon-green">
+          <span class="material-icons-outlined">face</span>
+        </div>
+        <div class="kpi-label">ผู้ติดตามใหม่</div>
+        <div class="kpi-value" id="newFollowers">18</div>
+        <div class="kpi-trend trend-up">+26.3% จากเดือนที่แล้ว</div>
+      </div>
+    </section>
+
+    <!-- Booking Summary Chart -->
+    <section class="summary-section">
+      <div class="section-header">
+        <h2>สรุปการจอง</h2>
+      </div>
+      <div class="chart-container-donut">
+        <canvas id="bookingSummaryChart"></canvas>
+        <div class="chart-center-text">
+          <span class="center-label">ทั้งหมด</span>
+          <span class="center-value">127</span>
+          <span class="center-label">รายการ</span>
         </div>
       </div>
-    </section>
-
-    <!-- Chart Section -->
-    <section class="chart-section">
-      <div class="section-header">
-        <h2>แนวโน้มการซื้อ</h2>
-        <select class="chart-type" id="chartType">
-          <option value="line">กราฟเส้น</option>
-          <option value="bar">กราฟแท่ง</option>
-        </select>
-      </div>
-      <div class="chart-container">
-        <canvas id="purchaseChart"></canvas>
-      </div>
-    </section>
-
-    <!-- Top Products -->
-    <section class="top-section">
-      <div class="section-header">
-        <h2>สินค้าที่ซื้อบ่อย</h2>
-        <a href="#" class="see-all">ดูทั้งหมด</a>
-      </div>
-      <div class="top-list" id="topProducts">
-        <!-- Generated by JS -->
-      </div>
-    </section>
-
-    <!-- Top Sellers -->
-    <section class="top-section">
-      <div class="section-header">
-        <h2>ผู้ขายที่ติดต่อบ่อย</h2>
-        <a href="#" class="see-all">ดูทั้งหมด</a>
-      </div>
-      <div class="seller-list" id="topSellers">
-        <!-- Generated by JS -->
-      </div>
-    </section>
-
-    <!-- Market Prices -->
-    <section class="top-section">
-      <div class="section-header">
-        <h2>ราคากลางล่าสุด</h2>
-        <a href="../../../gov-price-lookup.html" class="see-all">ดูทั้งหมด</a>
-      </div>
-      <div class="market-list" id="marketPrices">
-        <!-- Generated by JS -->
-      </div>
-    </section>
-
-    <!-- Booking Stats -->
-    <section class="stats-section">
-      <div class="section-header">
-        <h2>สถานะการจอง</h2>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-circle waiting">
-            <span class="stat-percent" id="waitingPercent">0%</span>
-          </div>
-          <div class="stat-info">
-            <div class="stat-count" id="waitingCount">0</div>
-            <div class="stat-name">รอดำเนินการ</div>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-circle success">
-            <span class="stat-percent" id="successPercent">0%</span>
-          </div>
-          <div class="stat-info">
-            <div class="stat-count" id="successCount">0</div>
-            <div class="stat-name">สำเร็จ</div>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-circle cancel">
-            <span class="stat-percent" id="cancelPercent">0%</span>
-          </div>
-          <div class="stat-info">
-            <div class="stat-count" id="cancelCount">0</div>
-            <div class="stat-name">ยกเลิก</div>
-          </div>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span class="legend-label">สำเร็จ</span>
+          <span class="legend-value">78</span>
         </div>
       </div>
     </section>

@@ -6,7 +6,9 @@ const AUTO_SUCCESS_DELAY_MIN = Number(process.env.BOOKING_AUTO_SUCCESS_DELAY_MIN
 const AUTO_SUCCESS_DEBUG = String(process.env.BOOKING_AUTO_SUCCESS_DEBUG || 'true').toLowerCase() === 'true';
 
 /**
- * Automatically marks waiting bookings as 'missed' if they passed the scheduled time + delay.
+ * [Background Service] หุ่นยนต์ทำงานเบื้องหลังอัตโนมัติ (Cron Job)
+ * ฟังก์ชัน 1: ตรวจสอบคิวที่ "เลยเวลา" และเปลี่ยนสถานะเป็น "ยกเลิก (cancel)" อัตโนมัติ
+ * เพื่อป้องกันปัญหา Farmer จองแล้วไม่มาตามนัด ทำให้คิวค้าง
  */
 async function autoCompleteDueBookings() {
   try {
@@ -49,7 +51,9 @@ async function autoCompleteDueBookings() {
 }
 
 /**
- * Deactivates product slots that have passed their end time.
+ * [Background Service] หุ่นยนต์ทำงานเบื้องหลังอัตโนมัติ (Cron Job)
+ * ฟังก์ชัน 2: ตรวจสอบ "รอบเวลารับซื้อ" (Slot) และ "ประกาศรับซื้อ" (Product) ที่หมดอายุ
+ * ถ้าหมดเวลาแล้ว จะถูกปิดการมองเห็นอัตโนมัติ (is_active = false)
  */
 async function autoCloseStaleProductsAndSlots() {
   try {

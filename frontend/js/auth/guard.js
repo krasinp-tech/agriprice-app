@@ -1,4 +1,4 @@
-﻿/* js/auth/guard.js
+/* js/auth/guard.js
   - รองรับกรณีเปิดเว็บอยู่ใน subfolder เช่น /agriprice_fixed/
   - redirect ไป login1 แบบถูกเสมอ
 */
@@ -64,16 +64,22 @@
         return;
       }
 
-      // หน้าเริ่มต้นตาม role
+      // หน้าเริ่มต้นตาม role และ tier
       let role = "";
+      let tier = "free";
       try {
         const u = JSON.parse(localStorage.getItem("user") || "null");
         role = (u && u.role) ? String(u.role).toLowerCase() : (localStorage.getItem("role") || "").toLowerCase();
+        tier = (u && u.tier) ? String(u.tier).toLowerCase() : "free";
       } catch (_) {}
 
       const base = getProjectBasePath();
       if (role === "buyer") {
-        if (window.navigateWithTransition) window.navigateWithTransition(defaultPath || base + "pages/buyer/Dashboard/Dashboard1.html"); else window.location.href = defaultPath || base + "pages/buyer/Dashboard/Dashboard1.html";
+        if (tier === "pro") {
+          if (window.navigateWithTransition) window.navigateWithTransition(defaultPath || base + "pages/buyer/Dashboard/Dashboard1.html"); else window.location.href = defaultPath || base + "pages/buyer/Dashboard/Dashboard1.html";
+        } else {
+          if (window.navigateWithTransition) window.navigateWithTransition(defaultPath || base + "index.html"); else window.location.href = defaultPath || base + "index.html";
+        }
       } else if (role === "farmer") {
         if (window.navigateWithTransition) window.navigateWithTransition(defaultPath || base + "index.html"); else window.location.href = defaultPath || base + "index.html";
       } else {

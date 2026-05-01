@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <script src="../../js/components/i18n.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="chat_title">แชท | AGRIPRICE</title>
+  <title data-i18n="chat_title">??? | AGRIPRICE</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +18,7 @@
   <script src="../../js/api-client.js"></script>
   <script src="../../js/global-anim.js"></script>
   <script src="../../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <body data-active="chat">
@@ -28,12 +29,12 @@
       <div class="chat-header-inner">
         <div class="chat-title">
           <span class="material-icons-outlined">chat_bubble_outline</span>
-          <span data-i18n="chat_heading">แชท</span>
+          <span data-i18n="chat_heading">???</span>
         </div>
 
         <div class="chat-search">
           <span class="material-icons-outlined">search</span>
-          <input id="chatSearchInput" type="text" placeholder="ค้นหาแชท / ผู้รับซื้อ" data-i18n-placeholder="chat_search_placeholder" />
+          <input id="chatSearchInput" type="text" placeholder="???????? / ??????????" data-i18n-placeholder="chat_search_placeholder" />
         </div>
       </div>
     </header>
@@ -41,10 +42,10 @@
     <!-- Layout -->
     <section class="chat-shell">
       <!-- Left: conversation list -->
-      <aside class="chat-list" aria-label="รายการแชท" data-i18n-aria-label="chat_list_label">
+      <aside class="chat-list" aria-label="?????????" data-i18n-aria-label="chat_list_label">
         <div class="chat-list-top">
-          <div class="chat-list-title" data-i18n="chat_recent_messages">ข้อความล่าสุด</div>
-          <button class="chat-refresh" id="chatRefreshBtn" type="button" title="รีเฟรช" data-i18n-title="refresh">
+          <div class="chat-list-title" data-i18n="chat_recent_messages">?????????????</div>
+          <button class="chat-refresh" id="chatRefreshBtn" type="button" title="??????" data-i18n-title="refresh">
             <span class="material-icons-outlined">refresh</span>
           </button>
         </div>
@@ -55,19 +56,19 @@
       </aside>
 
       <!-- Right: conversation detail -->
-      <section class="chat-room" aria-label="ห้องแชท" data-i18n-aria-label="chat_room_label">
+      <section class="chat-room" aria-label="???????" data-i18n-aria-label="chat_room_label">
         <!-- Empty state -->
         <div class="chat-empty" id="chatEmptyState">
           <div class="chat-empty-card">
             <div class="chat-empty-icon"><span class="material-icons-outlined" aria-hidden="true">forum</span></div>
-            <div class="chat-empty-title" data-i18n="chat_empty_title">เลือกแชทเพื่อเริ่มพูดคุย</div>
-            <div class="chat-empty-sub" data-i18n="chat_empty_sub">คุณสามารถติดต่อผู้รับซื้อและนัดหมายการจองคิวได้</div>
+            <div class="chat-empty-title" data-i18n="chat_empty_title">????????????????????????</div>
+            <div class="chat-empty-sub" data-i18n="chat_empty_sub">???????????????????????????????????????????????</div>
           </div>
         </div>
 
         <!-- Room header -->
         <div class="room-header" id="roomHeader" style="display:none;">
-          <button class="room-back" id="roomBackBtn" type="button" title="ย้อนกลับ" data-i18n-title="back">
+          <button class="room-back" id="roomBackBtn" type="button" title="????????" data-i18n-title="back">
             <span class="material-icons-outlined">arrow_back</span>
           </button>
 
@@ -75,15 +76,15 @@
             <div class="room-avatar" id="roomAvatar"><span class="material-icons-outlined" aria-hidden="true">person</span></div>
             <div class="room-user-text">
               <div class="room-name" id="roomName">-</div>
-              <div class="room-sub" id="roomSub" data-i18n="online">ออนไลน์</div>
+              <div class="room-sub" id="roomSub" data-i18n="online">???????</div>
             </div>
           </div>
 
           <div class="room-actions">
-            <button class="room-action" type="button" id="btnOpenProfile" title="ดูโปรไฟล์" data-i18n-title="view_profile">
+            <button class="room-action" type="button" id="btnOpenProfile" title="?????????" data-i18n-title="view_profile">
               <span class="material-icons-outlined">person_outline</span>
             </button>
-            <button class="room-action" type="button" data-action="call" title="โทร" data-i18n-title="call">
+            <button class="room-action" type="button" data-action="call" title="???" data-i18n-title="call">
               <span class="material-icons-outlined">call</span>
             </button>
           </div>
@@ -98,7 +99,7 @@
         <div class="composer-preview" id="composerPreview" style="display:none;">
           <div class="preview-item">
             <img id="previewImage" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" />
-            <button type="button" class="preview-remove" id="previewRemoveBtn" title="ลบรูป" data-i18n-title="remove_image">
+            <button type="button" class="preview-remove" id="previewRemoveBtn" title="?????" data-i18n-title="remove_image">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -106,14 +107,14 @@
 
         <!-- Composer -->
         <form class="room-composer" id="chatComposer" style="display:none;">
-          <button type="button" class="composer-btn" data-action="attach" title="แนบรูป" data-i18n-title="attach_image">
+          <button type="button" class="composer-btn" data-action="attach" title="??????" data-i18n-title="attach_image">
             <span class="material-icons-outlined">add_circle_outline</span>
           </button>
 
           <input id="chatImageInput" type="file" accept="image/*" hidden />
-          <input id="chatMessageInput" type="text" placeholder="พิมพ์ข้อความ..." autocomplete="off" data-i18n-placeholder="type_message" />
+          <input id="chatMessageInput" type="text" placeholder="????????????..." autocomplete="off" data-i18n-placeholder="type_message" />
 
-          <button type="submit" class="composer-send" title="ส่ง" data-i18n-title="send">
+          <button type="submit" class="composer-send" title="???" data-i18n-title="send">
             <span class="material-icons-outlined">send</span>
           </button>
         </form>
@@ -135,7 +136,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
   });
-  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  // sync ?????????????????????/????????
   window.addEventListener('storage', function(e) {
     if (e.key === 'lang') {
       if (window.i18nInit) window.i18nInit();

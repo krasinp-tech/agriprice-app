@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Payment | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/account/payment.css" />
+  <script src="../../js/global-anim.js"></script>
+  <meta name="theme-color" content="#3b82f6">
+</head>
+
+<body data-active="account">
+  
+  <!-- Blue Header Background -->
+  <div class="payment-header-bg">
+    <button class="back-btn-light" id="backBtn" aria-label="ย้อนกลับ">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <div class="header-titles">
+      <h1>ชำระเงิน</h1>
+      <p>เลือกวิธีการชำระเงินของคุณ</p>
+    </div>
+  </div>
+
+  <main class="payment-main">
+    
+    <!-- Plan Summary Card -->
+    <div class="summary-card">
+      <h2 class="section-title">แผนการสมัคร</h2>
+      <div class="plan-details">
+        <div class="plan-icon">
+          <span class="material-icons-outlined">schedule</span>
+        </div>
+        <div class="plan-info">
+          <div class="plan-info-top">
+            <span class="plan-name">แผน Premium</span>
+            <span class="plan-desc">การเข้าถึงฟีเจอร์ทั้งหมด</span>
+          </div>
+          <div class="plan-price">
+            <span class="currency">฿</span><span class="amount">499</span><span class="period">/เดือน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Method Card -->
+    <div class="method-card">
+      <h2 class="section-title">วิธีการชำระเงิน</h2>
+      
+      <!-- Tabs -->
+      <div class="method-tabs">
+        <button class="tab-btn active" data-target="creditCard">
+          <span class="material-icons-outlined">credit_card</span>
+          บัตรเครดิต
+        </button>
+        <button class="tab-btn" data-target="promptpay">
+          <span class="material-icons-outlined">qr_code_2</span>
+          QR PromptPay
+        </button>
+      </div>
+
+      <!-- Tab Content: Credit Card -->
+      <div class="tab-content active" id="creditCard">
+        <div class="form-group">
+          <label>หมายเลขบัตร</label>
+          <div class="input-with-icon">
+            <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" id="cardNumber">
+            <span class="material-icons-outlined field-icon">credit_card</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>ชื่อบนบัตร</label>
+          <input type="text" placeholder="SOMCHAI SUKSAI" id="cardName">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label>วันหมดอายุ</label>
+            <input type="text" placeholder="MM/YY" maxlength="5" id="cardExpiry">
+          </div>
+          <div class="form-group half">
+            <label>CVV</label>
+            <input type="text" placeholder="123" maxlength="3" id="cardCvv">
+          </div>
+        </div>
+
+        <div class="security-alert">
+          <span class="material-icons-outlined alert-icon">error_outline</span>
+          <p>ข้อมูลบัตรของคุณจะถูกเข้ารหัสอย่างปลอดภัย</p>
+        </div>
+      </div>
+
+      <!-- Tab Content: QR PromptPay -->
+      <div class="tab-content" id="promptpay">
+        <div class="qr-container">
+          <!-- Placeholder QR Code using inline SVG -->
+          <svg class="qr-code" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="#fff" rx="12"></rect>
+            <!-- Border outline simulating the image -->
+            <rect x="2" y="2" width="96" height="96" fill="none" stroke="#e2e8f0" stroke-width="2" rx="10"></rect>
+            
+            <g fill="#000">
+              <!-- Top Left Anchor -->
+              <rect x="15" y="15" width="20" height="20"></rect>
+              <rect x="18" y="18" width="14" height="14" fill="#fff"></rect>
+              <rect x="21" y="21" width="8" height="8"></rect>
+              
+              <!-- Top Right Anchor -->
+              <rect x="65" y="15" width="20" height="20"></rect>
+              <rect x="68" y="18" width="14" height="14" fill="#fff"></rect>
+              <rect x="71" y="21" width="8" height="8"></rect>
+              
+              <!-- Bottom Left Anchor -->
+              <rect x="15" y="65" width="20" height="20"></rect>
+              <rect x="18" y="68" width="14" height="14" fill="#fff"></rect>
+              <rect x="21" y="71" width="8" height="8"></rect>
+              
+              <!-- Random blocks -->
+              <rect x="40" y="15" width="5" height="20"></rect>
+              <rect x="50" y="15" width="10" height="5"></rect>
+              <rect x="50" y="25" width="5" height="10"></rect>
+              <rect x="40" y="40" width="45" height="10"></rect>
+              <rect x="15" y="40" width="20" height="5"></rect>
+              <rect x="15" y="50" width="10" height="10"></rect>
+              <rect x="30" y="50" width="15" height="5"></rect>
+              <rect x="50" y="55" width="5" height="15"></rect>
+              <rect x="60" y="55" width="25" height="5"></rect>
+              <rect x="40" y="65" width="5" height="10"></rect>
+              <rect x="50" y="75" width="15" height="10"></rect>
+              <rect x="70" y="65" width="5" height="20"></rect>
+              <rect x="80" y="75" width="5" height="10"></rect>
+            </g>
+          </svg>
+        </div>
+
+        <div class="countdown-timer">
+          เหลือเวลาอีก <span id="timerText">15:00</span> น.
+        </div>
+
+        <div class="security-alert">
+          <span class="material-icons-outlined alert-icon">error_outline</span>
+          <p>ข้อมูลบัตรของคุณจะถูกเข้ารหัสอย่างปลอดภัย</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-action">
+      <button class="btn-primary" id="verifyBtn">ตรวจสอบ</button>
+    </div>
+
+  </main>
+
+  <script src="../../js/account/payment.js"></script>
+</body>
+</html>

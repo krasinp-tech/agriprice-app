@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ยืนยันการจองคิว | AGRIPRICE</title>
+  <title>??????????????? | AGRIPRICE</title>
   <link rel="stylesheet" href="../css/global.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -25,31 +25,32 @@
   </style>
   <script src="../js/global-anim.js"></script>
   <script src="../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 <body>
   <div class="status-card" id="statusCard">
     <div id="loadingSec">
       <div class="loading-spinner"></div>
-      <p>กำลังยืนยันตัวตนและบันทึกคิว...</p>
+      <p>????????????????????????????...</p>
     </div>
     
     <div id="successSec" style="display: none;">
       <div class="status-icon"><span class="material-icons-outlined">check_circle</span></div>
-      <h2 class="status-title">ยืนยันสำเร็จ!</h2>
-      <p class="status-msg">รหัสคิวนี้ได้รับการบันทึกเข้าสู่ระบบเรียบร้อยแล้ว</p>
+      <h2 class="status-title">????????????!</h2>
+      <p class="status-msg">?????????????????????????????????????????????????</p>
       <div class="booking-info">
-        <div class="info-row"><span class="info-label">หมายเลขคิว:</span> <span class="info-value" id="resQueue">-</span></div>
+        <div class="info-row"><span class="info-label">??????????:</span> <span class="info-value" id="resQueue">-</span></div>
         <div class="info-row"><span class="info-label">Booking ID:</span> <span class="info-value" id="resId">-</span></div>
-        <div class="info-row"><span class="info-label">สถานะ:</span> <span class="info-value" style="color: #0B853C;">สำเร็จ</span></div>
+        <div class="info-row"><span class="info-label">?????:</span> <span class="info-value" style="color: #0B853C;">??????</span></div>
       </div>
-      <a href="buyer/myprofile.html" class="btn-done">กลับไปหน้าหลัก</a>
+      <a href="buyer/myprofile.html" class="btn-done">??????????????</a>
     </div>
 
     <div id="errorSec" style="display: none;">
       <div class="status-icon" style="background: #E53935;"><span class="material-icons-outlined">error_outline</span></div>
-      <h2 class="status-title">เกิดข้อผิดพลาด</h2>
-      <p class="status-msg" id="errorMsg">ไม่สามารถระบุตัวตนหรือพบข้อมูลการจอง</p>
-      <a href="javascript:history.back()" class="btn-done" style="background: #666;">ย้อนกลับ</a>
+      <h2 class="status-title">??????????????</h2>
+      <p class="status-msg" id="errorMsg">????????????????????????????????????</p>
+      <a href="javascript:history.back()" class="btn-done" style="background: #666;">????????</a>
     </div>
   </div>
 
@@ -68,7 +69,7 @@
       if (!bid || !TOKEN || !API_BASE) {
         loadingSec.style.display = 'none';
         errorSec.style.display = 'block';
-        if (!TOKEN) document.getElementById('errorMsg').textContent = 'กรุณาเข้าสู่ระบบก่อนสแกน';
+        if (!TOKEN) document.getElementById('errorMsg').textContent = '????????????????????????';
         return;
       }
 
@@ -86,13 +87,13 @@
           document.getElementById('resId').textContent = json.data?.booking_no || json.data?.booking_id || bid;
           successSec.style.display = 'block';
         } else {
-          document.getElementById('errorMsg').textContent = json.message || 'ไม่สามารถยืนยันคิวได้';
+          document.getElementById('errorMsg').textContent = json.message || '?????????????????????';
           errorSec.style.display = 'block';
         }
       } catch (e) {
         loadingSec.style.display = 'none';
         errorSec.style.display = 'block';
-        document.getElementById('errorMsg').textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+        document.getElementById('errorMsg').textContent = '????????????????????????????????';
       }
     });
   </script>

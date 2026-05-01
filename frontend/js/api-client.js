@@ -1,10 +1,7 @@
 /**
  * js/api-client.js - AgriPrice v2
- * เชื่อม frontend กับ server.js
- *
- * ใส่ใน HTML ทุกหน้าก่อน </head>:
- *   <script>window.API_BASE_URL = 'http://localhost:5000';</script>
- *   <script src="../../js/api-client.js"></script>
+ * ไฟล์นี้ทำหน้าที่เป็น "สะพานเชื่อม" (API Client) ระหว่าง Frontend กับ Backend
+ * รวมฟังก์ชันการดึงข้อมูลทั้งหมดไว้ที่เดียว เพื่อให้ง่ายต่อการดูแลและเรียกใช้งานซ้ำ (Reusable)
  */
 (function () {
   const BASE      = (window.API_BASE_URL || '').replace(/\/$/, '');
@@ -13,23 +10,29 @@
 
   if (!BASE) return; // ไม่มี server ให้ใช้ fallback แบบเดิม
 
-  // โ”€โ”€โ”€ helpers โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 1. Helpers (ตัวช่วยจัดการ Authentication & Token) ---
   const getToken = () => localStorage.getItem(TOKEN_KEY) || '';
   const setToken = t => localStorage.setItem(TOKEN_KEY, t);
   const getUser  = () => { try { return JSON.parse(localStorage.getItem(USER_KEY)||'null'); } catch(_){return null;} };
   const setUser  = u => localStorage.setItem(USER_KEY, JSON.stringify(u));
   const clearAuth = () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); localStorage.removeItem('role'); };
 
+  // ฟังก์ชันหลักที่ใช้ยิง API ทุกตัว (จัดการเรื่องแนบ Token ให้อัตโนมัติ)
   async function call(method, path, body, isForm) {
     const headers = {};
     const token = getToken();
+    
+    // แนบ Token ไปใน Header เพื่อยืนยันตัวตน
     if (token) headers['Authorization'] = 'Bearer ' + token;
     if (!isForm && body) headers['Content-Type'] = 'application/json';
+    
     const opts = { method, headers };
     if (body) opts.body = isForm ? body : JSON.stringify(body);
     let res;
     try { res = await fetch(BASE + path, opts); }
     catch (_) { throw new Error('ไม่สามารถเชื่อมต่อ server ได้'); }
+    
+    // ดักจับกรณี Token หมดอายุ (401) ให้เด้งกลับไปหน้า Login อัตโนมัติ
     if (res.status === 401) {
       clearAuth();
       const p = window.location.pathname, idx = p.indexOf('/pages/');
@@ -41,7 +44,7 @@
     return json;
   }
 
-  // โ”€โ”€โ”€ auth โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 2. Auth (ระบบสมัครสมาชิกและล็อกอินผ่าน OTP) ---
   const otpSend    = phone => call('POST', '/api/auth/otp/send', { phone });
   const otpVerify  = (phone, otp) => call('POST', '/api/auth/otp/verify', { phone, otp });
   const registerFinish = (temp_token, role, profile, password) =>
@@ -54,13 +57,13 @@
   }
   const logout = clearAuth;
 
-  // โ”€โ”€โ”€ profile โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 3. Profile (จัดการข้อมูลส่วนตัว) ---
   const getProfile     = ()        => call('GET',   '/api/profile');
   const updateProfile  = form      => call('PATCH', '/api/profile', form, form instanceof FormData);
   const getProfileById = id        => call('GET',   '/api/profiles/' + id);
   const deleteProfile  = reason    => call('DELETE','/api/profile', reason ? { reason } : {});
 
-  // โ”€โ”€โ”€ products โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 4. Products (จัดการประกาศขายผลผลิต) ---
   function getProducts(params) {
     const q = params ? '?'+new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v])=>v!=null&&v!==''))).toString() : '';
     return call('GET', '/api/products'+q);
@@ -71,7 +74,7 @@
   const deleteProduct  = id   => call('DELETE', '/api/products/'+id);
   const getVarieties   = p    => call('GET', '/api/varieties'+(p?'?'+new URLSearchParams(p).toString():''));
 
-  // โ”€โ”€โ”€ product slots โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 5. Product Slots (จัดการรอบการรับซื้อ/วันเวลาว่าง) ---
   const getProductSlots    = (productId, p) => call('GET', `/api/products/${productId}/slots`+(p?'?'+new URLSearchParams(p).toString():''));
   const getAllSlots        = p => call('GET', '/api/product-slots'+(p?'?'+new URLSearchParams(p).toString():''));
   const createProductSlot  = (productId, data) => call('POST', `/api/products/${productId}/slots`, data);
@@ -79,16 +82,16 @@
   const updateProductSlot  = (id, data) => call('PATCH', `/api/product-slots/${id}`, data);
   const deleteProductSlot  = id => call('DELETE', `/api/product-slots/${id}`);
 
-  // โ”€โ”€โ”€ users โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 6. Users (ค้นหาผู้ใช้) ---
   const getUsers = p => call('GET', '/api/users/search'+(p?'?'+new URLSearchParams(p).toString():''));
 
-  // โ”€โ”€โ”€ bookings โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 7. Bookings (ระบบจองคิวรับซื้อ - Core Feature) ---
   const getBookings      = status => call('GET',   '/api/bookings'+(status?'?status='+status:''));
   const getBooking       = id     => call('GET',   '/api/bookings/'+id);
   const createBooking    = body   => call('POST',  '/api/bookings', body);
   const updateBooking    = (id,s) => call('PATCH', '/api/bookings/'+id, { status: s });
 
-  // โ”€โ”€โ”€ chat โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 8. Chat (ระบบแชทเรียลไทม์) ---
   const getChats         = ()      => call('GET',  '/api/chats');
   const startChat        = target_user_id => call('POST', '/api/chats/start', { target_user_id });
   const getChatMessages  = id      => call('GET',  '/api/chats/'+id+'/messages');
@@ -102,18 +105,18 @@
     return call('POST', '/api/chats/'+chatId+'/messages', { message });
   }
 
-  // โ”€โ”€โ”€ notifications โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 9. Notifications (ระบบการแจ้งเตือน) ---
   const getNotifications = ()  => call('GET',   '/api/notifications');
   const markRead         = id  => call('PATCH', '/api/notifications/'+id+'/read');
   const markAllRead      = ()  => call('PATCH', '/api/notifications/read-all');
   const getNotificationSettings = () => call('GET', '/api/notification-settings');
   const saveNotificationSettings = (settings, role) => call('PATCH', '/api/notification-settings', { settings, role });
 
-  // โ”€โ”€โ”€ misc โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- 10. Misc (ฟังก์ชันอื่นๆ) ---
   const search       = q => call('GET', '/api/search?q='+encodeURIComponent(q));
   const getDashboard = () => call('GET', '/api/dashboard');
 
-  // โ”€โ”€โ”€ export โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+  // --- Export ออกไปให้ทุกหน้าเรียกใช้ผ่านคำสั่ง window.api.xxx() ได้ ---
   window.api = {
     BASE, getToken, setToken, clearAuth, getUser, setUser,
     otpSend, otpVerify, registerFinish, login, logout,
@@ -126,6 +129,5 @@
     getNotifications, markRead, markAllRead, getNotificationSettings, saveNotificationSettings,
     search, getDashboard,
   };
-  if (window.AGRIPRICE_DEBUG) console.log('[api] โ… connected:', BASE);
+  if (window.AGRIPRICE_DEBUG) console.log('[api] ✅ connected:', BASE);
 })();
-

@@ -1,0 +1,314 @@
+/* ================================
+   Payment Styles
+================================ */
+
+body {
+  background: #f0f7ff !important;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* Header Background */
+.payment-header-bg {
+  background: #3b82f6;
+  padding: 16px 20px 40px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  color: white;
+}
+
+.back-btn-light {
+  background: transparent;
+  border: none;
+  color: white;
+  margin-bottom: 20px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  margin-left: -4px;
+}
+
+.back-btn-light span {
+  font-size: 28px;
+}
+
+.header-titles h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.header-titles p {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.payment-main {
+  padding: 0 20px 100px;
+  margin-top: -24px; /* Pull up to overlap header */
+}
+
+/* Cards */
+.summary-card, .method-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+/* Plan Summary */
+.plan-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.plan-icon {
+  background: #3b82f6;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-info {
+  flex: 1;
+}
+
+.plan-info-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.plan-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.plan-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+}
+
+.plan-price .currency, .plan-price .amount {
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 24px;
+}
+
+.plan-price .period {
+  font-size: 12px;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+/* Tabs */
+.method-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn span {
+  font-size: 20px;
+}
+
+.tab-btn.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1e293b;
+}
+
+.tab-btn.active span {
+  color: #3b82f6;
+}
+
+/* Form Styles */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-group.half {
+  flex: 1;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #ffffff;
+}
+
+input:focus {
+  border-color: #3b82f6;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 40px;
+}
+
+.field-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1e293b;
+}
+
+/* Security Alert */
+.security-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffbeb;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+  border: 1px solid #fde68a;
+}
+
+.alert-icon {
+  color: #d97706;
+  font-size: 20px;
+}
+
+.security-alert p {
+  margin: 0;
+  font-size: 12px;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* QR Code Section */
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.qr-code {
+  width: 220px;
+  height: 220px;
+  display: block;
+}
+
+.countdown-timer {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+/* Bottom Action */
+.bottom-action {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  background: #f0f7ff;
+  /* Uncomment to add shadow if needed
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.03); */
+}
+
+@media (min-width: 1200px) {
+  .bottom-action {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    border-bottom-left-radius: var(--app-shell-radius);
+    border-bottom-right-radius: var(--app-shell-radius);
+  }
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}

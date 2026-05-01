@@ -1,4 +1,8 @@
-﻿// Global animation helper for fade-slide and modal-fade
+// Global animation helper for fade-slide and modal-fade
+/**
+ * [Frontend Logic] ไฟล์ควบคุมพฤติกรรมของแอป (App-like Behavior)
+ * ทำให้หน้าเว็บ HTML ทำตัวเหมือนแอปมือถือ (Native App) จริงๆ
+ */
 (function(){
   if (!window.__AGRIPRICE_APP_BEHAVIOR_READY) {
     try {
@@ -21,7 +25,8 @@
       return !!target.closest('input, textarea, [contenteditable="true"], .allow-select');
     };
 
-    // Mobile-app feel: prevent copy/select/context-menu on non-input UI.
+    // [UX] ป้องกันไม่ให้ผู้ใช้กดค้างเพื่อ Copy/Select Text เหมือนหน้าเว็บปกติ (ยกเว้นช่องกรอกข้อความ)
+    // ทำให้รู้สึกเหมือนกำลังกดแอปจริงๆ
     document.addEventListener('contextmenu', (e) => {
       if (isEditableTarget(e.target)) return;
       e.preventDefault();
@@ -42,6 +47,7 @@
       e.preventDefault();
     });
 
+    // [UX] ป้องกันการซูมหน้าจอ (Zoom) ด้วยนิ้ว เพื่อไม่ให้ UI พังบน iOS
     // iOS gesture zoom prevention
     ['gesturestart', 'gesturechange', 'gestureend'].forEach((evt) => {
       document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
@@ -130,80 +136,13 @@
 
     if (shouldForcePortrait() && isStrictRoute()) {
       document.documentElement.classList.add('app-strict-mode');
-
-      // Soft guard: show confirmation modal before leaving critical flow.
-      const createSoftGuardModal = () => {
-        const existing = document.getElementById('softGuardModal');
-        if (existing) return existing;
-
-        const modal = document.createElement('div');
-        modal.id = 'softGuardModal';
-        modal.className = 'soft-guard-modal';
-        modal.setAttribute('aria-hidden', 'true');
-        modal.innerHTML = `
-          <div class="soft-guard-backdrop" data-soft-guard-stay="1"></div>
-          <div class="soft-guard-sheet" role="dialog" aria-modal="true" aria-labelledby="softGuardTitle">
-            <h3 id="softGuardTitle">ยืนยันการออกจากหน้านี้</h3>
-            <p>ข้อมูลที่กำลังกรอกอาจยังไม่ถูกบันทึก คุณต้องการย้อนกลับหรือไม่?</p>
-            <div class="soft-guard-actions">
-              <button type="button" class="soft-guard-btn ghost" data-soft-guard-stay="1">อยู่ต่อ</button>
-              <button type="button" class="soft-guard-btn danger" data-soft-guard-exit="1">ย้อนกลับ</button>
-            </div>
-          </div>
-        `;
-
-        const hide = () => {
-          modal.classList.remove('show');
-          modal.setAttribute('aria-hidden', 'true');
-        };
-
-        modal.addEventListener('click', (e) => {
-          const stay = e.target.closest('[data-soft-guard-stay]');
-          if (stay) hide();
-        });
-
-        document.body.appendChild(modal);
-        return modal;
-      };
-
-      const modal = createSoftGuardModal();
-      const showModal = () => {
-        modal.classList.add('show');
-        modal.setAttribute('aria-hidden', 'false');
-      };
-
-      const onPopState = () => {
-        try {
-          history.pushState({ appStrictGuard: true }, '', window.location.href);
-        } catch (_) {}
-        showModal();
-      };
-
-      try {
-        history.pushState({ appStrictGuard: true }, '', window.location.href);
-      } catch (_) {}
-      window.addEventListener('popstate', onPopState);
-
-      modal.addEventListener('click', (e) => {
-        const exit = e.target.closest('[data-soft-guard-exit]');
-        if (!exit) return;
-
-        modal.classList.remove('show');
-        modal.setAttribute('aria-hidden', 'true');
-        window.removeEventListener('popstate', onPopState);
-
-        try {
-          history.go(-2);
-        } catch (_) {
-          history.back();
-        }
-      });
     }
 
     document.documentElement.classList.add('app-like-mode');
     window.__AGRIPRICE_APP_BEHAVIOR_READY = true;
   }
 
+  // [UX] ระบบ Page Transition เปลี่ยนหน้าจอแบบมี Animation เฟดเข้า-ออก
   if (!window.__AGRIPRICE_NATIVE_NAV_READY) {
     const LEAVE_MS = 180;
 
@@ -253,9 +192,15 @@
     }
 
     document.addEventListener('click', (e) => {
-      if (e.defaultPrevented) return;
+      if (e.defaultPrevented && !e.__agripriceHandled) return;
       if (e.button !== 0) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      // [UX] Haptic Feedback: สั่นเบาๆ เมื่อผู้ใช้กดปุ่ม เพื่อให้รู้สึกเหมือนใช้แอป Native
+      const isInteractive = e.target.closest('a[href], button, .menu-item, .card-actions, .bottom-nav-item, [data-action]');
+      if (isInteractive && navigator.vibrate) {
+        try { navigator.vibrate(15); } catch (_) {}
+      }
 
       const anchor = e.target.closest('a[href]');
       if (!anchor) return;

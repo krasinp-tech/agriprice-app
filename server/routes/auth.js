@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const db = require('../db');
-const response = require('../response');
+const response = require('../utils/response');
 const authMiddleware = require('../middlewares/auth');
 const registerSchema = require('../validators/register');
 const Joi = require('joi');
@@ -44,6 +44,7 @@ async function findAuthUserByEmail(email) {
 
 /**
  * POST /api/auth/otp/send
+ * [Authentication Flow] ส่งรหัส OTP ไปที่เบอร์โทรศัพท์ (หรือ Mock ถ้าอยู่ในโหมดทดสอบ)
  */
 router.post('/otp/send', otpLimiter, async (req, res) => {
   try {
@@ -65,6 +66,7 @@ router.post('/otp/send', otpLimiter, async (req, res) => {
 
 /**
  * POST /api/auth/otp/verify
+ * [Authentication Flow] ตรวจสอบรหัส OTP และเช็คว่าเป็นผู้ใช้ใหม่หรือไม่
  */
 router.post('/otp/verify', async (req, res) => {
   try {
@@ -75,15 +77,17 @@ router.post('/otp/verify', async (req, res) => {
     if (DEV_OTP_MODE) {
       if (String(otp) !== '123456') return res.status(400).json(response.error('OTP ไม่ถูกต้อง'));
     } else {
+      // ตรวจสอบกับ Supabase Auth
       const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' });
       if (error) return res.status(400).json(response.error(error.message));
     }
 
+    // ค้นหาในฐานข้อมูลว่าเคยลงทะเบียนด้วยเบอร์นี้หรือยัง
     const { data: existing } = await supabaseAdmin
-      .from('profiles').select('profile_id, first_name, role').eq('phone', phone).maybeSingle();
+      .from('profiles').select('profile_id, first_name, role, tier').eq('phone', phone).maybeSingle();
 
-    const isNewUser = !existing;
-    const temp_token = signTempToken(phone);
+    const isNewUser = !existing; // ถ้ายังไม่มีแปลว่าเป็น User ใหม่ ต้องไปหน้ากรอกชื่อ-รหัสผ่าน
+    const temp_token = signTempToken(phone); // สร้าง Token ชั่วคราวให้ไปกรอกข้อมูลต่อ
 
     res.json(response.success('OTP ยืนยันสำเร็จ', {
       verified: true,
@@ -142,7 +146,7 @@ router.post('/firebase/verify-phone', async (req, res) => {
     
     const { data: existing } = await supabaseAdmin
       .from('profiles')
-      .select('profile_id, first_name, role')
+      .select('profile_id, first_name, role, tier')
       .eq('phone', cleanPhone)
       .maybeSingle();
 
@@ -162,6 +166,7 @@ router.post('/firebase/verify-phone', async (req, res) => {
 
 /**
  * POST /api/auth/register/finish
+ * [Authentication Flow] ขั้นตอนสุดท้ายของการสมัครสมาชิก (กรอกรหัสผ่านและบันทึกลง DB)
  */
 router.post('/register/finish', async (req, res) => {
   let createdAuthUserId = null;
@@ -206,16 +211,16 @@ router.post('/register/finish', async (req, res) => {
       const defaultAvatar = getDefaultAvatarByRole(role);
 
       await client.query(
-        'INSERT INTO profiles (profile_id, phone, first_name, last_name, role, password_hash, avatar) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-        [userId, phone, firstName, lastName, role, password_hash, defaultAvatar]
+        'INSERT INTO profiles (profile_id, phone, first_name, last_name, role, password_hash, avatar, tier) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+        [userId, phone, firstName, lastName, role, password_hash, defaultAvatar, 'free']
       );
 
       await client.query('COMMIT');
-      const token = signToken({ id: userId, phone, role });
+      const token = signToken({ id: userId, phone, role, tier: 'free' });
 
       res.status(201).json(response.success('สมัครสมาชิกสำเร็จ', {
         token,
-        user: { id: userId, phone, role, name: `${firstName} ${lastName}`, avatar: defaultAvatar }
+        user: { id: userId, phone, role, tier: 'free', name: `${firstName} ${lastName}`, avatar: defaultAvatar }
       }));
     } catch (err) {
       await client.query('ROLLBACK');
@@ -233,6 +238,7 @@ router.post('/register/finish', async (req, res) => {
 
 /**
  * POST /api/auth/login
+ * [Authentication Flow] เข้าสู่ระบบด้วยเบอร์โทรและรหัสผ่าน (ไม่ต้องใช้ OTP)
  */
 router.post('/login', async (req, res) => {
   const loginSchema = Joi.object({
@@ -251,14 +257,14 @@ router.post('/login', async (req, res) => {
 
     let { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('profile_id, phone, first_name, last_name, role, password_hash')
+      .select('profile_id, phone, first_name, last_name, role, password_hash, tier')
       .eq('phone', searchPhone)
       .maybeSingle();
 
     if (!profile && identifier.includes('@')) {
       const { data: byEmail } = await supabaseAdmin
         .from('profiles')
-        .select('profile_id, phone, first_name, last_name, role, password_hash')
+        .select('profile_id, phone, first_name, last_name, role, password_hash, tier')
         .ilike('email', identifier.trim().toLowerCase())
         .maybeSingle();
       if (byEmail) profile = byEmail;
@@ -270,8 +276,8 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, profile.password_hash);
     if (!valid) return res.status(401).json(response.error('เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง'));
 
-    const token = signToken({ id: profile.profile_id, phone: profile.phone, role: profile.role });
-    const loginUser = { id: profile.profile_id, phone: profile.phone, role: profile.role, name: `${profile.first_name} ${profile.last_name}` };
+    const token = signToken({ id: profile.profile_id, phone: profile.phone, role: profile.role, tier: profile.tier || 'free' });
+    const loginUser = { id: profile.profile_id, phone: profile.phone, role: profile.role, tier: profile.tier || 'free', name: `${profile.first_name} ${profile.last_name}` };
 
     res.json(response.success("เข้าสู่ระบบสำเร็จ", { token, user: loginUser }));
   } catch (e) {

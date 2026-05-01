@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <script src="../../../js/components/i18n.js"></script>
@@ -6,7 +6,7 @@
     <script src="../../../js/components/escape-html.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_title_page">การจอง | AGRIPRICE</title>
+  <title data-i18n="booking_title_page">?????? | AGRIPRICE</title>
 
   <link rel="stylesheet" href="../../../css/global.css" />
    <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css" />
@@ -16,6 +16,7 @@
   <script src="../../../js/api-client.js"></script>
   <script src="../../../js/global-anim.js"></script>
   <script src="../../../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <body data-active="booking">
@@ -23,21 +24,21 @@
 
     <!-- Header Section -->
     <section class="booking-header">
-      <h1 class="booking-title" data-i18n="booking_title">การจอง</h1>
-      <p class="booking-subtitle" data-i18n="booking_subtitle_farmer">ประวัติการจองของคุณ</p>
+      <h1 class="booking-title" data-i18n="booking_title">??????</h1>
+      <p class="booking-subtitle" data-i18n="booking_subtitle_farmer">???????????????????</p>
     </section>
 
     <section class="controls">
-      <div class="segmented" role="tablist" aria-label="ตัวกรองการจอง" data-i18n-aria-label="booking_filter_label">
-        <button class="seg-btn active" data-filter="all" data-i18n="all">ทั้งหมด</button>
-        <button class="seg-btn" data-filter="waiting" data-i18n="waiting">รอคิว</button>
-        <button class="seg-btn" data-filter="success" data-i18n="success">สำเร็จ</button>
-        <button class="seg-btn" data-filter="cancel" data-i18n="cancel">ยกเลิก</button>
+      <div class="segmented" role="tablist" aria-label="?????????????" data-i18n-aria-label="booking_filter_label">
+        <button class="seg-btn active" data-filter="all" data-i18n="all">???????</button>
+        <button class="seg-btn" data-filter="waiting" data-i18n="waiting">?????</button>
+        <button class="seg-btn" data-filter="success" data-i18n="success">??????</button>
+        <button class="seg-btn" data-filter="cancel" data-i18n="cancel">??????</button>
       </div>
 
       <div class="searchbox">
         <span class="material-icons-outlined">search</span>
-        <input id="searchInput" type="text" placeholder="ค้นหาด้วยเลขจอง / ร้าน / คิว" data-i18n-placeholder="booking_search_placeholder" />
+        <input id="searchInput" type="text" placeholder="??????????????? / ???? / ???" data-i18n-placeholder="booking_search_placeholder" />
       </div>
     </section>
 
@@ -46,8 +47,8 @@
     <div class="empty" id="emptyState" hidden>
       <div class="empty-card">
         <div class="empty-emoji"><span class="material-icons-outlined" aria-hidden="true">receipt_long</span></div>
-        <div class="empty-title" data-i18n="booking_empty_title">ยังไม่มีรายการจองที่ตรงกับเงื่อนไข</div>
-        <div class="empty-desc" data-i18n="booking_empty_desc">ลองเปลี่ยนตัวกรอง หรือพิมพ์ค้นหาใหม่อีกครั้ง</div>
+        <div class="empty-title" data-i18n="booking_empty_title">??????????????????????????????????</div>
+        <div class="empty-desc" data-i18n="booking_empty_desc">????????????????? ??????????????????????????</div>
       </div>
     </div>
   </main>
@@ -68,7 +69,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
   });
-  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  // sync ?????????????????????/????????
   window.addEventListener('storage', function(e) {
     if (e.key === 'lang') {
       if (window.i18nInit) window.i18nInit();

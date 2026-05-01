@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../../css/global.css" />
   <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
   <link rel="stylesheet" href="../../css/account/account.css" />
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <!-- เพิ่ม data-auth="required" เพื่อบอกว่า หน้านี้ต้องล็อกอิน -->
@@ -71,7 +72,7 @@
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
 
-        <!-- buyer เท่านั้น: Dashboard -->
+        <!-- buyer PRO เท่านั้น: Dashboard -->
         <a class="menu-item" id="buyerDashboardLink" href="../buyer/Dashboard/Dashboard1.html" style="display:none;">
           <span class="menu-icon-wrap">
             <span class="material-icons-outlined mi">dashboard</span>
@@ -79,6 +80,18 @@
           <div class="menu-text">
             <div class="menu-title" data-i18n="dashboard">Dashboard</div>
             <div class="menu-sub" data-i18n="dashboard_desc">ภาพรวมและสถิติการซื้อของคุณ</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <!-- buyer FREE: สมัคร PRO -->
+        <a class="menu-item" id="buyerUpgradeLink" href="subscription.html" style="display:none;">
+          <span class="menu-icon-wrap">
+            <span class="material-icons-outlined mi" style="color: #f59e0b;">stars</span>
+          </span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="upgrade_pro">อัปเกรดเป็น PRO</div>
+            <div class="menu-sub" data-i18n="upgrade_pro_desc">ปลดล็อกสถิติ Dashboard สุดล้ำ</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>

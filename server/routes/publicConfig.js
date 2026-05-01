@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const response = require('../response');
+const response = require('../utils/response');
 
 /**
  * GET /api/public-config
@@ -8,7 +8,7 @@ const response = require('../response');
  */
 router.get('/', (req, res) => {
   const config = {
-    FIREBASE_CONFIG: {
+    firebase: {
       apiKey: process.env.FIREBASE_API_KEY || "",
       authDomain: process.env.FIREBASE_AUTH_DOMAIN || "",
       projectId: process.env.FIREBASE_PROJECT_ID || "",

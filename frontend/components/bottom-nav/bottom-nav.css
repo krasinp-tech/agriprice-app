@@ -90,15 +90,45 @@
     }
 }
 
-/* Desktop - ซ่อน bottom nav ถ้าต้องการ */
+/* Desktop - แปลงเป็น Sidebar ด้านซ้าย */
 @media (min-width: 1024px) {
     .bottom-nav {
-        max-width: var(--app-shell-width, 430px);
-        left: 50%;
-        transform: translateX(-50%);
-        border-radius: 0 0 26px 26px;
-        border-left: 1px solid #EFEFEF;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 240px;
+        max-width: 240px;
+        height: 100vh;
+        transform: none;
+        border-radius: 0;
+        border-left: none;
+        border-bottom: none;
         border-right: 1px solid #EFEFEF;
-        border-bottom: 1px solid #EFEFEF;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding-top: 32px;
+        padding-bottom: 32px;
+        background: #ffffff;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.03);
+    }
+
+    .bottom-nav-item {
+        flex: none;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 16px 24px;
+        gap: 16px;
+        min-height: 56px;
+    }
+
+    .bottom-nav-item span.material-icons-outlined {
+        font-size: 24px;
+    }
+
+    .bottom-nav-item .nav-label {
+        font-size: 16px;
+        font-weight: 600;
     }
 }
+

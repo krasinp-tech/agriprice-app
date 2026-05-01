@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const response = require('../response');
+const response = require('../utils/response');
 const authMiddleware = require('../middlewares/auth');
 const upload = require('../middlewares/upload');
 const { supabaseAdmin } = require('../utils/supabase');
@@ -9,6 +9,7 @@ const { saveFile } = require('../services/fileService');
 
 /**
  * GET /api/products
+ * [Core Feature] ดึงรายการผลผลิต (พร้อมระบบ Smart Search ค้นหาด้วยวันที่และข้อความ)
  */
 router.get('/', async (req, res) => {
   try {
@@ -26,7 +27,8 @@ router.get('/', async (req, res) => {
     if (user_id) query = query.eq('user_id', user_id);
     if (category) query = query.eq('category', category);
 
-    // --- SMART SEARCH (q) ---
+    // --- SMART SEARCH (ระบบค้นหาอัจฉริยะ) ---
+    // ตรวจสอบว่าผู้ใช้ค้นหาเป็น "วันที่" หรือ "ข้อความ"
     if (q) {
       // Check if q looks like a date (e.g., 2026-04-16, 16-04-2026, 16/04/2026)
       const dateMatch = q.match(/^(\d{4}-\d{2}-\d{2})|(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})$/);
@@ -53,7 +55,7 @@ router.get('/', async (req, res) => {
           query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%,variety.ilike.%${q}%`);
         }
       } else {
-        // Normal text search across multiples fields
+        // ค้นหาแบบข้อความปกติ (หาจากชื่อ, หมวดหมู่, สายพันธุ์)
         query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%,variety.ilike.%${q}%`);
       }
     }
@@ -101,6 +103,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * POST /api/products
+ * [Core Feature] สร้างประกาศรับซื้อ/ขายผลผลิตใหม่ พร้อมอัปโหลดรูปภาพ
  */
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {

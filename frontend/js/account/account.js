@@ -223,8 +223,21 @@
     if (buyerProfileLink) {
       buyerProfileLink.style.display = role === "buyer" ? "flex" : "none";
     }
-    if (buyerDashboardLink) {
-      buyerDashboardLink.style.display = role === "buyer" ? "flex" : "none";
+
+    const tier = String(u.tier || "free").toLowerCase();
+    const buyerUpgradeLink = document.getElementById("buyerUpgradeLink");
+
+    if (role === "buyer") {
+      if (tier === "pro") {
+        if (buyerDashboardLink) buyerDashboardLink.style.display = "flex";
+        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
+      } else {
+        if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
+        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "flex";
+      }
+    } else {
+      if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
+      if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
     }
 
     const s = u.stats || {};
@@ -293,6 +306,7 @@
       roleLabel,
       memberSince: data.memberSince ?? data.createdAt ?? data.created_at ?? emptyUser.memberSince,
       avatarUrl: data.avatarUrl ?? data.avatar ?? emptyUser.avatarUrl,
+      tier: data.tier ?? "free",
       stats: {
         following: data.stats?.following ?? data.followingCount ?? data.following_count ?? emptyUser.stats.following,
         followers: data.stats?.followers ?? data.followerCount ?? data.followers_count ?? emptyUser.stats.followers,

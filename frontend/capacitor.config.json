@@ -2,6 +2,7 @@
   "appId": "com.agriprice.app",
   "appName": "AGRIPRICE",
   "webDir": "www",
+  "backgroundColor": "#f8f9faff",
   "server": {
     "cleartext": true,
     "androidScheme": "https"

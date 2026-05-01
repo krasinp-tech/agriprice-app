@@ -188,4 +188,52 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/dashboard/pro-stats
+ * ดึงสถิติเชิงลึกสำหรับผู้ใช้ระดับ PRO
+ */
+router.get('/pro-stats', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // In a real implementation, you would aggregate from bookings, payments, views, etc.
+    // For now, return mock aggregated data for the Pro Dashboard design.
+
+    const { data: bookingsData } = await supabaseAdmin
+      .from('bookings')
+      .select('status')
+      .eq('buyer_id', userId);
+
+    const totalBookings = bookingsData ? bookingsData.length : 127;
+    const successBookings = bookingsData ? bookingsData.filter(b => b.status === 'success').length : 78;
+    const waitingBookings = bookingsData ? bookingsData.filter(b => b.status === 'waiting').length : 25;
+    const cancelBookings = bookingsData ? bookingsData.filter(b => b.status === 'cancel').length : 24;
+
+    res.json({
+      success: true,
+      data: {
+        monthlyRevenue: 45280,
+        totalBookings: totalBookings,
+        totalViews: 3842,
+        newFollowers: 18,
+        trends: {
+          monthlyRevenue: "+12.5%",
+          totalBookings: "+8.2%",
+          totalViews: "+24.1%",
+          newFollowers: "+26.3%"
+        },
+        bookingSummary: {
+          total: totalBookings,
+          success: successBookings,
+          waiting: waitingBookings,
+          cancel: cancelBookings
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('[Dashboard Pro API Error]', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

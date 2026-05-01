@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
       <script src="../../../js/components/i18n.js"></script>
@@ -6,7 +6,7 @@
       <script src="../../../js/components/ui-common.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>จองคิว - ข้อมูลสถานพาหนะ | AGRIPRICE</title>
+  <title>?????? - ??????????????? | AGRIPRICE</title>
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +22,7 @@
   <script src="../../../js/api-client.js"></script>
   <script src="../../../js/global-anim.js"></script>
   <script src="../../../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <body data-active="booking">
@@ -32,7 +33,7 @@
 
     <!-- Header Card -->
     <section class="header-card">
-      <button class="btn-back" id="btnBack" aria-label="ย้อนกลับ">
+      <button class="btn-back" id="btnBack" aria-label="????????">
         <span class="material-icons-outlined">arrow_back_ios</span>
       </button>
 
@@ -45,11 +46,11 @@
 
       <div class="header-content">
         <div class="product-icon">
-          <img src="../../../assets/images/durian.png" alt="ทุเรียน" id="productIcon">
+          <img src="../../../assets/images/durian.png" alt="???????" id="productIcon">
         </div>
         <h1 class="header-title" id="headerTitle"></h1>
-        <p class="header-subtitle">จองคิว</p>
-        <p class="header-description">กรอกข้อมูลการจองทั้งหมด</p>
+        <p class="header-subtitle">??????</p>
+        <p class="header-description">???????????????????????</p>
       </div>
     </section>
 
@@ -57,55 +58,55 @@
     <section class="form-content">
       <div class="container-form">
 
-        <!-- ข้อมูลสถานพาหนะ -->
+        <!-- ??????????????? -->
         <div class="section-block">
-          <h2 class="section-title">ข้อมูลสถานพาหนะ</h2>
-          <p class="section-subtitle">รายละเอียดรถที่จะเข้าส่งสินค้า</p>
+          <h2 class="section-title">???????????????</h2>
+          <p class="section-subtitle">??????????????????????????????</p>
 
-          <!-- รถคันที่ 1 -->
+          <!-- ???????? 1 -->
           <div class="vehicle-card" id="vehicle1">
             <div class="vehicle-header">
-              <h3 class="vehicle-title">รถคันที่ 1</h3>
+              <h3 class="vehicle-title">???????? 1</h3>
             </div>
 
             <div class="form-group">
-              <label class="form-label">ประเภทรถ</label>
+              <label class="form-label">????????</label>
               <div class="select-wrapper">
                 <select class="form-select" name="vehicleType1" required>
-                  <option value="">เลือกประเภทรถ</option>
-                  <option value="pickup-4" data-weight="9.5">รถกระบะทั่วไป (4 ล้อ)</option>
-                  <option value="pickup-cage-4" data-weight="9.5">รถพ่วง/เทรลเลอร์</option>
-                  <option value="truck-6" data-weight="15">รถ 6 ล้อ</option>
-                  <option value="truck-10" data-weight="25">รถ 10 ล้อ</option>
-                  <option value="trailer" data-weight="50.5">รถพ่วง/เทรลเลอร์ (6 เพลา 22 ล้อ)</option>
-                  <option value="motorcycle" data-weight="0.5">มอเตอร์ไซค์พ่วงข้าง</option>
-                  <option value="other" data-weight="">อื่นๆ</option>
+                  <option value="">?????????????</option>
+                  <option value="pickup-4" data-weight="9.5">????????????? (4 ???)</option>
+                  <option value="pickup-cage-4" data-weight="9.5">??????/?????????</option>
+                  <option value="truck-6" data-weight="15">?? 6 ???</option>
+                  <option value="truck-10" data-weight="25">?? 10 ???</option>
+                  <option value="trailer" data-weight="50.5">??????/????????? (6 ???? 22 ???)</option>
+                  <option value="motorcycle" data-weight="0.5">???????????????????</option>
+                  <option value="other" data-weight="">?????</option>
                 </select>
                 <span class="select-arrow material-icons-outlined">expand_more</span>
               </div>
-              <div class="weight-limit" id="weightLimit1">ไม่เกิน 9.5 ตัน</div>
+              <div class="weight-limit" id="weightLimit1">??????? 9.5 ???</div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">ข้อมูลป้ายทะเบียน</label>
+              <label class="form-label">?????????????????</label>
               <div class="plate-inputs">
                 <div class="plate-group no">
-                  <label class="plate-sub-label">เลขทะเบียน</label>
+                  <label class="plate-sub-label">??????????</label>
                   <input 
                     type="text" 
                     class="form-input plate-no" 
                     name="plateNo1" 
-                    placeholder="1กข 1234"
+                    placeholder="1?? 1234"
                     required
                   >
                 </div>
                 <div class="plate-group prov">
-                  <label class="plate-sub-label">จังหวัด</label>
+                  <label class="plate-sub-label">???????</label>
                   <input 
                     type="text" 
                     class="form-input plate-prov" 
                     name="plateProv1" 
-                    placeholder="จังหวัด"
+                    placeholder="???????"
                     required
                   >
                 </div>
@@ -113,46 +114,46 @@
             </div>
           </div>
 
-          <!-- ปุ่มเพิ่มรถ -->
+          <!-- ??????????? -->
           <button class="btn-add-vehicle" id="btnAddVehicle">
             <span class="material-icons-outlined">add_circle</span>
-            <span>เพิ่มข้อมูลรถคันที่ 2</span>
+            <span>??????????????????? 2</span>
           </button>
 
           <!-- Container for additional vehicles -->
           <div id="additionalVehicles"></div>
         </div>
 
-        <!-- ปริมาณผลผลิต -->
+        <!-- ???????????? -->
         <div class="section-block">
-          <h2 class="section-title">ปริมาณผลผลิตโดยประมาณ (กิโลกรัม)</h2>
+          <h2 class="section-title">????????????????????? (????????)</h2>
           <input 
             type="number" 
             class="form-input" 
             id="productAmount" 
-            placeholder="เช่น 1,200"
+            placeholder="???? 1,200"
             required
           >
-          <p class="help-text">ระบุน้ำหนักโดยประมาณของผลผลิตทั้งหมด </p>
+          <p class="help-text">???????????????????????????????????? </p>
         </div>
 
-        <!-- ข้อมูลติดต่อ -->
+        <!-- ???????????? -->
         <div class="section-block">
           <div class="section-header-with-action">
-            <h2 class="section-title">ข้อมูลติดต่อ</h2>
-            <button class="btn-edit-profile" id="btnEditProfile">แก้ไขข้อมูลส่วนตัว</button>
+            <h2 class="section-title">????????????</h2>
+            <button class="btn-edit-profile" id="btnEditProfile">??????????????????</button>
           </div>
 
           <div class="contact-card">
             <div class="contact-item">
-              <div class="contact-label">ชื่อ-นามสกุล</div>
-              <div class="contact-value" id="contactName">สมชาย เกษตรกร</div>
+              <div class="contact-label">????-???????</div>
+              <div class="contact-value" id="contactName">????? ???????</div>
             </div>
             <div class="contact-item">
-              <div class="contact-label">เบอร์โทรศัพท์</div>
+              <div class="contact-label">?????????????</div>
               <div class="contact-value" id="contactPhone">081-234-5678</div>
             </div>
-            <div class="contact-note">ข้อมูลติดต่อจะถูกใช้ในการรับผลการจอง</div>
+            <div class="contact-note">????????????????????????????????????</div>
           </div>
         </div>
 
@@ -162,7 +163,7 @@
     <!-- Submit Button -->
     <div class="submit-container">
       <button class="btn-submit" id="btnSubmit">
-        <span>ถัดไป</span>
+        <span>?????</span>
         <span class="material-icons-outlined">arrow_forward</span>
       </button>
     </div>
@@ -175,7 +176,7 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">แก้ไขข้อมูลส่วนตัว</h3>
+        <h3 class="modal-title">??????????????????</h3>
         <button class="btn-close-modal" id="btnCloseModal">
           <span class="material-icons-outlined">close</span>
         </button>
@@ -183,17 +184,17 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">ชื่อ-นามสกุล</label>
+          <label class="form-label">????-???????</label>
           <input 
             type="text" 
             class="form-input" 
             id="editName" 
-            placeholder="กรอกชื่อ-นามสกุล"
+            placeholder="????????-???????"
           >
         </div>
 
         <div class="form-group">
-          <label class="form-label">เบอร์โทรศัพท์</label>
+          <label class="form-label">?????????????</label>
           <input 
             type="tel" 
             class="form-input" 
@@ -205,8 +206,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-modal-cancel" id="btnCancelModal">ยกเลิก</button>
-        <button class="btn-modal-save" id="btnSaveModal">บันทึก</button>
+        <button class="btn-modal-cancel" id="btnCancelModal">??????</button>
+        <button class="btn-modal-save" id="btnSaveModal">??????</button>
       </div>
     </div>
   </div>
@@ -227,7 +228,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
   });
-  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+  // sync ?????????????????????/????????
   window.addEventListener('storage', function(e) {
     if (e.key === 'lang') {
       if (window.i18nInit) window.i18nInit();

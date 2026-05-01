@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ยืนยันตัวตน OTP | Agriprice</title>
+  <title>??????????? OTP | Agriprice</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,7 @@
   <script src="../../js/api-client.js"></script>
   <script src="../../js/global-anim.js"></script>
   <script src="../../js/permission-manager.js"></script>
+<meta name="theme-color" content="#f8f9fa">
 </head>
 
 <body>
@@ -29,44 +30,44 @@
       <!-- CONTENT SHEET -->
       <div class="content">
         <header class="head">
-          <h1 class="h1">ยืนยันตัวตน&nbsp;&nbsp;OTP</h1>
+          <h1 class="h1">???????????&nbsp;&nbsp;OTP</h1>
 
           <p class="subtitle">
-            กรุณากรอกรหัสยืนยันที่ส่งไปยังหมายเลขโทรศัพท์ของคุณ
+            ???????????????????????????????????????????????????
           </p>
 
           <p class="to" id="otpTo">
-            ส่งรหัสไปที่หมายเลข <span class="to-num">0XX-XXX-488</span>
+            ??????????????????? <span class="to-num">0XX-XXX-488</span>
           </p>
         </header>
 
         <div class="timer" aria-live="polite">
-          <span class="timer-label">รหัสจะหมดอายุใน</span>
+          <span class="timer-label">???????????????</span>
           <span class="timer-value" id="timerText">02:00</span>
-          <span class="timer-label">นาที</span>
+          <span class="timer-label">????</span>
         </div>
 
         <p class="hint" id="configSourceText" aria-live="polite"></p>
 
         <!-- OTP BOXES -->
         <form class="otp-form" id="otpForm" novalidate>
-          <div class="otp" role="group" aria-label="กรอกรหัส OTP 6 หลัก">
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="หลักที่ 1" />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 2" />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 3" />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 4" />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 5" />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 6" />
+          <div class="otp" role="group" aria-label="???????? OTP 6 ????">
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="??????? 1" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="??????? 2" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="??????? 3" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="??????? 4" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="??????? 5" />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="??????? 6" />
           </div>
 
           <div id="recaptcha-container" style="display:flex; justify-content:center; margin:10px 0;"></div>
 
-          <button class="link" id="resendBtn" type="button" disabled>ขอรหัสใหม่</button>
+          <button class="link" id="resendBtn" type="button" disabled>??????????</button>
 
           <div class="error" id="formError" role="alert" aria-live="polite"></div>
 
           <button class="btn" id="nextBtn" type="submit">
-            <span class="btn-text">ถัดไป</span>
+            <span class="btn-text">?????</span>
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
 

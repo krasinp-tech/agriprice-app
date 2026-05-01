@@ -261,10 +261,6 @@
       setActiveDot(itemsTab);
     })();
   })();
-  // ...existing code for dynamic product-tabs-section (already handled above)...
-
-
-
 
 function formatTimeAgo(dateStr) {
   if (!dateStr) return '';
@@ -278,6 +274,14 @@ function formatTimeAgo(dateStr) {
 (async function initProductCards() {
   const mount = document.getElementById("productCardsMount");
   if (!mount) return;
+
+  /**
+   * [Mobile Feature] ระบบดึงพิกัด GPS เพื่อหาล้ง (ผู้รับซื้อ) ที่อยู่ "ใกล้ที่สุด"
+   * นำเสนอ: 
+   * 1. เรียกพิกัดจากมือถือผู้ใช้ (Native GPS)
+   * 2. นำไปคำนวณระยะทางแบบ Haversine Formula เทียบกับพิกัดของผู้รับซื้อแต่ละคน
+   * 3. จัดเรียงให้คนที่อยู่ใกล้สุดขึ้นก่อน
+   */
 
     const DEBUG_HOME = !!window.AGRIPRICE_DEBUG; // Define DEBUG_HOME here
   // ตรวจ role ที่ใช้งานอยู่ (เหมือนใน search/profile)
@@ -399,7 +403,7 @@ function formatTimeAgo(dateStr) {
       try {
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
 
-        // ดึง GPS — ใช้ AgriPermission (ซึ่งจะใช้ Capacitor plugin บน native)
+        // 1. ดึงพิกัด GPS ผู้ใช้งาน (รองรับทั้ง Native App และ Web Browser)
         let userLat = null, userLng = null;
         try {
           if (window.AgriPermission) {
@@ -432,6 +436,26 @@ function formatTimeAgo(dateStr) {
           apiUrl += `&lat=${userLat}&lng=${userLng}`;
         }
 
+        // [UX] แสดง Skeleton Loading ระหว่างรอข้อมูลจาก API
+        mount.innerHTML = `
+          <div class="skeleton-card">
+            <div class="skeleton-avatar skeleton"></div>
+            <div class="skeleton-card-content">
+              <div class="skeleton-title skeleton"></div>
+              <div class="skeleton-text skeleton"></div>
+              <div class="skeleton-text skeleton" style="width: 50%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-avatar skeleton"></div>
+            <div class="skeleton-card-content">
+              <div class="skeleton-title skeleton"></div>
+              <div class="skeleton-text skeleton"></div>
+              <div class="skeleton-text skeleton" style="width: 40%;"></div>
+            </div>
+          </div>
+        `;
+
         const apiRes = await fetch(apiUrl, {
           headers: token ? { Authorization: 'Bearer ' + token } : {}
         });
@@ -463,7 +487,7 @@ function formatTimeAgo(dateStr) {
               else priceA = label;
             }
 
-            // คำนวณระยะทาง (Haversine)
+            // 2. คำนวณระยะทาง (Haversine Formula) ว่าห่างกันกี่กิโลเมตร
             let distance = '';
             let distKm = null;
             const sLat = p.profiles?.lat ?? p.lat ?? null;
@@ -491,7 +515,7 @@ function formatTimeAgo(dateStr) {
             };
           });
 
-          // เรียงใกล้สุดก่อน ถ้ามี GPS
+          // 3. เรียงลำดับ (Sorting) ให้ล้งที่อยู่ใกล้ผู้ใช้ที่สุดขึ้นเป็นอันดับแรก
           if (userLat !== null) {
             allProducts.sort((a, b) => (a._distKm ?? 9999) - (b._distKm ?? 9999));
           }
