@@ -280,7 +280,8 @@ router.post('/register/finish', async (req, res) => {
 
         if (supaErr) {
           console.error('[Auth] Supabase createUser error:', supaErr.message);
-          if (supaErr.message.toLowerCase().includes('already exists')) {
+          const msg = supaErr.message.toLowerCase();
+          if (msg.includes('already exists') || msg.includes('already been registered')) {
             const u = await findAuthUserByPhone(phone);
             if (!u) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
             userId = u.id;
