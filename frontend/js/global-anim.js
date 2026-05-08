@@ -283,37 +283,68 @@
   window.__AGRIPRICE_APP_READY = true;
 })();
 
-/* 3. CORDOVA & NATIVE HANDLING */
+/* 3. CORDOVA & CAPACITOR NATIVE HANDLING */
 document.addEventListener('deviceready', () => {
   if (window.AGRIPRICE_DEBUG) console.log('[Native] Device Ready');
 
-  // Handle Android Back Button
+  // Handle Android Back Button (Cordova fallback)
   document.addEventListener('backbutton', (e) => {
     e.preventDefault();
-
-    // 1. Check if any modal is open - if so, close it first
-    const openModal = document.querySelector('.modal:not([hidden]), .logout-modal[style*="flex"]');
-    if (openModal && openModal.style.display !== 'none') {
-      if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: Closing modal');
-      const closeBtn = openModal.querySelector('.modal-close, #logoutCancelBtn, .btn-outline');
-      if (closeBtn) closeBtn.click();
-      else openModal.style.display = 'none';
-      return;
-    }
-
-    // 2. Navigation history
-    if (window.history.length > 1) {
-      if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: History back');
-      window.history.back();
-    } else {
-      // If at the root, exit app
-      if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: Exit app');
-      if (navigator.app && navigator.app.exitApp) {
-        navigator.app.exitApp();
-      }
-    }
+    handleBackButton(() => {
+      if (navigator.app && navigator.app.exitApp) navigator.app.exitApp();
+    });
   }, false);
 }, false);
+
+// Capacitor Back Button Handling
+if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+  window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+    handleBackButton(() => {
+      if (canGoBack) {
+        window.history.back();
+      } else {
+        window.Capacitor.Plugins.App.exitApp();
+      }
+    });
+  });
+} else {
+  // If loaded later
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+      window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+        handleBackButton(() => {
+          if (canGoBack) {
+            window.history.back();
+          } else {
+            window.Capacitor.Plugins.App.exitApp();
+          }
+        });
+      });
+    }
+  });
+}
+
+function handleBackButton(exitCallback) {
+  // 1. Check if any modal is open - if so, close it first
+  const openModal = document.querySelector('.modal:not([hidden]):not(.fade-out), .logout-modal[style*="flex"], .modal.show');
+  if (openModal && openModal.style.display !== 'none' && !openModal.hasAttribute('hidden')) {
+    if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: Closing modal');
+    const closeBtn = openModal.querySelector('.modal-close, #logoutCancelBtn, .btn-outline, #cancelModalBtn');
+    if (closeBtn) closeBtn.click();
+    else openModal.style.display = 'none';
+    return;
+  }
+
+  // 2. Navigation history
+  if (window.history.length > 1 || window.location.pathname !== '/' && !window.location.pathname.endsWith('index.html')) {
+    if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: History back');
+    window.history.back();
+  } else {
+    // If at the root, exit app
+    if (window.AGRIPRICE_DEBUG) console.log('[Native] Back pressed: Exit app');
+    if (exitCallback) exitCallback();
+  }
+}
 
 // Global animation helper for fade-slide and modal-fade (Restored Original)
 (function(){
