@@ -251,48 +251,29 @@ router.post('/register/finish', async (req, res) => {
       await client.query('BEGIN');
       let userId = null;
 
-      // --- MOCK FLOW: Simplified & Robust ---
-      if (String(temp_token).startsWith('mock_temp_token_')) {
-        // พยายามหาไอดีจริงมาใช้เพื่อให้ผ่าน Foreign Key
-        const existingAuth = await findAuthUserByPhone(phone);
-        if (existingAuth) {
-          userId = existingAuth.id;
-          console.log(`[Auth] Mock Flow: Using existing ID ${userId}`);
-        } else {
-          // ถ้าไม่มีเบอร์นี้ใน Auth ให้ลองดึงใครก็ได้มาเป็นร่างทรง 1 คน
-          const { data: all } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1 });
-          if (all?.users?.[0]) {
-            userId = all.users[0].id;
-            console.log(`[Auth] Mock Flow: Using placeholder ID ${userId}`);
-          } else {
-            // ถ้าในระบบยังไม่มี User เลยแม้แต่คนเดียว ต้องสมัครจริงก่อนครับ
-            throw new Error('กรุณาสมัครสมาชิกด้วยเบอร์จริงอย่างน้อย 1 ครั้ง เพื่อเริ่มระบบฐานข้อมูลครับ');
-          }
-        }
-      } else {
-        const { data: authUser, error: supaErr } = await supabaseAdmin.auth.admin.createUser({
-          email: fakeEmail,
-          email_confirm: true,
-          phone: phone,
-          phone_confirm: true,
-          password,
-        });
+      // --- REMOVED MOCK FALLBACK: Always create a fresh user ---
+      const { data: authUser, error: supaErr } = await supabaseAdmin.auth.admin.createUser({
+        email: fakeEmail,
+        email_confirm: true,
+        phone: phone,
+        phone_confirm: true,
+        password,
+      });
 
-        if (supaErr) {
-          console.error('[Auth] Supabase createUser error:', supaErr.message);
-          const msg = supaErr.message.toLowerCase();
-          if (msg.includes('already exists') || msg.includes('already been registered')) {
-            const u = await findAuthUserByPhone(phone);
-            if (!u) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
-            userId = u.id;
-          } else {
-            throw new Error('เกิดข้อผิดพลาดจากฐานข้อมูล: ' + supaErr.message);
-          }
-        } else if (!authUser || !authUser.user) {
-          throw new Error('ระบบ Auth ขัดข้อง: ไม่ได้รับข้อมูลจาก Supabase');
+      if (supaErr) {
+        console.error('[Auth] Supabase createUser error:', supaErr.message);
+        const msg = supaErr.message.toLowerCase();
+        if (msg.includes('already exists') || msg.includes('already been registered')) {
+          const u = await findAuthUserByPhone(phone);
+          if (!u) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
+          userId = u.id;
         } else {
-          userId = authUser.user.id;
+          throw new Error('เกิดข้อผิดพลาดจากฐานข้อมูล: ' + supaErr.message);
         }
+      } else if (!authUser || !authUser.user) {
+        throw new Error('ระบบ Auth ขัดข้อง: ไม่ได้รับข้อมูลจาก Supabase');
+      } else {
+        userId = authUser.user.id;
       }
 
       createdAuthUserId = userId;
