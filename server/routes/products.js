@@ -312,10 +312,28 @@ buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), 
     if (category    !== undefined) updates.category    = category;
     if (variety     !== undefined) updates.variety     = variety;
     if (description !== undefined) updates.description = description;
-    if (price       !== undefined) updates.price       = Number(price);
-    if (grade       !== undefined) updates.grade       = grade;
+    
+    // Parse grades string if provided, to fallback if price/grade aren't explicitly provided
+    let parsedGrades = [];
+    if (grades !== undefined) {
+      try { parsedGrades = JSON.parse(grades); } catch(e) {}
+    }
+    const firstGrade = parsedGrades[0] || {};
+
+    // Use explicit price/grade, fallback to first grade in array, or ignore if undefined
+    if (price !== undefined) {
+      updates.price = Number(price);
+    } else if (firstGrade.price !== undefined) {
+      updates.price = Number(firstGrade.price);
+    }
+
+    if (grade !== undefined) {
+      updates.grade = grade;
+    } else if (firstGrade.grade !== undefined) {
+      updates.grade = firstGrade.grade;
+    }
+
     if (unit        !== undefined) updates.unit        = unit;
-    if (grades      !== undefined) updates.grades      = grades;
     if (is_active   !== undefined) updates.is_active   = is_active === 'true' || is_active === true;
     if (req.file) updates.image = await saveFile(req.file, 'products');
 
