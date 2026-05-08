@@ -349,13 +349,13 @@
       .filter(p => !isStaleProduct(p))
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
-        const grades = Array.isArray(p.product_grades) ? p.product_grades : [];
         let prices = { A: null, B: null, C: null };
-        if (grades.length > 0) {
-          grades.forEach(g => { if (['A', 'B', 'C'].includes(g.grade?.toUpperCase())) prices[g.grade.toUpperCase()] = `${Number(g.price)} ${t('unit_baht', 'บ.')}/${unit}`; });
-        } else {
-          prices.A = `${Number(p.price)} ${t('unit_baht', 'บ.')}/${unit}`;
-        }
+        const priceStr = `${Number(p.price || 0)} ${t('unit_baht', 'บ.')}/${unit}`;
+        const gradeName = (p.grade || 'คละ').toUpperCase();
+
+        if (gradeName === 'B') prices.B = priceStr;
+        else if (gradeName === 'C') prices.C = priceStr;
+        else prices.A = priceStr; // Default to A or "คละ"
 
         const profile = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
         const sLat = p.lat ?? profile?.lat ?? null;

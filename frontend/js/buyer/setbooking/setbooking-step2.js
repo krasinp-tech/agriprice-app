@@ -352,7 +352,7 @@
         // ส่งราคาและเกรดตัวแรกไปเป็นค่าหลัก
         price:       gradesArr[0]?.price || 0,
         grade:       gradesArr[0]?.grade || (window.i18nT ? window.i18nT('mixed_grade', 'คละ') : 'คละ'),
-        // [NORMALIZED] ส่งแค่ grades array โดย server จะ insert ลง product_grades ให้
+        // [NORMALIZED] Since we removed product_grades table, we only store the primary price/grade in products
         grades:      JSON.stringify(gradesArr),
       };
 

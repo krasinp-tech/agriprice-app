@@ -96,20 +96,19 @@
       // Merge and map
       const mappedProducts = products.map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
-        const gradesArr = Array.isArray(p.product_grades) ? p.product_grades : [];
-        let rawPriceA = null;
-        let prices = { A: null, B: null, C: null };
-        if (gradesArr.length > 0) {
-          gradesArr.forEach(g => {
-            const up = g.grade?.toUpperCase();
-            if (['A','B','C'].includes(up)) prices[up] = `${Number(g.price)} ${t('unit_baht', 'บ.')}/${unit}`;
-            if (up === 'A') rawPriceA = Number(g.price);
-          });
-          if (rawPriceA === null) rawPriceA = Number(gradesArr[0].price);
-        } else {
-          rawPriceA = Number(p.price);
-          prices.A = p.price ? `${Number(p.price)} ${t('unit_baht', 'บ.')}/${unit}` : null;
-        }
+        let rawPriceA = Number(p.price || 0);
+        let prices = { 
+          A: p.price ? `${Number(p.price)} ${t('unit_baht', 'บ.')}/${unit}` : null, 
+          B: null, 
+          C: null 
+        };
+        
+        // Since we removed product_grades table, we use the single grade field
+        const gName = (p.grade || 'คละ').toUpperCase();
+        if (gName === 'B') { prices.B = prices.A; prices.A = null; }
+        else if (gName === 'C') { prices.C = prices.A; prices.A = null; }
+        else { prices.A = prices.A; } // Default to Grade A or "คละ" display as A
+
 
         // Distance calculation
         const sLat = p.profiles?.lat ?? p.lat ?? null;

@@ -298,19 +298,15 @@
       const sellerSubEl = node.querySelector('[data-bind="sellerSub"]');
       if (sellerSubEl) sellerSubEl.textContent = `${p.name || ''} ${p.variety || ''}`.trim();
 
-      const grades = Array.isArray(p.product_grades) ? p.product_grades : [];
-      const pricesByGrade = {};
-      grades.forEach((g) => {
-        const grade = String(g.grade || '').toUpperCase();
-        if (['A', 'B', 'C'].includes(grade)) {
-          pricesByGrade[grade] = `${g.price} ${t('unit_baht', 'บ.')}/${p.unit ? t(p.unit, p.unit) : t('kg_unit', 'กก.')}`;
-        }
-      });
+      const unitStr = p.unit ? t(p.unit, p.unit) : t('kg_unit', 'กก.');
+      const priceStr = `${p.price} ${t('unit_baht', 'บ.')}/${unitStr}`;
+      const gradeName = (p.grade || 'คละ').toUpperCase();
+
       ['A', 'B', 'C'].forEach((grade) => {
         const el = node.querySelector(`[data-bind="price${grade}"]`);
         if (!el) return;
-        if (pricesByGrade[grade]) {
-          el.textContent = pricesByGrade[grade];
+        if (grade === gradeName || (grade === 'A' && gradeName === 'คละ')) {
+          el.textContent = priceStr;
         } else {
           el.closest('.pc-grade-box, .price-box')?.remove();
         }
