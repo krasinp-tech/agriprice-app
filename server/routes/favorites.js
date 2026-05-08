@@ -10,23 +10,40 @@ const { supabaseAdmin } = require('../utils/supabase');
  */
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data: rels, error } = await supabaseAdmin
       .from('user_relations')
-      .select('relation_id, target_user_id, created_at, profiles!target_user_id(profile_id,first_name,last_name,tagline,avatar,role)')
+      .select('relation_id, target_user_id, created_at')
       .eq('relation_type', 'favorite')
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Favorites] Supabase error:', error.message);
+      return res.json(response.success('ดึงรายการโปรดสำเร็จ (ไม่มีข้อมูลเนื่องจากข้อผิดพลาด)', []));
+    }
 
-    const result = (data || []).map(fav => ({
+    const targetIds = (rels || []).map(r => r.target_user_id);
+    let profilesMap = {};
+    
+    if (targetIds.length > 0) {
+      const { data: profs } = await supabaseAdmin
+        .from('profiles')
+        .select('profile_id,first_name,last_name,tagline,avatar,role')
+        .in('profile_id', targetIds);
+        
+      if (profs) {
+        profs.forEach(p => profilesMap[p.profile_id] = p);
+      }
+    }
+
+    const result = (rels || []).map(fav => ({
       id: fav.relation_id,
       user_id: fav.target_user_id,
-      first_name: fav.profiles?.first_name || '',
-      last_name:  fav.profiles?.last_name  || '',
-      tagline:    fav.profiles?.tagline    || '',
-      avatar:     fav.profiles?.avatar     || '',
-      role:       fav.profiles?.role       || '',
+      first_name: profilesMap[fav.target_user_id]?.first_name || '',
+      last_name:  profilesMap[fav.target_user_id]?.last_name  || '',
+      tagline:    profilesMap[fav.target_user_id]?.tagline    || '',
+      avatar:     profilesMap[fav.target_user_id]?.avatar     || '',
+      role:       profilesMap[fav.target_user_id]?.role       || '',
       created_at: fav.created_at,
     }));
 
