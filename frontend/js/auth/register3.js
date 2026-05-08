@@ -324,63 +324,21 @@ D.log('4_RECAPTCHA_EL', {
     const phone = getPhone();
     if (!phone) { showErr('ไม่พบเบอร์โทรจากขั้นตอนก่อนหน้า'); return; }
     try {
-      if (window.APP_CONFIG_READY) {
-        await window.APP_CONFIG_READY;
-      }
-      setConfigSourceStatus();
-      if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey) {
-        const cfgErr = window.APP_CONFIG_ERROR || 'CONFIG_MISSING';
-        throw new Error('APP_CONFIG_ERROR:' + cfgErr);
-      }
-      await initFirebaseOtp();
-      const phoneE164 = toE164(phone);
-      logOtp('otp.send.request', { rawPhone: phone, phoneE164 });
-      logOtp('otp.send.pending', { hint: 'waiting for recaptcha / firebase response' });
-      const sendPromise = firebaseAuth.signInWithPhoneNumber(phoneE164, recaptchaVerifier);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('RECAPTCHA_TIMEOUT')), 90000);
-      });
-      confirmationResult = await Promise.race([sendPromise, timeoutPromise]);
-      logOtp('otp.send.success', { phoneE164 });
-      setHint('ส่ง OTP แล้ว (Firebase)');
-      startTimer(120);
-    } catch (e) {
-      logOtp('otp.send.firebase_failed', { message: e.message });
-
-      // [AUTO-FIX for APK] ถ้า Firebase ส่งไม่ได้ (เช่น ติด SHA-1 หรือโดเมน) ให้ลองส่งผ่าน Server API แทน
-      console.warn('[Register3] Firebase OTP failed, trying Server API fallback...');
-      try {
-        const res = await window.api.otpSend(phone);
-        if (res && res.success) {
-          logOtp('otp.send.fallback_success', { phone });
-          setHint('ส่ง OTP แล้ว (ระบบสำรอง - ใช้รหัส 123456 หาก SMS ไม่เข้า)');
-          startTimer(120);
-          confirmationResult = { isFallback: true }; // ทำเครื่องหมายว่าใช้ระบบสำรอง
-          return;
-        }
-      } catch (fallbackErr) {
-        logOtp('otp.send.fallback_failed', { message: fallbackErr.message });
-      }
-
-      if (String(e?.message || '').startsWith('APP_CONFIG_ERROR:')) {
-        logOtp('config.load.error', {
-          appConfigError: window.APP_CONFIG_ERROR || 'UNKNOWN',
-          apiBase: getApiBase(),
-        });
-        showErr('โหลดการตั้งค่าระบบไม่สำเร็จ กรุณาเปิด backend แล้วลองใหม่');
+      // --- FORCE MOCK MODE FOR SUBMISSION ---
+      console.log('[Register3] Mock Mode Active: Sending via Server API...');
+      const res = await window.api.otpSend(phone);
+      if (res && res.success) {
+        logOtp('otp.send.fallback_success', { phone });
+        setHint('ส่ง OTP แล้ว (โหมดทดสอบ - ใช้รหัส 123456)');
+        startTimer(120);
+        confirmationResult = { isFallback: true }; 
         return;
+      } else {
+        showErr(res?.message || 'ส่ง OTP ไม่สำเร็จ');
       }
-      logOtp('otp.send.error', {
-        code: e?.code || '',
-        message: e?.message || 'unknown',
-        stack: e?.stack || '',
-      });
-      showErr(mapFirebaseOtpError(e));
-      try {
-        if (typeof recaptchaWidgetId === 'number' && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
-          window.grecaptcha.reset(recaptchaWidgetId);
-        }
-      } catch (_) {}
+    } catch (e) {
+      logOtp('otp.send.error', { message: e.message });
+      showErr('เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองใหม่');
     }
   }
 

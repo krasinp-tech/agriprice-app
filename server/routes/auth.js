@@ -20,11 +20,11 @@ const DEV_OTP_MODE = process.env.OTP_MOCK !== 'false';
 const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888']; // รายชื่อเบอร์ที่จะใช้ Mock เสมอ
 const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || '';
 
-// Rate limit OTP send: 5 requests per 10 min per IP
+// Rate limit OTP send: Relaxed for development/testing (100 requests per 10 min per IP)
 const otpLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 5,
-  message: { success: false, message: 'ขอ OTP ได้สูงสุด 5 ครั้งใน 10 นาที กรุณารอ' },
+  max: 100,
+  message: { success: false, message: 'ขอ OTP ได้สูงสุด 100 ครั้งใน 10 นาที (โหมดทดสอบ)' },
 });
 
 // Helper for finding auth user by phone (More reliable than email)

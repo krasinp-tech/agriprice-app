@@ -54,7 +54,7 @@
         sessionStorage.setItem('agriprice_local_failed', 'true');
         
         try {
-          const fallbackBase = 'https://agriprice-backend.onrender.com';
+          const fallbackBase = 'https://agriprice-app.onrender.com';
           res = await fetch(fallbackBase + path, opts);
         } catch (retryErr) {
           if (window.showToast) window.showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์สำรองได้');
