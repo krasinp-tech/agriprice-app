@@ -55,6 +55,7 @@
         localStorage.removeItem(keys.TOKEN);
         localStorage.removeItem(keys.ROLE);
         localStorage.removeItem(keys.USER_DATA);
+        localStorage.removeItem('agriprice_favorites_v1'); // ล้างความจำหัวใจ
         // keep theme for UX
         
         if (redirect) {
