@@ -305,32 +305,50 @@ buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), asyn
 buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, category, variety, price, grade, unit, grades, is_active } = req.body;
+    const { name, category, variety, price, grade, unit, grades, description, is_active } = req.body;
 
     const updates = {};
-    if (name      !== undefined) updates.name      = name;
-    if (category  !== undefined) updates.category  = category;
-    if (variety   !== undefined) updates.variety   = variety;
-    if (price     !== undefined) updates.price     = Number(price);
-    if (grade     !== undefined) updates.grade     = grade;
-    if (unit      !== undefined) updates.unit      = unit;
-    if (is_active !== undefined) updates.is_active = is_active === 'true' || is_active === true;
+    if (name        !== undefined) updates.name        = name;
+    if (category    !== undefined) updates.category    = category;
+    if (variety     !== undefined) updates.variety     = variety;
+    if (description !== undefined) updates.description = description;
+    if (price       !== undefined) updates.price       = Number(price);
+    if (grade       !== undefined) updates.grade       = grade;
+    if (unit        !== undefined) updates.unit        = unit;
+    if (grades      !== undefined) updates.grades      = grades;
+    if (is_active   !== undefined) updates.is_active   = is_active === 'true' || is_active === true;
     if (req.file) updates.image = await saveFile(req.file, 'products');
+
+    if (Object.keys(updates).length === 0) {
+      return res.json(response.success('ไม่มีข้อมูลให้อัปเดต', null));
+    }
+
+    // ลองหา product ก่อนว่ามีอยู่จริงไหม
+    const { data: existing } = await supabaseAdmin
+      .from('products')
+      .select('product_id, user_id')
+      .eq('product_id', productId)
+      .maybeSingle();
+
+    if (!existing) {
+      return res.status(404).json(response.error('ไม่พบสินค้าที่ต้องการแก้ไข'));
+    }
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).json(response.error('ไม่มีสิทธิ์แก้ไขสินค้านี้'));
+    }
 
     const { data, error } = await supabaseAdmin
       .from('products')
       .update(updates)
       .eq('product_id', productId)
-      .eq('user_id', req.user.id)
       .select()
       .single();
 
     if (error) throw error;
 
-
-
     res.json(response.success('อัปเดตรายการสำเร็จ', data));
   } catch (e) {
+    console.error('[PATCH buyer/products]', e.message);
     res.status(500).json(response.error(e.message));
   }
 });
