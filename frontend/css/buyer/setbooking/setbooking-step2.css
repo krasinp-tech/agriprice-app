@@ -203,6 +203,7 @@ body{
 .section-title{
   font-size: 16px;
   font-weight: 900;
+  flex-shrink: 0;
 }
 .section-sub{
   margin-top: 4px;
@@ -277,14 +278,20 @@ body{
 /* Rounds head */
 .rounds-head{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 10px;
 }
+.rounds-head > div {
+  flex: 1;
+  min-width: 0;
+}
 
 .add-round-btn{
-  height: 34px;
+  flex-shrink: 0;
+  width: auto !important;
+  height: 34px !important;
   padding: 0 12px;
   border:none;
   border-radius: 999px;
@@ -297,7 +304,6 @@ body{
   font-weight: 900;
   cursor:pointer;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 .add-round-btn .material-icons-outlined{ font-size: 18px; }
 
@@ -393,8 +399,9 @@ body{
 
 /* Delete button */
 .icon-btn{
-  width: 34px;
-  height: 34px;
+  flex-shrink: 0;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 999px;
   border: 1px solid #f0f0f0;
   background: #fff;
@@ -470,7 +477,9 @@ body{
   font-weight: 900;
 }
 .modal-close{
-  width: 34px; height: 34px;
+  flex-shrink: 0;
+  width: 34px !important; 
+  height: 34px !important;
   border-radius: 999px;
   border:none;
   background: transparent;

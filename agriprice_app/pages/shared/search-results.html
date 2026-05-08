@@ -1,0 +1,126 @@
+<script>
+// ขอสิทธิ์ตำแหน่งเมื่อเข้า search-results
+function requestLocationPermission() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        function (pos) {
+            localStorage.setItem('userLat', pos.coords.latitude);
+            localStorage.setItem('userLng', pos.coords.longitude);
+        },
+        function (err) {
+            localStorage.removeItem('userLat');
+            localStorage.removeItem('userLng');
+        }
+    );
+}
+document.addEventListener('DOMContentLoaded', requestLocationPermission);
+</script>
+<style>
+    body.smooth-fadein {
+        opacity: 0;
+        transform: translateY(40px);
+        animation: fadein-slide-down 0.5s forwards;
+    }
+    @keyframes fadein-slide-down {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('smooth-fadein');
+    });
+</script>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผลการค้นหา - AGRIPRICE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/global.css">
+    <link rel="stylesheet" href="../../css/shared-pages/search.css">
+    <link rel="stylesheet" href="../../components/product-card/product-card.css">
+    <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+</head>
+
+<body  data-active="home">
+
+    <!-- ── Search Header ─────────────────────────────────── -->
+    <section class="search-header-section fade-slide">
+        <div class="search-header-container">
+            <button class="back-btn" id="backBtn" style="cursor:pointer" tabindex="0">
+                <span class="material-icons-outlined">arrow_back</span>
+            </button>
+            <div class="search-box-header">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input-header" id="searchInput">
+                <button class="search-button-header" id="searchBtn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                        <defs>
+                            <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%"   stop-color="#0B853C"/>
+                                <stop offset="100%" stop-color="#00EC5F"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="11" cy="11" r="8" stroke="url(#sg)"/>
+                        <path d="m21 21-4.35-4.35" stroke="url(#sg)"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section fade-slide">
+            <button class="filter-btn active" data-filter="all">
+                <span class="material-icons-outlined">filter_alt</span>ตัวกรอง
+            </button>
+            <button class="filter-btn" data-filter="recent">ใกล้ฉัน</button>
+            <button class="filter-btn" data-filter="price-high">ราคาสูงสุด</button>
+            <button class="filter-btn" data-filter="price-low">ราคาต่ำสุด</button>
+        </div>
+    </section>
+
+    <!-- ── Results Summary ───────────────────────────────── -->
+    <section class="results-summary fade-slide">
+        <div class="container">
+            <p class="results-title">ผลการค้นหา <span class="results-count"><span id="resultCount">5</span> รายการ</span></p>
+        </div>
+    </section>
+
+<!-- ── Results ───────────────────────────────────────── -->
+<section class="search-results-section fade-slide">
+  <div class="container">
+    <!-- mount point -->
+    <div id="searchResultsMount"></div>
+  </div>
+</section>
+
+<script>
+  // Auto show animation
+  setTimeout(() => {
+    document.querySelectorAll('.fade-slide').forEach(el => el.classList.add('show'));
+  }, 60);
+</script>
+
+
+    <!-- ── Bottom Nav ─────────────────────────────────────── -->
+<div id="bottomNavMount"></div>
+
+
+
+<!-- ── Scripts ───────────────────────────────────────── -->
+    <script src="../../js/mockup/mockup.js"></script>
+    <script src="../../js/shared-pages/search.js"></script>
+    <script src="../../components/product-card/product-card.js"></script>
+    
+
+
+</body>
+</html>

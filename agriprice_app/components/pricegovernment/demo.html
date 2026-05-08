@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo - Government Price Component</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f6f7fb}
+    .container{max-width:920px;margin:0 auto;padding:16px}
+    .section-title{margin:0 0 6px 0}
+    .note{color:#6b7280;font-size:12px;margin:8px 0 14px}
+    .government-price-section{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
+  </style>
+  <link rel="stylesheet" href="./government-price.css" />
+</head>
+<body>
+  <div class="container">
+    <h2 style="margin:0 0 8px 0;">ตัวอย่าง (Mock) - กดไอคอนแล้วไปหน้าการ์ดราคา</h2>
+    <div class="note">ไฟล์นี้ไว้ลองดูผลลัพธ์ทันที (ไม่ต้องพึ่ง assets ของโปรเจกต์คุณ)</div>
+
+    <!-- inject component html -->
+    <div id="mount"></div>
+  </div>
+
+  <script>
+    // inject the component markup (simplified)
+    const icons = {"ทุเรียน": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guJfguLjguYDguKPguLXguKI8L3RleHQ+CiAgICA8L3N2Zz4=", "ลองกอง": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guKXguK3guIfguIHguK3guIc8L3RleHQ+CiAgICA8L3N2Zz4=", "มังคุด": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guKHguLHguIfguITguLjguJQ8L3RleHQ+CiAgICA8L3N2Zz4=", "เงาะ": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guYDguIfguLLguLA8L3RleHQ+CiAgICA8L3N2Zz4=", "ปาล์ม": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guJvguLLguKXguYzguKE8L3RleHQ+CiAgICA8L3N2Zz4=", "ยางพารา": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guKLguLLguIc8L3RleHQ+CiAgICA8L3N2Zz4=", "ผักสด": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guJzguLHguIE8L3RleHQ+CiAgICA8L3N2Zz4=", "เมล็ดพันธุ์": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guYDguKHguKXguYfguJQ8L3RleHQ+CiAgICA8L3N2Zz4=", "ไม้ประดับ": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guYTguKHguYk8L3RleHQ+CiAgICA8L3N2Zz4=", "สมุนไพร": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCc+CiAgICAgIDxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0nZycgeDE9JzAnIHgyPScxJyB5MT0nMCcgeTI9JzEnPgogICAgICAgIDxzdG9wIG9mZnNldD0nMCcgc3RvcC1jb2xvcj0nIzExMTgyNycvPjxzdG9wIG9mZnNldD0nMScgc3RvcC1jb2xvcj0nIzhmMDAwMCcvPgogICAgICA8L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICAgICAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyByeD0nMTgnIGZpbGw9J3VybCgjZyknLz4KICAgICAgPHRleHQgeD0nMzInIHk9JzM4JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LWZhbWlseT0nQXJpYWwnIGZvbnQtc2l6ZT0nMTgnIGZpbGw9J3doaXRlJz7guKrguKHguLjguJk8L3RleHQ+CiAgICA8L3N2Zz4="};
+
+    const items = Object.keys(icons).map((name, idx) => `
+      <div class="government-item ${idx===0?'active':''}">
+        <img src="${icons[name]}" alt="${name}">
+        <span>${name}</span>
+      </div>
+    `).join("");
+
+    document.getElementById("mount").innerHTML = `
+      <section class="government-price-section">
+        <div class="container">
+          <h3 class="section-title">ราคากลางโดยรัฐบาล</h3>
+          <div class="government-grid-scroll" id="governmentCarousel">
+            <div class="government-grid">${items}${items}</div>
+          </div>
+          <div class="government-dots" id="governmentDots"></div>
+        </div>
+      </section>
+    `;
+  </script>
+
+  <script src="./government-price.js"></script>
+</body>
+</html>

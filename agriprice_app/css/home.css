@@ -1,0 +1,157 @@
+
+/* ── Hero ──────────────────────── */
+.hero-background {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+}
+
+.hero-carousel {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+  user-select: none;
+  touch-action: pan-x;
+}
+.hero-carousel.dragging{ cursor: grabbing; }
+.hero-carousel::-webkit-scrollbar { 
+    display: none; 
+    touch-action: pan-x;
+
+}
+
+.hero-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    position: relative;
+}
+
+.hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.hero-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    pointer-events: auto;
+    margin-bottom: 58px;
+}
+
+.hero-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background: rgb(255, 255, 255);
+    border-radius: 50%;
+    transition: all 0.25s;
+    pointer-events: auto;
+  cursor: pointer;
+}
+
+.hero-indicator .dot.active {
+    width: 18px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.95);
+}
+
+/* ── Search Section ──────────────── */
+.search-section {
+    position: relative;
+    margin-top: -64px;
+    background: #ffffff;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    padding: 16px 0 12px;
+    z-index: 20;
+}
+
+.search-box {
+    position: relative;
+    margin: 0 24px;
+}
+
+.search-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 52px 0 20px;
+    border: 1px solid #d6d6d6;
+    border-radius: 28px;
+    font-size: 15px;
+    outline: none;
+    background: #ffffff;
+    color: #474646;
+    font-family: 'Inter', sans-serif;
+}
+
+.search-input::placeholder { color: #cfcfcf; }
+
+.search-button {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.search-results-section{
+  padding: 0 16px 10px;
+}
+#searchResultsMount:empty{
+  display:none;
+}
+
+
+/* ── Products Section ────────────── */
+.products-section {
+    background: #f8f8f8;
+    padding: 16px 0 24px;
+}
+
+/* Load More */
+.btn-load-more {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 16px auto 80px; /* เพิ่ม margin ล่างให้พ้น navbar */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.load-more-icon {
+    font-size: 34px;
+    background: linear-gradient(180deg, #0B853C, #00EC5F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.25s;
+}
+
+.btn-load-more:hover .load-more-icon { transform: scale(1.25); }
+
+
+
+

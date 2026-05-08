@@ -1,0 +1,151 @@
+/* ── Global Animation ───────────────────────────────────── */
+.fade-slide {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.38s cubic-bezier(.4,0,.2,1), transform 0.38s cubic-bezier(.4,0,.2,1);
+}
+.fade-slide.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.modal-fade {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(.4,0,.2,1);
+}
+.modal-fade.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-fade .modal-content {
+  transform: translateY(32px);
+  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+}
+.modal-fade.show .modal-content {
+  transform: translateY(0);
+}
+/* ================================
+   AGRIPRICE - Global Styles (NEW)
+   - Fix: Tablet side squeeze
+   - Mobile-first responsive container
+================================ */
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* Remove Android tap highlight + blue focus ring on tap */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+[tabindex] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  
+  /* กัน horizontal scroll จาก element ที่ล้น */
+  overflow-x: hidden;
+  
+  /* ✅ ลบ padding-bottom ออก - ให้แต่ละหน้าจัดการเอง */
+  /* padding-bottom: 70px; */
+}
+
+/* =================================
+   Container (Mobile-first)
+   Mobile: จำกัดเหมาะกับมือถือ
+   Tablet+: ขยายเต็ม/ตามขนาดจอ (แก้บีบ)
+================================= */
+.container {
+  width: 100%;
+  max-width: 428px;     /* มือถือ */
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .container {
+    max-width: 100%; 
+    padding: 0 24px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1440px;
+    padding: 0 80px;
+  }
+}
+
+/* =================================
+   Section Title (for Home page)
+================================= */
+.section-title-home {
+  font-size: 15px;
+  font-weight: 500;
+  color: #7e7e7e;
+  margin-bottom: 5px;
+  padding: 0 16px;
+}
+
+/* Tablet/Desk: เพิ่มระยะข้างให้พอดีกับ container */
+@media (min-width: 768px) {
+  .section-title-home {
+    padding: 0 24px;
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-title-home {
+    padding: 0 80px;
+    font-size: 16px;
+  }
+}
+
+/* ================================
+   Animations
+================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

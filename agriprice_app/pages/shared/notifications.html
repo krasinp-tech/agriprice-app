@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แจ้งเตือน | AGRIPRICE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/shared-pages/notifications.css" />
+  <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
+</head>
+<body data-active="notifications">
+
+  <script src="../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <main class="noti-page fade-slide">
+
+    <!-- Header -->
+    <header class="noti-header fade-slide">
+      <div class="noti-header-left">
+        <div class="noti-header-icon">
+          <span class="material-icons-outlined">notifications</span>
+        </div>
+        <h1 class="noti-header-title">การแจ้งเตือน</h1>
+      </div>
+      <button class="noti-refresh-btn" id="btnRefresh" type="button" aria-label="รีเฟรช">
+        <span class="material-icons-outlined">refresh</span>
+      </button>
+    </header>
+
+    <!-- Tabs -->
+    <div class="noti-tabs fade-slide" role="tablist">
+      <button class="noti-tab is-active" data-tab="all" role="tab" type="button">ทั้งหมด</button>
+      <button class="noti-tab" data-tab="unread" role="tab" type="button">
+        ยังไม่อ่าน
+        <span class="noti-tab-badge" id="unreadBadge">3</span>
+      </button>
+    </div>
+
+    <!-- List -->
+    <section class="noti-list-wrap fade-slide" id="notiList">
+
+      <!-- ราคายางพาราลดลง -->
+      <div class="noti-item">
+        <div class="noti-item-icon price">
+          <span class="material-icons-outlined">star_outline</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">ราคายางพาราลดลง</div>
+          <div class="noti-item-desc">ราคาลดลง 5 บาท/กก. จาก 55 เป็น 50 บาท/กก.</div>
+          <div class="noti-item-time">3 ชั่วโมงที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+      <div class="noti-divider"></div>
+
+      <!-- การจองใกล้หมดเวลา -->
+      <div class="noti-item">
+        <div class="noti-item-icon booking">
+          <span class="material-icons-outlined">schedule</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">การจองใกล้หมดเวลา</div>
+          <div class="noti-item-desc">การจองลองกอง 50 กก. จะหมดเวลาในอีก 2 ชั่วโมง</div>
+          <div class="noti-item-time">5 ชั่วโมงที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+      <div class="noti-divider"></div>
+
+      <!-- อัปเดตระบบเสร็จสิ้น -->
+      <div class="noti-item">
+        <div class="noti-item-icon system">
+          <span class="material-icons-outlined">settings</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">อัปเดตระบบเสร็จสิ้น</div>
+          <div class="noti-item-desc">ระบบได้รับการอัปเดตเพื่อประสิทธิภาพที่ดีขึ้น</div>
+          <div class="noti-item-time">1 วันที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+      <div class="noti-divider"></div>
+
+      <!-- ข้อความใหม่จากลังขวัญเมือง -->
+      <div class="noti-item">
+        <div class="noti-item-icon message">
+          <span class="material-icons-outlined">chat_bubble_outline</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">ข้อความใหม่จาก ลังขวัญเมือง</div>
+          <div class="noti-item-desc">ขอบคุณสำหรับการติดต่อครับ</div>
+          <div class="noti-item-time">1 วันที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+      <div class="noti-divider"></div>
+
+      <!-- ราคาปาล์มน้ำมันเพิ่มขึ้น -->
+      <div class="noti-item">
+        <div class="noti-item-icon price">
+          <span class="material-icons-outlined">star_outline</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">ราคาปาล์มน้ำมันเพิ่มขึ้น</div>
+          <div class="noti-item-desc">ราคาเพิ่มขึ้น 0.50 บาท/กก. จาก 4.50 เป็น 5.00 บาท/กก.</div>
+          <div class="noti-item-time">2 วันที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+      <div class="noti-divider"></div>
+
+      <!-- ผู้รับซื้อใหม่ในพื้นที่ -->
+      <div class="noti-item">
+        <div class="noti-item-icon location">
+          <span class="material-icons-outlined">location_on</span>
+        </div>
+        <div class="noti-item-body">
+          <div class="noti-item-title">ผู้รับซื้อใหม่ในพื้นที่</div>
+          <div class="noti-item-desc">มีผู้รับซื้อใหม่ 3 รายในระยะ 10 กม. จากคุณ</div>
+          <div class="noti-item-time">3 วันที่แล้ว</div>
+        </div>
+        <button class="noti-delete-btn" type="button">ลบ</button>
+      </div>
+
+    </section>
+
+    <!-- Empty State -->
+    <div class="noti-empty fade-slide" id="emptyState" hidden>
+      <div class="empty-icon">
+        <span class="material-icons-outlined">notifications_off</span>
+      </div>
+      <h3>ยังไม่มีการแจ้งเตือน</h3>
+      <p>เมื่อมีการอัปเดตราคา หรือใกล้ถึงคิวการจอง<br>ระบบจะแจ้งให้คุณทราบที่นี่</p>
+    </div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a class="bottom-nav-item" href="#">
+      <span class="material-icons-outlined">home</span>
+      <span>หน้าแรก</span>
+    </a>
+    <a class="bottom-nav-item" href="#">
+      <span class="material-icons-outlined">chat_bubble_outline</span>
+      <span>แชท</span>
+    </a>
+    <a class="bottom-nav-item" href="#">
+      <span class="material-icons-outlined">event_note</span>
+      <span>การจอง</span>
+    </a>
+    <a class="bottom-nav-item is-active" href="#">
+      <span class="material-icons-outlined">notifications</span>
+      <span>แจ้งเตือน</span>
+    </a>
+    <a class="bottom-nav-item" href="#">
+      <span class="material-icons-outlined">person_outline</span>
+      <span>บัญชี</span>
+    </a>
+  </nav>
+
+  <script>
+    // Auto show animation
+    setTimeout(() => {
+      document.querySelectorAll('.fade-slide').forEach(el => el.classList.add('show'));
+    }, 60);
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.noti-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+      });
+    });
+
+    // Delete button
+    document.querySelectorAll('.noti-delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.noti-item');
+        const divider = item.nextElementSibling;
+        item.classList.remove('show'); // use animation class
+        item.style.transform = 'translateX(30px)';
+        setTimeout(() => {
+          if (divider && divider.classList.contains('noti-divider')) divider.remove();
+          item.remove();
+        }, 380); // match animation duration
+      });
+    });
+  </script>
+
+  <div id="bottomNavMount"></div>
+  <script src="../../js/components.js"></script>
+  <script src="../../js/shared-pages/notifications.js"></script>
+</body>
+</html>

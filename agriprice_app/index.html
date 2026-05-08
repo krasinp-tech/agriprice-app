@@ -1,0 +1,268 @@
+<script>
+// ขอสิทธิ์ตำแหน่งเมื่อเข้าแอป
+function requestLocationPermission() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        function (pos) {
+            localStorage.setItem('userLat', pos.coords.latitude);
+            localStorage.setItem('userLng', pos.coords.longitude);
+        },
+        function (err) {
+            // ไม่อนุญาตหรือ error
+            localStorage.removeItem('userLat');
+            localStorage.removeItem('userLng');
+        }
+    );
+}
+document.addEventListener('DOMContentLoaded', requestLocationPermission);
+</script>
+<script>
+// ให้คลิกที่ช่องค้นหาแล้วเลื่อนขึ้นและเปลี่ยนหน้า
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('searchInput');
+    if (input) {
+        input.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function () {
+                var q = input.value ? input.value.trim() : '';
+                var url = q
+                    ? 'pages/shared/search-results.html?q=' + encodeURIComponent(q)
+                    : 'pages/shared/search-results.html';
+                window.location.href = url;
+            }, 350);
+        });
+    }
+});
+</script>
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    
+    <link rel="stylesheet" href="components/bottom-nav/bottom-nav.css">
+
+    <link rel="stylesheet" href="components/favorites/favorites.css">
+    <link rel="stylesheet" href="components/product-card/product-card.css">
+
+</head>
+
+<body data-active="home">
+
+
+    <!-- ── Hero ──────────────────────────────────────────── -->
+    <section class="hero-background">
+        <div class="hero-carousel" id="heroCarousel" aria-label="Hero slider">
+            <div class="hero-slide"><img src="assets/images/สตอรี่-1.jpg" alt="เกษตรกรหญิง"></div>
+            <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลไม้สดใหม่"></div>
+            <div class="hero-slide"><img src="assets/images/Gemini_Generated_Image_30unn130unn130un.png" alt="ภาพโปรโมชัน">
+            </div>
+        </div>
+
+        <div class="hero-indicator" id="heroIndicator" aria-hidden="true"></div>
+
+    </section>
+
+
+
+    <!-- ── Search ────────────────────────────────────────── -->
+    <section class="search-section">
+        <div class="search-box">
+            <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input" id="searchInput">
+            <button class="search-button" id="searchBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                    <defs>
+                        <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0B853C" />
+                            <stop offset="100%" stop-color="#00EC5F" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="11" cy="11" r="8" stroke="url(#sg)" />
+                    <path d="m21 21-4.35-4.35" stroke="url(#sg)" />
+                </svg>
+            </button>
+        </div>
+    </section>
+
+    <!-- ✅ Search Results Mount (สำหรับ js/shared-pages/search.js) -->
+    <section class="search-results-section">
+        <div id="searchResultsMount" style="cursor:pointer"></div>
+    </section>
+
+    <!-- ── รายการโปรด ─────────────────────────────────────── -->
+    <div id="favoritesMount"></div>
+    <script>
+        (async () => {
+            const mount = document.getElementById("favoritesMount");
+            if (!mount) return;
+
+            // ตรวจสอบ role ทันที + รอ localStorage ที่ค่อนข้างเชื่อถือได้
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const role = (localStorage.getItem("role") || "").toLowerCase();
+            
+            // debug
+            console.log("[Favorites] Role detected:", role);
+            
+            if (role !== "farmer") {
+                console.log("[Favorites] Hiding for non-farmer");
+                mount.remove();
+                return;
+            }
+
+            try {
+                const res = await fetch("components/favorites/favorites.html");
+                if (!res.ok) {
+                    console.error("Load favorites.html failed:", res.status);
+                    return;
+                }
+                mount.innerHTML = await res.text();
+
+                // โหลด JS หลัง inject HTML แล้ว
+                const s = document.createElement("script");
+                s.src = "components/favorites/favorites.js";
+                document.body.appendChild(s);
+
+            } catch (err) {
+                console.error("Favorites load error:", err);
+            }
+        })();
+    </script>
+
+
+    <!-- ── pricegovernment ───────────────────────────────────────── -->
+    <div id="governmentPriceMount"></div>
+    <script>
+        (async function loadGovernmentPrice() {
+            const mount = document.getElementById("governmentPriceMount");
+            if (!mount) return;
+            try {
+                const res = await fetch("components/pricegovernment/government-price.html");
+                if (!res.ok) throw new Error("Failed to load government-price component");
+                mount.innerHTML = await res.text();
+                
+                // Load mock data
+                const mockScript = document.createElement("script");
+                mockScript.src = "components/pricegovernment/mock-prices.js";
+                document.body.appendChild(mockScript);
+                
+                // Load CSS
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = "components/pricegovernment/government-price.css";
+                document.head.appendChild(link);
+                
+                // Load JS
+                const script = document.createElement("script");
+                script.src = "components/pricegovernment/government-price.js";
+                document.body.appendChild(script);
+            } catch (err) {
+                console.error("Error loading government price:", err);
+            }
+        })();
+    </script>
+
+    <!-- ── รายการแนะนำ ────────────────────────────────────── -->
+<section class="products-section">
+    <div class="container">
+        <h3 class="section-title">รายการแนะนำ</h3>
+        <!-- mount point -->
+        <div id="productCardsMount"></div>
+        <button class="btn-load-more">
+            <span class="material-icons-outlined load-more-icon">expand_more</span>
+        </button>
+    </div>
+</section>
+
+    
+   
+
+
+
+
+<!-- Side Menu + Bottom Nav (injected) -->
+
+<div id="bottomNavMount"></div>
+
+<!-- Scripts -->
+
+<!-- Components  -->
+<script src="js/components.js" defer></script>
+
+
+<!-- Mockup API (window.getMockupProducts) ให้โหลดก่อน home-sliders.js -->
+<script src="js/mockup/mockup.js"></script>
+
+<!-- Home specific -->
+
+<style>
+    body.smooth-fadeout {
+        transition: opacity 0.4s, transform 0.4s;
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+</style>
+<script src="js/home-sliders.js" defer></script>
+<script>
+// Smooth fade/slide transition when clicking search mount or input
+function goToSearchResultsSmooth() {
+    document.body.classList.add('smooth-fadeout');
+    setTimeout(function () {
+        var input = document.getElementById('searchInput');
+        var q = input && input.value ? input.value.trim() : '';
+        var url = q
+            ? 'pages/shared/search-results.html?q=' + encodeURIComponent(q)
+            : 'pages/shared/search-results.html';
+        window.location.href = url;
+    }, 400);
+}
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('searchInput');
+    if (input) {
+        input.addEventListener('click', goToSearchResultsSmooth);
+    }
+    var mount = document.getElementById('searchResultsMount');
+    if (mount) {
+        mount.addEventListener('click', goToSearchResultsSmooth);
+    }
+});
+</script>
+
+<script>
+// ให้คลิกที่ Search Results Mount แล้วเลื่อนขึ้นและเปลี่ยนหน้า
+document.addEventListener('DOMContentLoaded', function () {
+    var mount = document.getElementById('searchResultsMount');
+    if (mount) {
+        mount.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function () {
+                // ดึง query จากช่องค้นหา ถ้ามี
+                var input = document.getElementById('searchInput');
+                var q = input && input.value ? input.value.trim() : '';
+                var url = q
+                    ? 'pages/shared/search-results.html?q=' + encodeURIComponent(q)
+                    : 'pages/shared/search-results.html';
+                window.location.href = url;
+            }, 350);
+        });
+    }
+});
+</script>
+
+</body>
+
+
+</html>

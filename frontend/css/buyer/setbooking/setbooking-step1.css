@@ -247,16 +247,18 @@ body{
   position: relative;
   display:flex;
   align-items:center;
+  justify-content: space-between;
   gap: 8px;
   background: #f4f5f7;
   border: 1px solid #ececec;
   border-radius: 14px;
-  padding: 10px 10px;
+  padding: 10px 14px;
 }
 .combo.disabled{
   opacity: .65;
 }
 .combo-input{
+  flex: 1;
   border:none;
   outline:none;
   background: transparent;
@@ -270,6 +272,9 @@ body{
   font-weight: 600;
 }
 .combo-btn{
+  flex-shrink: 0;
+  width: 24px !important;
+  height: 24px !important;
   border:none;
   background: transparent;
   color:#6b7280;
@@ -277,7 +282,8 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 4px;
+  padding: 0;
+  margin-left: auto;
 }
 .combo-btn .material-icons-outlined{
   font-size: 22px;

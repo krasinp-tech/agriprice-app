@@ -1,0 +1,663 @@
+/* ================================
+   Profile Page Styles - Updated to match design
+================================ */
+
+/* ── Hero Cover ──────────────────── */
+.profile-hero {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #F5EDD8;
+}
+
+.profile-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ปุ่ม camera บน hero */
+.profile-hamburger {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    left: auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.profile-hamburger span {
+    font-size: 20px;
+    color: #555;
+}
+
+/* ── Profile Info Card ───────────── */
+.profile-info-card {
+    background: #fff;
+    border-radius: 0;
+    margin-top: 0;
+    position: relative;
+    z-index: 10;
+    padding: 0 16px 20px;
+    box-shadow: none;
+}
+
+.card-edit-icon {
+    display: none; /* hidden - using editAboutBtn instead */
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    z-index: 45;
+}
+
+.avatar-edit-btn span {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Avatar + Name row */
+.profile-top-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    padding-top: 0;
+    margin-top: -54px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.profile-avatar-frame { display: inline-block; position: relative; }
+
+.profile-avatar-wrap {
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    background: #F5EDD8;
+}
+
+.profile-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.profile-name-block {
+    flex: 1;
+    padding-bottom: 4px;
+    padding-top: 55px;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.25;
+}
+
+.profile-tagline {
+    font-size: 12px;
+    color: #666;
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+/* Status row */
+.profile-status-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    margin-bottom: 14px;
+}
+
+.status-online {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #22C55E;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22C55E;
+    box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
+}
+
+.status-followers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
+}
+
+.status-followers span.material-icons-outlined {
+    font-size: 15px;
+    color: #888;
+}
+
+/* ── Action Buttons ──────────────── */
+.profile-action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0;
+}
+
+.btn-edit-about {
+    flex: 1;
+    height: 44px;
+    border: 1.5px solid #DADADA;
+    border-radius: 12px;
+    background: #fff;
+    color: #2b2b2b;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.btn-edit-about:hover { background: #f8f8f8; }
+.btn-edit-about:active { transform: scale(0.98); }
+.btn-edit-about span.material-icons-outlined { font-size: 18px; color: #555; }
+
+.btn-map {
+    flex: 1;
+    height: 44px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #0B853C 0%, #00C85A 100%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.btn-map:hover { box-shadow: 0 4px 14px rgba(11,133,60,0.25); }
+.btn-map:active { transform: scale(0.98); }
+.btn-map span.material-icons-outlined { font-size: 18px; color: #fff; }
+
+/* ── Tabs ────────────────────────── */
+.profile-tabs {
+    display: flex;
+    border-bottom: 2px solid #F0F0F0;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #aaa;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s;
+    font-family: 'Sarabun', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.tab-btn.active {
+    color: #0B853C;
+    border-bottom-color: #0B853C;
+    font-weight: 700;
+}
+
+.tab-count { font-size: 13px; color: #aaa; }
+.tab-btn.active .tab-count { color: #0B853C; }
+
+/* Tab Panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── About Tab ───────────── */
+.about-desc {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.75;
+    margin-bottom: 18px;
+}
+
+/* About contact block */
+.about-contact {
+    margin: 0 0 18px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.about-contact .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #222;
+}
+
+/* Colored icon circles for contact */
+.about-contact .contact-item span.material-icons-outlined {
+    color: #fff;
+    font-size: 18px;
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* phone icon - green */
+.about-contact .contact-item:nth-child(1) span.material-icons-outlined {
+    background: #22C55E;
+}
+
+/* email icon - green darker */
+.about-contact .contact-item:nth-child(2) span.material-icons-outlined {
+    background: #16A34A;
+}
+
+/* web icon - blue */
+.about-contact .contact-item:nth-child(3) span.material-icons-outlined {
+    background: #2563EB;
+}
+
+.about-contact .contact-links { margin-top: 4px; }
+.about-contact .contact-links a,
+.about-contact .profile-extra-link a {
+    color: #222;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* ── Location / Map ──────────────── */
+.location-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #E8EEFF;
+    background: #F7F9FF;
+}
+
+.location-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.location-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #0B853C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.location-icon-wrap span.material-icons-outlined {
+    font-size: 20px;
+    color: #fff;
+}
+
+.location-text { flex: 1; }
+
+.location-address {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+
+.location-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.location-link {
+    font-size: 12px;
+    color: #0B853C;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: #E8F5E9;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.location-link:hover { text-decoration: underline; }
+
+/* Map container */
+.map-container {
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background: #e8f0e8;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* ── Services Section ──────────────── */
+.services-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    margin-top: 4px;
+}
+
+.service-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #F0F0F0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.service-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.service-icon.green  { background: #DCFCE7; }
+.service-icon.money  { background: #DCFCE7; }
+.service-icon.orange { background: #FEF3C7; }
+.service-icon.purple { background: #EDE9FE; }
+
+.service-icon span.material-icons-outlined { font-size: 20px; }
+.service-icon.green  span { color: #16A34A; }
+.service-icon.money  span { color: #16A34A; }
+.service-icon.orange span { color: #D97706; }
+.service-icon.purple span { color: #7C3AED; }
+
+.service-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    min-width: 95px;
+}
+
+.service-desc {
+    font-size: 12px;
+    color: #999;
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* ── Product List ─────────────── */
+.products-list-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+}
+
+#productListContainer {
+    padding-bottom: 100px;
+}
+
+/* ── Product Card State (open/closed) ──────────── */
+.product-card[data-is-open="false"] .product-header,
+.product-card[data-is-open="false"] .price-row,
+.product-card[data-is-open="false"] .meta-row {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.product-card[data-is-open="false"] {
+    position: relative;
+}
+
+.product-card[data-is-open="false"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,200,200,0.15), rgba(180,180,180,0.1));
+    pointer-events: none;
+    border-radius: 12px;
+    z-index: 1;
+}
+
+/* ── Product Card Actions ─────────── */
+.action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-contact {
+    height: 36px;
+    border: 1px solid #DADADA;
+    border-radius: 10px;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-contact.active {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+.btn-book {
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, #0B853C, #00EC5F);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Reviews Tab ─────────────────── */
+.review-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.review-item:last-child { border-bottom: none; }
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.reviewer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.reviewer-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+}
+
+.reviewer-date {
+    font-size: 11px;
+    color: #aaa;
+}
+
+.review-rating { color: #F59E0B; font-size: 13px; margin-left: auto; }
+
+.review-text {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    margin-left: 46px;
+}
+
+.review-products-placeholder { margin-top: 16px; }
+
+/* ── Modal ───────────────────────── */
+.modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 28px 16px;
+    z-index: 1000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal[hidden] { display: none !important; }
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    width: min(640px, 96%);
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 10;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+.modal-content h3 { margin: 0 0 8px 0; font-size: 16px; }
+.modal-content label { font-size: 13px; font-weight: 600; color: #555; display: block; margin-top: 8px; }
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="url"],
+.modal-content textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    margin: 4px 0 0 0;
+    border-radius: 8px;
+    border: 1px solid #e6e6e6;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.modal-content textarea { resize: vertical; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+
+.modal .btn-outline {
+    background: transparent;
+    border: 1px solid #DADADA;
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+}
+
+/* ── Desktop ─────────────────────── */
+@media (min-width: 1024px) {
+    .profile-hero { height: 280px; }
+
+    .profile-info-card {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 0 20px 24px;
+    }
+
+    .map-container { height: 180px; }
+}

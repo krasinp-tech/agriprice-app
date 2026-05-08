@@ -35,6 +35,13 @@
 (function () {
   if (window.__AGRIPRICE_APP_READY) return;
 
+  // Catch and suppress the harmless AbortError from View Transitions API
+  window.addEventListener("unhandledrejection", (event) => {
+    if (event.reason && event.reason.name === "AbortError") {
+      event.preventDefault();
+    }
+  });
+
   // Viewport Height Fix for iOS
   const setVH = () => {
     let vh = window.innerHeight * 0.01;
@@ -104,11 +111,6 @@
       console.log("[AgriPriceRouter] Navigating to:", absoluteUrl);
 
       if (absoluteUrl === window.location.href && !options.force) return;
-
-      if (!options.skipTransition) {
-        document.body.classList.add('page-leave');
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
 
       window.location.href = absoluteUrl;
     },
@@ -312,3 +314,49 @@ document.addEventListener('deviceready', () => {
     }
   }, false);
 }, false);
+
+// Global animation helper for fade-slide and modal-fade (Restored Original)
+(function(){
+  function animateOnLoad() {
+    document.querySelectorAll('.fade-slide').forEach(el => {
+      if (!el.classList.contains('show')) {
+        setTimeout(() => el.classList.add('show'), 60);
+      }
+    });
+    document.querySelectorAll('.modal-fade').forEach(el => {
+      // Modal will be shown/hidden by JS, so .show is handled elsewhere
+      // This ensures modal-content animates when .show is toggled
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', animateOnLoad);
+  } else {
+    animateOnLoad();
+  }
+
+  // MutationObserver: trigger animation for new .fade-slide elements
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === 1) {
+          if (node.classList && node.classList.contains('fade-slide')) {
+            setTimeout(() => node.classList.add('show'), 60);
+          }
+          // Also check descendants
+          node.querySelectorAll && node.querySelectorAll('.fade-slide').forEach(el => {
+            if (!el.classList.contains('show')) {
+              setTimeout(() => el.classList.add('show'), 60);
+            }
+          });
+        }
+      });
+    });
+  });
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  }
+})();

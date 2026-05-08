@@ -793,101 +793,32 @@ body::-webkit-scrollbar {
 }
 
 /* ================================
-   Native-like Page Transition
+   Native-like Page Transition (Restored Original)
 ================================ */
-/* 🎭 Professional View Transitions (Fade + Subtle Lift) */
-@view-transition {
-  navigation: auto;
+/* ── Global Animation ───────────────────────────────────── */
+.fade-slide {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.38s cubic-bezier(.4,0,.2,1), transform 0.38s cubic-bezier(.4,0,.2,1);
+}
+.fade-slide.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::view-transition-old(root) {
-  animation-name: fadeOutScale;
-}
-
-::view-transition-new(root) {
-  animation-name: fadeInSlideUp;
-}
-
-@keyframes fadeOutScale {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes fadeInSlideUp {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-
-/* 🎭 Fallback Transitions (For browsers without View Transitions) */
-body.page-enter > *:not(#bottomNavMount):not(#bottomNavPlaceholder):not(.bottom-nav) {
-  animation: fadeInSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-body.page-leave > *:not(#bottomNavMount):not(#bottomNavPlaceholder):not(.bottom-nav) {
-  animation: fadeOutScale 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* 🛡️ Persistent Navigation Stabilization */
-#bottomNavMount, #bottomNavPlaceholder {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10000; /* Permanent high z-index */
+.modal-fade {
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(.4,0,.2,1);
 }
-
-#bottomNavMount > *, #bottomNavPlaceholder > * {
+.modal-fade.show {
+  opacity: 1;
   pointer-events: auto;
 }
-
-::view-transition-group(main-navigation) {
-  animation-duration: 0s;
-  z-index: 20000; /* Even higher during transition */
+.modal-fade .modal-content {
+  transform: translateY(32px);
+  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
 }
-
-
-@keyframes slideOutToLeft {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-20%); opacity: 0.3; }
-}
-
-/* =============================================
-   🚀 Cross-Document View Transitions API
-   Eliminates navbar flicker on page navigation.
-   Supported: Chrome 126+, Edge 126+, Android WebView
-   Gracefully ignored by older browsers.
-============================================= */
-@view-transition {
-  navigation: auto;
-}
-
-/* Main page content: fade + subtle slide up */
-::view-transition-old(root) {
-  animation: 200ms ease-out both fade-and-scale-down;
-}
-::view-transition-new(root) {
-  animation: 300ms ease-out both fade-in-slide-up;
-}
-
-@keyframes fade-and-scale-down {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(8px); }
-}
-@keyframes fade-in-slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Navbar: zero-duration transition = visually persistent, never flickers */
-::view-transition-old(main-navigation),
-::view-transition-new(main-navigation) {
-  animation-duration: 0s;
+.modal-fade.show .modal-content {
+  transform: translateY(0);
 }

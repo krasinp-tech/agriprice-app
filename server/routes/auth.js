@@ -270,27 +270,28 @@ router.post('/register/finish', async (req, res) => {
           }
         }
       } else {
-        const { data: authUser } = await supabaseAdmin.auth.admin.createUser({
+        const { data: authUser, error: supaErr } = await supabaseAdmin.auth.admin.createUser({
           email: fakeEmail,
           email_confirm: true,
           phone: phone,
           phone_confirm: true,
           password,
-        }).catch(err => {
-          console.error('[Auth] Supabase createUser error:', err.message);
-          if (err.message.toLowerCase().includes('already exists')) {
-            return findAuthUserByPhone(phone).then(u => {
-              if (!u) throw new Error('ไม่พบข้อมูลผู้ใช้ในระบบ Auth');
-              return { data: { user: u } };
-            });
-          }
-          throw err;
         });
 
-        if (!authUser || !authUser.user) {
-          throw new Error('ระบบ Auth ขัดข้อง');
+        if (supaErr) {
+          console.error('[Auth] Supabase createUser error:', supaErr.message);
+          if (supaErr.message.toLowerCase().includes('already exists')) {
+            const u = await findAuthUserByPhone(phone);
+            if (!u) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
+            userId = u.id;
+          } else {
+            throw new Error('เกิดข้อผิดพลาดจากฐานข้อมูล: ' + supaErr.message);
+          }
+        } else if (!authUser || !authUser.user) {
+          throw new Error('ระบบ Auth ขัดข้อง: ไม่ได้รับข้อมูลจาก Supabase');
+        } else {
+          userId = authUser.user.id;
         }
-        userId = authUser.user.id;
       }
 
       createdAuthUserId = userId;

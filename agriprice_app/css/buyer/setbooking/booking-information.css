@@ -1,0 +1,447 @@
+/* ================================
+   AGRIPRICE - Booking Step 4
+   จองคิว: การจองสำเร็จ
+   (ใช้สไตล์จาก booking-detail.css)
+================================ */
+
+/* Responsive Container Wrapper */
+.booking-container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .booking-container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .booking-container {
+    max-width: 1024px;
+    padding: 0 40px;
+  }
+}
+
+.booking-step4 {
+  min-height: 100vh;
+  padding: 0 0 92px;
+  background: #F7F7F7;
+}
+
+/* ================================
+   Hero Section
+================================ */
+.hero {
+  position: relative;
+  margin-top: 14px;
+}
+
+.hero-bg {
+  height: 170px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.10);
+}
+
+.hero-content {
+  position: relative;
+  margin-top: -180px;
+  padding: 18px 16px 0;
+}
+
+
+.hero-sub {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+/* ================================
+   Big Card (Main Info)
+================================ */
+.big-card {
+  margin-top: 14px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.10);
+}
+
+.label {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.queue {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 1100;
+  letter-spacing: 1px;
+  color: #16a34a;
+  margin-top: 2px;
+}
+
+.subRow {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.subLabel {
+  opacity: 0.7;
+}
+
+.subValue {
+  font-weight: 800;
+}
+
+/* ================================
+   QR Code
+================================ */
+.qrWrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.qrFake {
+  width: 110px;
+  height: 110px;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.10) 1px, transparent 1px) 0 0/10px 10px,
+    linear-gradient(rgba(0, 0, 0, 0.10) 1px, transparent 1px) 0 0/10px 10px,
+    rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.qrFake::after {
+  content: "QR";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 1000;
+  opacity: 0.35;
+}
+
+#qrCanvas {
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 10px;
+}
+
+/* ================================
+   ID Row
+================================ */
+.idRow {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+/* ================================
+   Buttons
+================================ */
+.btn-outline {
+  margin-top: 12px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+  background: #fff;
+  color: #16a34a;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(22, 163, 74, 0.05);
+}
+
+.btn-cancel {
+  margin-top: 12px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 12px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: #fff;
+  color: #ef4444;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* ================================
+   Detail Panel
+================================ */
+.detailPanel {
+  margin-top: 12px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ================================
+   Cards
+================================ */
+.card {
+  margin-top: 12px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+}
+
+.card-title {
+  font-weight: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card-body {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.6;
+}
+
+.card.info {
+  background: #FFF9E6;
+  border: 1px solid #FFB800;
+}
+
+.card.info .card-title {
+  color: #FFB800;
+}
+
+/* ================================
+   Status Grid
+================================ */
+.statusGrid {
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 2px;
+}
+
+.statusItem.right {
+  margin-top: 2px;
+}
+
+.statusLabel {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.statusValue {
+  font-size: 18px;
+  font-weight: 1000;
+}
+
+.statusValue.green {
+  color: #16a34a;
+}
+
+.statusFoot {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.statusMini {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.statusMiniLabel {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.statusMiniValue {
+  margin-top: 2px;
+  font-weight: 1000;
+}
+
+/* ================================
+   Place Box (Map)
+================================ */
+.placeBox {
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+}
+
+.placeName {
+  font-weight: 1000;
+}
+
+.placeAddr {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.btn-map {
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+  background: #fff;
+  color: #1d4ed8;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-map:hover {
+  background: rgba(29, 78, 216, 0.05);
+}
+
+
+/* ================================
+   Responsive - Tablet
+================================ */
+@media (min-width: 768px) {
+  .booking-step4 {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 24px 92px;
+  }
+
+  .hero-bg {
+    height: 200px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .queue {
+    font-size: 52px;
+  }
+}
+
+/* ================================
+   Responsive - Desktop
+================================ */
+@media (min-width: 1024px) {
+  .booking-step4 {
+    max-width: 700px;
+    padding: 24px 32px 92px;
+  }
+
+  .hero-bg {
+    height: 220px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .queue {
+    font-size: 56px;
+  }
+}
+
+/* ================================
+   Animations
+================================ */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.big-card,
+.card {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+.card:nth-child(4) { animation-delay: 0.3s; }
+
+/* ================================
+   Vehicle Information Section
+================================ */
+.vehicleDetail {
+  display: grid;
+  gap: 12px;
+}
+
+.vehicleCount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.vehiclesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vehicleRow {
+  background: rgba(23, 163, 74, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+  border-left: 4px solid #17A34A;
+}
+
+.vehicleRowContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vehicleRowPlate {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0B853C;
+  letter-spacing: 1px;
+}
+
+.vehicleRowType {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
