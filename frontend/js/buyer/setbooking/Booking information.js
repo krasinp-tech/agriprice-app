@@ -84,13 +84,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const json = await res.json();
             // server ส่ง { success, message, data, ...data } ใช้ json.data หรือ json ตรง ๆ
             const d = json.data || json;
+            // หา farmer/seller จากฟิลด์ที่ API ส่งมา (รองรับหลายชื่อ)
+            const farmer = d.farmer || d.seller || d.buyer_profile || null;
+            const buyer  = d.buyer  || d.farmer_profile || null; // ไม่ได้ใช้แสดงในส่วนเกษตรกร
             return {
               bookingId: String(d.booking_no || d.booking_id || bid),
               status: d.status || 'waiting',
-              shopName: d.buyer ? (d.buyer.shop_name || `${d.buyer.first_name} ${d.buyer.last_name}`.trim()) : 'AgriPrice Store',
-              fullName: d.buyer ? `${d.buyer.first_name} ${d.buyer.last_name}`.trim() : '',
-              phone: d.buyer?.phone || '',
-              address: [d.buyer?.address_line1, d.buyer?.address_line2].filter(Boolean).join(' ') || d.address || '',
+              shopName: farmer
+                ? (farmer.shop_name || `${farmer.first_name || ''} ${farmer.last_name || ''}`.trim())
+                : (d.shop_name || 'AgriPrice Store'),
+              fullName: farmer ? `${farmer.first_name || ''} ${farmer.last_name || ''}`.trim() : '',
+              phone: farmer?.phone || d.farmer_phone || '',
+              address: farmer
+                ? [farmer.address_line1, farmer.address_line2].filter(Boolean).join(' ')
+                : (d.address || ''),
               queueNo: d.queue_no || '',
               time: d.scheduled_time ? new Date(d.scheduled_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '',
               date: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : '',
@@ -103,8 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
                   : []),
               vehicleCount: d.vehicle_count || 0,
               slotName: d.slot?.slot_name || '',
-              mapLink: d.buyer?.map_link || '',
-              chatTargetId: d.buyer?.profile_id || d.buyer_id || null,
+              mapLink: farmer?.map_link || farmer?.mapLink || '',
+              chatTargetId: farmer?.profile_id || d.farmer_id || d.seller_id || null,
               booking_id: d.booking_id || null,
               booking_no: d.booking_no || null,
               dateFormatted: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : '',
