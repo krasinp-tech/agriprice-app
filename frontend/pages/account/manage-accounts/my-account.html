@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="my_account">บัญชีของฉัน | AGRIPRICE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/account/manage-accounts/my-account.css" />
+
+  <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+<body data-auth="required">
+  <main class="ma-page">
+    <section class="ma-shell">
+      <header class="ma-header">
+      <a class="ma-back" href="../account.html" aria-label="ย้อนกลับไปหน้าจัดการบัญชี" data-i18n-aria-label="back_to_manage_account">
+        <span class="material-icons-outlined">chevron_left</span>
+      </a>
+      <div>
+        <h1 class="ma-title" data-i18n="my_account">บัญชีของฉัน</h1>
+        <p class="ma-subtitle" data-i18n="manage_profile_desc">จัดการข้อมูลส่วนตัว ความปลอดภัย และสถานะบัญชีของคุณ</p>
+      </div>
+      </header>
+
+      <section class="ma-card" aria-label="ข้อมูลบัญชี">
+
+        <h2 class="ma-card-title" data-i18n="account_info">ข้อมูลบัญชี</h2>
+
+        <a class="ma-row" href="edit-phone.html">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="phone_number">หมายเลขโทรศัพท์</div>
+            <div class="ma-value" id="phoneValue">+66*******361</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="edit-email.html">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="email">อีเมล</div>
+            <div class="ma-value" id="emailValue" data-i18n="no_email">ยังไม่ได้เพิ่มอีเมล</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="edit-birthdate.html">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="birth_date">วันเดือนปีเกิด</div>
+            <div class="ma-value" id="birthDateValue">1 ม.ค. ค.ศ. 2004</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="change-password.html">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="password">รหัสผ่าน</div>
+            <div class="ma-value" data-i18n="change_password">เปลี่ยนรหัสผ่าน</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row" href="edit-location.html" id="locationRow" style="display:none;">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="buyer_location">ที่ตั้งของล้ง</div>
+            <div class="ma-value" id="locationValue" data-i18n="no_location">ยังไม่ได้กำหนดตำแหน่ง</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+
+        <a class="ma-row ma-row-danger" href="deactivate-account.html">
+          <div class="ma-row-copy">
+            <div class="ma-label" data-i18n="delete_account">ปิดใช้งานหรือลบบัญชี</div>
+            <div class="ma-value" id="accountStateValue" data-i18n="active_status">ใช้งานปกติ</div>
+          </div>
+          <span class="material-icons-outlined ma-chevron">chevron_right</span>
+        </a>
+      </section>
+    </section>
+  </main>
+
+  <!-- Core Scripts -->
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/utils/storage-keys.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/utils/auth.js"></script>
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <!-- Component & Page Scripts -->
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/components/i18n.js"></script>
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+  <script src="../../../js/account/manage-accounts/my-account.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.i18nInit) window.i18nInit();
+    });
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'lang') {
+        if (window.i18nInit) window.i18nInit();
+      }
+    });
+  </script>
+</body>
+</html>

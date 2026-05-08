@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Buyer Avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4ea8ff"/>
+      <stop offset="1" stop-color="#2b7fff"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <circle cx="64" cy="46" r="22" fill="#ffe1bd"/>
+  <path d="M24 112c4-21 18-32 40-32s36 11 40 32" fill="#ffffff" opacity="0.95"/>
+  <path d="M42 42c2-12 10-18 22-18 12 0 20 6 22 18-2-2-4-3-8-3-3 0-7 1-10 3-3-2-7-3-10-3-4 0-6 1-8 3z" fill="#2d3a58"/>
+  <rect x="70" y="78" width="26" height="18" rx="4" fill="#1f6ad6"/>
+  <rect x="74" y="82" width="10" height="3" rx="1.5" fill="#9bc6ff"/>
+</svg>

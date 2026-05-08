@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="favorites_page_title">รายการที่บันทึกไว้ | AGRIPRICE</title>
+  
+  <link rel="stylesheet" href="../../css/global.css">
+  <link rel="stylesheet" href="../../components/product-card/product-card.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0B853C;
+      --bg-page: #F8F9FA;
+      --card-bg: #ffffff;
+      --text-main: #1a1a1a;
+      --text-muted: #666;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #000000;
+      --card-bg: #1c1c1e;
+      --text-main: #f2f2f7;
+      --text-muted: #8e8e93;
+    }
+
+    body {
+      background: var(--bg-page);
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+      padding-bottom: 30px;
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      background: var(--bg-page);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .content-area {
+      padding: 0 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      border: 1px solid rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      display: none;
+    }
+    .empty-state .material-icons-outlined {
+      font-size: 64px;
+      color: var(--primary);
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .favorites-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Override product card styles for this page */
+    .product-card {
+      margin: 0 !important;
+      width: 100% !important;
+    }
+  </style>
+  
+  <script src="../../js/config.js"></script>
+  <script src="../../js/components/i18n.js"></script>
+</head>
+<body data-page="favorites">
+
+  <header class="top-bar">
+    <a href="javascript:history.back()" class="back-btn">
+      <span class="material-icons-outlined">arrow_back</span>
+    </a>
+    <h1 class="page-title" data-i18n="favorites_title">รายการที่บันทึกไว้</h1>
+  </header>
+
+  <main class="content-area">
+    <div id="favoritesMount" class="favorites-grid">
+      <!-- Skeleton Loading -->
+      <div class="shimmer" style="height: 120px; border-radius: 20px; margin-bottom: 16px;"></div>
+      <div class="shimmer" style="height: 120px; border-radius: 20px; margin-bottom: 16px;"></div>
+    </div>
+
+    <div id="emptyState" class="empty-state">
+      <span class="material-icons-outlined">bookmark_border</span>
+      <h3 data-i18n="no_favorites_yet">ยังไม่มีรายการที่บันทึก</h3>
+      <p data-i18n="no_favorites_desc">คุณสามารถกดติดตามร้านค้าหรือถูกใจสินค้าได้จากหน้าหลัก</p>
+    </div>
+  </main>
+
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/utils/favorites-helpers.js"></script>
+  <script src="../../js/components.js"></script>
+  <script src="../../js/shared-pages/favorites.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.i18nInit) window.i18nInit();
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    });
+  </script>
+</body>
+</html>

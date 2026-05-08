@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title data-i18n="profile_title">โปรไฟล์ของฉัน - AGRIPRICE</title>
+
+<link rel="stylesheet" href="../../css/global.css">
+<link rel="stylesheet" href="../../css/dark-mode-patch.css">
+<link rel="stylesheet" href="../../css/shared-pages/profile-new.css">
+<link rel="stylesheet" href="../../css/buyer/myprofile.css">
+<link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+<!-- Leaflet for Map Picker -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<script src="../../js/config.js"></script>
+<script src="../../js/global-anim.js"></script>
+<script src="../../js/permission-manager.js"></script>
+</head>
+
+<body>
+<!-- HERO -->
+<section class="profile-hero-section">
+    <button class="profile-back-btn" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../account/account.html'); else window.location.href='../account/account.html';" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+        <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="ภาพปก" data-i18n-alt="hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนภาพปก">
+</section>
+
+<!-- MAIN CONTENT CARD -->
+<div class="profile-content-card">
+
+    <!-- Avatar (with edit button overlay) -->
+    <div class="profile-avatar-box" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+        <img id="profileAvatar" src="../../assets/images/avatar-guest.svg" alt="รูปโปรไฟล์" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/avatar-guest.svg';">
+    </div>
+
+    <!-- Name & Status -->
+    <div class="profile-header-info">
+        <h2 class="profile-name" id="profileName"></h2>
+        <div class="profile-tagline-text" id="profileTagline"></div>
+        <div class="profile-status">
+            <span class="status-dot"></span> <span data-i18n="profile_online">ออนไลน์</span>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="profile-stats-row">
+        <div class="stat-item">
+            <div id="followersCount" class="stat-value">-</div>
+            <div class="stat-label" data-i18n="profile_followers">ผู้ติดตาม</div>
+        </div>
+        <div class="stat-item">
+            <div id="followingCount" class="stat-value">-</div>
+            <div class="stat-label" data-i18n="profile_following">กำลังติดตาม</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">0</div>
+            <div class="stat-label" data-i18n="profile_score">คะแนน</div>
+        </div>
+    </div>
+
+    <!-- Actions (Owner view: Edit Profile + Add Purchase) -->
+    <div class="profile-action-row">
+        <button class="btn-message" id="editAboutBtn" type="button">
+            <span class="material-icons-outlined" style="font-size:20px;">edit</span>
+            <span data-i18n="profile_edit_btn">แก้ไขโปรไฟล์</span>
+        </button>
+        <button class="btn-follow" id="addPurchaseBtn" type="button">
+            <span class="material-icons-outlined" style="font-size:20px;">add_circle</span>
+            <span data-i18n="profile_add_purchase">+ เพิ่มการรับซื้อ</span>
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs-scroll">
+        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เกี่ยวกับ</div>
+        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">ข้อมูลติดต่อ</div>
+        <div class="profile-tab" data-tab="services" data-i18n="tab_services">บริการ</div>
+        <div class="profile-tab" data-tab="location" data-i18n="tab_location">ที่อยู่</div>
+    </div>
+
+    <!-- Tab: เกี่ยวกับ -->
+    <div class="tab-panel-new active" id="tab-about">
+        <p class="profile-about-text" id="aboutDesc"></p>
+        <div class="products-list-title" data-i18n="purchase_list_title">รายการการรับซื้อ</div>
+        <div id="productListContainer"></div>
+    </div>
+
+    <!-- Tab: ข้อมูลติดต่อ (Frame 15) -->
+    <div class="tab-panel-new" id="tab-contact">
+        <div class="contact-list" id="contactList">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+
+    <!-- Tab: บริการ (Frame 16) -->
+    <div class="tab-panel-new" id="tab-services">
+        <div class="services-list" id="servicesList">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+
+    <!-- Tab: ที่อยู่ (Frame 17) -->
+    <div class="tab-panel-new" id="tab-location">
+        <div class="location-card" id="locationCard">
+            <div class="location-header">
+                <div class="location-icon-wrap">
+                    <span class="material-icons-outlined">location_on</span>
+                </div>
+                <div class="location-text">
+                    <div class="location-address" id="addressLine1"></div>
+                    <div class="location-sub" id="addressLine2"></div>
+                </div>
+                <a id="mapLink" target="_blank" class="location-link" data-i18n="map_show">
+                    แสดงแผนที่
+                </a>
+            </div>
+            <div class="map-container">
+                <iframe id="mapIframe" allowfullscreen loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+    <a href="index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+    </a>
+    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </a>
+    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+    </a>
+    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+    </a>
+    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+    </a>
+</nav></div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="coverInput" accept="image/*" hidden>
+<input type="file" id="avatarInput" accept="image/*" hidden>
+
+<!-- Edit Profile Modal -->
+<div id="editAboutModal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
+
+        <label data-i18n="shop_name">ชื่อร้าน</label>
+        <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
+
+        <label data-i18n="tagline_label">Tagline / คำอธิบายสั้น</label>
+        <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint">
+
+        <label data-i18n="about_label">เกี่ยวกับ</label>
+        <textarea id="aboutEditor" rows="4"></textarea>
+
+        <label data-i18n="phone_label">โทรศัพท์</label>
+        <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
+
+        <label data-i18n="email_label">อีเมล</label>
+        <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
+
+        <label data-i18n="address_label">ที่อยู่</label>
+        <input id="addr1Editor" type="text" placeholder="ที่อยู่" data-i18n-placeholder="address_label">
+
+        <label data-i18n="address_cont_label">ที่อยู่ (ต่อ)</label>
+        <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder">
+
+        <label data-i18n="services_label">บริการของคุณ (เลือกได้หลายข้อ)</label>
+        <div id="servicesEditor" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" value="รับซื้อถึงสวน" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_onsite">รับซื้อถึงสวน</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" value="จ่ายเงินสด" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_cash">จ่ายเงินสด</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" value="จองคิวล่วงหน้า" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_booking">จองคิวล่วงหน้า</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" value="มีตาชั่งมาตรฐาน" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_scale">มีตาชั่งมาตรฐาน</span>
+            </label>
+        </div>
+
+        <label data-i18n="map_pin_label">ปักหมุดตำแหน่งบนแผนที่</label>
+        <div id="mapPickerWrapper" style="margin-bottom: 15px;">
+            <button id="openMapPickerBtn" type="button" class="btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-icons-outlined">place</span>
+                <span id="mapPickerStatusText" data-i18n="map_picker_btn">เลือกตำแหน่งบนแผนที่...</span>
+            </button>
+            <div id="mapPickerContainer" style="display: none; margin-top: 10px;">
+                <button id="getCurrentLocationBtn" type="button" class="btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #16a34a; border-color: #16a34a;">
+                    <span class="material-icons-outlined">my_location</span>
+                    <span data-i18n="current_location_btn">ใช้ตำแหน่งปัจจุบันของฉัน</span>
+                </button>
+                <div id="leafletMapDiv" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #ddd; z-index: 0;"></div>
+            </div>
+            <input type="hidden" id="mapLatEditor">
+            <input type="hidden" id="mapLngEditor">
+        </div>
+
+        <div class="modal-actions">
+            <button id="cancelAboutBtn" class="btn-outline" data-i18n="cancel_btn">ยกเลิก</button>
+            <button id="saveAboutBtn" style="background:#00c853;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;cursor:pointer;" data-i18n="save_btn">บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Tab panels */
+.tab-panel-new { display: none; padding-top: 16px; }
+.tab-panel-new.active { display: block; }
+
+/* Contact list items (Frame 15) */
+.contact-list { padding-top: 8px; }
+.contact-item-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #222;
+    border-bottom: 1px solid #f0f0f0;
+}
+.contact-item-row:last-child { border-bottom: none; }
+.contact-item-row .material-icons-outlined { color: #00a651; font-size: 20px; }
+.contact-item-row a { color: #222; text-decoration: none; }
+
+/* Services list (Frame 16) */
+.services-list { padding-top: 8px; }
+.service-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #222;
+    border-bottom: 1px solid #f0f0f0;
+}
+.service-row:last-child { border-bottom: none; }
+.service-row .material-icons-outlined { color: #00a651; font-size: 20px; }
+</style>
+
+<script src="../../js/components.js"></script>
+<script src="../../js/components/ui-common.js"></script>
+<script src="../../js/api-client.js"></script>
+<script src="../../js/utils/ui-helpers.js"></script>
+<script src="../../js/buyer/myprofile.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.i18nInit) window.i18nInit();
+
+    // --- Tab switching ---
+    const tabs = document.querySelectorAll('.profile-tab[data-tab]');
+    const panels = document.querySelectorAll('.tab-panel-new');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const panel = document.getElementById('tab-' + tab.dataset.tab);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    // --- Make images clickable to trigger hidden file inputs ---
+    const heroImage  = document.getElementById('heroImage');
+    const coverInput = document.getElementById('coverInput');
+    if (heroImage && coverInput) heroImage.addEventListener('click', () => coverInput.click());
+
+    const profileAvatarBox = document.querySelector('.profile-avatar-box');
+    const avatarInput      = document.getElementById('avatarInput');
+    if (profileAvatarBox && avatarInput) profileAvatarBox.addEventListener('click', () => avatarInput.click());
+});
+
+// Called by myprofile.js after profile data is loaded
+window.onProfileDataReady = function(profileData) {
+    // --- Render contact tab (Frame 15) ---
+    const contactList = document.getElementById('contactList');
+    if (contactList) {
+        const items = [];
+        if (profileData.phone) items.push(`
+            <div class="contact-item-row">
+                <span class="material-icons-outlined">phone</span>
+                <a href="tel:${profileData.phone}">${profileData.phone}</a>
+            </div>`);
+        if (profileData.email) items.push(`
+            <div class="contact-item-row">
+                <span class="material-icons-outlined">email</span>
+                <a href="mailto:${profileData.email}">${profileData.email}</a>
+            </div>`);
+        if (profileData.links && profileData.links.length) {
+            profileData.links.forEach(l => {
+                items.push(`
+                    <div class="contact-item-row">
+                        <span class="material-icons-outlined">language</span>
+                        <a href="${l}" target="_blank" rel="noopener">${l}</a>
+                    </div>`);
+            });
+        }
+        contactList.innerHTML = items.length ? items.join('') : `<p style="color:#aaa;font-size:14px;padding:16px 0;" data-i18n="no_contact_info">${window.i18nT ? window.i18nT('no_contact_info', 'ยังไม่มีข้อมูลติดต่อ') : 'ยังไม่มีข้อมูลติดต่อ'}</p>`;
+    }
+
+    // --- Render services tab (Frame 16) ---
+    const servicesList = document.getElementById('servicesList');
+    if (servicesList) {
+        const iconMap = {
+            'รับซื้อถึงสวน': 'local_shipping',
+            'จ่ายเงินสด':    'payments',
+            'จองคิวล่วงหน้า': 'event_available',
+        };
+        const svcs = (profileData.services && profileData.services.length) ? profileData.services : [];
+        if (svcs.length === 0) {
+            servicesList.innerHTML = `<div style="color:#94a3b8; font-size:13px; padding:10px 0;" data-i18n="no_services_info">${window.i18nT ? window.i18nT('no_services_info', 'ยังไม่ได้ระบุบริการ') : 'ยังไม่ได้ระบุบริการ'}</div>`;
+        } else {
+            servicesList.innerHTML = svcs.map(s => {
+                const sName = typeof s === 'string' ? s : (s.name || '');
+                return `
+                <div class="service-row">
+                    <span class="material-icons-outlined">${iconMap[sName] || 'check_circle'}</span>
+                    <span>${sName}</span>
+                </div>`;
+            }).join('');
+        }
+    }
+};
+</script>
+</body>
+</html>

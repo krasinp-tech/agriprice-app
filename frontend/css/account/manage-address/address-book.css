@@ -1,0 +1,161 @@
+/* AGRIPRICE - Address Book Styling */
+.address-page {
+    min-height: 100vh;
+    background: var(--bg-page);
+    padding: calc(16px + var(--safe-top, 0px)) 16px 40px;
+}
+
+/* Header */
+.address-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.back-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    display: grid; place-items: center;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.back-btn:active { transform: scale(0.92); background: var(--bg-input); }
+
+.page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+/* Address Card List */
+.address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.address-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.address-icon {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: #e8f5e9;
+    color: var(--primary);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+}
+
+.address-info {
+    flex: 1;
+}
+
+.address-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.address-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.address-detail {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.address-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.btn-action.delete { color: #ff3b30; margin-left: 12px; }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 24px;
+}
+
+.empty-icon {
+    font-size: 80px;
+    color: var(--text-muted);
+    opacity: 0.2;
+    margin-bottom: 16px;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.empty-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+}
+
+/* Floating Action Button / Bottom Button */
+.btn-add-address {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(11, 133, 60, 0.2);
+    transition: all 0.2s;
+}
+.btn-add-address:active { transform: scale(0.96); }
+
+/* Dark Mode */
+[data-theme="dark"] .address-page { background: #000000; }
+[data-theme="dark"] .address-card { background: #1c1c1e; border-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .back-btn { background: #1c1c1e; border-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .address-icon { background: #2c2c2e; color: #81c784; }
+[data-theme="dark"] .address-detail { color: rgba(255,255,255,0.6); }

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title data-i18n="profile_buyer_title">โปรไฟล์ผู้รับซื้อ - AGRIPRICE</title>
+
+<link rel="stylesheet" href="../../css/global.css">
+<link rel="stylesheet" href="../../css/dark-mode-patch.css">
+<link rel="stylesheet" href="../../css/shared-pages/profile-new.css">
+<link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script src="../../js/global-anim.js"></script>
+  <script src="../../js/permission-manager.js"></script>
+<style>
+    /* Tab panels */
+    .tab-panel-new { display: none; padding-top: 16px; }
+    .tab-panel-new.active { display: block; }
+
+    /* Contact list */
+    .contact-item-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        font-size: 15px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .contact-item-row .material-icons-outlined { color: #00a651; font-size: 20px; }
+    .contact-item-row a { color: inherit; text-decoration: none; }
+
+    /* Service list */
+    .service-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        font-size: 15px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .service-row .material-icons-outlined { color: #00a651; font-size: 20px; }
+
+    /* Location Card */
+    .location-card {
+        background: #f9f9f9;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 8px;
+    }
+    .location-header { display: flex; gap: 12px; margin-bottom: 12px; }
+    .location-icon-wrap { color: #00a651; }
+    .location-address { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .location-sub { font-size: 13px; color: #666; }
+    .map-container { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin-top: 12px; }
+    .map-container iframe { width: 100%; height: 100%; border: none; }
+
+    /* Profile purchase pagination button (match app style) */
+    .profile-load-more-btn {
+        display: none;
+        width: fit-content;
+        min-width: 170px;
+        margin: 14px auto 6px;
+        padding: 10px 20px;
+        border: 1px solid rgba(0, 222, 154, 0.28);
+        border-radius: 999px;
+        background: linear-gradient(180deg, #032a1e 0%, #042117 100%);
+        color: #23e5c0;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        cursor: pointer;
+        box-shadow: inset 0 1px 0 rgba(0, 255, 188, 0.09), 0 2px 8px rgba(0, 0, 0, 0.25);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .profile-load-more-btn:hover {
+        filter: brightness(1.06);
+        box-shadow: inset 0 1px 0 rgba(0, 255, 188, 0.14), 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+    .profile-load-more-btn:active {
+        transform: translateY(1px);
+        box-shadow: inset 0 1px 0 rgba(0, 255, 188, 0.1), 0 1px 6px rgba(0, 0, 0, 0.25);
+    }
+    .profile-load-more-btn:focus-visible {
+        outline: 2px solid rgba(0, 222, 154, 0.45);
+        outline-offset: 2px;
+    }
+    .profile-load-more-btn .material-icons-outlined {
+        font-size: 18px;
+        line-height: 1;
+    }
+</style>
+</head>
+
+<body>
+    <!-- HERO -->
+<section class="profile-hero-section">
+    <button class="profile-back-btn" onclick="window.history.back()" aria-label="ย้อนกลับ" data-i18n-aria-label="back">
+        <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="โปรไฟล์หน้าปก" data-i18n-alt="profile_hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';">
+</section>
+
+<!-- MAIN CONTENT CARD -->
+<div class="profile-content-card">
+
+    <!-- Avatar Squircle -->
+    <div class="profile-avatar-box">
+        <img id="profileAvatar" src="../../assets/images/durian.png" alt="รูปล้ง" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/durian.png';">
+    </div>
+
+    <!-- Header Info -->
+    <div class="profile-header-info">
+        <h2 class="profile-name" id="profileName"><div class="shimmer" style="width: 140px; height: 24px; border-radius: 4px;"></div></h2>
+        <div class="profile-status">
+            <span class="status-dot"></span> <span data-i18n="online">ออนไลน์</span>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="profile-stats-row">
+        <div class="stat-item">
+            <div class="stat-value" id="followersCount"><div class="shimmer" style="width: 30px; height: 20px; border-radius: 4px; margin: 0 auto;"></div></div>
+            <div class="stat-label" data-i18n="followers_label">ผู้ติดตาม</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="followingCount"><div class="shimmer" style="width: 30px; height: 20px; border-radius: 4px; margin: 0 auto;"></div></div>
+            <div class="stat-label" data-i18n="following_label">กำลังติดตาม</div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="profile-action-row">
+        <button class="btn-message" id="contactBtn">
+            <span class="material-icons-outlined" style="font-size: 20px;">chat_bubble_outline</span>
+            <span data-i18n="nav_chat">แชท</span>
+        </button>
+        <button class="btn-follow" id="followBtn">
+            <span class="material-icons-outlined" style="font-size: 20px;">person_add</span>
+            <span data-i18n="follow">ติดตาม</span>
+        </button>
+    </div>
+
+    <!-- Tabs Scroll -->
+    <div class="profile-tabs-scroll">
+        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เกี่ยวกับ</div>
+        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">ข้อมูลติดต่อ</div>
+        <div class="profile-tab" data-tab="services" data-i18n="tab_services">บริการ</div>
+        <div class="profile-tab" data-tab="location" data-i18n="tab_location">ที่อยู่</div>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="tab-panel-new active" id="tab-about">
+        <div class="profile-about-text" id="aboutDesc"></div>
+    </div>
+
+    <div class="tab-panel-new" id="tab-contact">
+        <div id="contactList"></div>
+    </div>
+
+    <div class="tab-panel-new" id="tab-services">
+        <div id="servicesList"></div>
+    </div>
+
+    <div class="tab-panel-new" id="tab-location">
+        <div class="location-card">
+            <div class="location-header">
+                <div class="location-icon-wrap"><span class="material-icons-outlined">location_on</span></div>
+                <div class="location-info">
+                    <div class="location-address" id="addressLine1"></div>
+                    <div class="location-sub" id="addressLine2"></div>
+                </div>
+            </div>
+            <div class="map-container">
+                <iframe id="mapIframe" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Purchase List (always visible across tabs) -->
+    <div class="products-list-title" data-i18n="purchase_list_title">รายการการรับซื้อ</div>
+    <div id="productListContainer">
+        <div class="shimmer" style="height: 100px; border-radius: 16px; margin-bottom: 12px;"></div>
+        <div class="shimmer" style="height: 100px; border-radius: 16px; margin-bottom: 12px;"></div>
+    </div>
+    <button id="profileLoadMoreBtn" class="btn-load-more profile-load-more-btn" type="button">
+        <span class="material-icons-outlined" aria-hidden="true">expand_more</span>
+        <span data-i18n="load_more">ดูเพิ่มเติม</span>
+    </button>
+
+</div>
+
+<!-- Bottom Nav (component) -->
+<div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+    <a href="index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+    </a>
+    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </a>
+    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+    </a>
+    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+    </a>
+    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+    </a>
+</nav></div>
+
+  <!-- Core Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils/storage-keys.js"></script>
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/utils/auth.js"></script>
+  <script src="../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <!-- Component & Page Scripts -->
+  <script src="../../js/global-anim.js"></script>
+  <script src="../../js/components/i18n.js"></script>
+  <script src="../../js/components.js"></script>
+  <script src="../../js/utils/ui-helpers.js"></script>
+  <script src="../../js/shared-pages/profile.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.i18nInit) window.i18nInit();
+
+        // Tab Switching Logic
+        const tabs = document.querySelectorAll('.profile-tab');
+        const panels = document.querySelectorAll('.tab-panel-new');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                panels.forEach(p => {
+                    p.classList.remove('active');
+                    if(p.id === 'tab-' + target) p.classList.add('active');
+                });
+            });
+        });
+    });
+
+    // Keep language in sync when returning via back/forward cache
+    // or when language changes in another page/tab.
+    window.addEventListener('pageshow', function() {
+        if (window.i18nInit) window.i18nInit();
+    });
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && window.i18nInit) window.i18nInit();
+    });
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'lang' && window.i18nInit) window.i18nInit();
+    });
+</script>
+</body>
+</html>

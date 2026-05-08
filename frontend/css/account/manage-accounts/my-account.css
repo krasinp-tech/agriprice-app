@@ -1,0 +1,232 @@
+
+body {
+  font-family: 'Sarabun', 'Inter', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+.ma-page {
+  min-height: 100vh;
+  padding: 18px 14px 30px;
+}
+
+.ma-shell {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.ma-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 6px 0 18px;
+}
+
+.ma-back {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: var(--text-main);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.ma-back:active {
+  transform: scale(0.96);
+  background: var(--bg-input);
+}
+
+.ma-title {
+  font-size: clamp(22px, 4.8vw, 30px);
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.ma-subtitle {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.ma-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.ma-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-input) 100%);
+}
+
+.ma-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  padding: 2px;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.ma-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ma-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ma-profile-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.ma-profile-role {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  text-transform: capitalize;
+}
+
+.ma-card-title {
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  opacity: 0.8;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ma-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.ma-row:last-child {
+  border-bottom: none;
+}
+
+.ma-row:hover {
+  background: var(--bg-page);
+  filter: brightness(0.98);
+}
+
+.ma-row:active {
+  transform: scale(0.996);
+}
+
+.ma-row-copy {
+  min-width: 0;
+}
+
+.ma-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ma-value {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ma-chevron {
+  color: var(--text-dim);
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.ma-row-danger .ma-label {
+  color: #ef4444;
+}
+
+.ma-row-danger .ma-value {
+  color: #ff453a;
+  opacity: 0.8;
+}
+
+.ma-row-danger .ma-chevron {
+  color: #ff453a;
+  opacity: 0.6;
+}
+
+@media (min-width: 640px) {
+  .ma-page {
+    padding: 26px 24px 42px;
+  }
+
+  .ma-header {
+    margin-bottom: 22px;
+  }
+
+  .ma-row {
+    padding: 16px 20px;
+  }
+
+  .ma-row-copy {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .ma-value {
+    margin-top: 0;
+    text-align: right;
+  }
+}
+
+/* fade-slide animation removed for visibility debugging */
+
+.modal-fade {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(.4,0,.2,1);
+}
+.modal-fade.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-fade .modal-content {
+  transform: translateY(32px);
+  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+}
+.modal-fade.show .modal-content {
+  transform: translateY(0);
+}

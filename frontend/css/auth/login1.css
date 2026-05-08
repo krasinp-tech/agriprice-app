@@ -1,0 +1,278 @@
+/* ================================================
+   login1.css — Agriprice Welcome Screen (Final)
+   - Video autoplay muted loop (no controls)
+   - Crop video slightly + focus
+   - White content sheet overlaps video
+   - Rounded sheet top corners
+   - Responsive: mobile/tablet full screen, desktop centered card
+   ================================================ */
+
+body {
+  font-family: var(--font-main);
+  color: var(--text-main);
+  background: var(--bg-card);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  height: 100dvh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== PAGE WRAPPER ===== */
+.screen {
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  display: block;
+  /* Use block with grid child */
+}
+
+/* ===== CARD =====
+   Mobile/Tablet: full screen
+*/
+.card {
+  width: 100%;
+  height: 100dvh;
+  background: var(--bg-card);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  /* Top auto, Bottom fills rest */
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ===== MEDIA (TOP VIDEO) ===== */
+.media {
+  position: relative;
+  overflow: hidden;
+  height: clamp(300px, 52vh, 520px);
+  background: linear-gradient(135deg, var(--bg-input) 0%, var(--border-light) 100%);
+}
+
+/* 📱 Status Bar Overlay: Ensures clock/battery icons are visible */
+.media::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* วิดีโอเต็มพื้นที่ + ครอปเล็กน้อย */
+.media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transform-origin: 50% 38%;
+  display: block;
+}
+
+/* ===== CONTENT SHEET (WHITE) ===== */
+.content {
+  position: relative;
+  z-index: 2;
+  background: var(--bg-card);
+  margin-top: -36px;
+  border-top-left-radius: var(--radius-xxl);
+  border-top-right-radius: var(--radius-xxl);
+  box-shadow: var(--shadow-md);
+  padding: 32px var(--space-lg) calc(20px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 📱 Centered for Premium App Feel */
+  text-align: center;
+  flex-grow: 1;
+  min-height: 0;
+
+  /* 🎭 Entrance Animation */
+  animation: slideUpSheet 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Title */
+.title {
+  line-height: 1.08;
+  margin-bottom: var(--space-xs);
+}
+
+.title-th {
+  display: block;
+  font-size: clamp(28px, 4.6vw, 36px);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+  color: var(--text-main);
+}
+
+.title-brand {
+  display: block;
+  margin-top: var(--space-xxs);
+  font-size: clamp(36px, 6vw, 50px);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  color: #0B66FF;
+}
+
+/* 📱 Brand Icon Container */
+.brand-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(11, 133, 60, 0.1);
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: clamp(13px, 1.9vw, 15px);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-width: 42ch;
+  margin-bottom: 20px;
+}
+
+/* ===== SEGMENTED CONTROL ===== */
+.segmented-wrap {
+  margin-top: auto;
+  /* Push everything down */
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+.segmented {
+  width: 100%;
+  border-radius: var(--radius-round);
+  padding: 5px;
+  border: 1.8px solid var(--border-light);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  background: var(--bg-card);
+}
+
+.seg-btn {
+  height: 54px;
+  border-radius: var(--radius-round);
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  transition: transform 0.13s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.seg-btn:active {
+  transform: scale(0.98);
+}
+
+.seg-primary {
+  background: linear-gradient(175deg, #0E3480 0%, #081E5A 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 24px rgba(14, 52, 128, 0.25) !important;
+}
+
+.seg-ghost {
+  background: transparent !important;
+  color: var(--text-main) !important;
+}
+
+.hint {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim) !important;
+  text-align: center;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet+ */
+@media (min-width: 640px) {
+  body {
+    background: var(--bg-page);
+  }
+
+  .card {
+    width: 100%;
+    max-width: var(--app-max-width);
+    margin: 0 auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Desktop: ทำเป็นการ์ดกลาง */
+@media (min-width: 1024px) {
+  .screen {
+    display: grid;
+    place-items: center;
+    padding: 40px var(--space-md);
+  }
+
+  .card {
+    width: 100%;
+    max-width: var(--app-max-width);
+    min-height: unset;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+  }
+
+  .media {
+    height: 440px;
+    width: 100%;
+  }
+}
+
+/* จอเตี้ย/แนวนอน: ลดวิดีโอ และซ่อน subtitle เพื่อให้ปุ่มไม่หลุด */
+@media (max-height: 600px) and (orientation: landscape) {
+  .media {
+    height: clamp(220px, 42vh, 300px);
+  }
+
+  .content {
+    padding: var(--space-md) var(--space-lg) calc(var(--space-md) + var(--safe-bottom));
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .seg-btn {
+    height: 46px;
+    font-size: 14px;
+  }
+}

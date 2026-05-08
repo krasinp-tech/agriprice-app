@@ -1,0 +1,20 @@
+# Environment secrets
+.env
+.env.*
+server/.env
+node_modules/
+*.zip
+server_deploy.zip
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Logs
+*.log
+
+# Generated mobile/web artifacts
+frontend/www/
+frontend/android/app/capacitor.build.gradle
+frontend/android/capacitor.settings.gradle

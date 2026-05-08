@@ -1,0 +1,403 @@
+/* ================================
+   AGRIPRICE - Booking Step 4
+   จองคิว: การจองสำเร็จ
+   (ใช้สไตล์จาก booking-detail.css)
+================================ */
+
+/* Responsive Container Wrapper */
+.booking-container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+@media (min-width: 768px) {
+  .booking-container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .booking-container {
+    max-width: 1024px;
+    padding: 0 40px;
+  }
+}
+
+.booking-step4 {
+  min-height: auto;
+  padding: 0 0 100px;
+  background: var(--bg-page);
+}
+
+/* ================================
+   Hero Section
+================================ */
+.hero {
+  position: relative;
+  margin-top: 14px;
+}
+
+.hero-bg {
+  height: 180px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.10);
+}
+
+.hero-content {
+  position: relative;
+  margin-top: -150px;
+  padding: 18px 20px 0;
+}
+
+.hero-title {
+  text-align: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.hero-sub {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ================================
+   Big Card (Main Info)
+================================ */
+.big-card {
+  margin-top: 20px;
+  background: var(--bg-card);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.label {
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.queue {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #16a34a;
+  margin: 4px 0;
+}
+
+.subRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.subLabel {
+  opacity: 0.6;
+}
+
+.subValue {
+  font-weight: 700;
+}
+
+/* ================================
+   QR Code
+================================ */
+.qrWrap {
+  width: 220px;
+  height: 220px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+#qrCanvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ================================
+   ID Row
+================================ */
+.idRow {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+/* ================================
+   Buttons
+================================ */
+.btn-detail {
+  margin-top: 16px;
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1.5px solid rgba(22, 163, 74, 0.3);
+  background: transparent;
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-detail:active {
+  background: rgba(22, 163, 74, 0.05);
+  transform: scale(0.98);
+}
+
+.btn-cancel {
+  margin-top: 24px;
+  width: 100%;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  background: var(--bg-card);
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:active {
+  background: rgba(239, 68, 68, 0.05);
+  transform: scale(0.98);
+}
+
+/* ================================
+   Detail Panel
+================================ */
+.detailPanel {
+  width: 100%;
+  margin-top: 16px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .detailPanel {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ================================
+   Cards
+================================ */
+.card {
+  margin-top: 16px;
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+}
+
+.card-title {
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.card-body {
+  font-size: 14px;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.card.info {
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+}
+
+[data-theme="dark"] .card.info {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.card.info .card-title {
+  color: #B45309;
+}
+
+[data-theme="dark"] .card.info .card-title {
+    color: #FBBF24;
+}
+
+/* ================================
+   Status Grid
+================================ */
+.statusGrid {
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.02);
+  padding: 4px;
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+}
+
+.statusLabel {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.statusValue {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.statusValue.green {
+  color: #16a34a;
+}
+
+.statusFoot {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.statusMini {
+  background: var(--bg-page);
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.statusMiniLabel {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+
+.statusMiniValue {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+/* ================================
+   Place Box (Map)
+================================ */
+.placeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.placeName {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.placeAddr {
+  font-size: 14px;
+  opacity: 0.7;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.btn-map {
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1.5px solid rgba(22, 163, 74, 0.2);
+  background: transparent;
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-map:active {
+  background: rgba(29, 78, 216, 0.05);
+  transform: scale(0.98);
+}
+
+
+/* ================================
+   Responsive - Tablet
+================================ */
+@media (min-width: 768px) {
+  .booking-step4 {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 24px 100px;
+  }
+
+  .hero-bg {
+    height: 200px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .queue {
+    font-size: 56px;
+  }
+}
+
+/* ================================
+   Animations
+================================ */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.big-card,
+.card {
+  animation: slideInUp 0.4s ease-out both;
+}
+
+.card:nth-of-type(1) { animation-delay: 0.1s; }
+.card:nth-of-type(2) { animation-delay: 0.2s; }
+.card:nth-of-type(3) { animation-delay: 0.3s; }

@@ -1,0 +1,184 @@
+/* ==========================================================
+   myprofile.css — Owner-specific additions on top of profile-new.css
+   ========================================================== */
+
+@import url('../shared-pages/profile-new.css');
+
+/* Camera overlay on hero */
+.hero-camera-btn {
+    position: absolute;
+    top: max(var(--safe-area-top, 16px), 16px);
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+}
+
+/* Camera overlay on avatar */
+.avatar-camera-btn {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #eee;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 20;
+}
+
+.avatar-camera-btn span {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Profile tagline below name */
+.profile-tagline-text {
+    font-size: 14px;
+    color: #888;
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+/* Location card (same style, light) */
+.location-card {
+    background: #f7f9ff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    border: 1px solid #eef0f7;
+}
+
+.location-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.location-icon-wrap span {
+    color: #00a651;
+    font-size: 22px;
+}
+
+.location-text {
+    flex: 1;
+    font-size: 13px;
+    color: #444;
+}
+
+.location-address {
+    font-weight: 600;
+}
+
+.location-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #00a651;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.map-container {
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 160px;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20000; /* Higher than bottom nav (10000) */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.modal[hidden] {
+    display: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 20001;
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 20002;
+}
+
+.modal-content h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 20px 0;
+}
+
+.modal-content label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+    margin-top: 14px;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fafafa;
+    box-sizing: border-box;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-outline {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #fff;
+    cursor: pointer;
+    color: #555;
+}
