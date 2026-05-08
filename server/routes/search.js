@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 
     let prodQuery = supabaseAdmin
       .from('products')
-      .select('product_id, user_id, name, variety, category, unit, price, image, is_active, created_at, profiles!user_id(first_name, last_name, avatar, lat, lng), product_grades(grade, price)')
+      .select('product_id, user_id, name, variety, category, unit, price, image, is_active, created_at, profiles!user_id(first_name, last_name, avatar, lat, lng)')
       .eq('is_active', true)
       .limit(safeLimit);
 

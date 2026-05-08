@@ -37,14 +37,7 @@ async function autoCompleteDueBookings() {
 
     if (updErr) throw updErr;
 
-    for (const row of (updatedRows || [])) {
-      await db.query(
-        'INSERT INTO booking_status_logs (booking_id, old_status, new_status, note) VALUES ($1,$2,$3,$4)',
-        [row.booking_id, 'waiting', 'cancel', 'auto-expire (no-show) after delay']
-      ).catch(() => {});
-    }
-
-    logger.info(`[automation] marked ${updatedRows.length} bookings as missed`);
+    logger.info(`[automation] marked ${(updatedRows || []).length} bookings as missed`);
   } catch (err) {
     logger.warn('[automation] autoCompleteDueBookings failed: ' + err.message);
   }

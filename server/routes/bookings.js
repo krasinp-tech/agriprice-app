@@ -59,7 +59,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
         *,
         farmer:profiles!farmer_id(profile_id, first_name, last_name, phone, avatar),
         buyer:profiles!buyer_id(profile_id, first_name, last_name, phone, avatar, address_line1, address_line2, map_link, lat, lng),
-        product:products(product_id, name, variety, category, unit, product_grades(grade, price)),
+        product:products(product_id, name, variety, category, unit),
         slot:product_slots(slot_id, slot_name, time_start, time_end, capacity, booked_count)
       `);
 
@@ -390,10 +390,6 @@ router.patch('/:id/checkin', authMiddleware, async (req, res) => {
 
     if (updErr) throw updErr;
 
-    await db.query(
-      'INSERT INTO booking_status_logs (booking_id, old_status, new_status, changed_by, note) VALUES ($1,$2,$3,$4,$5)',
-      [booking.booking_id, 'waiting', 'success', buyerId, 'Instant QR Check-in by Buyer']
-    ).catch(() => {});
 
     res.json(response.success('เช็คอินสำเร็จ! ยินดีต้อนรับเข้าสู่งาน', updated));
   } catch (e) {

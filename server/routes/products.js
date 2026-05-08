@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 
     let query = supabaseAdmin
       .from('products')
-      .select('*, product_grades(grade, price), profiles!user_id(profile_id, first_name, last_name, avatar, lat, lng)', { count: 'exact' })
+      .select('*, profiles!user_id(profile_id, first_name, last_name, avatar, lat, lng)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
 
@@ -95,7 +95,6 @@ router.get('/:id', async (req, res) => {
       .from('products')
       .select(
         'product_id, name, variety, grade, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
-        'product_grades(grade, price), ' +
         'profiles!user_id(profile_id, first_name, last_name, phone, avatar, lat, lng)'
       )
       .eq('product_id', req.params.id)
@@ -143,15 +142,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     const { data, error } = await supabaseAdmin.from('products').insert(updates).select().single();
     if (error) throw error;
 
-    // Insert grades if provided
-    if (grades && Array.isArray(JSON.parse(grades))) {
-      const gradesArr = JSON.parse(grades).map(g => ({
-        product_id: data.product_id,
-        grade: g.grade,
-        price: Number(g.price)
-      }));
-      await supabaseAdmin.from('product_grades').insert(gradesArr);
-    }
+
 
     res.status(201).json(response.success('เพิ่มรายการสำเร็จ', data));
   } catch (e) {
@@ -190,14 +181,7 @@ router.patch('/:id', authMiddleware, upload.single('image'), async (req, res) =>
 
     if (error) throw error;
 
-    if (grades) {
-      const gradesArr = JSON.parse(grades);
-      // Simple sync: delete all and re-insert
-      await supabaseAdmin.from('product_grades').delete().eq('product_id', productId);
-      await supabaseAdmin.from('product_grades').insert(
-        gradesArr.map(g => ({ product_id: productId, grade: g.grade, price: Number(g.price) }))
-      );
-    }
+
 
     res.json(response.success('อัปเดตรายการสำเร็จ', data));
   } catch (e) {
@@ -309,11 +293,7 @@ buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), asyn
     const { data, error } = await supabaseAdmin.from('products').insert(insertData).select().single();
     if (error) throw error;
 
-    if (parsedGrades.length > 0) {
-      await supabaseAdmin.from('product_grades').insert(
-        parsedGrades.map(g => ({ product_id: data.product_id, grade: g.grade, price: Number(g.price) }))
-      );
-    }
+
 
     res.status(201).json(response.success('เพิ่มรายการสำเร็จ', data));
   } catch (e) {
@@ -347,13 +327,7 @@ buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), 
 
     if (error) throw error;
 
-    if (grades) {
-      const gradesArr = JSON.parse(grades);
-      await supabaseAdmin.from('product_grades').delete().eq('product_id', productId);
-      await supabaseAdmin.from('product_grades').insert(
-        gradesArr.map(g => ({ product_id: productId, grade: g.grade, price: Number(g.price) }))
-      );
-    }
+
 
     res.json(response.success('อัปเดตรายการสำเร็จ', data));
   } catch (e) {
