@@ -21,25 +21,24 @@
 		const isNative = (
 			window.location.protocol === 'capacitor:' || 
 			window.location.protocol === 'ionic:' ||
-			(window.Capacitor && window.Capacitor.isNative) ||
-			((hostname === 'localhost' || hostname === '127.0.0.1') && !window.location.port)
+			(window.Capacitor && window.Capacitor.isNative)
 		);
 
-		const isDevServer = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(hostname) && window.location.port;
-		
-		if (isDevServer && !isNative) {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Local development detected (Browser). Targeting localhost:5000');
+		// If we explicitly want to use local server for development
+		if (localStorage.getItem('agriprice_use_local') === '1') {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Manual override: Using localhost:5000');
 			return 'http://localhost:5000';
 		}
 
-		// Always use Render for production/external access or Native APK
-		if (window.AGRIPRICE_DEBUG) console.log('[config] Native/Production environment. Targeting Render: https://agriprice-app.onrender.com');
+		// ALWAYS DEFAULT TO PRODUCTION RENDER for reliability during presentation/handoff
+		if (window.AGRIPRICE_DEBUG) console.log('[config] Defaulting to Production API: https://agriprice-app.onrender.com');
 		return 'https://agriprice-app.onrender.com';
 	})();
 
 	window.API_BASE_URL = window.API_BASE_URL || DEFAULT_URL;
 	window.AGRIPRICE_DEBUG = window.AGRIPRICE_DEBUG ?? (
-		new URLSearchParams(window.location.search).has('debug') || localStorage.getItem('agriprice_debug') === '1'
+		new URLSearchParams(window.location.search).has('debug') || 
+		localStorage.getItem('agriprice_debug') === '1'
 	);
 
 	// Helper function for other scripts to get the latest API URL
