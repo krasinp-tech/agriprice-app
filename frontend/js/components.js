@@ -148,57 +148,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     return { read, write, has, add, remove, toggle, KEY };
   })();
 
-  window.appNotify = function appNotify(message, type = "info") {
-    if (!message) return;
-
-    let host = document.getElementById("appNotifyHost");
-    if (!host) {
-      host = document.createElement("div");
-      host.id = "appNotifyHost";
-      host.style.cssText = [
-        "position:fixed",
-        "right:16px",
-        "bottom:16px",
-        "z-index:99999",
-        "display:flex",
-        "flex-direction:column",
-        "gap:8px",
-        "pointer-events:none",
-        "max-width:min(92vw,360px)",
-      ].join(";");
-      document.body.appendChild(host);
-    }
-
-    const toast = document.createElement("div");
-    const palette = {
-      success: ["#e8f8ef", "#137a3a"],
-      error: ["#fdecec", "#b42318"],
-      loading: ["#eef4ff", "#1d4ed8"],
-      info: ["#f4f4f5", "#374151"],
-    };
-    const [bg, fg] = palette[type] || palette.info;
-
-    toast.textContent = String(message);
-    toast.style.cssText = [
-      "pointer-events:auto",
-      "padding:12px 14px",
-      "border-radius:14px",
-      "box-shadow:0 10px 30px rgba(0,0,0,.12)",
-      "font-size:14px",
-      "line-height:1.4",
-      "background:" + bg,
-      "color:" + fg,
-      "border:1px solid rgba(0,0,0,.08)",
-    ].join(";");
-
-    host.appendChild(toast);
-    window.setTimeout(() => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateY(6px)";
-      toast.style.transition = "opacity .2s ease, transform .2s ease";
-      window.setTimeout(() => toast.remove(), 220);
-    }, type === "loading" ? 1400 : 2400);
-  };
 
   function initNativePageTransitions() {
     if (window.__AGRIPRICE_NATIVE_NAV_READY) return;
