@@ -753,6 +753,18 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const mount = document.getElementById("favoritesPlaceholder");
     if (!mount) return;
 
+    let role = "";
+    try {
+      const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
+      const user = raw ? JSON.parse(raw) : null;
+      role = String(user?.role || "").toLowerCase();
+    } catch (_) { }
+    
+    if (role === "buyer") {
+      mount.remove();
+      return;
+    }
+
     const url = getRelativePrefixToRoot() + "components/favorites/favorites.html";
     await loadComponent("#favoritesPlaceholder", url, () => {
       if (window.i18nInit) window.i18nInit();
@@ -779,7 +791,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         const user = raw ? JSON.parse(raw) : null;
         role = String(user?.role || "").toLowerCase();
       } catch (_) { }
-      if (!role) return;
+      if (!role || role === "buyer") return;
 
       const sync = async () => {
         if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;

@@ -7,8 +7,18 @@ window.initFavoritesComponent = function initFavoritesComponent() {
   if (!helpers || !section || !favoritesTrack || !favoritesDots) return;
 
   const role = helpers.getRole();
-  if (!role) {
-    section.remove();
+  if (!role || role !== "farmer") {
+    // Completely remove from DOM
+    if (section && section.parentNode) {
+      section.parentNode.removeChild(section);
+    } else if (section) {
+      section.remove();
+    }
+    
+    // Also remove the placeholder from index.html if it's there
+    const placeholder = document.getElementById("favoritesPlaceholder");
+    if (placeholder) placeholder.remove();
+    
     return;
   }
   section.hidden = false;
