@@ -442,6 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ================================
   // Event Handlers
   // ================================
+
   function handleToggleDetail() {
     if (!detailPanel || !toggleDetailBtn) return;
     const isHidden = detailPanel.hidden;
@@ -458,12 +459,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleCancelBooking() {
-    const confirmed = window.confirm(t('cancel_booking_confirm', "คุณต้องการยกเลิกการจองหรือไม่?"));
-    if (!confirmed) return;
-    const bkId = bookingIdText?.textContent || "";
-    const result = await BookingAPI.cancelBooking(bkId);
-    if (result.success) {
-      window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
+    const message = t('cancel_booking_confirm', "คุณต้องการยกเลิกการจองหรือไม่?");
+    if (window.showConfirm) {
+      window.showConfirm(message, async (confirmed) => {
+        if (!confirmed) return;
+        const bkId = bookingIdText?.textContent || "";
+        const result = await BookingAPI.cancelBooking(bkId);
+        if (result.success) {
+          if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");
+          window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
+        } else {
+          if (window.appNotify) window.appNotify(result.message || t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง"), "error");
+        }
+      });
+    } else {
+      // fallback
+      const confirmed = window.confirm(message);
+      if (!confirmed) return;
+      const bkId = bookingIdText?.textContent || "";
+      const result = await BookingAPI.cancelBooking(bkId);
+      if (result.success) {
+        window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
+      }
     }
   }
 

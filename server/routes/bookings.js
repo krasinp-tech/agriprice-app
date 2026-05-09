@@ -317,11 +317,17 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     }
 
     // ดึงข้อมูล booking ก่อน เพื่อตรวจสอบ ownership
-    const { data: booking, error: fetchErr } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('bookings')
-      .select('booking_id, farmer_id, buyer_id, status')
-      .eq('booking_id', id)
-      .maybeSingle();
+      .select('booking_id, farmer_id, buyer_id, status');
+
+    if (!isNaN(Number(id))) {
+      query = query.eq('booking_id', id);
+    } else {
+      query = query.eq('booking_no', id);
+    }
+
+    const { data: booking, error: fetchErr } = await query.maybeSingle();
 
     if (fetchErr) throw fetchErr;
     if (!booking) return res.status(404).json(response.error('ไม่พบข้อมูลการจอง'));
@@ -345,7 +351,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from('bookings')
       .update(updates)
-      .eq('booking_id', id)
+      .eq('booking_id', booking.booking_id)
       .select()
       .single();
 
