@@ -358,7 +358,9 @@
 
       // ตรวจสอบว่าเป็นอาการแก้ไข (Update) หรือสร้างใหม่ (Create)
       const productIdFromStep1 = state.step1.product?.id || state.step1.editSource?.product_id;
-      const isEdit = state.step1.editSource?.isEdit && productIdFromStep1;
+      // [FIXED] ตรวจสอบว่าเป็นหมายเลข ID จริงหรือไม่ (กันกรณีเป็นชื่อสินค้าจาก Fallback)
+      const isNumericId = (id) => id && !isNaN(id) && Number.isSafeInteger(Number(id));
+      const isEdit = state.step1.editSource?.isEdit && isNumericId(productIdFromStep1);
       
       let productResult;
       if (isEdit) {
@@ -427,9 +429,14 @@
     renderStep1Summary();
     renderRounds();
 
+    // [FIXED] ตรวจสอบว่าเป็นหมายเลข ID จริงหรือไม่ (กันกรณีเป็นชื่อสินค้าจาก Fallback)
+    const isNumericId = (id) => id && !isNaN(id) && Number.isSafeInteger(Number(id));
+
     // หากเป็นการแก้ไข (Edit) ให้ดึงข้อมูลรอบเดิมมาจาก DB
     const productId = state.step1?.product?.id || state.step1?.editSource?.product_id;
-    if (state.step1?.editSource?.isEdit && productId) {
+    const isEdit = state.step1?.editSource?.isEdit && isNumericId(productId);
+
+    if (isEdit) {
         try {
             const res = await apiCall('GET', `/api/product-slots?product_id=${productId}`);
             const slots = res.data || [];
