@@ -7,7 +7,7 @@ window.initFavoritesComponent = function initFavoritesComponent() {
   if (!helpers || !section || !favoritesTrack || !favoritesDots) return;
 
   const role = helpers.getRole();
-  if (role !== "farmer") {
+  if (!role) {
     section.remove();
     return;
   }
@@ -143,17 +143,27 @@ window.initFavoritesComponent = function initFavoritesComponent() {
 
   async function refreshFavorites() {
     items = await loadFavoriteItems();
-    renderFavoriteCards();
-    renderDots();
-    syncActiveDot();
+    if (!items || items.length === 0) {
+      section.style.display = "none";
+    } else {
+      section.style.display = "";
+      renderFavoriteCards();
+      renderDots();
+      syncActiveDot();
+    }
   }
 
   function refreshFromStoreNow() {
     const fromStore = helpers.loadFavoritesFromStore();
     items = dedupeFavoriteItems(fromStore).slice(0, 6);
-    renderFavoriteCards();
-    renderDots();
-    syncActiveDot();
+    if (!items || items.length === 0) {
+      section.style.display = "none";
+    } else {
+      section.style.display = "";
+      renderFavoriteCards();
+      renderDots();
+      syncActiveDot();
+    }
   }
 
   window.addEventListener("favorites:changed", () => {

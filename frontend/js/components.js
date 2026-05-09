@@ -779,7 +779,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         const user = raw ? JSON.parse(raw) : null;
         role = String(user?.role || "").toLowerCase();
       } catch (_) { }
-      if (role === "buyer") return;
+      if (!role) return;
 
       const sync = async () => {
         if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
