@@ -350,12 +350,24 @@
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
         let prices = { A: null, B: null, C: null };
-        const priceStr = `${Number(p.price || 0)} ${t('unit_baht', 'บ.')}/${unit}`;
-        const gradeName = (p.grade || 'คละ').toUpperCase();
-
-        if (gradeName === 'B') prices.B = priceStr;
-        else if (gradeName === 'C') prices.C = priceStr;
-        else prices.A = priceStr; // Default to A or "คละ"
+        const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
+        
+        let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
+        if (gradesArr.length > 0) {
+            gradesArr.forEach(g => {
+                const gName = String(g.grade || 'คละ').toUpperCase();
+                const pStr = `${Number(g.price || 0)} ${unitStr}`;
+                if (gName === 'B') prices.B = pStr;
+                else if (gName === 'C') prices.C = pStr;
+                else prices.A = pStr;
+            });
+        } else {
+            const priceStr = `${Number(p.price || 0)} ${unitStr}`;
+            const gradeName = (p.grade || 'คละ').toUpperCase();
+            if (gradeName === 'B') prices.B = priceStr;
+            else if (gradeName === 'C') prices.C = priceStr;
+            else prices.A = priceStr;
+        }
 
         const profile = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
         const sLat = p.lat ?? profile?.lat ?? null;

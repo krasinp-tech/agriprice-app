@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                     if (pJson) {
                         const apiProducts = (pJson.data || pJson || []).map(p => {
-                            const gradesArr = Array.isArray(p.product_grades) ? p.product_grades : [];
+                            const gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
                             const prices = {};
                             if (gradesArr.length > 0) {
                                 gradesArr.forEach(g => { prices[g.grade] = g.price; });

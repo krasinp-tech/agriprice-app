@@ -299,14 +299,28 @@
       if (sellerSubEl) sellerSubEl.textContent = `${p.name || ''} ${p.variety || ''}`.trim();
 
       const unitStr = p.unit ? t(p.unit, p.unit) : t('kg_unit', 'กก.');
-      const priceStr = `${p.price} ${t('unit_baht', 'บ.')}/${unitStr}`;
-      const gradeName = (p.grade || 'คละ').toUpperCase();
+      let prices = { A: null, B: null, C: null };
+      
+      let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
+      if (gradesArr.length > 0) {
+          gradesArr.forEach(g => {
+              const gName = String(g.grade || 'คละ').toUpperCase();
+              const pStr = `${Number(g.price || 0)} ${t('unit_baht', 'บ.')}/${unitStr}`;
+              if (['A','B','C'].includes(gName)) prices[gName] = pStr;
+              else prices.A = pStr;
+          });
+      } else {
+          const priceStr = `${p.price} ${t('unit_baht', 'บ.')}/${unitStr}`;
+          const gradeName = (p.grade || 'คละ').toUpperCase();
+          if (['A','B','C'].includes(gradeName)) prices[gradeName] = priceStr;
+          else prices.A = priceStr;
+      }
 
       ['A', 'B', 'C'].forEach((grade) => {
         const el = node.querySelector(`[data-bind="price${grade}"]`);
         if (!el) return;
-        if (grade === gradeName || (grade === 'A' && gradeName === 'คละ')) {
-          el.textContent = priceStr;
+        if (prices[grade]) {
+          el.textContent = prices[grade];
         } else {
           el.closest('.pc-grade-box, .price-box')?.remove();
         }

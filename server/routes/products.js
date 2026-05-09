@@ -94,7 +94,7 @@ router.get('/:id', async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from('products')
       .select(
-        'product_id, name, variety, grade, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
+        'product_id, name, variety, grade, grades, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
         'profiles!user_id(profile_id, first_name, last_name, phone, avatar, lat, lng)'
       )
       .eq('product_id', req.params.id)
@@ -285,6 +285,7 @@ buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), asyn
       price:     Number(price || firstGrade.price || 0),
       grade:     grade || firstGrade.grade || 'คละ',
       unit:      unit || 'กก.',
+      grades:    parsedGrades,
       is_active: true,
     };
     if (description) insertData.description = description;
@@ -331,6 +332,12 @@ buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), 
       updates.grade = grade;
     } else if (firstGrade.grade !== undefined) {
       updates.grade = firstGrade.grade;
+    }
+
+    if (parsedGrades.length > 0) {
+      updates.grades = parsedGrades;
+    } else if (grades !== undefined && grades === '[]') {
+      updates.grades = [];
     }
 
     if (unit        !== undefined) updates.unit        = unit;
