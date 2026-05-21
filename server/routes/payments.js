@@ -6,17 +6,12 @@ const { signToken } = require('../utils/helpers');
 
 /**
  * POST /api/payments/checkout
- * Mock endpoint for processing a subscription payment.
- * Upgrades the user's tier to "pro".
+ * อัปเกรด tier เป็น "pro"
  */
 router.post('/checkout', authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // 1. In a real app, integrate Omise/Stripe here.
-    // For now, we simulate a successful payment and upgrade tier.
-
-    // 2. Update user tier in Supabase and get user details
     const { data, error } = await supabaseAdmin
       .from('profiles')
       .update({ tier: 'pro' })
@@ -28,7 +23,6 @@ router.post('/checkout', authMiddleware, async (req, res) => {
       throw new Error(error?.message || 'User not found in profiles');
     }
 
-    // 3. Issue a new token with the upgraded tier
     const newToken = signToken({
       id: data.profile_id,
       phone: data.phone,
@@ -48,4 +42,44 @@ router.post('/checkout', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/payments/cancel
+ * ยกเลิก subscription — downgrade tier กลับเป็น "free"
+ */
+router.post('/cancel', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .update({ tier: 'free' })
+      .eq('profile_id', userId)
+      .select('profile_id, phone, role, first_name, last_name')
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message || 'User not found in profiles');
+    }
+
+    // ออก token ใหม่ที่มี tier: free
+    const newToken = signToken({
+      id: data.profile_id,
+      phone: data.phone,
+      role: data.role,
+      tier: 'free'
+    });
+
+    res.json({
+      success: true,
+      message: 'Subscription cancelled. Downgraded to FREE.',
+      data: { tier: 'free', token: newToken }
+    });
+
+  } catch (e) {
+    console.error('[Cancel Subscription Error]', e);
+    res.status(500).json({ success: false, error: 'Cancel failed: ' + e.message });
+  }
+});
+
 module.exports = router;
+
