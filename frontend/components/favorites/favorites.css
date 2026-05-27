@@ -1,0 +1,215 @@
+/* components/favorites/favorites.css */
+
+/* ─────────────────────────────────────
+   Favorites Section (refine UI)
+───────────────────────────────────── */
+
+.favorites-section {
+  background: var(--bg-page);
+  padding: 8px 0 16px; /* Match standardized section padding */
+}
+
+.favorites-section .container {
+  width: 100%;
+  padding: 0; /* Remove container padding as header/grid handle it */
+  overflow: visible;
+}
+
+/* Redundant styles removed to use .section-header and .section-title from home.css */
+
+/* ✅ ดูทั้งหมด (compact version) */
+.view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0B853C;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(11, 133, 60, 0.08);
+  border: none;
+  transition: background .15s ease, transform .1s ease;
+}
+
+.view-all-btn .material-icons-outlined {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.view-all-btn:active {
+  transform: scale(0.96);
+  background: rgba(11, 133, 60, 0.14);
+}
+
+/* ===== Track ===== */
+.favorites-section .favorites-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  padding: 8px 24px; /* Standardized side padding */
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-x;
+}
+
+.favorites-section .favorites-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.favorites-section .favorites-grid.dragging {
+  cursor: grabbing;
+}
+
+/* ===== Card (Stories Style) ===== */
+.favorites-section .fav-card {
+  flex: 0 0 76px;
+  min-width: 76px;
+  scroll-snap-align: start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.favorites-section .fav-card:active {
+  transform: scale(0.92);
+}
+
+.favorites-section .fav-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--primary), #00EC5F);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(11, 133, 60, 0.15);
+}
+
+.favorites-section .fav-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
+  border: 2px solid var(--bg-page);
+}
+
+.favorites-section .fav-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  padding: 0 4px;
+}
+
+[data-theme="dark"] .favorites-section .fav-avatar img {
+  background: #1c1c1e;
+  border-color: #000000;
+}
+
+
+/* ===== Dots ===== */
+.favorites-section .favorites-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.favorites-section .favorites-dots .dot {
+  width: 6px;
+  height: 6px;
+  background: #DADADA;
+  border-radius: 50%;
+  transition: all .25s ease;
+}
+
+.favorites-section .favorites-dots .dot.active {
+  width: 22px;
+  border-radius: 6px;
+  background: var(--primary);
+}
+
+/* ─────────────────────────────────────
+   Responsive
+───────────────────────────────────── */
+@media (min-width: 768px) {
+  .favorites-section {
+    padding: 16px 0 22px;
+  }
+
+  .favorites-header {
+    margin-bottom: 16px;
+  }
+
+  .favorites-section .favorites-grid {
+    gap: 16px;
+  }
+
+  .favorites-section .fav-card {
+    flex: 0 0 84px;
+    min-width: 84px;
+    gap: 10px;
+  }
+
+  .favorites-section .fav-avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .favorites-section .fav-title {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .favorites-section {
+    padding: 24px 0 32px;
+  }
+
+  .favorites-section .favorites-grid {
+    gap: 24px;
+    justify-content: flex-start;
+  }
+
+  .favorites-section .fav-card {
+    flex: 0 0 92px;
+    min-width: 92px;
+  }
+
+  .favorites-section .fav-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .favorites-section .fav-title {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .favorites-header {
+    padding: 0 80px;
+  }
+
+  .favorites-section .favorites-grid {
+    padding: 0 80px 10px;
+  }
+}

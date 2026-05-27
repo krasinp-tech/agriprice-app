@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../../js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="terms_title">ข้อกำหนดและเงื่อนไข | AGRIPRICE</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../css/global.css">
+    <link rel="stylesheet" href="../../../css/account/manage-terms/terms.css">
+    <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <main class="terms-page">
+        <!-- ── Header ───────────────────────────────────────── -->
+        <header class="terms-header fade-slide">
+            <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+                <span class="material-icons-outlined">chevron_left</span>
+            </a>
+            <h1 class="page-title" data-i18n="terms">ข้อกำหนดและเงื่อนไข</h1>
+        </header>
+
+        <!-- ── Content Card ─────────────────────────────────── -->
+        <div class="terms-card fade-slide">
+            <section class="terms-section">
+                <h3 class="section-title">
+                    <span class="material-icons-outlined">gavel</span>
+                    <span data-i18n="terms_of_use">ข้อกำหนดการใช้งาน</span>
+                </h3>
+                <div class="section-body" data-i18n="terms_intro">
+                    ในการใช้งานแพลตฟอร์ม AgriPrice ท่านตกลงที่จะปฏิบัติตามเงื่อนไขดังต่อไปนี้:
+                    <ul class="terms-list">
+                        <li data-i18n="terms_item_1">ท่านต้องให้ข้อมูลที่เป็นความจริงในการลงทะเบียน</li>
+                        <li data-i18n="terms_item_2">ห้ามใช้แพลตฟอร์มในทางที่ผิดกฎหมายหรือละเมิดสิทธิ์ผู้อื่น</li>
+                        <li data-i18n="terms_item_3">AgriPrice เป็นเพียงตัวกลางในการอำนวยความสะดวกในการซื้อขาย</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="terms-section">
+                <h3 class="section-title">
+                    <span class="material-icons-outlined">security</span>
+                    <span data-i18n="privacy_policy_title">นโยบายความเป็นส่วนตัว</span>
+                </h3>
+                <div class="section-body" data-i18n="privacy_intro">
+                    เราให้ความสำคัญกับข้อมูลส่วนบุคคลของท่านเป็นอันดับหนึ่ง:
+                    <ul class="terms-list">
+                        <li data-i18n="privacy_item_1">เราเก็บรวบรวมข้อมูลเพื่อพัฒนาการให้บริการที่ดีขึ้น</li>
+                        <li data-i18n="privacy_item_2">ข้อมูลของท่านจะถูกเก็บรักษาเป็นความลับและปลอดภัย</li>
+                        <li data-i18n="privacy_item_3">ท่านสามารถขอตรวจสอบหรือลบข้อมูลของท่านได้ทุกเมื่อ</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="terms-section">
+                <h3 class="section-title">
+                    <span class="material-icons-outlined">info</span>
+                    <span data-i18n="liability_title">ความรับผิดชอบ</span>
+                </h3>
+                <div class="section-body" data-i18n="liability_body">
+                    AgriPrice มุ่งมั่นที่จะรักษาเสถียรภาพของระบบ แต่ไม่รับผิดชอบต่อความเสียหายที่เกิดจากบุคคลที่สามหรือเหตุสุดวิสัยที่นอกเหนือการควบคุม
+                </div>
+            </section>
+
+            <div class="last-updated">
+                <span data-i18n="last_updated">อัปเดตล่าสุด:</span>
+                7 พฤษภาคม 2026
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../../../js/global-anim.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.i18nInit) window.i18nInit();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+{
+  "appId": "com.agriprice.app",
+  "appName": "AGRIPRICE",
+  "webDir": "www",
+  "backgroundColor": "#f8f9faff",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "useLegacyBridge": false,
+    "loggingBehavior": "debug"
+  },
+  "plugins": {
+    "Geolocation": {
+      "plistSuffix": "agriprice"
+    },
+    "Camera": {
+      "presentationStyle": "fullscreen",
+      "saveToGallery": false,
+      "promptLabelHeader": "เลือกรูปภาพ",
+      "promptLabelCancel": "ยกเลิก",
+      "promptLabelPhoto": "เลือกจากคลัง",
+      "promptLabelPicture": "ถ่ายรูป"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#0B853C",
+      "sound": "default"
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0B853C",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0B853C",
+      "overlaysWebView": false
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "DARK",
+      "resizeOnFullScreen": true
+    }
+  },
+  "cordova": {
+    "preferences": {
+      "Orientation": "portrait",
+      "fullscreen": "false",
+      "webviewbounce": "false",
+      "UIWebViewBounce": "false",
+      "DisallowOverscroll": "true",
+      "EnableViewportScale": "false",
+      "StatusBarOverlaysWebView": "false",
+      "StatusBarStyle": "lightcontent"
+    }
+  }
+}

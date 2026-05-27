@@ -1,0 +1,435 @@
+/* ============================================================
+   AGRIPRICE — profile-new.css (Light & Dark Theme)
+   ============================================================ */
+
+[data-theme="dark"] body {
+    background: #000000 !important;
+}
+
+[data-theme="dark"] .profile-hero-section {
+    background: #1c1c1e;
+}
+
+[data-theme="dark"] .profile-content-card {
+    background: #1c1c1e;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+}
+
+[data-theme="dark"] .profile-avatar-box {
+    background: #2c2c2e;
+    border-color: #1c1c1e;
+}
+
+[data-theme="dark"] .profile-name,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .products-list-title,
+[data-theme="dark"] .pc-sub {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .profile-about-text,
+[data-theme="dark"] .pc-grade-price,
+[data-theme="dark"] .pc-footer {
+    color: #8e8e93 !important;
+}
+
+[data-theme="dark"] .btn-follow,
+[data-theme="dark"] .pc-btn-contact {
+    background: #2c2c2e !important;
+    color: #f2f2f7 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .product-card-light,
+[data-theme="dark"] .pc-grade-box,
+[data-theme="dark"] .pc-avatar {
+    background: #2c2c2e !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .profile-tab {
+    color: #8e8e93;
+}
+
+[data-theme="dark"] .profile-tab.active {
+    background: #00a651;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .contact-item-row,
+[data-theme="dark"] .service-row {
+    color: #f2f2f7;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .location-card {
+    background: #2c2c2e !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .location-sub {
+    color: #8e8e93 !important;
+}
+
+/* ============================================================ */
+
+body {
+    background: var(--bg-page, #f8f9fa) !important;
+    margin: 0;
+    font-family: 'Inter', 'Kanit', sans-serif;
+    color: var(--text-main, #1c1c1e);
+}
+
+/* 1. Hero Section */
+.profile-hero-section {
+    position: relative;
+    background: #fdf3e7;
+    height: 260px;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+}
+
+.profile-back-btn {
+    position: absolute;
+    top: max(var(--safe-area-top, 16px), 16px);
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+/* 2. Main Content Card (White overlapping part) */
+.profile-content-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 30px 30px 0 0;
+    margin-top: -40px; /* Overlap the hero */
+    padding: 0 24px 120px 24px;
+    min-height: calc(100vh - 220px);
+    z-index: 5;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+}
+
+/* 3. Squircle Avatar */
+.profile-avatar-box {
+    position: absolute;
+    top: -55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 110px;
+    background: #fdf3e7;
+    border-radius: 32px;
+    border: 6px solid #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.profile-avatar-box img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* 4. Name & Status */
+.profile-header-info {
+    text-align: center;
+    padding-top: 65px;
+}
+
+.profile-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 6px 0;
+}
+
+.profile-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #00c853;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #00c853;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* 5. Stats Row */
+.profile-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 24px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* 6. Action Buttons */
+.profile-action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-message {
+    flex: 1;
+    height: 44px;
+    background: #0084ff;
+    border-radius: 22px;
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-follow {
+    flex: 1;
+    height: 44px;
+    background: #e4e6eb;
+    border-radius: 22px;
+    color: #4b4c4f;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 7. Tab Navigation */
+.profile-tabs-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    margin-top: 32px;
+    padding-bottom: 4px;
+    scrollbar-width: none; /* Firefox */
+}
+.profile-tabs-scroll::-webkit-scrollbar {
+    display: none; /* Safari/Chrome */
+}
+
+.profile-tab {
+    white-space: nowrap;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+    cursor: pointer;
+    background: transparent;
+}
+
+.profile-tab.active {
+    background: #00a651;
+    color: #fff;
+}
+
+/* 8. About Text */
+.profile-about-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #555;
+    margin-top: 24px;
+}
+
+/* 9. Products List */
+.products-list-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin: 32px 0 16px 0;
+}
+
+.product-card-light {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #f1f1f1;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.pc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.pc-seller-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.pc-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #fdf3e7;
+    padding: 6px;
+    border: 1px solid #f1f1f1;
+}
+
+.pc-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.pc-seller-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.pc-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #00a651;
+}
+
+.pc-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+}
+
+.pc-like-btn {
+    color: #ccc;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.pc-grades-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pc-grade-box {
+    flex: 1;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 8px 0;
+    text-align: center;
+}
+
+.pc-grade-letter {
+    font-size: 24px;
+    font-weight: 900;
+    color: #00a651;
+    line-height: 1.1;
+}
+
+.pc-grade-price {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+}
+
+.pc-chevron-right {
+    color: #00a651;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.pc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 500;
+}
+
+.pc-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pc-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pc-btn-contact {
+    flex: 1;
+    height: 38px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    color: #666;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.pc-btn-book {
+    flex: 1;
+    height: 38px;
+    background: #00c853;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="search_results_title_page">ผลการค้นหา - AGRIPRICE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/global.css">
+    <link rel="stylesheet" href="../../css/shared-pages/search.css">
+    <link rel="stylesheet" href="../../components/product-card/product-card.css">
+    <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
+    <script src="../../js/global-anim.js"></script>
+    <script src="../../js/permission-manager.js"></script>
+    <link rel="stylesheet" href="../../css/dark-mode-patch.css">
+</head>
+
+<body data-active="home">
+    <!-- ── Search Header ─────────────────────────────────── -->
+    <section class="search-header-section">
+        <div class="search-header-container">
+            <button class="back-btn" id="backBtn">
+                <span class="material-icons-outlined">arrow_back</span>
+            </button>
+            <div class="search-box-header">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input-header" id="searchInput" data-i18n-placeholder="search_buyer">
+                <button class="search-button-header" id="searchBtn">
+                    <span class="material-icons-outlined" style="color: var(--primary); font-size: 24px;">search</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Chips (Horizontal Scroll) -->
+        <div class="filter-section">
+            <button class="filter-chip" id="openDrawerBtn">
+                <span class="material-icons-outlined">tune</span>
+                <span data-i18n="filters">ตัวกรอง</span>
+            </button>
+            <button class="filter-chip active" data-sort="all" data-i18n="filter_all">ทั้งหมด</button>
+            <button class="filter-chip" data-sort="recent" data-i18n="filter_recent">ล่าสุด</button>
+            <button class="filter-chip" data-sort="nearest" data-i18n="filter_nearest">ใกล้ที่สุด</button>
+            <button class="filter-chip" data-sort="price-low" data-i18n="filter_price_low">ราคาถูกสุด</button>
+            <button class="filter-chip" data-sort="price-high" data-i18n="filter_price_high">ราคาสูงสุด</button>
+        </div>
+    </section>
+
+    <!-- ── Filter Drawer (BottomSheet) ─────────────────── -->
+    <div class="filter-drawer" id="filterDrawer">
+        <div class="filter-drawer-overlay" id="drawerOverlay"></div>
+        <div class="filter-drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title" data-i18n="filter">ตัวกรอง</h3>
+                <button class="drawer-close" id="closeDrawerBtn">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+
+
+            <div class="filter-group">
+                <label class="filter-label" data-i18n="buy_month">เดือนที่รับซื้อ</label>
+                <div class="filter-grid" id="monthGrid">
+                    <!-- JS will inject 1-12 months as chips/buttons -->
+                </div>
+            </div>
+
+            <div class="drawer-footer">
+                <button class="btn-reset" id="resetFiltersBtn" data-i18n="reset_all">ล้างทั้งหมด</button>
+                <button class="btn-apply" id="applyFiltersBtn" data-i18n="apply_filters">ใช้ตัวกรอง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Results Summary ───────────────────────────────── -->
+    <section class="results-summary">
+        <div class="container">
+            <p class="results-title">
+                <span data-i18n="search_results_title">ผลการค้นหา</span> 
+                <span class="results-count">
+                    <span id="resultCount">0</span> 
+                    <span data-i18n="results_count_suffix">รายการ</span>
+                </span>
+            </p>
+        </div>
+    </section>
+
+    <!-- ── Results ───────────────────────────────────────── -->
+    <section class="search-results-section">
+        <div class="container">
+            <div id="searchResultsMount">
+                <!-- Skeleton Loader -->
+                <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+                <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+                <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Bottom Nav ─────────────────────────────────────── -->
+    <div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+    <a href="index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+    </a>
+    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </a>
+    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+    </a>
+    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+    </a>
+    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+    </a>
+</nav></div>
+
+    <!-- Core Scripts -->
+    <script src="../../js/config.js"></script>
+    <script src="../../js/utils/storage-keys.js"></script>
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/utils/auth.js"></script>
+    <script src="../../js/auth/guard.js"></script>
+    <script>window.AuthGuard.requireLogin();</script>
+
+    <!-- Component & Page Scripts -->
+    <script src="../../js/global-anim.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/components/i18n.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/utils/location-helper.js"></script>
+    <script src="../../js/utils/ui-helpers.js"></script>
+    <script src="../../js/shared-pages/search.js"></script>
+    <script src="../../components/product-card/product-card.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.i18nInit) window.i18nInit();
+
+            // Sync Theme Proper
+            function applyTheme() {
+                const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+            applyTheme();
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'agriprice_theme') applyTheme();
+            });
+
+            // Month Grid Generation
+            const monthGrid = document.getElementById('monthGrid');
+            const months = [
+                window.i18nT('mon_jan', 'ม.ค.'),
+                window.i18nT('mon_feb', 'ก.พ.'),
+                window.i18nT('mon_mar', 'มี.ค.'),
+                window.i18nT('mon_apr', 'เม.ย.'),
+                window.i18nT('mon_may', 'พ.ค.'),
+                window.i18nT('mon_jun', 'มิ.ย.'),
+                window.i18nT('mon_jul', 'ก.ค.'),
+                window.i18nT('mon_aug', 'ส.ค.'),
+                window.i18nT('mon_sep', 'ก.ย.'),
+                window.i18nT('mon_oct', 'ต.ค.'),
+                window.i18nT('mon_nov', 'พ.ย.'),
+                window.i18nT('mon_dec', 'ธ.ค.')
+            ];
+            months.forEach((m, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-chip';
+                btn.style.width = '100%';
+                btn.style.justifyContent = 'center';
+                btn.dataset.month = idx + 1;
+                btn.textContent = m;
+                btn.onclick = () => btn.classList.toggle('active');
+                monthGrid.appendChild(btn);
+            });
+        });
+    </script>
+    
+    <!-- Bottom Navigation Component -->
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="booking_confirmed_title">จองคิว - การจองสำเร็จ | AGRIPRICE</title>
+  <script src="../../../js/components/i18n.js"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../../css/global.css">
+  <link rel="stylesheet" href="../../../css/buyer/setbooking/booking-information.css">
+  <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css">
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/permission-manager.js"></script>
+  <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
+</head>
+
+<body data-active="booking">
+
+  <!-- Main Container -->
+  <main class="booking-step4">
+    <div class="booking-container">
+
+   
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+
+      <div class="hero-content">
+
+        <div class="hero-sub" id="heroSub" data-i18n="booking_confirmed_msg">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+
+        <div class="big-card">
+          <div class="label" data-i18n="queue_number">หมายเลขคิว</div>
+          <div class="queue" id="queueNo">-</div>
+
+          <div class="subRow">
+            <div class="subLabel" data-i18n="queue_time_label">เวลาเข้าคิว</div>
+            <div class="subValue"><b id="timeText">-</b> น.</div>
+          </div>
+
+          <div class="qrWrap">
+            <div id="qrCanvas" style="width:110px;height:110px;display:flex;align-items:center;justify-content:center;"></div>
+          </div>
+
+          <div class="idRow">
+            <div class="subLabel" data-i18n="booking_id_label">ID การจอง</div>
+            <div class="subValue" id="bookingIdText">-</div>
+          </div>
+
+          <button class="btn-outline" type="button" id="toggleDetailBtn" data-i18n="show_booking_details">
+            แสดงรายละเอียดการจอง
+          </button>
+
+          <div class="detailPanel" id="detailPanel" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Queue Status Card -->
+    <section class="card">
+      <div class="card-title" data-i18n="current_queue_status">
+        <span class="material-icons-outlined">groups</span>
+        สถานะคิวปัจจุบัน
+      </div>
+
+      <div class="statusGrid">
+        <div class="statusItem">
+          <div class="statusLabel" data-i18n="current_queue_label">คิวปัจจุบัน</div>
+          <div class="statusValue" id="currentQueue">-</div>
+        </div>
+        <div class="statusItem right">
+          <div class="statusLabel" data-i18n="my_queue_label">คิวของฉัน</div>
+          <div class="statusValue green" id="myQueue">-</div>
+        </div>
+
+        <div class="statusFoot">
+          <div class="statusMini">
+            <div class="statusMiniLabel" data-i18n="queues_ahead">จำนวนคิวก่อนหน้า</div>
+            <div class="statusMiniValue" id="aheadCount">-</div>
+          </div>
+          <div class="statusMini">
+            <div class="statusMiniLabel" data-i18n="estimated_arrival_time">เวลาประมาณที่จะถึงคิว</div>
+            <div class="statusMiniValue" id="eta">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vehicle Information Card -->
+    <section class="card">
+      <div class="card-title" data-i18n="truck_info_title">
+        <span class="material-icons-outlined">directions_car</span>
+        ข้อมูลรถบรรทุก
+      </div>
+
+      <div class="vehicleDetail" id="vehicleDetail">
+        <div class="vehicleCount">
+          <span data-i18n="vehicle_count_label">จำนวนรถ:</span>
+          <b id="vehicleCountTotal">-</b>
+          <span data-i18n="vehicle_unit">คัน</span>
+        </div>
+        <div class="vehiclesList" id="vehiclesList"></div>
+      </div>
+    </section>
+
+    <!-- Farmer Personal Information Card -->
+    <section class="card">
+      <div class="card-title" data-i18n="farmer_info_title">
+        <span class="material-icons-outlined">person</span>
+        ข้อมูลส่วนตัวของเกษตรกร
+      </div>
+
+      <div class="placeBox">
+        <div class="placeName" id="shopName">-</div>
+        <div class="placeAddr" id="shopAddr">-</div>
+        
+        <!-- New Contact Section -->
+        <div class="farmer-contact">
+          <div class="contact-row">
+            <span class="contact-label" data-i18n="farmer_phone">เบอร์โทรศัพท์:</span>
+            <span class="contact-value" id="farmerPhone">-</span>
+          </div>
+          <div class="action-row">
+            <button class="btn-action-small call" id="btnCall">
+              <span class="material-icons-outlined">call</span>
+              <span data-i18n="call_now">โทรออก</span>
+            </button>
+            <button class="btn-action-small chat" id="btnChat">
+              <span class="material-icons-outlined">chat</span>
+              <span data-i18n="chat_now">แชท</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Map Button -->
+        <button class="btn-map-link" id="btnOpenMap">
+          <span class="material-icons-outlined">map</span>
+          <span data-i18n="open_map">เปิดแผนที่</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Cancel Button -->
+    <button class="btn-cancel" id="btnCancelBooking" data-i18n="cancel_booking_btn">
+      ยกเลิกการจอง
+    </button>
+
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+    <a href="../../../index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+    </a>
+    <a href="../../../pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </a>
+    <a href="booking.html" class="bottom-nav-item active" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+    </a>
+    <a href="../../../pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+    </a>
+    <a href="../../../pages/account/account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+    </a>
+</nav></div>
+
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Scripts -->
+
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/buyer/setbooking/Booking information.js"></script>
+
+
+
+  <script src="../../../js/auth/guard.js"></script>
+  <script>
+    window.AuthGuard.requireLogin();
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.i18nInit) window.i18nInit();
+    });
+    // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'lang') {
+        if (window.i18nInit) window.i18nInit();
+      }
+    });
+  </script>
+
+
+
+</body>
+</html>

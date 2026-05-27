@@ -1,0 +1,277 @@
+/* ============================================================
+   AGRIPRICE — Dashboard Pro (Buyer/Seller)  |  Dashboard1.css
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg-color: #f0f7ff;
+  --card-bg: #ffffff;
+  --text-primary: #1e293b;
+  --text-muted: #64748b;
+  --blue: #3b82f6;
+  --blue-grad: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --green: #10b981;
+  --orange: #f59e0b;
+  --teal: #14b8a6;
+  --red: #ef4444;
+  --radius: 24px;
+}
+
+body {
+  font-family: var(--font-main, 'Sarabun', sans-serif);
+  background: var(--bg-color) !important;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.dashboard-header-bg {
+  background: var(--blue-grad);
+  padding: 16px 20px 40px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  color: white;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+}
+
+.back-btn-light {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  margin-bottom: 24px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s;
+}
+
+.back-btn-light:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.back-btn-light span {
+  font-size: 24px;
+}
+
+.header-titles h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.header-titles p {
+  font-size: 15px;
+  margin: 0;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* ── Main Content ───────────────────────────────────────── */
+.dash-main-pro {
+  padding: 0 20px 20px;
+  margin-top: -30px;
+}
+
+/* ── Period Selector ────────────────────────────────────── */
+.period-selector-pro {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.period-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: #ffffff;
+  color: #64748b;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.period-tab.active {
+  background: var(--blue);
+  color: white;
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ── KPI Grid ──────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.icon-circle span {
+  font-size: 24px;
+  color: white;
+}
+
+.icon-green { background: var(--green); }
+.icon-blue { background: var(--blue); }
+.icon-orange { background: var(--orange); }
+.icon-teal { background: var(--teal); }
+
+.kpi-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.kpi-trend {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.trend-up { color: var(--green); }
+.trend-blue { color: var(--blue); }
+.trend-orange { color: var(--orange); }
+.trend-teal { color: var(--teal); }
+
+/* ── Summary Chart Section ──────────────────────────────── */
+.summary-section {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 24px;
+  letter-spacing: -0.01em;
+}
+
+.chart-container-donut {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 0 auto 24px;
+}
+
+.chart-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.center-value {
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+  margin: 2px 0;
+  letter-spacing: -0.02em;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.legend-label {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.legend-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* -- Dark Mode Support -- */
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .summary-section,
+[data-theme="dark"] .period-tab {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .kpi-value,
+[data-theme="dark"] .section-header h2,
+[data-theme="dark"] .center-value,
+[data-theme="dark"] .legend-value {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] body {
+  background: #0f172a !important;
+}

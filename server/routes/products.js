@@ -1,0 +1,381 @@
+const express = require('express');
+const router = express.Router();
+const response = require('../utils/response');
+const authMiddleware = require('../middlewares/auth');
+const upload = require('../middlewares/upload');
+const { supabaseAdmin } = require('../utils/supabase');
+const { getOptionalAuthUser } = require('../utils/helpers');
+const { saveFile } = require('../services/fileService');
+
+/**
+ * GET /api/products
+ * [Core Feature] ดึงรายการผลผลิต (พร้อมระบบ Smart Search ค้นหาด้วยวันที่และข้อความ)
+ */
+router.get('/', async (req, res) => {
+  try {
+    const { q, user_id, category, page = 1, limit = 20 } = req.query;
+    const from = (Number(page) - 1) * Number(limit);
+    const to = from + Number(limit) - 1;
+
+    let query = supabaseAdmin
+      .from('products')
+      .select('*, profiles!user_id(profile_id, first_name, last_name, avatar, lat, lng)', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (!user_id) {
+      query = query.eq('is_active', true);
+    }
+
+    if (user_id && user_id !== 'undefined') query = query.eq('user_id', user_id);
+    if (category && category !== 'undefined') query = query.eq('category', category);
+
+    // --- SMART SEARCH (ระบบค้นหาอัจฉริยะ) ---
+    // ตรวจสอบว่าผู้ใช้ค้นหาเป็น "วันที่" หรือ "ข้อความ"
+    if (q) {
+      // Check if q looks like a date (e.g., 2026-04-16, 16-04-2026, 16/04/2026)
+      const dateMatch = q.match(/^(\d{4}-\d{2}-\d{2})|(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})$/);
+      if (dateMatch) {
+        let dateObj = new Date(q);
+        // Fallback for Thai/Alt formats if simple Date() fails
+        if (isNaN(dateObj.getTime())) {
+          const parts = q.split(/[-/]/);
+          if (parts.length === 3) {
+            // Assume DD-MM-YYYY or DD-MM-YY
+            const d = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const y = parts[2].length === 2 ? 2000 + parseInt(parts[2], 10) : parseInt(parts[2], 10);
+            dateObj = new Date(y, m, d);
+          }
+        }
+
+        if (!isNaN(dateObj.getTime())) {
+          const start = new Date(dateObj).toISOString();
+          const end = new Date(dateObj.setDate(dateObj.getDate() + 1)).toISOString();
+          query = query.gte('created_at', start).lt('created_at', end);
+        } else {
+          // Fallback to text search if date parsing failed
+          query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%,variety.ilike.%${q}%`);
+        }
+      } else {
+        // ค้นหาแบบข้อความปกติ (หาจากชื่อ, หมวดหมู่, สายพันธุ์)
+        query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%,variety.ilike.%${q}%`);
+      }
+    }
+
+    const { data, count, error } = await query;
+    if (error) {
+      console.error('[GET /api/products] Supabase Error:', error);
+      throw error;
+    }
+
+    res.json({
+      success: true,
+      data: data || [],
+      total: count || 0,
+      page: Number(page),
+      limit: Number(limit)
+    });
+  } catch (e) {
+    console.error('[GET /api/products] Catch Error:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+/**
+ * GET /api/products/:id
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    if (!req.params.id || req.params.id === 'undefined') {
+      return res.status(404).json(response.error('ไม่พบสินค้า'));
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select(
+        'product_id, name, variety, grade, grades, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
+        'profiles!user_id(profile_id, first_name, last_name, phone, avatar, lat, lng)'
+      )
+      .eq('product_id', req.params.id)
+      .single();
+
+    if (error) return res.status(404).json(response.error('ไม่พบสินค้า'));
+    res.json(response.success('ดึงข้อมูลสำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * POST /api/products
+ * [Core Feature] สร้างประกาศรับซื้อ/ขายผลผลิตใหม่ พร้อมอัปโหลดรูปภาพ
+ */
+router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const { name, category, variety, price, grade, unit, grades } = req.body;
+    
+    // If grades array is provided, price at top level becomes optional
+    if (!name) return res.status(400).json(response.error('กรุณาระบุชื่อผลผลิต'));
+    if (!price && (!grades || JSON.parse(grades).length === 0)) {
+      return res.status(400).json(response.error('กรุณาระบุราคา'));
+    }
+
+    const parsedGrades = grades ? JSON.parse(grades) : [];
+    const firstGrade = parsedGrades[0] || {};
+
+    const updates = {
+      user_id: req.user.id,
+      name,
+      category,
+      variety,
+      price: Number(price || firstGrade.price || 0),
+      grade: grade || firstGrade.grade || 'คละ',
+      unit: unit || 'กก.',
+      is_active: true
+    };
+
+    if (req.file) {
+      updates.image = await saveFile(req.file, 'products');
+    }
+
+    const { data, error } = await supabaseAdmin.from('products').insert(updates).select().single();
+    if (error) throw error;
+
+
+
+    res.status(201).json(response.success('เพิ่มรายการสำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * PATCH /api/products/:id
+ */
+router.patch('/:id', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { name, category, variety, price, grade, unit, grades, is_active } = req.body;
+
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (category !== undefined) updates.category = category;
+    if (variety !== undefined) updates.variety = variety;
+    if (price !== undefined) updates.price = Number(price);
+    if (grade !== undefined) updates.grade = grade;
+    if (unit !== undefined) updates.unit = unit;
+    if (is_active !== undefined) updates.is_active = is_active === 'true' || is_active === true;
+
+    if (req.file) {
+      updates.image = await saveFile(req.file, 'products');
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .update(updates)
+      .eq('product_id', productId)
+      .eq('user_id', req.user.id) // Ensure ownership
+      .select()
+      .single();
+
+    if (error) throw error;
+
+
+
+    res.json(response.success('อัปเดตรายการสำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * DELETE /api/products/:id
+ */
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { error } = await supabaseAdmin
+      .from('products')
+      .update({ is_active: false })
+      .eq('product_id', req.params.id)
+      .eq('user_id', req.user.id);
+    
+    if (error) throw error;
+    res.json(response.success('ลบรายการสำเร็จ'));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * GET /api/products/:id/slots
+ */
+router.get('/:id/slots', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('product_slots')
+      .select('*')
+      .eq('product_id', req.params.id)
+      .eq('is_active', true)
+      .order('time_start');
+
+    if (error) throw error;
+    res.json(response.success('ดึงข้อมูลสำเร็จ', data || []));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * POST /api/products/:id/slots
+ */
+router.post('/:id/slots', authMiddleware, async (req, res) => {
+  try {
+    const payload = {
+      ...req.body,
+      product_id: req.params.id
+    };
+    const { data, error } = await supabaseAdmin
+      .from('product_slots')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(response.success('สร้างคิวสำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+// (exported below with buyerRouter)
+
+// =============================================================
+// Buyer-specific Product Routes  (/api/buyer/products/*)
+// เป็น alias ของ /api/products แต่ตรวจสอบว่า role === 'buyer'
+// ใช้งานโดย setbooking-step2.js ของ Frontend
+// =============================================================
+const buyerRouter = express.Router();
+
+const requireBuyer = (req, res, next) => {
+  if (req.user?.role !== 'buyer') {
+    return res.status(403).json(response.error('เฉพาะ Buyer เท่านั้นที่ใช้งาน endpoint นี้ได้'));
+  }
+  next();
+};
+
+/** POST /api/buyer/products — สร้างประกาศรับซื้อ (Buyer) */
+buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), async (req, res) => {
+  try {
+    const { name, category, variety, price, grade, unit, grades, description, quantity } = req.body;
+    if (!name) return res.status(400).json(response.error('กรุณาระบุชื่อผลผลิต'));
+
+    const parsedGrades = grades ? JSON.parse(grades) : [];
+    const firstGrade   = parsedGrades[0] || {};
+
+    if (!price && parsedGrades.length === 0) {
+      return res.status(400).json(response.error('กรุณาระบุราคา'));
+    }
+
+    const insertData = {
+      user_id:   req.user.id,
+      name,
+      category:  category || name,
+      variety:   variety  || null,
+      price:     Number(price || firstGrade.price || 0),
+      grade:     grade || firstGrade.grade || 'คละ',
+      unit:      unit || 'กก.',
+      grades:    parsedGrades,
+      is_active: true,
+    };
+    if (description) insertData.description = description;
+    if (req.file) insertData.image = await saveFile(req.file, 'products');
+
+    const { data, error } = await supabaseAdmin.from('products').insert(insertData).select().single();
+    if (error) throw error;
+
+
+
+    res.status(201).json(response.success('เพิ่มรายการสำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/** PATCH /api/buyer/products/:id — แก้ไขประกาศรับซื้อ (Buyer) */
+buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { name, category, variety, price, grade, unit, grades, description, is_active } = req.body;
+
+    const updates = {};
+    if (name        !== undefined) updates.name        = name;
+    if (category    !== undefined) updates.category    = category;
+    if (variety     !== undefined) updates.variety     = variety;
+    if (description !== undefined) updates.description = description;
+    
+    // Parse grades string if provided, to fallback if price/grade aren't explicitly provided
+    let parsedGrades = [];
+    if (grades !== undefined) {
+      try { parsedGrades = JSON.parse(grades); } catch(e) {}
+    }
+    const firstGrade = parsedGrades[0] || {};
+
+    // Use explicit price/grade, fallback to first grade in array, or ignore if undefined
+    if (price !== undefined) {
+      updates.price = Number(price);
+    } else if (firstGrade.price !== undefined) {
+      updates.price = Number(firstGrade.price);
+    }
+
+    if (grade !== undefined) {
+      updates.grade = grade;
+    } else if (firstGrade.grade !== undefined) {
+      updates.grade = firstGrade.grade;
+    }
+
+    if (parsedGrades.length > 0) {
+      updates.grades = parsedGrades;
+    } else if (grades !== undefined && grades === '[]') {
+      updates.grades = [];
+    }
+
+    if (unit        !== undefined) updates.unit        = unit;
+    if (is_active   !== undefined) updates.is_active   = is_active === 'true' || is_active === true;
+    if (req.file) updates.image = await saveFile(req.file, 'products');
+
+    if (Object.keys(updates).length === 0) {
+      return res.json(response.success('ไม่มีข้อมูลให้อัปเดต', null));
+    }
+
+    // ลองหา product ก่อนว่ามีอยู่จริงไหม
+    const { data: existing } = await supabaseAdmin
+      .from('products')
+      .select('product_id, user_id')
+      .eq('product_id', productId)
+      .maybeSingle();
+
+    if (!existing) {
+      return res.status(404).json(response.error('ไม่พบสินค้าที่ต้องการแก้ไข'));
+    }
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).json(response.error('ไม่มีสิทธิ์แก้ไขสินค้านี้'));
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .update(updates)
+      .eq('product_id', productId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json(response.success('อัปเดตรายการสำเร็จ', data));
+  } catch (e) {
+    console.error('[PATCH buyer/products]', e.message);
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+module.exports = { router, buyerRouter };

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <script src="js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0B853C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AgriPrice">
+    <link rel="apple-touch-icon" href="assets/images/app-logo.jpg">
+    <title data-i18n="home_title">AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="components/bottom-nav/bottom-nav.css">
+    <link rel="stylesheet" href="components/favorites/favorites.css">
+    <link rel="stylesheet" href="components/product-card/product-card.css">
+    <link rel="stylesheet" href="css/dark-mode-patch.css">
+
+    <style></style>
+
+    <script src="js/global-anim.js"></script>
+    <script src="js/permission-manager.js"></script>
+</head>
+
+<body data-active="home">
+            <script>
+            // Intercept back button on mobile (Cordova/Capacitor)
+            document.addEventListener('deviceready', function() {
+                document.addEventListener('backbutton', function(e) {
+                    // Prevent exit on home page
+                    if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                        // Show confirm dialog or just block
+                        if (window.navigator && window.navigator.notification && window.navigator.notification.confirm) {
+                            window.navigator.notification.confirm(
+                                'คุณต้องการออกจากแอพหรือไม่?',
+                                function(buttonIndex) {
+                                    if (buttonIndex === 1) { // 1 = OK
+                                        navigator.app.exitApp();
+                                    }
+                                },
+                                'ออกจากแอพ',
+                                ['ตกลง','ยกเลิก']
+                            );
+                        } else {
+                            // Block exit (do nothing)
+                        }
+                        e.preventDefault();
+                        return false;
+                    }
+                }, false);
+            }, false);
+
+            // For browser/PWA: prevent accidental exit by pushing dummy state
+            if (window.history && window.location.pathname.endsWith('index.html')) {
+                window.history.pushState({ home: true }, 'home', window.location.href);
+                window.addEventListener('popstate', function(e) {
+                    if (e.state && e.state.home) {
+                        // Optionally show confirm dialog here
+                        // alert('กด back อีกครั้งเพื่อออกจากแอพ');
+                        window.history.pushState({ home: true }, 'home', window.location.href);
+                    }
+                });
+            }
+            </script>
+    <!-- ── Hero Carousel ──────────────────────────────────── -->
+    <section class="hero-background">
+        <div class="hero-carousel" id="heroCarousel">
+            <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกร" data-i18n-alt="slider_farmer"></div>
+            <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลผลิตสดใหม่" data-i18n-alt="slider_fresh_produce"></div>
+            <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="โปรโมชัน" data-i18n-alt="slider_promotion"></div>
+        </div>
+        <div class="hero-indicator" id="heroIndicator"></div>
+    </section>
+
+    <!-- ── Search & Overlap ────────────────────────────────── -->
+    <section class="search-section">
+        <div class="search-box">
+            <input type="text" placeholder="ค้นหาผู้รับซื้อ หรือผลผลิต..." class="search-input" id="searchInput"
+                data-i18n-placeholder="search_buyer">
+            <button class="search-button" id="searchBtn">
+                <span class="material-icons-outlined" style="color: var(--primary); font-size: 28px;">search</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Categories ────────────────────────────────────── -->
+    <section class="product-tabs-section">
+        <div class="section-header">
+            <h2 class="section-title" data-i18n="categories_title">หมวดหมู่สินค้า</h2>
+        </div>
+        <div class="product-grid">
+            <a class="product-item" href="gov-price-lookup.html?category=fruit">
+                <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="fruit">ผลไม้</span>
+            </a>
+            <a class="product-item" href="gov-price-lookup.html?category=vegetable">
+                <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="vegetable">ผักสด</span>
+            </a>
+            <a class="product-item" href="gov-price-lookup.html?category=rice">
+                <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="rice_crops">ข้าว/พืชไร่</span>
+            </a>
+            <a class="product-item" href="gov-price-lookup.html?category=oil">
+                <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="oil">น้ำมัน</span>
+            </a>
+            <a class="product-item" href="gov-price-lookup.html?category=organic">
+                <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="organic">อินทรีย์</span>
+            </a>
+            <a class="product-item" href="gov-price-lookup.html?category=seedlings">
+                <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์" style="width:40px;height:40px;object-fit:contain;"></div>
+                <span data-i18n="seedlings">พืชพันธุ์</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ── Favorites (Farmer only - injected via JS) ────────── -->
+    <div id="favoritesPlaceholder"></div>
+
+    <!-- ── Recommendations ────────────────────────────────── -->
+    <section class="products-section">
+        <div class="section-header">
+            <h2 class="section-title" data-i18n="recommend">รายการแนะนำ</h2>
+        </div>
+        <div id="productCardsMount">
+            <!-- Skeleton Loading -->
+            <div style="padding: 0 16px;">
+                <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+                <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+            </div>
+        </div>
+        <button class="btn-load-more" style="margin-top: 8px;">
+            <span class="material-icons-outlined load-more-icon">expand_more</span>
+            <span data-i18n="load_more">ดูเพิ่มเติม</span>
+        </button>
+    </section>
+
+    <!-- ── Announcements Banner ──────────────────────────── -->
+    <section class="banner-section">
+        <div class="section-header">
+            <h2 class="section-title" data-i18n="announcement">ประชาสัมพันธ์</h2>
+            <a href="pages/shared/announcements.html" class="view-all">
+                <span data-i18n="view_all">ดูทั้งหมด</span>
+                <span class="material-icons-outlined" style="font-size: 14px;">chevron_right</span>
+            </a>
+        </div>
+        <div class="banner-carousel" id="bannerCarousel">
+            <div class="banner-item"><img src="assets/images/hero.png" alt="Promo 1" data-i18n-alt="promo_1"></div>
+            <div class="banner-item"><img src="assets/images/promo-banner-1.png" alt="Promo 2" data-i18n-alt="promo_2"></div>
+        </div>
+        <div class="page-indicator" id="bannerDots" style="margin-top: 12px;"></div>
+    </section>
+
+    <div id="bottomNavMount">
+      <nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+        <a href="index.html" class="bottom-nav-item" data-page="home">
+          <span class="material-icons-outlined">home</span>
+          <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+        </a>
+        <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat">
+          <div class="nav-icon-wrapper">
+            <span class="material-icons-outlined">chat_bubble_outline</span>
+            <span class="nav-badge" style="display: none;"></span>
+          </div>
+          <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        </a>
+        <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+          <span class="material-icons-outlined">local_mall</span>
+          <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+        </a>
+        <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+          <span class="material-icons-outlined">notifications_none</span>
+          <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+        </a>
+        <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+          <span class="material-icons-outlined">person_outline</span>
+          <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js" defer></script>
+    <script src="js/utils/storage-keys.js" defer></script>
+    <script src="js/api-client.js" defer></script>
+    <script src="js/utils/auth.js" defer></script>
+    <script src="js/auth/guard.js" defer></script>
+    <script src="js/permission-manager.js" defer></script>
+    <script src="js/utils/location-helper.js" defer></script>
+    <script src="js/utils/ui-helpers.js" defer></script>
+    <script src="js/utils/favorites-helpers.js" defer></script>
+    <script src="js/components.js" defer></script>
+    <script src="js/home-sliders.js" defer></script>
+    <script src="js/gov-prices.js" defer></script>
+    <script src="components/favorites/favorites.js" defer></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.i18nInit) window.i18nInit();
+
+            // Sync theme properly for home
+            const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // Listen for theme changes from other pages
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'agriprice_theme') {
+                    document.documentElement.setAttribute('data-theme', e.newValue || 'light');
+                }
+                if (e.key === 'lang' && window.i18nInit) window.i18nInit();
+            });
+
+            // 📱 Trigger Native Permissions (GPS & Notifications)
+            // We wait a bit to ensure the user has seen the content first
+            if (window.AgriPermission && window.AgriPermission.requestAll) {
+                setTimeout(() => {
+                    window.AgriPermission.requestAll();
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+
+</html>

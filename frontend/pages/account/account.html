@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="manage_account">จัดการบัญชี</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
+  <link rel="stylesheet" href="../../css/account/account.css" />
+  <link rel="stylesheet" href="../../css/dark-mode-patch.css" />
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+
+<body data-active="account" data-auth="required">
+  <main class="acc-page">
+
+    <div class="acc-hero" aria-hidden="true"></div>
+
+    <section class="acc-content">
+      <h1 class="acc-title" data-i18n="manage_account">จัดการบัญชี</h1>
+
+      <section class="profile-card" aria-label="โปรไฟล์">
+        <div class="avatar-wrap">
+          <img id="avatarImg" class="avatar" src="../../assets/images/default.png" alt="รูปโปรไฟล์" />
+          <button class="avatar-edit" id="avatarEditBtn" type="button" aria-label="แก้ไขรูปโปรไฟล์"
+            data-i18n-aria-label="edit_avatar">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <input id="avatarFile" type="file" accept="image/*" hidden />
+        </div>
+
+        <div class="profile-name-row">
+          <div class="profile-name" id="profileName">
+            <div class="shimmer" style="width: 120px; height: 20px; border-radius: 4px; margin: 0 auto;"></div>
+          </div>
+          <span id="proBadge" class="badge-pro" style="display: none;">PRO</span>
+        </div>
+        <div class="profile-sub" id="profileSub">
+          <div class="shimmer" style="width: 160px; height: 14px; border-radius: 4px; margin: 4px auto 0;"></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-num" id="statFollowing">
+              <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
+            </div>
+            <div class="stat-label" data-i18n="following">กำลังติดตาม</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-num" id="statFollowers">
+              <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
+            </div>
+            <div class="stat-label" data-i18n="followers">ผู้ติดตาม</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-num" id="statPros">
+              <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
+            </div>
+            <div class="stat-label" data-i18n="pros">รายการโปร</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="menu-card" aria-label="เมนูบัญชี">
+        <a class="menu-item" href="manage-accounts/my-account.html">
+          <span class="menu-icon-wrap">
+            <span class="material-icons-outlined mi">person_outline</span>
+          </span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="my_account">บัญชีของฉัน</div>
+            <div class="menu-sub" data-i18n="manage_profile">จัดการข้อมูลส่วนตัว</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+
+
+        <div class="menu-item" id="darkModeToggle">
+          <span class="menu-icon-wrap">
+            <span class="material-icons-outlined mi">dark_mode</span>
+          </span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="dark_mode">โหมดมืด</div>
+            <div class="menu-sub" id="darkModeStatus" data-i18n="off">ปิดอยู่</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="darkModeCheck" style="display:none;">
+            <div class="toggle-track">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role-based links -->
+        <a class="menu-item" id="buyerUpgradeLink" href="../account/subscription.html" style="display:none;">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">workspace_premium</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="upgrade_pro">อัปเกรดเป็นโปร</div>
+            <div class="menu-sub" data-i18n="upgrade_pro_desc">ปลดล็อกฟีเจอร์พรีเมียม</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <a class="menu-item" id="buyerDashboardLink" href="../buyer/Dashboard/Dashboard1.html" style="display:none;">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">dashboard</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="dashboard">แดชบอร์ด</div>
+            <div class="menu-sub" data-i18n="dashboard_desc">ดูข้อมูลวิเคราะห์และการจอง</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <a class="menu-item" id="buyerProfileLink" href="../buyer/myprofile.html" style="display:none;">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">badge</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="manage_myprofile">จัดการโปรไฟล์ของฉัน</div>
+            <div class="menu-sub" data-i18n="edit_myprofile">แก้ไขข้อมูลหน้าโปรไฟล์ของฉัน</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <a class="menu-item" href="manage-notifications/setup-notifications.html">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">notifications_none</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="notifications">การแจ้งเตือน</div>
+            <div class="menu-sub" data-i18n="notifications_desc">ตั้งค่าการแจ้งเตือน</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <a class="menu-item" href="manage-language/language.html">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">language</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="language_title">ภาษา</div>
+            <div class="menu-sub" id="currentLanguageName"></div>
+            <script>
+              // Show current language name in menu-sub
+              document.addEventListener('DOMContentLoaded', function () {
+                if (window.LANGUAGE_LABELS && window.getCurrentLang) {
+                  document.getElementById('currentLanguageName').textContent = LANGUAGE_LABELS[getCurrentLang()];
+                } else if (window.i18nT) {
+                  // fallback: try to use i18nT
+                  const lang = localStorage.getItem('lang') || 'th';
+                  const map = { th: 'ไทย', en: 'English', zh: '中文' };
+                  document.getElementById('currentLanguageName').textContent = map[lang] || 'ไทย';
+                }
+                window.addEventListener('storage', function (e) {
+                  if (e.key === 'lang') {
+                    const lang = localStorage.getItem('lang') || 'th';
+                    if (window.LANGUAGE_LABELS && window.getCurrentLang) {
+                      document.getElementById('currentLanguageName').textContent = LANGUAGE_LABELS[getCurrentLang()];
+                    } else {
+                      const map = { th: 'ไทย', en: 'English', zh: '中文' };
+                      document.getElementById('currentLanguageName').textContent = map[lang] || 'ไทย';
+                    }
+                  }
+                });
+              });
+            </script>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+      </section>
+
+      <section class="menu-card" aria-label="ข้อมูลเพิ่มเติม">
+        <a class="menu-item" href="manage-address/address-book.html">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">location_on</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="address">สมุดที่อยู่</div>
+            <div class="menu-sub" data-i18n="address_desc">จัดการที่อยู่จัดส่ง</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <a class="menu-item" href="manage-terms/terms.html">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">description</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="terms">ข้อกำหนดและเงื่อนไข</div>
+            <div class="menu-sub" data-i18n="terms_desc">นโยบายความเป็นส่วนตัว</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+      </section>
+
+      <section class="menu-card" aria-label="รีวิวและออกจากระบบ">
+        <a class="menu-item" href="manage-review-us/review-us.html">
+          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">star_border</span></span>
+          <div class="menu-text">
+            <div class="menu-title" data-i18n="review">รีวิวให้แอปเรา</div>
+            <div class="menu-sub" data-i18n="review_desc">ให้คะแนนความชื่นชอบของแอป Agriprice</div>
+          </div>
+          <span class="material-icons-outlined chev">chevron_right</span>
+        </a>
+
+        <button class="logout-item" id="logoutBtn" type="button">
+          <span class="logout-text" data-i18n="logout">ออกจากระบบ</span>
+          <span class="material-icons-outlined logout-icon">logout</span>
+        </button>
+      </section>
+
+      <div class="version">VERSION 2.5.56.1</div>
+    </section>
+  </main>
+
+  <div id="bottomNavMount">
+    <nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
+      <a href="../../index.html" class="bottom-nav-item" data-page="home">
+        <span class="material-icons-outlined">home</span>
+        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+      </a>
+      <a href="../../pages/shared/chat.html" class="bottom-nav-item" data-page="chat">
+        <div class="nav-icon-wrapper">
+          <span class="material-icons-outlined">chat_bubble_outline</span>
+          <span class="nav-badge" style="display: none;"></span>
+        </div>
+        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+      </a>
+      <a href="../../pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
+        <span class="material-icons-outlined">local_mall</span>
+        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+      </a>
+      <a href="../../pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+        <span class="material-icons-outlined">notifications_none</span>
+        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+      </a>
+      <a href="account.html" class="bottom-nav-item" data-page="account">
+        <span class="material-icons-outlined">person_outline</span>
+        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+      </a>
+    </nav>
+  </div>
+
+  <div id="logoutModal" class="logout-modal" style="display: none;">
+    <div class="logout-modal-overlay"></div>
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon"><span class="material-icons-outlined">logout</span></div>
+      <h2 class="logout-modal-title" data-i18n="logout_title">ออกจากระบบ</h2>
+      <p class="logout-modal-message" data-i18n="logout_msg">ต้องการออกจากระบบใช่หรือไม่?</p>
+      <div class="logout-modal-actions">
+        <button type="button" class="logout-modal-btn logout-modal-btn-cancel" id="logoutCancelBtn"><span
+            data-i18n="logout_no">ไม่ใช่</span></button>
+        <button type="button" class="logout-modal-btn logout-modal-btn-confirm" id="logoutConfirmBtn"><span
+            data-i18n="logout_yes">ใช่</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils/storage-keys.js"></script>
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/utils/auth.js"></script>
+  <script src="../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <!-- Component & Page Scripts -->
+  <script src="../../js/global-anim.js"></script>
+  <script src="../../js/components/i18n.js"></script>
+  <script src="../../js/components.js"></script>
+  <script src="../../js/account/account.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.i18nInit) window.i18nInit();
+    });
+  </script>
+</body>
+
+</html>

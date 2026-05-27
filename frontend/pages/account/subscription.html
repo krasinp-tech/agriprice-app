@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Subscription Plans | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/account/subscription.css" />
+  <script src="../../js/config.js"></script>
+  <script src="../../js/components/i18n.js"></script>
+  <script src="../../js/global-anim.js"></script>
+  <meta name="theme-color" content="#f0f7ff">
+  <link rel="stylesheet" href="../../css/dark-mode-patch.css">
+</head>
+
+<body data-active="account">
+  
+  <header class="sub-header">
+    <button class="back-btn" id="backBtn" aria-label="ย้อนกลับ" data-i18n-aria-label="back">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+  </header>
+
+  <main class="sub-main">
+    <div class="header-text">
+      <div class="icon-container">
+        <span class="material-icons-outlined">storefront</span>
+      </div>
+      <h1 data-i18n="subscription_plans_title">แผนการสมัครสมาชิก</h1>
+      <p data-i18n="perfect_plan_desc">เลือกแผนที่สมบูรณ์แบบสำหรับธุรกิจของคุณ</p>
+    </div>
+
+    <p class="swipe-hint" data-i18n="swipe_hint">ปัดเพื่อเปรียบเทียบแผน</p>
+
+    <div class="plans-carousel">
+      <!-- Free Plan -->
+      <div class="plan-card free-plan">
+        <div class="plan-badge" data-i18n="starter_badge">STARTER</div>
+        <h2 class="plan-name" data-i18n="free_plan_name">FREE</h2>
+        <div class="plan-price">
+          <span class="currency">฿</span><span class="amount">0</span><span class="period" data-i18n="month_period">/เดือน</span>
+        </div>
+        
+        <ul class="plan-features">
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon">check_circle</span>
+            <span data-i18n="up_to_3_products">สร้างสินค้าได้สูงสุด 3 รายการ</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon">check_circle</span>
+            <span data-i18n="edit_delete_products">แก้ไขและลบสินค้าได้</span>
+          </li>
+          <li class="feature-item excluded">
+            <span class="material-icons-outlined cross-icon">cancel</span>
+            <span data-i18n="no_dashboard">ไม่มีแดชบอร์ดวิเคราะห์ข้อมูล</span>
+          </li>
+          <li class="feature-item excluded">
+            <span class="material-icons-outlined cross-icon">cancel</span>
+            <span data-i18n="no_revenue_tracking">ไม่มีการติดตามรายได้</span>
+          </li>
+          <li class="feature-item excluded">
+            <span class="material-icons-outlined cross-icon">cancel</span>
+            <span data-i18n="no_product_boost">ไม่มีการบูสต์สินค้า</span>
+          </li>
+        </ul>
+
+        <button class="plan-btn btn-current" disabled data-i18n="current_plan_btn">แพ็กเกจปัจจุบัน</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="plan-card pro-plan">
+        <div class="plan-badge premium" data-i18n="recommended_badge">RECOMMENDED</div>
+        <h2 class="plan-name pro-text" data-i18n="pro_plan_name">PRO</h2>
+        <div class="plan-price">
+          <span class="currency">฿</span><span class="amount">499</span><span class="period" data-i18n="month_period">/เดือน</span>
+        </div>
+        
+        <ul class="plan-features">
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="up_to_10_products">สร้างสินค้าได้สูงสุด 10 รายการ</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="dashboard_analytics">แดชบอร์ดวิเคราะห์ข้อมูล</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="view_product_performance">ดูประสิทธิภาพของสินค้า</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="monthly_booking_summary">สรุปยอดจองรายเดือน</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="monthly_revenue_summary">สรุปรายได้รายเดือน</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="top_booked_ranking">อันดับสินค้าที่ถูกจองสูงสุด</span>
+          </li>
+          <li class="feature-item included">
+            <span class="material-icons-outlined check-icon pro">check_circle</span>
+            <span data-i18n="product_boosting">บูสต์สินค้าเพิ่มการมองเห็น</span>
+          </li>
+        </ul>
+
+        <button class="plan-btn btn-upgrade" id="upgradeBtn" data-i18n="upgrade_pro_btn">อัปเกรดเป็น Pro</button>
+      </div>
+    </div>
+
+    <!-- Dots -->
+    <div class="carousel-dots">
+      <div class="dot"></div>
+      <div class="dot active"></div>
+    </div>
+
+    <!-- Why Upgrade -->
+    <div class="why-upgrade-card">
+      <div class="why-icon">
+        <span class="material-icons-outlined">star</span>
+      </div>
+      <div class="why-content">
+        <h3 data-i18n="why_upgrade_title">ทำไมต้องอัปเกรด?</h3>
+        <p data-i18n="why_upgrade_desc">เพิ่มการมองเห็น ติดตามประสิทธิภาพ และเติบโตธุรกิจการเกษตรของคุณด้วยเครื่องมือวิเคราะห์ระดับสูง</p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../../js/account/subscription.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.i18nInit) window.i18nInit();
+    });
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'lang') {
+        if (window.i18nInit) window.i18nInit();
+      }
+    });
+  </script>
+</body>
+</html>

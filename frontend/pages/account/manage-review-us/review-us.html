@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../../js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="review_us_title">รีวิวให้แอปเรา | AGRIPRICE</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../css/global.css">
+    <link rel="stylesheet" href="../../../css/account/manage-review-us/review-us.css">
+    <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <main class="review-page">
+        <!-- ── Header ───────────────────────────────────────── -->
+        <header class="review-header fade-slide">
+            <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+                <span class="material-icons-outlined">chevron_left</span>
+            </a>
+            <h1 class="page-title" data-i18n="review">รีวิวให้แอปเรา</h1>
+        </header>
+
+        <!-- ── Content Card ─────────────────────────────────── -->
+        <div class="review-card fade-slide">
+            <span class="review-illustration">⭐</span>
+            <h2 class="review-headline" data-i18n="do_you_like_agriprice">คุณชอบ AgriPrice ไหม?</h2>
+            <p class="review-sub" data-i18n="review_hint">คะแนนของคุณช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น</p>
+
+            <!-- Star Rating System -->
+            <div class="star-rating" id="starContainer">
+                <button class="star-btn" data-value="1"><span class="material-icons-outlined">star</span></button>
+                <button class="star-btn" data-value="2"><span class="material-icons-outlined">star</span></button>
+                <button class="star-btn" data-value="3"><span class="material-icons-outlined">star</span></button>
+                <button class="star-btn" data-value="4"><span class="material-icons-outlined">star</span></button>
+                <button class="star-btn" data-value="5"><span class="material-icons-outlined">star</span></button>
+            </div>
+
+            <!-- Feedback Area -->
+            <div class="feedback-box">
+                <textarea class="feedback-textarea" id="feedbackText" placeholder="เขียนข้อเสนอแนะหรือความประทับใจที่นี่..." data-i18n-placeholder="feedback_placeholder"></textarea>
+            </div>
+
+            <button class="btn-submit-review" id="submitReviewBtn" data-i18n="submit_review">ส่งรีวิว</button>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../../../js/global-anim.js"></script>
+    <script src="../../../js/account/manage-review-us/review-us.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.i18nInit) window.i18nInit();
+        });
+    </script>
+</body>
+</html>

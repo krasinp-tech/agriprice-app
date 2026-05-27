@@ -1,0 +1,1991 @@
+/* ================================
+  Booking Step 2 — Province Autocomplete Patch
+================================ */
+[data-theme="dark"] .autocomplete-items {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-light) !important;
+}
+[data-theme="dark"] .autocomplete-items div {
+  background: transparent !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .autocomplete-items div.autocomplete-active {
+  background: var(--bg-input) !important;
+  color: var(--primary) !important;
+}
+/* ================================
+  Booking Step 2 — Modal & Form Patch
+================================ */
+[data-theme="dark"] .modal-content {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .modal-title {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .btn-close-modal,
+[data-theme="dark"] .btn-modal-cancel {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border: none !important;
+}
+[data-theme="dark"] .btn-close-modal:hover,
+[data-theme="dark"] .btn-modal-cancel:hover {
+  background: #3a3a3c !important;
+}
+[data-theme="dark"] .contact-note {
+  border-top-color: var(--border-light) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .plate-sub-label,
+[data-theme="dark"] .contact-label,
+[data-theme="dark"] .section-subtitle,
+[data-theme="dark"] .help-text {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .modal-title {
+  color: var(--text-main) !important;
+}
+/* ============================================================
+   AGRIPRICE — dark-mode-patch.css
+   วิธีใช้: ใส่ <link> นี้เป็น CSS ไฟล์สุดท้ายในทุกหน้า
+   ต่อจาก global.css และ CSS เฉพาะหน้า
+
+   <link rel="stylesheet" href="../../css/dark-mode-patch.css">
+   (ปรับ path ตามระดับ folder ของแต่ละหน้า)
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION 1: global.css — แก้ไข hardcode ที่ทำให้ bg กลับเป็นขาว
+   ============================================================ */
+
+/* global.css มีบรรทัด background: #f8f9fa !important; อยู่ใน @media (min-width: 1024px)
+   ทำให้ dark mode ไม่ทำงานบน desktop — ต้อง override */
+@media (min-width: 1024px) {
+  [data-theme="dark"] body {
+    background: var(--bg-page) !important;
+  }
+}
+
+/* skeleton ใช้สีขาวแบบ hardcode — ปรับให้รองรับ dark */
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #2c2c2e 25%, #3a3a3c 50%, #2c2c2e 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+[data-theme="dark"] .skeleton-card {
+  background: var(--bg-card) !important;
+  box-shadow: none;
+}
+
+/* soft-guard-sheet ใช้ #ffffff แบบ hardcode */
+[data-theme="dark"] .soft-guard-sheet {
+  background: var(--bg-card) !important;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.6);
+}
+
+[data-theme="dark"] .soft-guard-btn.ghost {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+}
+
+
+/* ============================================================
+   SECTION 2: home.css — หน้าหลัก
+   ============================================================ */
+
+/* hero indicator dot active ใช้ rgba(0,0,0,.95) */
+[data-theme="dark"] .hero-indicator .dot.active {
+  background: rgba(255,255,255,0.9) !important;
+}
+
+/* gov-price card บนหน้าแรก */
+[data-theme="dark"] .gov-price-preview {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* product category items */
+[data-theme="dark"] .product-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .product-item:hover {
+  border-color: rgba(11,133,60,0.3) !important;
+}
+
+[data-theme="dark"] .product-item .cat-icon {
+  background: rgba(11,133,60,0.15) !important;
+}
+
+/* farmer listing cards */
+[data-theme="dark"] .farmer-card,
+[data-theme="dark"] .listing-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* section title colors hardcoded ใน home.css */
+[data-theme="dark"] .section-title-home {
+  color: var(--text-muted) !important;
+}
+
+/* promo banner */
+[data-theme="dark"] .promo-banner {
+  background: var(--bg-card) !important;
+}
+
+/* tab bar (ถ้ามี) */
+[data-theme="dark"] .tab-bar,
+[data-theme="dark"] .tabs-wrap {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .tab-btn {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  color: var(--primary) !important;
+}
+
+
+/* ============================================================
+   SECTION 3: bottom-nav/bottom-nav.css
+   ============================================================ */
+
+/* bottom-nav ใช้ var() แล้ว แต่ inactive color hardcode #AAAAAA */
+[data-theme="dark"] .bottom-nav-item {
+  color: #636366 !important;
+}
+
+[data-theme="dark"] .bottom-nav-item.active,
+[data-theme="dark"] .bottom-nav-item.is-active {
+  color: var(--primary) !important;
+}
+
+
+/* ============================================================
+   SECTION 4: product-card/product-card.css
+   ============================================================ */
+
+/* seller-name hardcode #888 */
+[data-theme="dark"] .seller-name {
+  color: var(--text-muted) !important;
+}
+
+/* heart-icon stroke hardcode #CCCCCC */
+[data-theme="dark"] .heart-icon {
+  stroke: #636366 !important;
+}
+
+/* price-row hardcoded colors */
+[data-theme="dark"] .price-label,
+[data-theme="dark"] .price-unit {
+  color: var(--text-muted) !important;
+}
+
+/* tag/badge hardcoded colors */
+[data-theme="dark"] .product-tag {
+  background: rgba(11,133,60,0.15) !important;
+  color: #4ade80 !important;
+}
+
+/* location text */
+[data-theme="dark"] .product-location {
+  color: var(--text-muted) !important;
+}
+
+/* divider lines */
+[data-theme="dark"] .card-divider {
+  background: var(--border-light) !important;
+}
+
+
+/* ============================================================
+   SECTION 5: account/account.css
+   ============================================================ */
+
+/* menu-title, menu-sub hardcode rgba(0,0,0,.84) */
+[data-theme="dark"] .menu-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .menu-sub {
+  color: var(--text-muted) !important;
+}
+
+/* version label */
+[data-theme="dark"] .version {
+  color: rgba(255,255,255,0.22) !important;
+}
+
+/* logout modal */
+[data-theme="dark"] .logout-modal-icon {
+  background: rgba(255,59,48,0.15) !important;
+}
+
+[data-theme="dark"] .logout-modal-btn-cancel {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .logout-modal-btn-cancel:hover {
+  background: #3a3a3c !important;
+}
+
+
+/* ============================================================
+   SECTION 6: account/manage-accounts/ & subpages
+   ============================================================ */
+
+/* หน้า account-detail, my-account, change-password ฯลฯ */
+[data-theme="dark"] .ud-page,
+[data-theme="dark"] .ma-page,
+[data-theme="dark"] .detail-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .ud-card,
+[data-theme="dark"] .ma-card,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .form-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .ud-label,
+[data-theme="dark"] .ma-label,
+[data-theme="dark"] .field-label,
+[data-theme="dark"] .input-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .ud-value,
+[data-theme="dark"] .ma-value,
+[data-theme="dark"] .field-value {
+  color: var(--text-main) !important;
+}
+
+/* form inputs */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-dim) !important;
+}
+
+/* section headers */
+[data-theme="dark"] .section-header,
+[data-theme="dark"] .page-header-title {
+  color: var(--text-main) !important;
+}
+
+/* dividers */
+[data-theme="dark"] .divider,
+[data-theme="dark"] .separator,
+[data-theme="dark"] .card-divider,
+[data-theme="dark"] .stat-divider,
+[data-theme="dark"] .info-row {
+  background: var(--border-light) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+
+/* ============================================================
+   SECTION 6.5: Booking Steps (Step 1-4)
+   ============================================================ */
+
+[data-theme="dark"] .booking-step1,
+[data-theme="dark"] .booking-step2,
+[data-theme="dark"] .booking-step3,
+[data-theme="dark"] .booking-step4 {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .calendar-container,
+[data-theme="dark"] .timeslots-container,
+[data-theme="dark"] .vehicle-card,
+[data-theme="dark"] .contact-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .big-card,
+[data-theme="dark"] .card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .timeslot {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .timeslot.selected {
+  border-color: var(--primary) !important;
+  background: rgba(11, 133, 60, 0.15) !important;
+}
+
+[data-theme="dark"] .submit-container {
+  background: linear-gradient(to top, var(--bg-page) 80%, transparent) !important;
+}
+
+[data-theme="dark"] .btn-submit {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .calendar-day {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .calendar-day.selected {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .calendar-nav {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .info-value,
+[data-theme="dark"] .contact-value,
+[data-theme="dark"] .product-name,
+[data-theme="dark"] .vehicle-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .info-label,
+[data-theme="dark"] .contact-label,
+[data-theme="dark"] .product-info,
+[data-theme="dark"] .vehicle-detail,
+[data-theme="dark"] .section-subtitle {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .card-title {
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .card-icon {
+  color: var(--primary) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .info-row {
+  border-bottom-color: var(--border-light) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .info-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+[data-theme="dark"] .product-icon-wrapper,
+[data-theme="dark"] .vehicle-icon {
+  background: var(--bg-input) !important;
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] .summary-card.warning-card .card-title,
+[data-theme="dark"] .summary-card.warning-card .warning-icon {
+  color: #FFB800 !important;
+}
+
+[data-theme="dark"] .warning-list li {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .idRow,
+[data-theme="dark"] .detailPanel,
+[data-theme="dark"] .statusGrid,
+[data-theme="dark"] .statusMini,
+[data-theme="dark"] .placeBox {
+  background: var(--bg-input) !important;
+}
+
+
+/* ============================================================
+   SECTION 7: account/manage-device/ (device-management.css)
+   ============================================================ */
+
+[data-theme="dark"] .device-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .device-name {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .device-sub,
+[data-theme="dark"] .device-meta {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .device-icon-wrap {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .current-device-badge {
+  background: rgba(11,133,60,0.15) !important;
+  color: #4ade80 !important;
+}
+
+
+/* ============================================================
+   SECTION 8: account/manage-language/ (language.css)
+   ============================================================ */
+
+[data-theme="dark"] .lang-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .lang-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .lang-item {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .lang-item:hover {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+[data-theme="dark"] .lang-item.active {
+  background: rgba(11,133,60,0.12) !important;
+}
+
+
+/* ============================================================
+   SECTION 9: account/manage-notifications/ (setup-notifications.css)
+   ============================================================ */
+
+[data-theme="dark"] .notify-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .notify-card,
+[data-theme="dark"] .noti-setting-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .notify-title,
+[data-theme="dark"] .noti-setting-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .notify-sub,
+[data-theme="dark"] .noti-setting-sub {
+  color: var(--text-muted) !important;
+}
+
+
+/* ============================================================
+   SECTION 10: account/payment.css & subscription.css
+   ============================================================ */
+
+[data-theme="dark"] .payment-page,
+[data-theme="dark"] .sub-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .payment-card,
+[data-theme="dark"] .sub-card,
+[data-theme="dark"] .plan-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .plan-name,
+[data-theme="dark"] .plan-price {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .plan-feature {
+  color: var(--text-muted) !important;
+}
+
+/* Highlight/PRO card — keep green but darken slightly */
+[data-theme="dark"] .plan-card.featured,
+[data-theme="dark"] .plan-card.pro {
+  border-color: var(--primary) !important;
+  background: rgba(11,133,60,0.08) !important;
+}
+
+/* payment summary box */
+[data-theme="dark"] .payment-summary {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .payment-row-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .payment-row-value {
+  color: var(--text-main) !important;
+}
+
+/* ยอดรวม highlight */
+[data-theme="dark"] .fffbeb-bg {
+  background: rgba(245,158,11,0.12) !important;
+}
+
+
+/* ============================================================
+   SECTION 11: auth/login1.css & login2.css
+   ============================================================ */
+
+/* Auth pages ใช้ --card: #FFFFFF แบบ local root ไม่ได้ใช้ global theme
+   Solution: override เฉพาะ content sheet ส่วนด้านล่าง, ปล่อย video/hero ตามเดิม */
+
+[data-theme="dark"] .sheet,
+[data-theme="dark"] .login-sheet,
+[data-theme="dark"] .auth-sheet {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .sheet-title,
+[data-theme="dark"] .login-title,
+[data-theme="dark"] .auth-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .sheet-sub,
+[data-theme="dark"] .login-sub,
+[data-theme="dark"] .auth-sub {
+  color: var(--text-muted) !important;
+}
+
+/* login1.css .card ใช้ background: var(--card) (#FFFFFF) */
+[data-theme="dark"] .card {
+  background: var(--bg-card) !important;
+}
+
+/* segment control บน login1 */
+[data-theme="dark"] .seg-control,
+[data-theme="dark"] .segment-control {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .seg-option,
+[data-theme="dark"] .segment-option {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .seg-option.active,
+[data-theme="dark"] .segment-option.active {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+/* Social login buttons */
+[data-theme="dark"] .btn-social {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+}
+
+/* login2.html specific (The Sheet & Inputs) */
+[data-theme="dark"] .content {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .h1 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .sub {
+  color: #4ade80 !important; /* Lighter green for dark mode readability */
+}
+
+[data-theme="dark"] .label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .input {
+  background: rgba(255, 255, 255, 0.05) !important; /* Subtle dark tint */
+  color: #FFFFFF !important;
+  border: none !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 14px 12px 12px !important; /* Add some padding for the box feel */
+  border-radius: 8px 8px 0 0 !important;
+}
+
+[data-theme="dark"] .input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-bottom-color: #0B66FF !important; /* Brand blue focus */
+}
+
+/* Fix for browser autofill background */
+[data-theme="dark"] .input:-webkit-autofill,
+[data-theme="dark"] .input:-webkit-autofill:hover, 
+[data-theme="dark"] .input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #2c2c2e inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+[data-theme="dark"] .eye {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+[data-theme="dark"] .eye:hover {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .link {
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .foot {
+  color: var(--text-dim) !important;
+}
+
+
+/* ============================================================
+   SECTION 12: auth/register1-4.css
+   ============================================================ */
+
+[data-theme="dark"] .register-page,
+[data-theme="dark"] .reg-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .register-card,
+[data-theme="dark"] .reg-card {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .register-title,
+[data-theme="dark"] .reg-title,
+[data-theme="dark"] .h1 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .register-sub,
+[data-theme="dark"] .reg-sub,
+[data-theme="dark"] .subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] .label {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="dark"] .help {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+[data-theme="dark"] .input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #FFFFFF !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-bottom-color: #0B66FF !important;
+}
+
+[data-theme="dark"] .error {
+  background: rgba(255, 59, 48, 0.2) !important;
+  color: #ff8080 !important;
+  border: 1px solid rgba(255, 59, 48, 0.3) !important;
+}
+
+/* Role selection cards */
+[data-theme="dark"] .role-card {
+  background: var(--bg-card) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .role-card.active,
+[data-theme="dark"] .role-card.selected {
+  border-color: #0B66FF !important;
+  background: rgba(11, 102, 255, 0.1) !important;
+  box-shadow: 0 0 20px rgba(11, 102, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .role-name {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .role-desc {
+  color: rgba(255, 255, 255, 0.8) !important; /* Brighter description */
+}
+
+[data-theme="dark"] .subtitle {
+  color: rgba(255, 255, 255, 0.6) !important; /* Visible subtitle */
+}
+
+[data-theme="dark"] .hint {
+  color: rgba(255, 255, 255, 0.5) !important; /* Visible hint under button */
+}
+
+/* OTP input */
+[data-theme="dark"] .otp-input,
+[data-theme="dark"] .otp-box {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-main) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .otp-box:focus {
+  border-color: #0B66FF !important;
+  background: rgba(11, 102, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .to,
+[data-theme="dark"] .timer-label {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] .timer-value {
+  color: #60a5fa !important; /* Brighter blue for the timer */
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] #resendBtn {
+  color: #FFFFFF !important;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] #resendBtn:disabled {
+  opacity: 0.3;
+}
+
+/* Modal specific for register1.html */
+[data-theme="dark"] .modal-sheet {
+  background: var(--bg-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .modal-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .modal-text {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] .m-btn.m-ghost {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .m-btn.m-primary {
+  background: linear-gradient(175deg, #0E3480 0%, #081E5A 100%) !important;
+  color: #FFFFFF !important;
+}
+
+
+/* ============================================================
+   SECTION 13: shared-pages/chat.css
+   ============================================================ */
+
+/* chat header */
+[data-theme="dark"] .chat-list-top {
+  border-bottom-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .chat-list-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .chat-refresh:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .chat-refresh:active {
+  background: rgba(11,133,60,0.1) !important;
+}
+
+/* chat room items */
+[data-theme="dark"] .chat-room-item {
+  border-bottom-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .chat-room-item:hover,
+[data-theme="dark"] .chat-room-item:active {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* unread badge */
+[data-theme="dark"] .chat-badge {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+/* message bubbles */
+[data-theme="dark"] .msg-bubble.them {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .msg-time {
+  color: var(--text-dim) !important;
+}
+
+/* message input area */
+[data-theme="dark"] .chat-input-wrap,
+[data-theme="dark"] .msg-input-bar {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .chat-input,
+[data-theme="dark"] .msg-input {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* image overlay */
+[data-theme="dark"] .img-overlay-bg {
+  background: rgba(0,0,0,0.92) !important;
+}
+
+/* empty state */
+[data-theme="dark"] .chat-empty-title {
+  color: var(--text-main) !important;
+}
+
+
+/* ============================================================
+   SECTION 14: shared-pages/notifications.css
+   ============================================================ */
+
+/* notifications.css ใช้ local :root tokens ของตัวเอง
+   ต้อง override ด้วย data-theme="dark" */
+
+[data-theme="dark"] .noti-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .noti-header {
+  background: rgba(28,28,30,0.88) !important;
+}
+
+[data-theme="dark"] .noti-header-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .noti-card {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .noti-item {
+  border-bottom-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .noti-item:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+[data-theme="dark"] .noti-item.unread {
+  background: rgba(11,133,60,0.06) !important;
+}
+
+[data-theme="dark"] .noti-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .noti-body {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .noti-time {
+  color: var(--text-dim) !important;
+}
+
+/* gradient bottom fade */
+[data-theme="dark"] .noti-fade-bottom {
+  background: linear-gradient(180deg, rgba(30,158,108,.06), var(--bg-page) 48%) !important;
+}
+
+
+/* ============================================================
+   SECTION 15: shared-pages/profile.css (farmer profile)
+   ============================================================ */
+
+[data-theme="dark"] .profile-info-card {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .profile-name {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .profile-role,
+[data-theme="dark"] .profile-location {
+  color: var(--text-muted) !important;
+}
+
+/* stats section */
+[data-theme="dark"] .profile-stats {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .stat-value {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .stat-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .stat-divider {
+  background: var(--border-light) !important;
+}
+
+/* about section */
+[data-theme="dark"] .about-section,
+[data-theme="dark"] .about-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .about-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .about-value {
+  color: var(--text-main) !important;
+}
+
+/* product listings on profile */
+[data-theme="dark"] .profile-listing-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* tab bar */
+[data-theme="dark"] .profile-tabs {
+  background: var(--bg-card) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .profile-tab-btn {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .profile-tab-btn.active {
+  color: var(--primary) !important;
+  border-bottom-color: var(--primary) !important;
+}
+
+
+/* ============================================================
+   SECTION 16: shared-pages/search.css
+   ============================================================ */
+
+[data-theme="dark"] .filter-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .filter-btn.active {
+  background: rgba(11,133,60,0.15) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .search-results-count {
+  color: var(--text-muted) !important;
+}
+
+
+/* ============================================================
+   SECTION 17: buyer/myprofile.css
+   ============================================================ */
+
+[data-theme="dark"] .profile-hamburger {
+  background: rgba(28,28,30,0.88) !important;
+}
+
+[data-theme="dark"] .profile-hamburger span {
+  color: var(--text-main) !important;
+}
+
+/* profile-info-card ใช้ background: #fff hardcode */
+[data-theme="dark"] .profile-info-card {
+  background: var(--bg-card) !important;
+}
+
+/* avatar border hardcode #fff */
+[data-theme="dark"] .profile-avatar-wrap {
+  border-color: var(--bg-card) !important;
+}
+
+/* avatar-edit-btn */
+[data-theme="dark"] .avatar-edit-btn {
+  background: var(--bg-card) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .avatar-edit-btn span {
+  color: var(--text-muted) !important;
+}
+
+/* profile name */
+[data-theme="dark"] .profile-display-name,
+[data-theme="dark"] .buyer-name {
+  color: var(--text-main) !important;
+}
+
+/* bio/about text */
+[data-theme="dark"] .profile-bio,
+[data-theme="dark"] .buyer-bio {
+  color: var(--text-muted) !important;
+}
+
+/* edit about button */
+[data-theme="dark"] .btn-edit-about {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* map button */
+[data-theme="dark"] .btn-map {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* tabs */
+[data-theme="dark"] .profile-tab-wrap {
+  background: var(--bg-page) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+
+/* ============================================================
+   SECTION 18: buyer/Dashboard/Dashboard1.css
+   ============================================================ */
+
+[data-theme="dark"] .dash-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .dash-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .kpi-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .dash-card-title,
+[data-theme="dark"] .kpi-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .kpi-value {
+  color: var(--text-main) !important;
+}
+
+
+/* ============================================================
+   SECTION 19: buyer/setbooking/ & farmer/booking/
+   ============================================================ */
+
+[data-theme="dark"] .booking-title {
+  /* gradient text — ปล่อยให้ green gradient คงอยู่ */
+}
+
+[data-theme="dark"] .booking-subtitle {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .step-card,
+[data-theme="dark"] .booking-form-card,
+[data-theme="dark"] .booking-info-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .form-group-label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .step-indicator {
+  color: var(--text-muted) !important;
+}
+
+/* progress bar track */
+[data-theme="dark"] .progress-track {
+  background: var(--bg-input) !important;
+}
+
+/* date picker / time picker */
+[data-theme="dark"] .date-picker-trigger,
+[data-theme="dark"] .time-slot-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .time-slot-btn.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+}
+
+/* booking-card list */
+[data-theme="dark"] .booking-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .status-badge {
+  /* keep color-coded statuses */
+}
+
+/* segmented control */
+[data-theme="dark"] .segmented {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .seg-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .seg-btn.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+
+/* ============================================================
+   SECTION 20: gov-price-lookup.css
+   ============================================================ */
+
+/* page bg hardcoded #f5f5f5, .page bg hardcoded #fff */
+[data-theme="dark"] html.gov-page,
+[data-theme="dark"] body.gov-page {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .page {
+  background: var(--bg-card) !important;
+}
+
+/* filter card */
+[data-theme="dark"] .filter-card {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .filter-label {
+  color: var(--text-muted) !important;
+}
+
+/* select elements */
+[data-theme="dark"] .filter-select,
+[data-theme="dark"] .gov-select {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* price result cards */
+[data-theme="dark"] .result-card,
+[data-theme="dark"] .price-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .result-card:hover {
+  border-color: rgba(11,133,60,0.3) !important;
+}
+
+[data-theme="dark"] .price-name {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .price-meta,
+[data-theme="dark"] .price-source {
+  color: var(--text-muted) !important;
+}
+
+/* trend indicator */
+[data-theme="dark"] .trend-up { color: #4ade80 !important; }
+[data-theme="dark"] .trend-down { color: #f87171 !important; }
+[data-theme="dark"] .trend-stable { color: var(--text-muted) !important; }
+
+/* section dividers */
+[data-theme="dark"] .section-divider,
+[data-theme="dark"] .gov-divider {
+  background: var(--border-light) !important;
+}
+
+/* empty/loading state */
+[data-theme="dark"] .gov-empty {
+  color: var(--text-muted) !important;
+}
+
+
+/* ============================================================
+   SECTION 21: ui-common.js — inject CSS (toast/modal/loading)
+   ============================================================ */
+
+/* global-loading overlay */
+[data-theme="dark"] .global-loading {
+  background: rgba(0,0,0,0.5) !important;
+}
+
+/* global-confirm modal */
+[data-theme="dark"] .global-confirm .modal {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+/* toast colours already handle themselves via JS palette —
+   but we ensure the backdrop doesn't look off */
+[data-theme="dark"] #globalAppNotifyHost {
+  color-scheme: dark;
+}
+
+
+/* ============================================================
+   SECTION 22: toggle switch state (account page)
+   ============================================================ */
+
+/* toggle-track default (off state) */
+[data-theme="dark"] .toggle-track {
+  background: #3a3a3c !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* toggle-thumb shadow */
+[data-theme="dark"] .toggle-thumb {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.6) !important;
+}
+
+
+/* ============================================================
+   SECTION 23: media (prefers-color-scheme: dark) aliases
+   Ensure system auto-dark also hits the same overrides above
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bottom-nav-item { color: #636366; }
+  :root:not([data-theme="light"]) .menu-title { color: var(--text-main); }
+  :root:not([data-theme="light"]) .menu-sub { color: var(--text-muted); }
+  :root:not([data-theme="light"]) .version { color: rgba(255,255,255,0.22); }
+  :root:not([data-theme="light"]) .seller-name { color: var(--text-muted); }
+  :root:not([data-theme="light"]) .chat-list-title { color: var(--text-main); }
+  :root:not([data-theme="light"]) .chat-empty-title { color: var(--text-main); }
+  :root:not([data-theme="light"]) .noti-page { background: var(--bg-page); }
+  :root:not([data-theme="light"]) .noti-header { background: rgba(28,28,30,0.88); }
+  :root:not([data-theme="light"]) .noti-header-title { color: var(--text-main); }
+  :root:not([data-theme="light"]) .toggle-track {
+    background: #3a3a3c;
+    border-color: rgba(255,255,255,0.1);
+  }
+  :root:not([data-theme="light"]) body {
+    background: var(--bg-page);
+  }
+  @media (min-width: 1024px) {
+    :root:not([data-theme="light"]) body {
+      background: var(--bg-page) !important;
+    }
+  }
+  /* favorites-section */
+  :root:not([data-theme="light"]) .favorites-section {
+    background: var(--bg-page) !important;
+  }
+  :root:not([data-theme="light"]) .favorites-header .section-title {
+    color: var(--text-main) !important;
+  }
+  :root:not([data-theme="light"]) .fav-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+  }
+  :root:not([data-theme="light"]) .fav-subtitle {
+    color: var(--text-muted) !important;
+  }
+}
+
+  /* home sections */
+  :root:not([data-theme="light"]) .search-section,
+  :root:not([data-theme="light"]) .product-tabs-section,
+  :root:not([data-theme="light"]) .product-near-section,
+  :root:not([data-theme="light"]) .favorites-section {
+    background: var(--bg-page) !important;
+  }
+
+/* --- Manual Toggle Overrides --- */
+
+/* Favorites Section */
+[data-theme="dark"] .favorites-section {
+  background: var(--bg-page) !important;
+}
+[data-theme="dark"] .favorites-header .section-title {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .fav-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .fav-subtitle {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .favorites-dots .dot {
+  background: #333 !important;
+}
+[data-theme="dark"] .favorites-dots .dot.active {
+  background: var(--text-main) !important;
+}
+
+/* Home Page Sections */
+[data-theme="dark"] .search-section,
+[data-theme="dark"] .product-tabs-section,
+[data-theme="dark"] .product-near-section {
+  background: var(--bg-page) !important;
+}
+[data-theme="dark"] .search-input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .cat-icon {
+  background: var(--bg-input) !important;
+}
+[data-theme="dark"] .product-item span {
+  color: var(--text-main) !important;
+}
+
+/* Account Page - Ensure Logout area has spacing */
+[data-theme="dark"] .logout-section {
+  padding-bottom: 20px;
+}
+
+
+/* ============================================================
+   SECTION 24: account/account.css — toggle thumb
+   ============================================================ */
+[data-theme="dark"] .toggle-thumb {
+  background: #ffffff !important;
+}
+
+/* ============================================================
+   SECTION 25: account/manage-accounts/account-detail.css
+   ============================================================ */
+[data-theme="dark"] .field-input {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* ============================================================
+   SECTION 26: account/manage-device/device-management.css
+   ============================================================ */
+[data-theme="dark"] .device-other-title,
+[data-theme="dark"] .device-list-title,
+[data-theme="dark"] .device-name {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .modal-content {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .modal-btn {
+  color: var(--text-main) !important;
+  background: var(--bg-input) !important;
+}
+[data-theme="dark"] .modal-btn:hover {
+  background: #3a3a3c !important;
+}
+[data-theme="dark"] .device-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 27: account/manage-notifications — slider thumb
+   ============================================================ */
+[data-theme="dark"] .notify-slider:before {
+  background: #ebebeb !important;
+}
+
+/* ============================================================
+   SECTION 28: auth/register1.css
+   ============================================================ */
+[data-theme="dark"] .role-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .modal-sheet {
+  background: var(--bg-card) !important;
+}
+
+/* ============================================================
+   SECTION 29: buyer/Dashboard/Dashboard1.css
+   ============================================================ */
+[data-theme="dark"] .period-tab {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .period-tab.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   SECTION 30: buyer/setbooking/booking-information.css
+   ============================================================ */
+[data-theme="dark"] .big-card,
+[data-theme="dark"] .booking-info-card .card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-cancel {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* ============================================================
+   SECTION 31: buyer/setbooking/booking.css
+   ============================================================ */
+[data-theme="dark"] .segmented {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .searchbox {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .booking-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .cta .btn {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .vehicleItem {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .scan-btn {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .scan-modal-content {
+  background: var(--bg-card) !important;
+}
+
+/* ============================================================
+   SECTION 32: buyer/setbooking/setbooking-step1.css
+   ============================================================ */
+[data-theme="dark"] .label {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .combo-input {
+  color: var(--text-main) !important;
+  background: var(--bg-input) !important;
+}
+[data-theme="dark"] .combo-menu {
+  background: var(--bg-card) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+[data-theme="dark"] .combo-item:hover {
+  background: rgba(255,255,255,0.05) !important;
+}
+[data-theme="dark"] .textarea {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .grade-remove {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .add-grade {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .modal {
+  background: rgba(0,0,0,0.7) !important;
+}
+[data-theme="dark"] .modal-title-btn,
+[data-theme="dark"] .modal-box {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 33: buyer/setbooking/setbooking-step2.css
+   ============================================================ */
+[data-theme="dark"] .setbooking-step2 .card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .setbooking-step2 .input {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .table-wrap {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .rounds-table tbody td {
+  color: var(--text-main) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+[data-theme="dark"] .rounds-table thead th {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .toggle::after {
+  background: #ffffff !important;
+}
+[data-theme="dark"] .icon-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 34: farmer/booking/booking-step1.css — Calendar
+   ============================================================ */
+[data-theme="dark"] .progress-step.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .calendar-nav {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .calendar-day {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .calendar-day:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+[data-theme="dark"] .calendar-day.selected {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .timeslot {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .timeslot.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+}
+[data-theme="dark"] .timeslot.disabled {
+  background: var(--bg-input) !important;
+  color: var(--text-dim) !important;
+  opacity: 0.5 !important;
+}
+
+/* ============================================================
+   SECTION 35: farmer/booking/booking-step2.css — Vehicle form
+   ============================================================ */
+[data-theme="dark"] .form-label {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .vehicle-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .btn-close-modal,
+[data-theme="dark"] .btn-modal-cancel {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* ============================================================
+   SECTION 36: farmer/booking/booking-step3.css — Summary
+   ============================================================ */
+[data-theme="dark"] .booking-step3 {
+  background: var(--bg-page) !important;
+}
+[data-theme="dark"] .summary-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .product-icon-wrapper {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 37: farmer/booking/booking-step4.css — QR
+   ============================================================ */
+[data-theme="dark"] #qrCanvas {
+  background: #fff !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+}
+
+/* ============================================================
+   SECTION 38: gov-price-lookup.css
+   ============================================================ */
+[data-theme="dark"] .page {
+  background: var(--bg-card) !important;
+}
+[data-theme="dark"] .page-header::after {
+  background: var(--border-light) !important;
+}
+[data-theme="dark"] .select-wrap select,
+[data-theme="dark"] .date-row input[type="date"] {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .avg-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .price-table-wrap {
+  background: var(--bg-card) !important;
+}
+[data-theme="dark"] .price-table thead th {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .price-table tbody td {
+  color: var(--text-main) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 39: home.css — misc
+   ============================================================ */
+[data-theme="dark"] .hero-indicator .dot {
+  background: rgba(255,255,255,0.4) !important;
+}
+[data-theme="dark"] .gov-price-table thead,
+[data-theme="dark"] .gov-price-table th {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .social-link:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+/* ============================================================
+   SECTION 40: shared-pages/chat.css
+   ============================================================ */
+[data-theme="dark"] .chat-list-title,
+[data-theme="dark"] .chat-empty-title {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .chat-item:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+[data-theme="dark"] .chat-item-avatar,
+[data-theme="dark"] .room-avatar {
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .chat-room {
+  background: var(--bg-page) !important;
+}
+[data-theme="dark"] .room-action {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border-light) !important;
+}
+[data-theme="dark"] .room-composer {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* ============================================================
+   SECTION 41: shared-pages/profile.css
+   ============================================================ */
+[data-theme="dark"] .status-online {
+  color: #4ade80 !important;
+}
+[data-theme="dark"] .location-address,
+[data-theme="dark"] .service-name,
+[data-theme="dark"] .reviewer-name {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .map-open-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+/* ============================================================
+   SECTION 15: farmer/booking/booking.html
+   ============================================================ */
+
+[data-theme="dark"] .page-shell {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .booking-header {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .booking-title {
+  /* Maintain the gradient but ensure it looks good on dark */
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .booking-subtitle {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .segmented {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .seg-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .seg-btn.active {
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .searchbox {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .searchbox input {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+[data-theme="dark"] .searchbox input::placeholder {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="dark"] .booking-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .shop {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .meta {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .queueBox {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .queueNo {
+  color: #4ade80 !important; /* Lighter green for dark mode */
+}
+
+[data-theme="dark"] .empty-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* ============================================================
+   SECTION 16: buyer/setbooking/booking.html (Buyer Side)
+   ============================================================ */
+
+[data-theme="dark"] .scan-btn {
+  background: linear-gradient(135deg, #0B853C 0%, #00C853 100%) !important;
+  box-shadow: 0 8px 24px rgba(0, 200, 83, 0.3) !important;
+  right: 20px !important;
+  bottom: 110px !important;
+  width: 58px !important;
+  height: 58px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[data-theme="dark"] .scan-btn .material-icons-outlined {
+  color: #FFFFFF !important;
+  font-size: 28px !important;
+}
+
+/* Fix scan modal for dark mode */
+[data-theme="dark"] .scan-modal-content {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-light) !important;
+}
+
+[data-theme="dark"] .scan-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .scan-close {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .scan-actions input {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .scan-hint {
+  color: var(--text-muted) !important;
+}
+
+/* ============================================================
+   SECTION 17: buyer/myprofile.html (Rebuilt Layout)
+   ============================================================ */
+[data-theme="dark"] .profile-content-card,
+[data-theme="dark"] .profile-info-card,
+[data-theme="dark"] .location-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .product-card-light {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .pc-avatar {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .pc-name {
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .pc-sub {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .pc-grade-box {
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .pc-grade-letter {
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .pc-grade-price,
+[data-theme="dark"] .pc-footer {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .pc-btn-contact,
+[data-theme="dark"] .btn-outline {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .contact-item-row,
+[data-theme="dark"] .service-row {
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .contact-item-row a {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .profile-name,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .products-list-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .profile-tagline-text,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .profile-tab {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .profile-tab.active {
+  color: #4ade80 !important;
+  border-color: #4ade80 !important;
+}
+
+[data-theme="dark"] .empty-state {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .modal-content h3 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .modal-content label {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .modal-content input,
+[data-theme="dark"] .modal-content textarea {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] .location-text .location-sub {
+  color: var(--text-muted) !important;
+}

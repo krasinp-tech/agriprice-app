@@ -1,0 +1,277 @@
+/* ================================
+   notifications.css — AGRIPRICE (Premium Redesign)
+   Aesthetics: Glassmorphism, Pill Tabs, Floating Cards, Swipe-to-Delete
+   Visual Consistency: Synced with global.css variables
+================================ */
+
+body {
+    background: var(--bg-page);
+    font-family: var(--font-main);
+    overflow-x: hidden;
+}
+
+.noti-page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 28px 20px;
+    min-height: 100vh;
+}
+
+/* ─── PREMIUM HEADER ─── */
+.noti-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: calc(12px + env(safe-area-inset-top)) 0 12px;
+    background: rgba(248, 250, 252, 0.85); /* Fallback */
+    background: color-mix(in srgb, var(--bg-page), transparent 15%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.noti-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.noti-header-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.noti-header-icon .material-icons-outlined {
+    font-size: 28px;
+}
+
+.noti-header-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+/* ─── PILL TABS (iOS Style) ─── */
+.noti-tabs {
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: 14px;
+    display: flex;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.noti-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 10px;
+}
+
+.noti-tab.is-active {
+    color: #fff;
+    background: var(--primary);
+    box-shadow: 0 4px 10px rgba(11, 133, 60, 0.2);
+}
+
+.noti-tab-badge {
+    background: var(--primary); /* Use brand green instead of red */
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* ─── FLOATING NOTIFICATION CARDS ─── */
+.noti-list-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.noti-item-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    touch-action: pan-y;
+}
+
+.noti-item {
+    background: var(--bg-card);
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s ease-out, background 0.3s ease;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.noti-item.is-unread {
+    background: color-mix(in srgb, var(--bg-card), var(--primary) 5%);
+    border-left: 4px solid var(--primary);
+}
+
+.noti-item:active {
+    transform: scale(0.98);
+}
+
+/* Icons by Type - Adaptive Colors */
+.noti-item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.noti-item-icon.system  { background: var(--bg-input); color: var(--text-muted); }
+.noti-item-icon.booking { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.noti-item-icon.price   { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.noti-item-icon.chat    { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.noti-item-icon.follow  { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.noti-item-icon.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.noti-item-icon.cancel  { background: rgba(11, 27, 58, 0.1); color: var(--text-muted); }
+
+.noti-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.noti-item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.noti-item-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.noti-item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.noti-item-time {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.noti-item-status {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.is-unread .noti-item-status { background: rgba(11, 133, 60, 0.1); color: var(--primary); }
+.is-read .noti-item-status   { color: var(--text-dim); }
+
+/* ─── SWIPE DELETE BUTTON ─── */
+.noti-delete-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    background: #1c1c1e; /* Premium Dark */
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.noti-delete-btn .material-icons-outlined {
+    font-size: 24px;
+}
+
+/* ─── EMPTY STATE ─── */
+.noti-empty {
+    margin-top: 60px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--bg-input);
+    color: var(--text-dim);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon .material-icons-outlined {
+    font-size: 40px;
+}
+
+.noti-empty h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.noti-empty p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ─── DESKTOP ─── */
+@media (min-width: 1024px) {
+  .noti-page {
+    max-width: 520px;
+    margin: 0 auto;
+    padding-top: 24px;
+  }
+
+  .noti-header {
+    top: 14px;
+  }
+
+  .noti-tabs {
+    top: 95px;
+  }
+}

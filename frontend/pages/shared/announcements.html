@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <script src="../../js/components/i18n.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="announcement">ประชาสัมพันธ์ | AGRIPRICE</title>
+
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../css/global.css">
+  <link rel="stylesheet" href="../../css/dark-mode-patch.css">
+  
+  <style>
+    .announcement-page {
+      min-height: 100vh;
+      background: var(--bg-page);
+      padding: 0 28px 40px;
+    }
+
+    /* ── Header ── */
+    .header-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: calc(20px + env(safe-area-inset-top)) 0 16px;
+      background: var(--bg-page);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-back {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    /* ── List ── */
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .news-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .news-card:active {
+      transform: scale(0.98);
+      background: var(--bg-input);
+    }
+
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .news-tag {
+      padding: 4px 10px;
+      background: rgba(11, 133, 60, 0.1);
+      color: var(--primary);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .news-icon {
+      font-size: 18px;
+      color: var(--text-muted);
+    }
+
+    .news-content h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 6px;
+      line-height: 1.4;
+    }
+
+    .news-content p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .news-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .read-more {
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .material-icons-outlined {
+      font-size: 64px;
+      opacity: 0.2;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body data-active="announcements">
+  <div class="announcement-page">
+    <header class="header-bar">
+      <button class="btn-back" onclick="history.back()" aria-label="Back" data-i18n-aria-label="back">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+      <h1 class="header-title" data-i18n="announcement">ข่าวสารประชาสัมพันธ์</h1>
+    </header>
+
+    <main class="news-list" id="newsList">
+      <!-- Skeleton Loading -->
+      <div class="shimmer" style="height: 140px; border-radius: 20px;"></div>
+      <div class="shimmer" style="height: 140px; border-radius: 20px;"></div>
+      <div class="shimmer" style="height: 140px; border-radius: 20px;"></div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/shared-pages/announcements.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.i18nInit) window.i18nInit();
+    });
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'lang' && window.i18nInit) window.i18nInit();
+    });
+  </script>
+</body>
+</html>

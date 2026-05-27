@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- Leaflet CSS (Map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <link rel="stylesheet" href="../../../css/global.css" />
+  
+  <style>
+    .location-page {
+      padding: calc(20px + env(safe-area-inset-top)) 20px 40px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .back-btn { 
+      width: 44px; height: 44px; background: white; border-radius: 12px;
+      display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      color: var(--text-main); border: none; cursor: pointer;
+    }
+    .title { font-size: 20px; font-weight: 800; }
+
+    #map {
+      height: 350px;
+      width: 100%;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+      z-index: 1;
+    }
+
+    .info-card {
+      background: white; border-radius: 20px; padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;
+    }
+    .info-label { font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .info-val { font-size: 16px; font-weight: 800; color: var(--primary); }
+
+    .btn-gps {
+      background: #f1f5f9; color: #475569; border: none;
+      padding: 14px; border-radius: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 12px; cursor: pointer;
+    }
+
+    .btn-save {
+      background: var(--primary); color: white; border: none;
+      padding: 16px; border-radius: 18px; font-weight: 800; font-size: 16px;
+      box-shadow: 0 8px 20px rgba(11, 133, 60, 0.2); cursor: pointer;
+    }
+    .btn-save:disabled { opacity: 0.5; }
+  </style>
+</head>
+<body data-auth="required">
+
+  <main class="location-page">
+    <header class="header">
+      <button class="back-btn" onclick="history.back()">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+      <h1 class="title">ปักหมุดตำแหน่งล้ง</h1>
+    </header>
+
+    <div id="map"></div>
+
+    <div class="info-card">
+      <div class="info-label">พิกัดปัจจุบันที่เลือก</div>
+      <div class="info-val" id="coordsText">กรุณาเลือกตำแหน่งบนแผนที่</div>
+    </div>
+
+    <button class="btn-gps" onclick="useCurrentLocation()">
+      <span class="material-icons-outlined">my_location</span>
+      ใช้ตำแหน่งปัจจุบันของฉัน
+    </button>
+
+    <button class="btn-save" id="saveBtn" onclick="saveLocation()" disabled>
+      บันทึกตำแหน่งที่ตั้ง
+    </button>
+  </main>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Core Scripts -->
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/utils/storage-keys.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/utils/auth.js"></script>
+  <script src="../../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
+
+  <!-- Component & Page Scripts -->
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/components/i18n.js"></script>
+  <script src="../../../js/components.js"></script>
+  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+
+  <script>
+    let map, marker;
+    let selectedLat = null, selectedLng = null;
+
+    async function init() {
+      // รอจนกว่า Config จะพร้อม
+      await window.APP_CONFIG_READY;
+      
+      // พิกัดเริ่มต้น (กรุงเทพฯ หรือค่าที่เคยบันทึกไว้)
+      let initialLat = 13.7563, initialLng = 100.5018;
+      
+      const store = window.AccountManageStore;
+      if (store) {
+        const data = store.getData();
+        if (data.lat && data.lng) {
+          initialLat = data.lat;
+          initialLng = data.lng;
+          selectedLat = initialLat;
+          selectedLng = initialLng;
+          updateUI();
+        }
+      }
+
+      map = L.map('map').setView([initialLat, initialLng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // สร้าง Marker ถ้ามีตำแหน่งเดิม
+      if (selectedLat) {
+        marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
+        marker.on('dragend', function(e) {
+          const pos = e.target.getLatLng();
+          selectedLat = pos.lat;
+          selectedLng = pos.lng;
+          updateUI();
+        });
+      }
+
+      // คลิกเพื่อปักหมุด
+      map.on('click', function(e) {
+        const { lat, lng } = e.latlng;
+        selectedLat = lat;
+        selectedLng = lng;
+        
+        if (marker) {
+          marker.setLatLng([lat, lng]);
+        } else {
+          marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+          marker.on('dragend', function(ev) {
+            const pos = ev.target.getLatLng();
+            selectedLat = pos.lat;
+            selectedLng = pos.lng;
+            updateUI();
+          });
+        }
+        updateUI();
+      });
+    }
+
+    function updateUI() {
+      if (selectedLat && selectedLng) {
+        document.getElementById('coordsText').innerText = `${selectedLat.toFixed(6)}, ${selectedLng.toFixed(6)}`;
+        document.getElementById('saveBtn').disabled = false;
+      }
+    }
+
+    function useCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const { latitude, longitude } = pos.coords;
+          selectedLat = latitude;
+          selectedLng = longitude;
+          
+          map.setView([latitude, longitude], 16);
+          if (marker) {
+            marker.setLatLng([latitude, longitude]);
+          } else {
+            marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+          }
+          updateUI();
+        }, err => {
+          const msg = 'ไม่สามารถดึงตำแหน่งได้ กรุณาลองเลือกในแผนที่แทน';
+          if (window.appNotify) window.appNotify(msg, 'error');
+          else console.warn(msg);
+        });
+      }
+    }
+
+    async function saveLocation() {
+      if (!selectedLat || !selectedLng) return;
+      
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.innerText = 'กำลังบันทึก...';
+      saveBtn.disabled = true;
+
+      try {
+        await window.APP_CONFIG_READY;
+        const API_BASE = window.API_BASE_URL.replace(/\/$/, '');
+        const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token');
+        
+        const res = await fetch(API_BASE + '/api/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ lat: selectedLat, lng: selectedLng })
+        });
+
+        if (res.ok) {
+          // อัปเดต store ทันที
+          if (window.AccountManageStore) {
+            await window.AccountManageStore.syncFromServer();
+          }
+          const okMsg = 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
+          if (window.appNotify) window.appNotify(okMsg, 'success');
+          else console.log(okMsg);
+          history.back();
+        } else {
+          throw new Error('บันทึกไม่สำเร็จ');
+        }
+      } catch (err) {
+        const failMsg = 'เกิดข้อผิดพลาด: ' + err.message;
+        if (window.appNotify) window.appNotify(failMsg, 'error');
+        else console.error(failMsg);
+        saveBtn.innerText = 'บันทึกตำแหน่งที่ตั้ง';
+        saveBtn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
