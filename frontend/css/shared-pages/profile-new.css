@@ -383,10 +383,27 @@ body {
     font-weight: 600;
 }
 
-.pc-chevron-right {
+.pc-scroll-hint {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
     color: #00a651;
-    font-size: 20px;
+    flex-shrink: 0;
+    min-width: 36px;
+    font-size: 10px;
     font-weight: 700;
+    opacity: 0.9;
+}
+
+.pc-scroll-hint .material-icons-outlined {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.pc-scroll-text {
+    line-height: 1;
 }
 
 .pc-footer {

@@ -3,9 +3,6 @@
   - ยืนยัน OTP -> ได้ temp_token -> เก็บไว้ให้ register4
 */
 (function () {
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
-// DEBUG PATCH - inspect verification flow
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
 
 const D = {
   log(step, data) {
@@ -17,12 +14,10 @@ const D = {
     if (!window.AGRIPRICE_DEBUG) return;
     const t = new Date().toISOString().slice(11, 23);
     console.log(`%c[OK ${t}] ${step}`, 'color:#a5d6a7;font-weight:bold', data ?? '');
-  // 1. Check sessionStorage phone
-  // 2. Check window.FIREBASE_CONFIG
   },
   err(step, e) {
     if (!window.AGRIPRICE_DEBUG) return;
-    console.error(`[โ] ${step}`, {
+    console.error(`[Error] ${step}`, {
       code: e?.code ?? '-',
       message: e?.message ?? String(e),
       stack: e?.stack ?? '-'
@@ -30,13 +25,13 @@ const D = {
   }
 };
 
-// โ”€โ”€ 1. เธ•เธฃเธงเธ sessionStorage phone โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+// 1. ตรวจสอบ sessionStorage phone
 D.log('1_SESSION', {
   register_profile: sessionStorage.getItem('register_profile'),
   otp_temp_token: sessionStorage.getItem('otp_temp_token')
 });
 
-// โ”€โ”€ 2. เธ•เธฃเธงเธ window.FIREBASE_CONFIG โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+// 2. ตรวจสอบ window.FIREBASE_CONFIG
 D.log('2_FIREBASE_CONFIG', {
   hasFirebase: !!window.firebase,
   hasConfig: !!window.FIREBASE_CONFIG,
@@ -45,63 +40,16 @@ D.log('2_FIREBASE_CONFIG', {
   projectId: window.FIREBASE_CONFIG?.projectId
 });
 
-// โ”€โ”€ 3. เธ•เธฃเธงเธ API_BASE_URL โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-// 3. Check API_BASE_URL
+// 3. ตรวจสอบ API_BASE_URL
 D.log('3_API_BASE', { API_BASE_URL: window.API_BASE_URL });
 
-// โ”€โ”€ 4. เธ•เธฃเธงเธ recaptcha-container โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-// 4. Check recaptcha-container
+// 4. ตรวจสอบ recaptcha-container
 D.log('4_RECAPTCHA_EL', {
   found: !!document.getElementById('recaptcha-container'),
   el: document.getElementById('recaptcha-container')
 });
 
-// โ”€โ”€ 5. hook XMLHttpRequest โ€” เธ”เธน network call เธ—เธธเธเธ•เธฑเธง
-// 5. Hook XMLHttpRequest to inspect every network call
-(function hookXHR() {
-  const _open = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function(method, url) {
-    this._url = url;
-    this.addEventListener('load', function() {
-      if (String(this._url).includes('identitytoolkit') ||
-          String(this._url).includes('firebase') ||
-          String(this._url).includes('localhost')) {
-        D.log('5_XHR', {
-          method, url: this._url,
-          status: this.status,
-          responseSnippet: this.responseText?.slice(0, 300)
-        });
-      }
-    });
-    this.addEventListener('error', function() {
-      D.err('5_XHR_ERROR', { url: this._url });
-    });
-    return _open.apply(this, arguments);
-  };
-})();
-
-// โ”€โ”€ 6. hook fetch โ€” เธ”เธน /api/auth/firebase/verify-phone
-// 6. Hook fetch to inspect /api/auth/firebase/verify-phone
-(function hookFetch() {
-  const _fetch = window.fetch;
-  window.fetch = async function(url, opts) {
-    D.log('6_FETCH_REQ', { url, method: opts?.method, body: opts?.body });
-    try {
-      const res = await _fetch.apply(this, arguments);
-      const clone = res.clone();
-      clone.text().then(body =>
-        D.log('6_FETCH_RES', { url, status: res.status, body: body?.slice(0, 400) })
-      );
-      return res;
-    } catch (e) {
-      D.err('6_FETCH_FAIL', e); throw e;
-    }
-  };
-})();
-
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
-// ๐” END DEBUG PATCH
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
+// END DEBUG PATCH
 
   const getApiBase = () => (window.API_BASE_URL || '').replace(/\/$/, '');
   const DEBUG_OTP = !!window.AGRIPRICE_DEBUG;
@@ -425,11 +373,11 @@ D.log('4_RECAPTCHA_EL', {
     });
     if (!res.ok) throw new Error(json.message || 'ยืนยัน OTP ไม่สำเร็จ');
 
-    // เธเธฑเธเธ—เธถเธ temp_token เน€เธชเธกเธญ (เนเธเนเนเธ”เนเธ—เธฑเนเธ user เนเธซเธกเนเนเธฅเธฐเน€เธเนเธฒ)
+    // บันทึก temp_token เสมอ (ใช้ได้ทั้ง user ใหม่และเก่า)
       // Save temp_token immediately so it works for new and existing users
     sessionStorage.setItem(KEY_TEMP_TOKEN, json.temp_token || '');
 
-    // เธ–เนเธฒเน€เธเธญเธฃเนเธกเธตเธเธฑเธเธเธตเนเธฅเนเธง โ’ redirect เนเธ login เนเธ—เธ
+    // ถ้าเบอร์มีบัญชีแล้ว -> redirect ไป login แทน
       // If the user already exists, redirect to login instead
     if (!json.isNewUser) {
       showErr('เบอร์นี้มีบัญชีอยู่แล้ว กำลังพาไป Login...');
@@ -467,7 +415,7 @@ D.log('4_RECAPTCHA_EL', {
         if (window.navigateWithTransition) window.navigateWithTransition(NEXT_ROUTE); else window.location.href = NEXT_ROUTE;
       }
     } catch (err) {
-      // __redirect__ เธเธทเธญ silent error เธ—เธตเนเธ•เธฑเนเธเนเธ redirect เนเธกเนเธ•เนเธญเธเนเธชเธ”เธ
+      // __redirect__ คือ silent error ที่ตั้งใจ redirect ไม่ต้องแสดง
         // __redirect__ is a silent error used to stop explicit redirect logging
       if (err?.message !== '__redirect__') {
         logOtp('otp.verify.error', {

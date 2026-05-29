@@ -25,48 +25,37 @@ function mapStatusText(status) {
    Fetch bookings from API
  ========================= */
 async function fetchBookings() {
-  if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-  const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-  const TOKEN_KEY = window.AUTH_TOKEN_KEY || 'token';
-  const token = localStorage.getItem(TOKEN_KEY) || '';
-
-  if (currentBase && token) {
-    try {
-      if (window.showLoading) window.showLoading(true);
-      const res = await fetch(currentBase + '/api/bookings', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (window.showLoading) window.showLoading(false);
-      
-      if (!res.ok) throw new Error(res.status);
-      const json = await res.json();
-      console.log('[DEBUG] Bookings API Response:', json);
-      return (Array.isArray(json.data) ? json.data : []).map(b => ({
-        id: String(b.booking_id),
-        bookingId: b.booking_no || String(b.booking_id),
-        farmerName: b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}`.trim() : (window.i18nT ? window.i18nT('booking_unknown_name', 'ไม่ทราบชื่อ') : 'ไม่ทราบชื่อ'),
-        shopName: b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}`.trim() : (window.i18nT ? window.i18nT('booking_unknown_name', 'ไม่ทราบชื่อ') : 'ไม่ทราบชื่อ'),
-        phone: b.farmer?.phone || '',
-        productName: b.product?.name || '',
-        quantityKg: b.product_amount || 0,
-        queueNo: b.queue_no || '',
-        time: b.scheduled_time ? new Date(b.scheduled_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '',
-        createdAt: b.created_at ? new Date(b.created_at).toLocaleDateString('th-TH') : '',
-        status: b.status || 'waiting',
-        address: b.address || '',
-        vehicles: Array.isArray(b.vehicles) && b.vehicles.length > 0
-          ? b.vehicles
-          : (b.vehicle_plates
-            ? String(b.vehicle_plates).split(',').map(p => p.trim()).filter(Boolean).map(plate => ({ plate, type: 'รถบรรทุก' }))
-            : []),
-      }));
-    } catch (e) {
-      if (window.showLoading) window.showLoading(false);
-      if (window.showAlert) window.showAlert('เกิดข้อผิดพลาดขณะโหลดข้อมูลการจอง', 'error');
-      return [];
-    }
+  if (!window.api) return [];
+  try {
+    if (window.showLoading) window.showLoading(true);
+    const json = await window.api.call('GET', '/api/bookings');
+    if (window.showLoading) window.showLoading(false);
+    
+    console.log('[DEBUG] Bookings API Response:', json);
+    return (Array.isArray(json.data) ? json.data : []).map(b => ({
+      id: String(b.booking_id),
+      bookingId: b.booking_no || String(b.booking_id),
+      farmerName: b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}`.trim() : (window.i18nT ? window.i18nT('booking_unknown_name', 'ไม่ทราบชื่อ') : 'ไม่ทราบชื่อ'),
+      shopName: b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}`.trim() : (window.i18nT ? window.i18nT('booking_unknown_name', 'ไม่ทราบชื่อ') : 'ไม่ทราบชื่อ'),
+      phone: b.farmer?.phone || '',
+      productName: b.product?.name || '',
+      quantityKg: b.product_amount || 0,
+      queueNo: b.queue_no || '',
+      time: b.scheduled_time ? new Date(b.scheduled_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '',
+      createdAt: b.created_at ? new Date(b.created_at).toLocaleDateString('th-TH') : '',
+      status: b.status || 'waiting',
+      address: b.address || '',
+      vehicles: Array.isArray(b.vehicles) && b.vehicles.length > 0
+        ? b.vehicles
+        : (b.vehicle_plates
+          ? String(b.vehicle_plates).split(',').map(p => p.trim()).filter(Boolean).map(plate => ({ plate, type: 'รถบรรทุก' }))
+          : []),
+    }));
+  } catch (e) {
+    if (window.showLoading) window.showLoading(false);
+    if (window.showAlert) window.showAlert('เกิดข้อผิดพลาดขณะโหลดข้อมูลการจอง', 'error');
+    return [];
   }
-  return [];
 }
 
 let BOOKINGS = [];
@@ -77,16 +66,15 @@ let BOOKINGS = [];
 function renderCard(b) {
   const badgeClass = b.status || "unknown";
   const statusText = mapStatusText(b.status);
-  const esc = window.escapeHtml || ((s) => s);
+  const esc = (window.AgriPriceUI && window.AgriPriceUI.escapeHtml) || window.escapeHtml || ((s) => s);
 
   const phoneLine = b.phone
     ? `<div class="meta">${esc(window.i18nT ? window.i18nT('phone_label', 'โทร') : 'โทร')}: <b>${esc(b.phone)}</b></div>`
     : "";
 
+  const formattedQty = (window.AgriPriceUI && window.AgriPriceUI.formatNumber) ? window.AgriPriceUI.formatNumber(b.quantityKg || 0) : Number(b.quantityKg || 0).toLocaleString();
   const productLine = b.productName
-    ? `<div class="meta">${esc(b.productName)} - <b>${Number(
-      b.quantityKg || 0
-    ).toLocaleString()} ${esc(window.i18nT ? window.i18nT('kg_unit', 'กก.') : 'กก.')}</b></div>`
+    ? `<div class="meta">${esc(b.productName)} - <b>${formattedQty} ${esc(window.i18nT ? window.i18nT('kg_unit', 'กก.') : 'กก.')}</b></div>`
     : "";
 
   const vehiclesInfo = b.vehicles && Array.isArray(b.vehicles) && b.vehicles.length > 0

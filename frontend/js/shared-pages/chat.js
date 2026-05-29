@@ -1,4 +1,9 @@
 /**
+ * chat.js
+ * ระบบแชทสด (Real-time Chat) สำหรับพูดคุยตกลงซื้อขาย
+ * จัดการทั้งการแสดงรายการห้องแชท และหน้าต่างสนทนา
+ */
+/**
  * AGRIPRICE - Chat Page JS
  * Ready for DB: replace ChatAPI methods with real fetch calls later.
  */
@@ -528,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `<img src="${escapeHtml(convo.avatar)}" alt="" onerror="this.onerror=null;this.src='${avatarFallback}'">`
       : '<span class="material-icons-outlined" aria-hidden="true">person</span>';
     roomAvatar.style.overflow = "hidden";
-    // เน€เธเนเธเธชเธ–เธฒเธเธฐเธญเธญเธเนเธฅเธเน
+    // เช็คสถานะออนไลน์
     if (convo.sellerId) updateOnlineStatus(convo.sellerId);
 
     // show/hide
@@ -1130,7 +1135,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function stopPolling() {
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
-  // เน€เธฃเธดเนเธก poll เนเธฅเธฐเธซเธขเธธเธ”เน€เธกเธทเนเธญเธญเธญเธเธเธฒเธเธซเธเนเธฒ
+  // เริ่ม poll และหยุดเมื่อออกจากหน้า
   startPolling();
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {

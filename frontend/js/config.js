@@ -1,5 +1,9 @@
-// frontend/js/config.js
-// ใช้สำหรับตั้งค่า API_BASE_URL และ config อื่นๆ
+/**
+ * config.js
+ * ไฟล์สำหรับการตั้งค่าพื้นฐานของแอปพลิเคชัน
+ * เช่น การกำหนด URL ของ Server (API_BASE_URL) เพื่อให้แอปเชื่อมต่อได้ถูกต้อง
+ * ทั้งในโหมดรันบนคอมพิวเตอร์เครื่องนี้ (Local) หรือรันบน Server จริง (Production)
+ */
 (() => {
 	if (typeof window.AGRIPRICE_CONFIG_LOADED !== 'undefined') return;
 	window.AGRIPRICE_CONFIG_LOADED = true;

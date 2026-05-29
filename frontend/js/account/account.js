@@ -1,3 +1,9 @@
+/**
+ * account.js
+ * ไฟล์จัดการหน้าเมนูหลักของ "บัญชีผู้ใช้"
+ * แสดงข้อมูลส่วนตัว, รูปโปรไฟล์, สถิติผู้ติดตาม, ยอดเงินในกระเป๋า (ถ้ามี),
+ * และเป็นศูนย์รวมเมนูการตั้งค่าต่างๆ ของผู้ใช้ทั้งเกษตรกรและผู้ซื้อ
+ */
 // js/account/account.js
 (function () {
   "use strict";
@@ -17,9 +23,7 @@
   // เปิดโหมด debug ได้ด้วย window.ACCOUNT_DEBUG = true
   const DEBUG = !!(window.ACCOUNT_DEBUG || window.AGRIPRICE_DEBUG);
 
-  // =========================
   // SAFE FALLBACK (no mock content)
-  // =========================
   const emptyUser = {
     id: 0,
     fullName: "-",
@@ -29,9 +33,7 @@
     stats: { following: 0, followers: 0, pros: 0 },
   };
 
-  // =========================
   // DOM ELEMENTS
-  // =========================
   const avatarImg = document.getElementById("avatarImg");
   const profileName = document.getElementById("profileName");
   const profileSub = document.getElementById("profileSub");
@@ -46,9 +48,7 @@
   const fileInput = document.getElementById("avatarFile");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // =========================
   // HELPERS
-  // =========================
   function log(...args) {
     if (DEBUG) console.log("[account]", ...args);
   }

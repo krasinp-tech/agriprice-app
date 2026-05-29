@@ -1,3 +1,9 @@
+/**
+ * components.js
+ * ไฟล์จัดการ "ส่วนประกอบร่วม" (UI Components) ของแอป
+ * เช่น แถบเมนูด้านล่าง (Bottom Navigation), ระบบการกดปุ่มเพื่อเปลี่ยนหน้า,
+ * และการจัดการปุ่มกดย้อนกลับบนมือถือ (Back Button Handling)
+ */
 (function setupMobileBackButtonHandler() {
   // Cordova/Capacitor: intercept backbutton globally
   document.addEventListener('deviceready', function() {

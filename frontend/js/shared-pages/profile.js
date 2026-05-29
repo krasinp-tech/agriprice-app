@@ -13,30 +13,13 @@
   }
 
   // --- UI Helpers ---
-  function showLoading(visible) {
-    let el = document.getElementById('loadingOverlay');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'loadingOverlay';
-      el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;font-size:16px;color:#fff;backdrop-filter:blur(4px);';
-      el.innerHTML = '<div class="loading-spinner" style="border:3px solid rgba(255,255,255,0.3);border-top:3px solid #fff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;"></div>';
-      document.body.appendChild(el);
-    }
-    el.style.display = visible ? 'flex' : 'none';
-  }
-
-  function showAlert(msg, type = 'info') {
-    if (window.appNotify) {
-      window.appNotify(msg, type === 'error' ? 'error' : 'success');
-    } else {
-      if (type === 'error') console.error(msg);
-      else console.log(msg);
-    }
-  }
+  const showLoading = (v) => window.showLoading ? window.showLoading(v) : null;
+  const showAlert = (m, t) => window.showAlert ? window.showAlert(m, t) : (window.appNotify ? window.appNotify(m, t) : alert(m));
 
   const esc = (s) => window.AgriPriceUI ? window.AgriPriceUI.escapeHtml(s) : s;
 
   function getMyId() {
+    if (window.api && window.api.getUser) return window.api.getUser()?.id || null;
     try {
       const u = JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || 'null');
       return u?.id || null;
@@ -44,7 +27,7 @@
   }
 
   function authHeaders() {
-    const t = localStorage.getItem(TOKEN_KEY) || '';
+    const t = (window.api && window.api.getToken) ? window.api.getToken() : (localStorage.getItem(TOKEN_KEY) || '');
     return t ? { 'Authorization': 'Bearer ' + t } : {};
   }
 
@@ -84,8 +67,8 @@
     if (productCardTemplatePromise) return productCardTemplatePromise;
     productCardTemplatePromise = (async () => {
       const candidatePaths = [
-        '../../components/product-card/product-card.html',
-        '/frontend/components/product-card/product-card.html',
+        '../../components/product-card/product-card.html?v=20260528',
+        '/frontend/components/product-card/product-card.html?v=20260528',
       ];
       for (const path of candidatePaths) {
         try {

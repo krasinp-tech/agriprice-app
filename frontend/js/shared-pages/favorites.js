@@ -13,7 +13,7 @@
   }
 
   async function loadTemplate() {
-    const res = await fetch('../../components/product-card/product-card.html');
+    const res = await fetch('../../components/product-card/product-card.html?v=20260528');
     const html = await res.text();
     const holder = document.createElement('div');
     holder.innerHTML = html;

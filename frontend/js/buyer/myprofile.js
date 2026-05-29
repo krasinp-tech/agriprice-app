@@ -1,10 +1,16 @@
+/**
+ * myprofile.js (สำหรับผู้ซื้อ)
+ * ไฟล์จัดการหน้าโปรไฟล์ส่วนตัวของผู้ซื้อ (Buyer)
+ * แสดงข้อมูลร้านค้า, พิกัดบนแผนที่, สินค้าที่กำลังประกาศรับซื้อ, 
+ * และจัดการการแก้ไขข้อมูลร้านค้าเพื่อให้เกษตรกรค้นหาได้ง่ายขึ้น
+ */
 document.addEventListener("DOMContentLoaded", function () {
 
-    // โ”€โ”€ Login Guard โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+    // Login Guard
     if (window.AuthGuard && typeof AuthGuard.requireLogin === 'function') {
         AuthGuard.requireLogin();
     }
-    // โ”€โ”€ API helpers โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
+    // API helpers
     const _API_BASE = (window.API_BASE_URL || '').replace(/\/$/, '');
     const _TOKEN_KEY = window.AUTH_TOKEN_KEY || 'token';
     function _authH(json) {
@@ -303,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function normalizeUnitLabel(unit) {
         const value = String(unit || '').trim();
         if (!value) return 'กก.';
-        if (/[เธโ]/.test(value)) return 'กก.';
+        if (/[ก-ฮ]/.test(value)) return 'กก.';
         return value;
     }
 
@@ -418,7 +424,8 @@ document.addEventListener("DOMContentLoaded", function () {
         RENDER SERVICES (inject after location-card)
         ========================================================== */
     function showAlert(msg, type = 'info') {
-        if (window.appNotify) window.appNotify(msg, type);
+        if (window.showAlert) window.showAlert(msg, type);
+        else if (window.appNotify) window.appNotify(msg, type);
         else if (type === 'error') console.error(msg);
         else console.log(msg);
     }
@@ -438,11 +445,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     function showEmptyState(container, msg) {
-        if (!container) return;
-        container.innerHTML = `<div class="empty-state" style="padding:20px; text-align:center; color:#666; font-size:14px;">${msg}</div>`;
+        if (window.showEmptyState) window.showEmptyState(container, msg);
+        else if (container) container.innerHTML = `<div class="empty-state" style="padding:20px; text-align:center; color:#666; font-size:14px;">${msg}</div>`;
     }
     function hideEmptyState(container) {
-        // Handled by container.innerHTML = ""
+        if (window.hideEmptyState) window.hideEmptyState(container);
     }
 
     /* ==========================================================

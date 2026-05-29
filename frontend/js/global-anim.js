@@ -1,4 +1,10 @@
 /**
+ * global-anim.js
+ * ไฟล์ควบคุม "เอนิเมชั่น" และ "ประสบการณ์ผู้ใช้" (UX) ในระดับภาพรวม
+ * จัดการเรื่องการเปลี่ยนหน้าให้มีความนุ่มนวล, ระบบ Dark Mode (โหมดกลางคืน),
+ * รวมถึงระบบแจ้งเตือน (Toast Notification) และหน้าต่างยืนยัน (Modal Confirmation)
+ */
+/**
  * 🌙 AGRIPRICE - Premium Global Controller
  * - Theme Engine (Dark/Light)
  * - Page Transitions

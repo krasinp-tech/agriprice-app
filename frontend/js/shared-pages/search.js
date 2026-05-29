@@ -1,3 +1,8 @@
+/**
+ * search.js
+ * ระบบค้นหาผู้ซื้อและสินค้า โดยคำนวณจากพิกัด GPS ของผู้ใช้
+ * แสดงผลลัพธ์เรียงตามระยะทางจากใกล้ไปไกล
+ */
 (function () {
   const params = new URLSearchParams(window.location.search);
   const DEBUG_SEARCH = !!window.AGRIPRICE_DEBUG;
@@ -154,7 +159,7 @@
   async function loadTemplateOnce() {
     if (tpl) return tpl;
     try {
-      const res = await fetch(resolveToRootUrl("components/product-card/product-card.html"));
+      const res = await fetch(resolveToRootUrl("components/product-card/product-card.html?v=20260528"));
       const holder = document.createElement("div");
       holder.innerHTML = await res.text();
       tpl = holder.querySelector("#productCardTpl");

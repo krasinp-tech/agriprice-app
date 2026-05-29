@@ -205,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Utilities
   // ================================
   function formatEstimatedTime(minutes) {
+    if (window.AgriPriceUI) return window.AgriPriceUI.formatEstimatedTime(minutes);
     if (minutes < 60) return `${minutes} ${t('unit_minute', 'นาที')}`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;

@@ -1,3 +1,7 @@
+/**
+ * gov-prices.js
+ * ดึงและแสดงผลราคากลางสินค้าเกษตรจากกรมการค้าภายใน
+ */
 /* js/gov-prices.js - Government Price Display Handler */
 (function govPricesInit() {
   const DEBUG_GOV_PRICES = !!window.AGRIPRICE_DEBUG;
