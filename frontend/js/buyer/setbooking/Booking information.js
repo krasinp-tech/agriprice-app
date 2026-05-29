@@ -209,7 +209,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatBookingDate(dateValue) {
+<<<<<<< HEAD
     if (window.AgriPriceUI) return window.AgriPriceUI.formatThaiDate(dateValue);
+=======
+>>>>>>> 21b616fb7307f76694a08f1b84b4538ead21df96
     if (!dateValue) return "-";
     const d = new Date(dateValue);
     if (isNaN(d.getTime())) return "-";
@@ -219,7 +222,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatEstimatedTime(minutes) {
+<<<<<<< HEAD
     if (window.AgriPriceUI) return window.AgriPriceUI.formatEstimatedTime(minutes);
+=======
+>>>>>>> 21b616fb7307f76694a08f1b84b4538ead21df96
     const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
     if (minutes < 60) return `${minutes} ${t('minute', 'นาที')}`;
     const hours = Math.floor(minutes / 60);

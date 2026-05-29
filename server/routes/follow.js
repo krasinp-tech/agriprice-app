@@ -98,51 +98,7 @@ router.post('/:userId', authMiddleware, async (req, res) => {
       await supabaseAdmin.rpc('increment_following_count', { target_id: followerId });
     } catch (e) { }
 
-    // สร้าง notification ให้ผู้ถูก follow (พยายามใส่ชื่อผู้ติดตามให้ด้วย)
-    try {
-      let followerName = '';
-      try {
-        const { data: prof, error: profErr } = await supabaseAdmin
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('profile_id', followerId)
-          .maybeSingle();
-        if (!profErr && prof) {
-          followerName = `${prof.first_name || ''} ${prof.last_name || ''}`.trim();
-        }
-      } catch (_) { followerName = ''; }
-
-      const description = followerName ? `${followerName} ได้ติดตามคุณ` : 'มีผู้ติดตามใหม่';
-
-      await supabaseAdmin
-        .from('notifications')
-        .insert({
-          user_id: followingId,
-          type: 'follow',
-          title: 'มีผู้ติดตามใหม่',
-          description,
-          is_read: false
-        });
-    } catch (e) {
-      // ไม่ขัดขวาง flow ถ้าไม่สามารถสร้าง notification ได้
-      console.warn('[FollowAPI] create notification failed:', e.message || e);
-    }
-
-    let targetProfile = null;
-    let meProfile = null;
-    try {
-      const [{ data: targetData }, { data: meData }] = await Promise.all([
-        supabaseAdmin.from('profiles').select('profile_id, followers_count, following_count').eq('profile_id', followingId).maybeSingle(),
-        supabaseAdmin.from('profiles').select('profile_id, followers_count, following_count').eq('profile_id', followerId).maybeSingle(),
-      ]);
-      targetProfile = targetData || null;
-      meProfile = meData || null;
-    } catch (_) { }
-
-    res.json(response.success('Follow สำเร็จ', {
-      target: targetProfile,
-      me: meProfile,
-    }));
+    res.json(response.success('Follow สำเร็จ'));
   } catch (e) {
     res.json(response.success('Follow สำเร็จ'));
   }

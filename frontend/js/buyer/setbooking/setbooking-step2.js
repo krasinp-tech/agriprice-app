@@ -1,10 +1,10 @@
 /**
  * setbooking-step2.js
- * - UI ตามรูป: ช่วงวันที่ + ตารางรอบคิว + toggle + ลบ + modal เพิ่มรอบ
- * - รองรับ DB: รวม payload จาก step1 แล้วเตรียมส่ง API ในอนาคต
- * NOTE: สร้าง product ใน /api/products เป็น flow ของ Farmer ไม่ใช่ Buyer
- * ถ้า token ของ buyer ถูกใช้สร้าง product server จะปฏิเสธ (role ไม่ถูกต้อง)
- * ควรย้ายไฟล์หรือปรับ flow ให้ตรงกับบทบาท
+ * - UI เธ•เธฒเธกเธฃเธนเธ: เธเนเธงเธเธงเธฑเธเธ—เธตเน + เธ•เธฒเธฃเธฒเธเธฃเธญเธเธเธดเธง + toggle + เธฅเธ + modal เน€เธเธดเนเธกเธฃเธญเธ
+ * - เธฃเธญเธเธฃเธฑเธ DB: เธฃเธงเธก payload เธเธฒเธ step1 เนเธฅเนเธงเน€เธ•เธฃเธตเธขเธกเธชเนเธ API เนเธเธญเธเธฒเธเธ•
+ * NOTE: เธชเธฃเนเธฒเธ product เนเธ /api/products เน€เธเนเธ flow เธเธญเธ Farmer เนเธกเนเนเธเน Buyer
+ * เธ–เนเธฒ token เธเธญเธ buyer เธ–เธนเธเนเธเนเธชเธฃเนเธฒเธ product server เธเธฐเธเธเธดเน€เธชเธ (role เนเธกเนเธ–เธนเธเธ•เนเธญเธ)
+ * เธเธงเธฃเธขเนเธฒเธขเนเธเธฅเนเธซเธฃเธทเธญเธเธฃเธฑเธ flow เนเธซเนเธ•เธฃเธเธเธฑเธเธเธ—เธเธฒเธ—
  */
 
 (function () {
@@ -13,7 +13,7 @@
     USE_API: !!(window.API_BASE_URL),
     getApiBase: () => window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, ""),
     ENDPOINTS: {
-      save: "/api/buyer/products", // POST [FIXED Bug1: Buyer-specific endpoint, not Farmer/Admin /api/products] สร้างสินค้า
+      save: "/api/buyer/products", // POST [FIXED Bug1: Buyer-specific endpoint, not Farmer/Admin /api/products] เธชเธฃเนเธฒเธเธชเธดเธเธเนเธฒ
     },
   };
 

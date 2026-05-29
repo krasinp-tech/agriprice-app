@@ -6,25 +6,21 @@
 const path    = require('path');
 const fs      = require('fs');
 const { createClient } = require('@supabase/supabase-js');
-const logger  = require('../utils/logger');
 
 const UPLOAD_MODE   = process.env.UPLOAD_MODE   || 'supabase-storage';
 const UPLOAD_DIR    = process.env.UPLOAD_DIR    || path.join(__dirname, '..', 'uploads');
 const SUPABASE_URL  = process.env.SUPABASE_URL;
 const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'agriprice';
-const HAS_SUPABASE_STORAGE_CONFIG = Boolean(SUPABASE_URL && SERVICE_KEY);
-const EFFECTIVE_UPLOAD_MODE = UPLOAD_MODE === 'supabase-storage' && !HAS_SUPABASE_STORAGE_CONFIG
-  ? 'local'
-  : UPLOAD_MODE;
 
 let supabaseAdmin;
-if (UPLOAD_MODE === 'supabase-storage' && HAS_SUPABASE_STORAGE_CONFIG) {
+if (UPLOAD_MODE === 'supabase-storage') {
+  if (!SUPABASE_URL || !SERVICE_KEY) {
+    throw new Error('❌ ต้องตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY ใน .env');
+  }
   supabaseAdmin = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-} else if (UPLOAD_MODE === 'supabase-storage') {
-  logger.warn('⚠️  Supabase storage env vars are missing; file uploads will use local disk storage instead.');
 }
 
 /**
@@ -40,7 +36,7 @@ async function saveFile(file, folder = 'misc') {
   const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
 
   // ─── Local storage ──────────────────────────────────────────
-  if (EFFECTIVE_UPLOAD_MODE === 'local') {
+  if (UPLOAD_MODE === 'local') {
     const destDir  = path.join(UPLOAD_DIR, folder);
     const destPath = path.join(UPLOAD_DIR, filename);
     fs.mkdirSync(destDir, { recursive: true });

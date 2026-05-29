@@ -1,9 +1,3 @@
-/**
- * home-sliders.js
- * ไฟล์ควบคุมหน้าแรก (Home Page) ของแอป
- * จัดการส่วนของรูปแบนเนอร์เลื่อน (Hero Slider), แถบเลือกหมวดหมู่สินค้า,
- * และการดึงรายการสินค้ามาแสดงผล พร้อมระบบค้นหาเบื้องต้น
- */
 (function initAgriPriceHome() {
   const DEBUG_HOME = !!window.AGRIPRICE_DEBUG;
 
@@ -283,7 +277,7 @@
       const user = rawUser ? JSON.parse(rawUser) : null;
       const isBuyer = user?.role?.toLowerCase() === "buyer";
 
-      const tplRes = await fetch("components/product-card/product-card.html?v=20260528").catch(() => null);
+      const tplRes = await fetch("components/product-card/product-card.html").catch(() => null);
       if (!tplRes?.ok) return;
       const tplHtml = await tplRes.text();
       const holder = document.createElement("div");

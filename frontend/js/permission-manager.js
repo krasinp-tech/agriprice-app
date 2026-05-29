@@ -1,8 +1,4 @@
 /**
- * permission-manager.js
- * จัดการขอสิทธิ์เข้าถึงฟีเจอร์ของมือถือ (GPS, Camera, Notifications)
- */
-/**
  * permission-manager.js — AgriPrice Pure Native Permission v3
  * 
  * [Mobile Feature] ไฟล์นี้จัดการเรื่องการขอสิทธิ์เข้าถึง (Permissions) บนมือถือทั้งหมด

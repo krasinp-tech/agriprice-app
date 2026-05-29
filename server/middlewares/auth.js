@@ -24,13 +24,6 @@ function auth(req, res, next) {
       return res.status(401).json({ success: false, message: 'ไม่พบ token' });
     }
 
-    // Local dev override: accept a fake token for headless/local testing
-    // Only accept when explicitly enabled via DEV_ACCEPT_FAKE_TOKEN env var
-    if (process.env.DEV_ACCEPT_FAKE_TOKEN === '1' && token === 'fake-token-123') {
-      req.user = { id: 0, phone: '0000000000', role: 'buyer' };
-      return next();
-    }
-
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = {
       id:    payload.id,

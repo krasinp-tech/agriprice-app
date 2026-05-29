@@ -43,7 +43,7 @@
     },
   };
 
-  const TEMPLATE_PATH = "../../components/product-card/product-card.html?v=20260528"; // ปรับ path ตอนเรียกใช้ได้
+  const TEMPLATE_PATH = "../../components/product-card/product-card.html"; // ปรับ path ตอนเรียกใช้ได้
   const STYLE_SELECTOR = 'link[data-component="product-card"]';
 
   function getRole() {

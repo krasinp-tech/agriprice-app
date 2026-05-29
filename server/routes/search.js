@@ -27,8 +27,7 @@ router.get('/', async (req, res) => {
 
     if (term) {
       prodQuery = prodQuery.or(`name.ilike.%${term}%,variety.ilike.%${term}%,category.ilike.%${term}%`);
-      // Include tagline and address_line2 so buyers/ล้ง can be found by their display name or location
-      userQuery = userQuery.or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%,tagline.ilike.%${term}%,address_line2.ilike.%${term}%`);
+      userQuery = userQuery.or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`);
     }
 
     const [prodRes, userRes] = await Promise.all([prodQuery, userQuery]);

@@ -184,25 +184,3 @@ router.post('/push-token', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-
-/**
- * DEBUG: GET /api/notifications/debug — admin-only preview of notifications
- * Use account with role='admin' to access. Returns recent notifications for inspection.
- */
-router.get('/debug', authMiddleware, async (req, res) => {
-  try {
-    if (!req.user || String(req.user.role || '').toLowerCase() !== 'admin') {
-      return res.status(403).json(response.error('ต้องใช้สิทธิ์ผู้ดูแลระบบ'));
-    }
-    const { limit = 100 } = req.query;
-    const { data, error } = await supabaseAdmin
-      .from('notifications')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(Number(limit));
-    if (error) return res.status(500).json(response.error('ไม่สามารถดึงข้อมูลแจ้งเตือนได้', error.message));
-    res.json(response.success('OK', data || []));
-  } catch (e) {
-    res.status(500).json(response.error(e.message));
-  }
-});

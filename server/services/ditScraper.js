@@ -8,14 +8,13 @@ const cron   = require('node-cron');
 const XLSX   = require('xlsx');
 const https  = require('https');
 const http   = require('http');
-const logger = require('../utils/logger');
-const { supabaseAdmin } = require('../utils/supabase');
+const { createClient } = require('@supabase/supabase-js');
 
-const HAS_SUPABASE_CONFIG = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-if (!HAS_SUPABASE_CONFIG) {
-  logger.warn('⚠️  Supabase env vars are missing; DIT auto-sync will stay disabled until .env is configured.');
-}
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
 
 // รายการสินค้าที่ต้องการดึง
 const COMMODITIES = [
@@ -308,11 +307,6 @@ async function fetchOneCommodity(commodity, date) {
 // upsert ลง Supabase
 async function upsertPrices(rows) {
   if (!rows.length) return 0;
-  if (!HAS_SUPABASE_CONFIG) {
-    console.log('[DIT] Supabase is not configured; skipping upsert.');
-    return 0;
-  }
-
   console.log(`[DIT] Upserting ${rows.length} rows...`);
   var result = await supabaseAdmin
     .from('gov_prices')

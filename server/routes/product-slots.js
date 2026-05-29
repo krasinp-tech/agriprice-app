@@ -4,15 +4,6 @@ const response = require('../utils/response');
 const authMiddleware = require('../middlewares/auth');
 const { supabaseAdmin } = require('../utils/supabase');
 
-function toBangkokDayRange(date) {
-  const startLocal = new Date(`${date}T00:00:00+07:00`);
-  const endLocal = new Date(startLocal.getTime() + 24 * 60 * 60 * 1000);
-  return {
-    startUtc: startLocal.toISOString(),
-    endUtc: endLocal.toISOString(),
-  };
-}
-
 /**
  * GET /api/product-slots
  * ดึงรายการคิวของสินค้า
@@ -58,36 +49,7 @@ router.get('/', async (req, res) => {
 
     const { data, error } = await query;
     if (error) throw error;
-
-    let slots = data || [];
-    if (date && slots.length > 0) {
-      const slotIds = slots.map(s => s.slot_id).filter(Boolean);
-      if (slotIds.length > 0) {
-        const { startUtc, endUtc } = toBangkokDayRange(date);
-        const { data: bookings, error: bookingErr } = await supabaseAdmin
-          .from('bookings')
-          .select('slot_id')
-          .in('slot_id', slotIds)
-          .eq('status', 'waiting')
-          .gte('scheduled_time', startUtc)
-          .lt('scheduled_time', endUtc);
-
-        if (bookingErr) throw bookingErr;
-
-        const counts = bookings.reduce((acc, booking) => {
-          if (!booking || !booking.slot_id) return acc;
-          acc[booking.slot_id] = (acc[booking.slot_id] || 0) + 1;
-          return acc;
-        }, {});
-
-        slots = slots.map((slot) => ({
-          ...slot,
-          booked_count: counts[slot.slot_id] || 0,
-        }));
-      }
-    }
-
-    res.json(response.success('ดึงข้อมูลสำเร็จ', slots));
+    res.json(response.success('ดึงข้อมูลสำเร็จ', data || []));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }

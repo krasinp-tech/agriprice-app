@@ -1,7 +1,7 @@
 /**
  * AGRIPRICE - Booking Step 3 JavaScript
- * ฟีเจอร์: สรุปการจอง, โหลดข้อมูลจาก step 1-2, ยืนยันการจอง
- * รองรับ: Desktop, Tablet, Mobile
+ * เธเธตเน€เธเธญเธฃเน: เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ, เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธฒเธ step 1-2, เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธ
+ * เธฃเธญเธเธฃเธฑเธ: Desktop, Tablet, Mobile
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -134,12 +134,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Utility Functions
   // ================================
   function formatThaiDate(isoString) {
-    if (window.AgriPriceUI) return window.AgriPriceUI.formatThaiDate(isoString);
     return formatDateLocale(isoString);
   }
 
   function formatNumber(num) {
-    if (window.AgriPriceUI) return window.AgriPriceUI.formatNumber(num);
     if (!num && num !== 0) return t('unspecified', "ไม่ระบุ");
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -345,10 +343,12 @@ document.addEventListener("DOMContentLoaded", () => {
         step: 3
       };
 
-      // บันทึกผ่าน API Layer (รองรับ Database)
+      // ๐”ต เธเธฑเธเธ—เธถเธเธเนเธฒเธ API Layer (เธฃเธญเธเธฃเธฑเธ Database)
       const result = await BookingAPI.confirmBooking(finalBookingData);
 
-      // ไปหน้าสำเร็จ (step 4)
+      if (DEBUG_BOOKING) console.log("โ… เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ:", result);
+
+      // เนเธเธซเธเนเธฒเธชเธณเน€เธฃเนเธ (step 4)
       const bookingId = result.bookingId || result.booking?.id || "";
       if (window.navigateWithTransition) window.navigateWithTransition("pages/farmer/booking/booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "")); else window.location.href = "pages/farmer/booking/booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "");
     } catch (error) {
@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize
   // ================================
   async function init() {
-    // ตรวจสอบว่ามีข้อมูลจาก step ก่อนหน้าหรือไม่
+    // เธ•เธฃเธงเธเธชเธญเธเธงเนเธฒเธกเธตเธเนเธญเธกเธนเธฅเธเธฒเธ step เธเนเธญเธเธซเธเนเธฒเธซเธฃเธทเธญเนเธกเน
     const step1Data = localStorage.getItem("bookingStep1");
     const step2Data = localStorage.getItem("bookingStep2");
 
@@ -381,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     await loadSummaryData();
+    if (DEBUG_BOOKING) console.log("๐€ Booking Step 3 initialized");
   }
 
   init();

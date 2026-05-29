@@ -10,26 +10,47 @@
     passwordUpdatedAt: "",
   };
 
-  async function apiFetch(path, options) {
-    if (!window.api) throw new Error("API Client not loaded");
-    const init = options || {};
-    // Extract body from string if needed
-    let body = init.body;
-    if (typeof body === 'string') {
-      try { body = JSON.parse(body); } catch(e) {}
-    }
-    return window.api.call(init.method || 'GET', path, body);
+  function getApiBase() {
+    const API_BASE = (window.API_BASE_URL || 'https://agriprice-app.onrender.com').replace(/\/$/, '');
+    if (API_BASE) return API_BASE;
+
+    const origin = asText(window.location && window.location.origin);
+    if (/localhost|127\.0\.0\.1/i.test(origin)) return "https://agriprice-app.onrender.com";
+    if (/^https?:\/\//i.test(origin)) return origin.replace(/\/$/, "");
+    return "https://agriprice.com";
   }
 
-  function formatThaiDate(dateValue) {
-    if (window.AgriPriceUI) return window.AgriPriceUI.formatThaiDate(dateValue);
-    const value = typeof dateValue === 'string' ? dateValue.trim() : "";
-    if (!value) return "-";
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return "-";
-    const lang = localStorage.getItem('lang') || 'th';
-    const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
-    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(parsed);
+  function getToken() {
+    try {
+      const tokenKey = window.AUTH_TOKEN_KEY || "token";
+      return asText(localStorage.getItem(tokenKey));
+    } catch (_) {
+      return "";
+    }
+  }
+
+  async function apiFetch(path, options) {
+    const token = getToken();
+    const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
+    if (!token) throw new Error(t('please_login_again', "กรุณาเข้าสู่ระบบใหม่"));
+
+    const init = options || {};
+    const headers = {
+      ...(init.headers || {}),
+      Authorization: "Bearer " + token,
+    };
+
+    const res = await fetch(getApiBase() + path, { ...init, headers });
+    const text = await res.text();
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch (_) {}
+
+    if (!res.ok) {
+      const message = (body && (body.message || body.error || body.detail)) || `Request failed (${res.status})`;
+      throw new Error(message);
+    }
+
+    return body;
   }
 
   function mapProfileToStore(profile) {
@@ -162,6 +183,19 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reason: asText(reason) }),
     });
+  }
+
+  function formatThaiDate(dateValue) {
+    const value = asText(dateValue);
+    if (!value) return "-";
+ 
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "-";
+ 
+    const lang = localStorage.getItem('lang') || 'th';
+    const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
+    
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(parsed);
   }
 
   function maskPhone(phone) {

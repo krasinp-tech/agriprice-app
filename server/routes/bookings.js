@@ -8,15 +8,6 @@ const logger = require('../utils/logger');
 const { supabaseAdmin } = require('../utils/supabase');
 const { makeBookingNo } = require('../utils/helpers');
 
-function toBangkokDayRange(isoTimestamp) {
-  const scheduled = new Date(isoTimestamp);
-  const localBangkok = new Date(scheduled.getTime() + 7 * 60 * 60 * 1000);
-  const dateOnly = localBangkok.toISOString().slice(0, 10);
-  const startUtc = new Date(`${dateOnly}T00:00:00+07:00`).toISOString();
-  const endUtc = new Date(new Date(`${dateOnly}T00:00:00+07:00`).getTime() + 24 * 60 * 60 * 1000).toISOString();
-  return { dateOnly, startUtc, endUtc };
-}
-
 /**
  * GET /api/bookings
  * ดึงรายการการจองทั้งหมดของผู้ใช้ (แบ่งตาม Role: Farmer จะเห็นคิวที่ตัวเองจอง, Buyer จะเห็นคิวของลูกค้า)
@@ -185,13 +176,6 @@ router.post('/', authMiddleware, async (req, res) => {
     if (Array.isArray(final_plates)) {
       final_plates = final_plates.map(v => typeof v === 'object' ? (v.plate || v.no) : v).filter(Boolean).join(', ');
     }
-
-    // จำนวนรถที่ขอจอง (ประมาณการจากทะเบียนที่ส่งมา)
-    let requestedVehicles = 0;
-    if (final_plates && typeof final_plates === 'string') {
-      requestedVehicles = final_plates.split(',').map(s => s.trim()).filter(Boolean).length;
-    }
-    if (requestedVehicles === 0) requestedVehicles = 1; // assume at least one vehicle
     
     // 2. สร้างหมายเลขการจองแบบสุ่ม (เช่น BK-123456)
     const booking_no = makeBookingNo();
@@ -209,42 +193,6 @@ router.post('/', authMiddleware, async (req, res) => {
     // [FIXED] ใช้ RPC next_queue_sequence เพื่อป้องกัน Race Condition
     let queue_no = 'Q-01';
     if (slot_id) {
-      // ตรวจสอบความจุของ Slot ว่ายังคงรับได้หรือไม่ (ป้องกัน overbooking)
-      try {
-        const { data: slotInfo, error: slotErr } = await supabaseAdmin
-          .from('product_slots')
-          .select('capacity, booked_count')
-          .eq('slot_id', slot_id)
-          .single();
-        if (slotErr) {
-          console.warn('[bookings] Failed to fetch slot info:', slotErr.message || slotErr);
-        } else if (slotInfo) {
-          const { startUtc, endUtc } = toBangkokDayRange(scheduled_time);
-          const { count: existingCount, error: countErr } = await supabaseAdmin
-            .from('bookings')
-            .select('*', { count: 'exact', head: true })
-            .eq('slot_id', slot_id)
-            .eq('status', 'waiting')
-            .gte('scheduled_time', startUtc)
-            .lt('scheduled_time', endUtc);
-
-          if (countErr) {
-            console.warn('[bookings] Failed to count slot bookings by date:', countErr.message || countErr);
-          }
-
-          const bookedForDate = Number(existingCount || 0);
-          const remaining = Number(slotInfo.capacity || 0) - bookedForDate;
-          if (remaining <= 0) {
-            return res.status(400).json(response.error('รอบคิวนี้เต็มแล้ว ไม่สามารถจองได้'));
-          }
-          if (requestedVehicles > remaining) {
-            return res.status(400).json(response.error(`จำนวนรถที่ขอจอง (${requestedVehicles}) เกินจำนวนคิวที่เหลือ (${remaining})`));
-          }
-        }
-      } catch (e) {
-        console.warn('[bookings] Slot capacity check failed:', e.message || e);
-      }
-
       let sequence = null;
 
       // พยายามใช้ RPC ก่อน (atomic, ป้องกัน race condition)
@@ -254,30 +202,24 @@ router.post('/', authMiddleware, async (req, res) => {
       if (!rpcSeqErr && rpcSeq != null) {
         sequence = Number(rpcSeq);
       } else {
-        // Fallback: ใช้ booking รอบเดียวกันในวันเดียวกัน
+        // Fallback: ใช้ MAX(booking_id) แทน COUNT เพื่อลด race window
         if (rpcSeqErr) {
-          console.warn('⚠️  RPC next_queue_sequence ไม่พบ — ใช้ daily fallback:', rpcSeqErr.message);
+          console.warn('⚠️  RPC next_queue_sequence ไม่พบ — ใช้ MAX fallback:', rpcSeqErr.message);
         }
-        const { startUtc, endUtc } = toBangkokDayRange(scheduled_time);
-        const { data: existingRows, error: existingErr } = await supabaseAdmin
+        const { data: maxRows } = await supabaseAdmin
           .from('bookings')
           .select('queue_no')
           .eq('slot_id', slot_id)
-          .eq('status', 'waiting')
-          .gte('scheduled_time', startUtc)
-          .lt('scheduled_time', endUtc)
-          .not('queue_no', 'is', null);
+          .not('queue_no', 'is', null)
+          .order('booking_id', { ascending: false })
+          .limit(1);
 
-        if (existingErr) {
-          console.warn('⚠️  Failed to load existing daily queue numbers:', existingErr.message || existingErr);
-          sequence = 1;
+        if (maxRows && maxRows.length > 0) {
+          const lastQNo = maxRows[0].queue_no || '';
+          const match = lastQNo.match(/-(\d+)$/);
+          sequence = match ? Number(match[1]) + 1 : 1;
         } else {
-          const maxSeq = (existingRows || []).reduce((max, row) => {
-            const match = String(row.queue_no || '').match(/-(\d+)$/);
-            const value = match ? Number(match[1]) : 0;
-            return value > max ? value : max;
-          }, 0);
-          sequence = maxSeq + 1;
+          sequence = 1;
         }
       }
 
@@ -318,13 +260,23 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json(response.error(userMessage, error));
     }
 
-    // 7. NOTE: Do NOT increment `product_slots.booked_count` here.
-    // Availability and queue logic are now computed per-day from the `bookings` table
-    // (using scheduled_time and status='waiting'). Updating a global
-    // `booked_count` leads to counts that accumulate across days and reintroduce
-    // the bug where queues carry over to other dates.
-    // If you need aggregated metrics, implement a separate background job/RPC
-    // that derives metrics without affecting per-day availability.
+    // 7. เพิ่มจำนวนการจอง (booked_count) ใน Slot อัตโนมัติด้วย Database Function (RPC)
+    // ลองใช้ RPC ก่อน ถ้าไม่มี Function ใน Supabase ให้ fallback เป็น manual increment
+    if (slot_id) {
+      const { error: rpcErr } = await supabaseAdmin.rpc('increment_booked_count', { p_slot_id: slot_id });
+      if (rpcErr) {
+        console.warn('⚠️  RPC increment_booked_count ไม่พบ — ใช้ manual increment แทน:', rpcErr.message);
+        const { data: slotData } = await supabaseAdmin
+          .from('product_slots').select('booked_count').eq('slot_id', slot_id).single();
+        if (slotData) {
+          const { error: updErr } = await supabaseAdmin
+            .from('product_slots')
+            .update({ booked_count: (slotData.booked_count || 0) + 1 })
+            .eq('slot_id', slot_id);
+          if (updErr) console.error('❌ Manual increment Error (Non-critical):', updErr);
+        }
+      }
+    }
 
     // สร้าง notification ให้ผู้ซื้อเมื่อมีการจองใหม่
     await supabaseAdmin
@@ -434,17 +386,6 @@ router.patch('/:id/checkin', authMiddleware, async (req, res) => {
 
     if (booking.buyer_id !== buyerId) return res.status(403).json(response.error('คุณไม่มีสิทธิ์เช็คอินรายการนี้'));
     if (booking.status !== 'waiting') return res.status(400).json(response.error(`ไม่สามารถเช็คอินได้ เนื่องจากสถานะคือ ${booking.status}`));
-
-    if (booking.scheduled_time) {
-      const scheduledTime = new Date(booking.scheduled_time);
-      if (!Number.isNaN(scheduledTime.getTime()) && Date.now() < scheduledTime.getTime()) {
-        return res.status(409).json(response.error('ยังไม่ถึงคิว กรุณามาตามเวลานัดอีกครั้ง', {
-          scheduled_time: booking.scheduled_time,
-          queue_no: booking.queue_no,
-          slot: booking.slot || null,
-        }));
-      }
-    }
 
     const { data: updated, error: updErr } = await supabaseAdmin
       .from('bookings')

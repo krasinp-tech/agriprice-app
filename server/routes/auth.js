@@ -16,8 +16,7 @@ const {
   JWT_SECRET
 } = require('../utils/helpers');
 
-// Enable OTP mock only in non-production environments unless explicitly disabled
-const DEV_OTP_MODE = (process.env.NODE_ENV || 'development') !== 'production' && process.env.OTP_MOCK !== 'false';
+const DEV_OTP_MODE = process.env.OTP_MOCK !== 'false'; 
 const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888']; // รายชื่อเบอร์ที่จะใช้ Mock เสมอ
 const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || '';
 
@@ -224,8 +223,8 @@ router.post('/register/finish', async (req, res) => {
     const { temp_token, role, profile, password } = validBody;
     let payload;
 
-    // --- MOCK TOKEN BYPASS (only in DEV_OTP_MODE) ---
-    if (DEV_OTP_MODE && String(temp_token).startsWith('mock_temp_token_')) {
+    // --- MOCK TOKEN BYPASS ---
+    if (String(temp_token).startsWith('mock_temp_token_')) {
       const parts = temp_token.split('_');
       // format: mock_temp_token_PHONE_TIMESTAMP
       const phoneFromMock = parts[3] || 'unknown';
@@ -326,53 +325,37 @@ router.post('/login', async (req, res) => {
   const loginSchema = Joi.object({
     phone: Joi.string().min(8).max(20),
     email: Joi.string().email(),
-    identifier: Joi.string().min(3).max(120),
     password: Joi.string().min(8).max(100).required(),
-  }).or('phone', 'email', 'identifier');
+  }).or('phone', 'email');
 
   const { error: schemaErr } = loginSchema.validate(req.body);
   if (schemaErr) return res.status(400).json(response.error('ข้อมูลไม่ถูกต้อง: ' + schemaErr.details[0].message));
 
   try {
-    const { phone, email, identifier: rawIdentifier, password } = req.body;
-    const identifier = String(phone || email || rawIdentifier || '').trim();
-    const isEmail = identifier.includes('@');
+    const { phone, email, password } = req.body;
+    const identifier = phone || email;
+    const searchPhone = toE164(identifier);
 
-    if (!identifier) {
-      return res.status(400).json(response.error('กรุณาระบุเบอร์โทรศัพท์หรืออีเมล'));
-    }
+    let { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('profile_id, phone, first_name, last_name, role, password_hash, tier, lat, lng')
+      .eq('phone', searchPhone)
+      .maybeSingle();
 
-    if (!isEmail && !/^[+]?\d{8,20}$/.test(identifier.replace(/\s+/g, ''))) {
-      return res.status(400).json(response.error('รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง'));
-    }
-
-    const searchPhone = isEmail ? null : toE164(identifier);
-    const searchEmail = isEmail ? identifier.toLowerCase() : null;
-
-    let profile = null;
-
-    if (searchPhone) {
-      ({ data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('profile_id, phone, first_name, last_name, role, password_hash, tier, lat, lng')
-        .eq('phone', searchPhone)
-        .maybeSingle());
-    }
-
-    if (!profile && searchEmail) {
+    if (!profile && identifier.includes('@')) {
       const { data: byEmail } = await supabaseAdmin
         .from('profiles')
         .select('profile_id, phone, first_name, last_name, role, password_hash, tier, lat, lng')
-        .ilike('email', searchEmail)
+        .ilike('email', identifier.trim().toLowerCase())
         .maybeSingle();
       if (byEmail) profile = byEmail;
     }
 
     if (!profile || !profile.password_hash)
-      return res.status(401).json(response.error('ไม่พบบัญชีนี้ กรุณาตรวจสอบเบอร์โทรหรืออีเมลอีกครั้ง'));
+      return res.status(401).json(response.error('ไม่พบบัญชีนี้ กรุณาสมัครสมาชิกก่อน'));
 
     const valid = await bcrypt.compare(password, profile.password_hash);
-    if (!valid) return res.status(401).json(response.error('รหัสผ่านไม่ถูกต้อง'));
+    if (!valid) return res.status(401).json(response.error('เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง'));
 
     // [FIX] เช็คสถานะบัญชี (Deactivated)
     if (profile.account_status === 'disabled') {
