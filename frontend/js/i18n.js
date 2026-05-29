@@ -522,7 +522,14 @@ function translatePage() {
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (t[key]) el.textContent = t[key];
+    if (t[key]) {
+      let val = t[key];
+      const n = el.getAttribute('data-i18n-n');
+      if (n !== null) {
+        val = val.replace('{n}', n);
+      }
+      el.textContent = val;
+    }
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {

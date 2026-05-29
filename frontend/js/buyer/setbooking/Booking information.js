@@ -95,9 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 : (d.shop_name || 'AgriPrice Store'),
               fullName: farmer ? `${farmer.first_name || ''} ${farmer.last_name || ''}`.trim() : '',
               phone: farmer?.phone || d.farmer_phone || '',
-              address: farmer
-                ? [farmer.address_line1, farmer.address_line2].filter(Boolean).join(' ')
-                : (d.address || ''),
+              address: d.farmer_address || '-',
               queueNo: d.queue_no || '',
               time: d.scheduled_time ? new Date(d.scheduled_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '',
               date: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : '',
@@ -122,7 +120,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // fallback: localStorage (ข้อมูลจาก step3)
       const local = localStorage.getItem("confirmedBooking");
-      if (local) return JSON.parse(local);
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          if (parsed) {
+            parsed.address = parsed.address || '-';
+            return parsed;
+          }
+        } catch (_) {}
+      }
 
       return null;
     },
@@ -209,10 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatBookingDate(dateValue) {
-<<<<<<< HEAD
     if (window.AgriPriceUI) return window.AgriPriceUI.formatThaiDate(dateValue);
-=======
->>>>>>> 21b616fb7307f76694a08f1b84b4538ead21df96
     if (!dateValue) return "-";
     const d = new Date(dateValue);
     if (isNaN(d.getTime())) return "-";
@@ -222,10 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatEstimatedTime(minutes) {
-<<<<<<< HEAD
     if (window.AgriPriceUI) return window.AgriPriceUI.formatEstimatedTime(minutes);
-=======
->>>>>>> 21b616fb7307f76694a08f1b84b4538ead21df96
     const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
     if (minutes < 60) return `${minutes} ${t('minute', 'นาที')}`;
     const hours = Math.floor(minutes / 60);

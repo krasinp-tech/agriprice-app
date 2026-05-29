@@ -100,14 +100,16 @@
         let prices = { 
           A: p.price ? `${Number(p.price)} ${t('unit_baht', 'บ.')}/${unit}` : null, 
           B: null, 
-          C: null 
+          C: null,
+          D: null
         };
         
-        // Since we removed product_grades table, we use the single grade field
+        // Move price to correct grade slot
         const gName = (p.grade || 'คละ').toUpperCase();
         if (gName === 'B') { prices.B = prices.A; prices.A = null; }
         else if (gName === 'C') { prices.C = prices.A; prices.A = null; }
-        else { prices.A = prices.A; } // Default to Grade A or "คละ" display as A
+        else if (gName === 'D') { prices.D = prices.A; prices.A = null; }
+        // else stays in A (includes 'A', 'คละ', etc.)
 
 
         // Distance calculation
@@ -129,6 +131,7 @@
           priceDisplayA: prices.A,
           priceDisplayB: prices.B,
           priceDisplayC: prices.C,
+          priceDisplayD: prices.D,
           variety: p.variety || '',
           productName: p.name || '',
           createdAtMonth: p.created_at ? (new Date(p.created_at).getMonth() + 1).toString() : null,
@@ -140,7 +143,56 @@
         };
       });
 
-      return mappedProducts;
+      const mappedUsers = users.map(u => {
+        const sLat = u.lat ?? null;
+        const sLng = u.lng ?? null;
+        const distKm = (userLat !== null && sLat !== null && sLng !== null)
+          ? window.LocationHelper.calculateDistance(userLat, userLng, sLat, sLng)
+          : null;
+
+        // Aggregate grades from user's products
+        const userPrices = { A: null, B: null, C: null, D: null };
+        const userProductList = Array.isArray(u.products) ? u.products : [];
+        userProductList.forEach(p => {
+          const unit = p.unit || t('kg_unit', 'กก.');
+          const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
+          const pStr = `${Number(p.price || 0)} ${unitStr}`;
+          const g = (p.grade || 'คละ').toUpperCase();
+          if (g === 'B' && !userPrices.B) userPrices.B = pStr;
+          else if (g === 'C' && !userPrices.C) userPrices.C = pStr;
+          else if (g === 'D' && !userPrices.D) userPrices.D = pStr;
+          else if (!userPrices.A) userPrices.A = pStr;
+        });
+
+        // Product chips for display (name + variety)
+        const productChips = userProductList.map(p => p.variety ? `${p.name} (${p.variety})` : p.name);
+
+        return {
+          type: 'user',
+          sellerId: u.id || u.profile_id,
+          sellerName: `${u.first_name || ''} ${u.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
+          sellerSub: u.role === 'buyer' ? t('buyer', 'ผู้รับซื้อ') : t('farmer', 'เกษตรกร'),
+          avatar: u.avatar
+            ? (u.avatar.startsWith('http') ? u.avatar : resolveToRootUrl(`assets/images/${u.avatar.split('/').pop()}`))
+            : resolveToRootUrl('assets/images/avatar-guest.svg'),
+          priceDisplayA: userPrices.A,
+          priceDisplayB: userPrices.B,
+          priceDisplayC: userPrices.C,
+          priceDisplayD: userPrices.D,
+          productChips,
+          priceA: 0,
+          variety: '',
+          productName: '',
+          createdAtMonth: null,
+          updateTime: '',
+          updatedMinutesAgo: 0,
+          _productId: null,
+          _distKm: distKm,
+          distanceText: window.LocationHelper.formatDistance(distKm)
+        };
+      });
+
+      return [...mappedProducts, ...mappedUsers];
     } catch (e) {
       const msg = "Error in search: " + e.message + "\nLine: " + (e.lineNumber || "unknown");
       if (window.appNotify) window.appNotify(msg, "error");
@@ -186,7 +238,7 @@
         node.querySelector('[data-bind="sellerName"]').textContent = item.sellerName;
         node.querySelector('[data-bind="sellerSub"]').textContent = item.sellerSub;
         
-        ['A','B','C'].forEach(g => {
+        ['A','B','C','D'].forEach(g => {
           const el = node.querySelector(`[data-bind="price${g}"]`);
           const val = item[`priceDisplay${g}`];
           if (el) {
@@ -210,10 +262,21 @@
           node.querySelectorAll('[data-action="book"], [data-action="contact"], [data-action="toggle-favorite"]').forEach(el => el.remove());
         }
 
-        // Hide price row for user profiles
+        // For user cards: replace price row with product chips
         if (item.type === 'user') {
           const priceRow = node.querySelector('.price-row');
-          if (priceRow) priceRow.style.display = 'none';
+          node.querySelector('[data-action="book"]')?.remove();
+
+          if (priceRow && item.productChips && item.productChips.length > 0) {
+            // Replace price row with a scrollable product chip list
+            const chipHtml = item.productChips.map(name =>
+              `<span class="search-product-chip">${name}</span>`
+            ).join('');
+            priceRow.innerHTML = `<div class="search-product-chips-scroll">${chipHtml}</div>`;
+            priceRow.style.display = '';
+          } else if (priceRow) {
+            priceRow.style.display = 'none';
+          }
         }
 
         mount.appendChild(node);

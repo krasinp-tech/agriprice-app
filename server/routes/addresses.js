@@ -40,6 +40,13 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { tag, first_name, last_name, phone, address_line1, address_line2, is_default } = req.body;
     
+    if (is_default) {
+      await supabaseAdmin
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', req.user.id);
+    }
+
     const newAddress = {
       user_id: req.user.id,
       tag: tag || 'Home',
@@ -59,6 +66,47 @@ router.post('/', authMiddleware, async (req, res) => {
 
     if (error) throw error;
     res.status(201).json(response.success('เพิ่มที่อยู่สำเร็จ', data));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * PUT /api/addresses/:id
+ * อัปเดตข้อมูลที่อยู่
+ */
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tag, first_name, last_name, phone, address_line1, address_line2, is_default } = req.body;
+
+    if (is_default) {
+      await supabaseAdmin
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', req.user.id);
+    }
+
+    const updatedAddress = {
+      tag: tag || 'Home',
+      first_name,
+      last_name,
+      phone,
+      address_line1,
+      address_line2,
+      is_default: !!is_default
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('user_addresses')
+      .update(updatedAddress)
+      .eq('id', id)
+      .eq('user_id', req.user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(response.success('อัปเดตที่อยู่สำเร็จ', data));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }

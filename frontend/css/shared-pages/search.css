@@ -355,3 +355,47 @@
         padding: 0 80px;
     }
 }
+
+/* ── Product Chips (user card related products) ─── */
+.search-product-chips-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 2px 0;
+    flex-wrap: nowrap;
+}
+
+.search-product-chips-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.search-product-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    height: 30px;
+    padding: 0 12px;
+    background: color-mix(in srgb, var(--primary, #00a651) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary, #00a651) 30%, transparent);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary, #00a651);
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+.search-product-chip:active {
+    background: color-mix(in srgb, var(--primary, #00a651) 22%, transparent);
+}
+
+[data-theme="dark"] .search-product-chip {
+    background: rgba(0, 166, 81, 0.12);
+    border-color: rgba(0, 166, 81, 0.3);
+    color: #4ade80;
+}

@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = {
           buyer_id,
           farmer_id: bookingData.farmer_id || null,
-          product_id: bookingData.product_id ? String(bookingData.product_id) : null,
+          product_id: String(bookingData.product_id || localStorage.getItem('bookingProductId') || ''),
           slot_id: bookingData.slot_id ? String(bookingData.slot_id) : null,
           scheduled_time,
           note: bookingData.note || null,
@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // หมายเลข slot — แสดงชื่อ slot จาก API (queue_no จะได้หลัง confirm)
-      const slotLabel = step1Data.timeSlot?.slot_name || step1Data.timeSlot?.time || '-';
+      const slotLabel = step1Data.timeSlot?.slot_name || '-';
       if (summarySlot) summarySlot.textContent = slotLabel;
 
       // ================================
@@ -229,9 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // ================================
       // Fetch real product details from API
       let productDetails = null;
-      if (step1Data.product_id && window.api) {
+      const lookupProductId = step1Data.product_id || localStorage.getItem('bookingProductId');
+      if (lookupProductId && window.api) {
         try {
-          productDetails = await window.api.getProduct(step1Data.product_id);
+          productDetails = await window.api.getProduct(lookupProductId);
         } catch (e) {
           if (DEBUG_BOOKING) console.warn('[step3] Failed to fetch product details:', e.message);
         }
@@ -292,8 +293,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (summaryAddress) {
-        const addressText = resolveBookingAddress(step1Data, step2Data);
-        summaryAddress.textContent = addressText || t('unspecified_address', "ไม่ระบุที่อยู่");
+        let addressText = '';
+        try {
+          if (window.api) {
+            const res = await window.api.getAddresses();
+            if (res && res.success && res.data && res.data.length > 0) {
+              const defaultAddr = res.data.find(a => a.is_default) || res.data[0];
+              if (defaultAddr) {
+                addressText = [defaultAddr.address_line1, defaultAddr.address_line2].filter(Boolean).join(' ').trim();
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[step3] Failed to fetch default address from address book:', e.message);
+        }
+        if (!addressText) {
+          addressText = resolveBookingAddress(step1Data, step2Data);
+        }
+        summaryAddress.textContent = addressText || '-';
       }
 
       if (DEBUG_BOOKING) console.log("🔍 โหลดข้อมูลสรุป:", { step1Data, step2Data });
@@ -320,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dateFormatted: step1Data.dateFormatted,
         timeSlot:      step1Data.timeSlot,
         slot_id:       step1Data.slot_id    || null,
-        product_id:    step1Data.product_id || null,
+        product_id:    step1Data.product_id || localStorage.getItem('bookingProductId') || null,
         buyer_id:      step1Data.buyer_id   || null,
         farmer_id:     step1Data.farmer_id  || (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY||'user')||'null')?.id||null; } catch(_){return null;} })(),
         farmerName:    step1Data.farmerName || localStorage.getItem('bookingFarmerName') || '',
@@ -334,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })),
         productAmount: step2Data.productAmount || null,
         contact:       step2Data.contact       || {},
-        address:       resolveBookingAddress(step1Data, step2Data),
+        address:       summaryAddress ? (summaryAddress.textContent || '-') : '-',
 
         // [FIX] ลบ status:"confirmed" ออก เพราะ Server กำหนด status='waiting' เสมอ
         // การระบุ "confirmed" ที่นี่ทำให้ Frontend logic สับสน

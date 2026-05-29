@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS public.product_slots (
 
 -- ── Bookings ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.bookings (
-  id              BIGSERIAL   PRIMARY KEY,
+  booking_id      BIGSERIAL   PRIMARY KEY,
   booking_no      TEXT        NOT NULL UNIQUE,
   buyer_id        UUID        REFERENCES public.profiles(id) ON DELETE SET NULL,
   farmer_id       UUID        REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -123,6 +123,12 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   note            TEXT,
   address         TEXT,
   status          TEXT        NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting','success','cancel')),
+  cancel_reason   TEXT,
+  complete_note   TEXT,
+  vehicle_plates  TEXT,
+  contact_name    TEXT,
+  contact_phone   TEXT,
+  product_amount  NUMERIC(12,2),
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );

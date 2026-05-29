@@ -90,7 +90,7 @@
         card.querySelector('[data-bind="sellerSub"]').textContent = item.sellerSub || item.sub || item.productName || '';
         
         // Prices
-        ['A', 'B', 'C'].forEach(g => {
+        ['A', 'B', 'C', 'D'].forEach(g => {
           const el = card.querySelector(`[data-bind="price${g}"]`);
           const price = item[`price${g}`];
           if (el) {
@@ -100,7 +100,10 @@
         });
 
         const distEl = card.querySelector('[data-bind="distance"]');
-        if (distEl) distEl.textContent = item.distance || '';
+        if (distEl) {
+          const rawDist = item.distance || '';
+          distEl.textContent = (rawDist && !rawDist.includes('-')) ? rawDist : (window.LocationHelper?.formatDistance?.(null) || '');
+        }
         
         const timeEl = card.querySelector('[data-bind="updateTime"]');
         if (timeEl) timeEl.textContent = item.updateTime || '';

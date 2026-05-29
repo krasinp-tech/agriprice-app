@@ -323,13 +323,46 @@ D.log('4_RECAPTCHA_EL', {
     clearErr();
     const phone = getPhone();
     if (!phone) { showErr('ไม่พบเบอร์โทรจากขั้นตอนก่อนหน้า'); return; }
+    
+    const e164Phone = toE164(phone);
+    const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888'];
+
     try {
-      // --- FORCE MOCK MODE FOR SUBMISSION ---
-      console.log('[Register3] Mock Mode Active: Sending via Server API...');
-      const res = await window.api.otpSend(phone);
+      setLoad(true);
+      
+      // 1. ตรวจสอบว่าเป็นเบอร์ทดสอบหรือไม่ (ถ้าใช่ ให้ข้าม Firebase ไปใช้ Server Mock เลย)
+      if (TEST_PHONES.includes(e164Phone)) {
+        console.log('[Register3] Test phone detected, skipping Firebase...');
+      } else {
+        // 2. พยายามส่งผ่าน Firebase (Real OTP)
+        try {
+          setHint('กำลังเตรียมการส่ง SMS...');
+          await initFirebaseOtp();
+          
+          // แสดง reCAPTCHA container เผื่อกรณีโดนท้าทาย (ปกติจะ invisible)
+          const recaptchaEl = document.getElementById('recaptcha-container');
+          if (recaptchaEl) recaptchaEl.style.display = 'flex';
+
+          confirmationResult = await firebaseAuth.signInWithPhoneNumber(e164Phone, recaptchaVerifier);
+          
+          logOtp('otp.send.firebase_success', { phone: e164Phone });
+          setHint('ส่งรหัส OTP เรียบร้อยแล้ว');
+          startTimer(120);
+          return; // ส่งสำเร็จผ่าน Firebase แล้ว จบฟังก์ชัน
+        } catch (fErr) {
+          console.error('[OTP] Firebase send failed:', fErr);
+          logOtp('otp.send.firebase_failed', { message: fErr.message });
+          // ถ้าเป็น error เรื่อง Billing หรืออื่นๆ ที่ทำให้ส่งไม่ได้ ให้ลอง Fallback ไปที่ Server
+        }
+      }
+
+      // 3. Fallback: ส่งผ่าน Server API (อาจจะเป็น Supabase หรือ Mock ตามค่า OTP_MOCK ใน .env)
+      console.log('[Register3] Falling back to Server API for OTP...');
+      setHint('กำลังส่งรหัสผ่านระบบสำรอง...');
+      const res = await window.api.otpSend(phone, 'register');
       if (res && res.success) {
         logOtp('otp.send.fallback_success', { phone });
-        setHint('ส่ง OTP แล้ว (โหมดทดสอบ - ใช้รหัส 123456)');
+        setHint('ส่ง OTP แล้ว (หากไม่ได้รับใน 1 นาที ให้ลองรหัส 123456)');
         startTimer(120);
         confirmationResult = { isFallback: true }; 
         return;
@@ -339,6 +372,8 @@ D.log('4_RECAPTCHA_EL', {
     } catch (e) {
       logOtp('otp.send.error', { message: e.message });
       showErr('เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองใหม่');
+    } finally {
+      setLoad(false);
     }
   }
 

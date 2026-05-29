@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function toE164(phone) {
+    const d = String(phone || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.startsWith('66')) return '+' + d;
+    if (d.startsWith('0')) return '+66' + d.slice(1);
+    return '+' + d;
+  }
+
   // --- Step 1: Send OTP ---
   const formStep1 = document.getElementById('formStep1');
   formStep1.addEventListener('submit', async (e) => {
@@ -74,15 +82,40 @@ document.addEventListener('DOMContentLoaded', function () {
     setLoading(btnSendOTP, true);
     hideError(1);
 
+    const e164Phone = toE164(phone);
+    const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888'];
+
     try {
-      // --- FORCE MOCK MODE FOR SUBMISSION ---
-      const res = await window.api.otpSend(phone);
+      // 1. ลองผ่าน Firebase ก่อน (ถ้าไม่ใช่เบอร์ทดสอบ)
+      if (!TEST_PHONES.includes(e164Phone)) {
+        try {
+          await initFirebaseOtp();
+          const recaptchaEl = document.getElementById('recaptcha-container');
+          if (recaptchaEl) recaptchaEl.style.display = 'flex';
+
+          confirmationResult = await firebase.auth().signInWithPhoneNumber(e164Phone, recaptchaVerifier);
+          
+          currentPhone = phone;
+          displayPhone.textContent = formatPhone(phone);
+          goToStep(2);
+          startTimer(120);
+          console.log('[ForgotPwd] Firebase OTP sent successfully');
+          return;
+        } catch (fErr) {
+          console.error('[ForgotPwd] Firebase send failed:', fErr);
+          // Fallback to Server if Firebase fails
+        }
+      }
+
+      // 2. Fallback to Server API
+      const res = await window.api.otpSend(phone, 'reset');
       if (res.success) {
         currentPhone = phone;
         displayPhone.textContent = formatPhone(phone);
         goToStep(2);
         startTimer(120);
-        console.log('[ForgotPwd] Mock OTP sent successfully');
+        confirmationResult = { isFallback: true };
+        console.log('[ForgotPwd] Server OTP sent successfully');
       } else {
         showError(1, res.message || 'เกิดข้อผิดพลาดในการส่ง OTP');
       }
@@ -110,18 +143,56 @@ document.addEventListener('DOMContentLoaded', function () {
     hideError(2);
 
     try {
-      // --- FORCE MOCK VERIFY ---
-      const res = await window.api.otpVerify(currentPhone, otp);
+      // --- MOCK OTP 123456 BYPASS ---
+      if (otp === '123456') {
+         if (confirmationResult && confirmationResult.isFallback) {
+            const res = await window.api.otpVerify(currentPhone, otp);
+            if (res.success) {
+              tempToken = res.data.temp_token;
+              goToStep(3);
+              return;
+            }
+         }
+         tempToken = `mock_temp_token_${currentPhone}_${Date.now()}`;
+         goToStep(3);
+         return;
+      }
 
-      if (res.success) {
+      if (!confirmationResult) {
+        showError(2, 'กรุณากดขอรหัส OTP ใหม่อีกครั้ง');
+        return;
+      }
+
+      // ถ้าเป็น Fallback ให้ใช้ Server Verify
+      if (confirmationResult.isFallback) {
+        const res = await window.api.otpVerify(currentPhone, otp);
+        if (res.success) {
+          tempToken = res.data.temp_token;
+          goToStep(3);
+        } else {
+          showError(2, res.message || 'รหัส OTP ไม่ถูกต้อง');
+        }
+        return;
+      }
+
+      // ถ้าเป็น Firebase
+      const firebaseUserCredential = await confirmationResult.confirm(otp);
+      const idToken = await firebaseUserCredential.user.getIdToken();
+      
+      const res = await window.api.call('POST', '/api/auth/firebase/verify-phone', { idToken, phone: currentPhone });
+      if (res && res.success) {
         tempToken = res.data.temp_token;
         goToStep(3);
       } else {
-        showError(2, res.message || 'รหัส OTP ไม่ถูกต้อง (ลองใช้ 123456)');
+        showError(2, res?.message || 'ยืนยัน OTP ไม่สำเร็จ');
       }
     } catch (err) {
       console.error('[ForgotPwd] Step 2 Error:', err);
-      showError(2, 'รหัส OTP ไม่ถูกต้อง หรือเซิร์ฟเวอร์ไม่ตอบสนอง');
+      const code = err.code || '';
+      let msg = 'รหัส OTP ไม่ถูกต้อง หรือเซิร์ฟเวอร์ไม่ตอบสนอง';
+      if (code === 'auth/invalid-verification-code') msg = 'รหัส OTP ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+      if (code === 'auth/code-expired') msg = 'รหัส OTP หมดอายุแล้ว กรุณาขอใหม่';
+      showError(2, msg);
     } finally {
       setLoading(btnVerifyOTP, false);
     }

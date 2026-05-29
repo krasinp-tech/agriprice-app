@@ -349,7 +349,7 @@
       .filter(p => !isStaleProduct(p))
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
-        let prices = { A: null, B: null, C: null };
+        let prices = { A: null, B: null, C: null, D: null };
         const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
         
         let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
@@ -359,13 +359,15 @@
                 const pStr = `${Number(g.price || 0)} ${unitStr}`;
                 if (gName === 'B') prices.B = pStr;
                 else if (gName === 'C') prices.C = pStr;
-                else prices.A = pStr;
+                else if (gName === 'D') prices.D = pStr;
+                else prices.A = pStr; // A, คละ, หรืออื่นๆ → A
             });
         } else {
             const priceStr = `${Number(p.price || 0)} ${unitStr}`;
             const gradeName = (p.grade || 'คละ').toUpperCase();
             if (gradeName === 'B') prices.B = priceStr;
             else if (gradeName === 'C') prices.C = priceStr;
+            else if (gradeName === 'D') prices.D = priceStr;
             else prices.A = priceStr;
         }
 
@@ -386,7 +388,7 @@
           avatar: profile?.avatar || 'assets/images/avatar-guest.svg',
           ...prices,
           updateTime: formatTime(p.created_at),
-          distance: (distKm !== null) ? (window.LocationHelper.formatDistance?.(distKm) || '') : '',
+          distance: window.LocationHelper?.formatDistance?.(distKm) || '',
           _distKm: distKm,
           productId: p.product_id,
           isStale
@@ -409,7 +411,7 @@
         if (avatar) avatar.src = window.AgriPriceRouter?.resolveAsset(item.avatar) || item.avatar;
         node.querySelector('[data-bind="sellerName"]').textContent = item.sellerName;
         node.querySelector('[data-bind="sellerSub"]').textContent = item.sellerSub;
-        ['A', 'B', 'C'].forEach(g => {
+        ['A', 'B', 'C', 'D'].forEach(g => {
           const el = node.querySelector(`[data-bind="price${g}"]`);
           if (el) { if (item[g]) el.textContent = item[g]; else el.closest('.pc-grade-box, .price-box')?.remove(); }
         });

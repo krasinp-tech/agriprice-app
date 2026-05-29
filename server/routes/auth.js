@@ -51,9 +51,22 @@ async function findAuthUserByPhone(phone) {
  */
 router.post('/otp/send', otpLimiter, async (req, res) => {
   try {
-    let { phone } = req.body;
+    let { phone, type } = req.body; // type: 'register' | 'reset'
     if (!phone) return res.status(400).json(response.error('กรุณาระบุเบอร์โทรศัพท์'));
     phone = toE164(phone);
+
+    // [NEW] ป้องกันเบอร์ซ้ำสำหรับการสมัครสมาชิก
+    if (type === 'register') {
+      const { data: existing } = await supabaseAdmin
+        .from('profiles')
+        .select('profile_id')
+        .eq('phone', phone)
+        .maybeSingle();
+      
+      if (existing) {
+        return res.status(400).json(response.error('เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว กรุณาเข้าสู่ระบบ'));
+      }
+    }
 
     // เช็คว่าเป็นเบอร์ทดสอบหรือไม่
     const isTestPhone = TEST_PHONES.includes(phone);
@@ -241,7 +254,7 @@ router.post('/register/finish', async (req, res) => {
 
     if (!payload.otp_verified) return res.status(401).json(response.error('Token ไม่ถูกต้อง'));
 
-    const phone = payload.phone;
+    const phone = toE164(payload.phone);
     const { first_name, last_name } = profile;
     const password_hash = await bcrypt.hash(password, 10);
     const fakeEmail = `${phone.replace('+', '')}@agriprice.app`;

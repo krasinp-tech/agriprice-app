@@ -89,7 +89,7 @@
   }
 
   // --- 2. Auth (ระบบสมัครสมาชิกและล็อกอินผ่าน OTP) ---
-  const otpSend    = phone => call('POST', '/api/auth/otp/send', { phone });
+  const otpSend    = (phone, type) => call('POST', '/api/auth/otp/send', { phone, type });
   const otpVerify  = (phone, otp) => call('POST', '/api/auth/otp/verify', { phone, otp });
   const registerFinish = (temp_token, role, profile, password) =>
     call('POST', '/api/auth/register/finish', { temp_token, role, profile, password });
@@ -145,6 +145,7 @@
   const getQueueStatus   = id     => call('GET',   '/api/bookings/'+id+'/queue-status');
   const createBooking    = body   => call('POST',  '/api/bookings', body);
   const updateBooking    = (id,s) => call('PATCH', '/api/bookings/'+id, { status: s });
+  const getAddresses     = ()     => call('GET',   '/api/addresses');
 
   // --- 8. Chat (ระบบแชทเรียลไทม์) ---
   const getChats         = ()      => call('GET',  '/api/chats');
@@ -180,7 +181,7 @@
     getProducts, getProduct, createProduct, updateProduct, deleteProduct, getVarieties,
     getProductSlots, getAllSlots, createProductSlot, createSlotsBatch, updateProductSlot, deleteProductSlot,
     getUsers,
-    getBookings, getBooking, getQueueStatus, createBooking, updateBooking,
+    getBookings, getBooking, getQueueStatus, createBooking, updateBooking, getAddresses,
     getChats, startChat, getChatMessages, sendMessage,
     getNotifications, markRead, markAllRead, deleteNotification, getNotificationSettings, saveNotificationSettings,
     search, getDashboard,

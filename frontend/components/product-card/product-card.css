@@ -101,19 +101,35 @@
 .favorite-btn.active .heart-icon { fill: #E53935; stroke: #E53935; }
 
 .pc-grades-row.price-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     margin-bottom: 16px;
+    /* outer wrapper — no overflow here so border-radius clips correctly */
+}
+
+/* ── Swipeable scroll track ─────────────────────────────── */
+.pc-grades-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;   /* iOS momentum */
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;               /* Firefox */
+    -ms-overflow-style: none;            /* IE / Edge */
+    padding-bottom: 2px;                 /* prevent clip on scroll shadow */
+}
+.pc-grades-scroll::-webkit-scrollbar {
+    display: none;                       /* Chrome / Safari */
 }
 
 .pc-grade-box.price-box {
-    flex: 1;
+    flex: 0 0 calc(33.333% - 6px);      /* show ~3 boxes; shrink gracefully */
+    min-width: 80px;
+    scroll-snap-align: start;
     border: 1px solid var(--border-light, #eee);
     border-radius: 8px;
     padding: 8px 0;
     text-align: center;
     background: var(--bg-input, #f6f7f8);
+    transition: transform 0.15s ease;
 }
 
 .pc-grade-letter {
@@ -128,12 +144,6 @@
     color: var(--text-muted, #888);
     font-weight: 600;
     margin-top: 2px;
-}
-
-.pc-chevron-right {
-    color: var(--primary, #00a651);
-    font-size: 20px;
-    font-weight: 700;
 }
 
 .pc-footer.meta-row {

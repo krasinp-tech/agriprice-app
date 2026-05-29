@@ -62,6 +62,10 @@ const TRANSLATIONS = {
     off: 'ปิดอยู่',
     upgrade_pro: 'อัปเกรดเป็นโปร',
     upgrade_pro_desc: 'ปลดล็อกฟีเจอร์พรีเมียม',
+    my_package: 'แพ็กเกจของฉัน',
+    manage_package: 'จัดการหรือยกเลิกแพ็กเกจโปร',
+    cancel_pro_btn: 'ยกเลิกแพ็กเกจโปร',
+    confirm_cancel_subscription: 'ต้องการยกเลิกแพ็กเกจโปรและกลับไปใช้แผนเริ่มต้นใช่หรือไม่? คุณจะเสียสิทธิ์ในการเข้าถึงแดชบอร์ดวิเคราะห์ข้อมูล',
     role_buyer: 'ผู้รับซื้อ',
     role_farmer: 'เกษตรกร',
     role_user: 'ผู้ใช้งาน',
@@ -687,6 +691,10 @@ const TRANSLATIONS = {
     off: 'Off',
     upgrade_pro: 'Upgrade to Pro',
     upgrade_pro_desc: 'Unlock premium features',
+    my_package: 'My Package',
+    manage_package: 'Manage or cancel Pro package',
+    cancel_pro_btn: 'Cancel Pro Package',
+    confirm_cancel_subscription: 'Do you want to cancel the Pro package and downgrade to the Starter plan? You will lose access to the analytics dashboard.',
     role_buyer: 'Buyer',
     role_farmer: 'Farmer',
     role_user: 'User',
@@ -1313,6 +1321,10 @@ const TRANSLATIONS = {
     off: '关闭',
     upgrade_pro: '升级到专业版',
     upgrade_pro_desc: '解锁高级功能',
+    my_package: '我的套餐',
+    manage_package: '管理或取消专业版套餐',
+    cancel_pro_btn: '取消专业版套餐',
+    confirm_cancel_subscription: '您确定要取消专业版套餐并降级到基础版计划吗？您将失去访问数据分析面板的权限。',
     role_buyer: '买家',
     role_farmer: '农民',
     role_user: '用户',
@@ -1898,7 +1910,14 @@ function translatePage() {
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (t[key]) el.textContent = t[key];
+    if (t[key]) {
+      let val = t[key];
+      const n = el.getAttribute('data-i18n-n');
+      if (n !== null) {
+        val = val.replace('{n}', n);
+      }
+      el.textContent = val;
+    }
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {

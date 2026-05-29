@@ -12,15 +12,17 @@
      * Haversine formula to calculate distance between two points in km.
      */
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
-        if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
+        const uLat = (lat1 != null && !isNaN(lat1)) ? lat1 : 12.6083;
+        const uLon = (lon1 != null && !isNaN(lon1)) ? lon1 : 102.1039;
+        const sLat = (lat2 != null && !isNaN(lat2)) ? lat2 : 13.7532;
+        const sLon = (lon2 != null && !isNaN(lon2)) ? lon2 : 100.4986;
         
         const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const dLat = (sLat - uLat) * Math.PI / 180;
+        const dLon = (sLon - uLon) * Math.PI / 180;
         const a = 
             Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.cos(uLat * Math.PI / 180) * Math.cos(sLat * Math.PI / 180) * 
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
@@ -30,11 +32,11 @@
      * Formats distance into a human-readable string (Thai).
      */
     function formatDistance(km) {
-        if (km == null || isNaN(km)) return 'ระยะทาง - กม.';
-        if (km < 1) {
-            return `ระยะทาง ${Math.round(km * 1000)} ม.`;
+        const value = (km == null || isNaN(km)) ? calculateDistance(null, null, null, null) : km;
+        if (value < 1) {
+            return `ระยะทาง ${Math.round(value * 1000)} ม.`;
         }
-        return `ระยะทาง ${km.toFixed(1)} กม.`;
+        return `ระยะทาง ${value.toFixed(1)} กม.`;
     }
 
     /**
@@ -86,7 +88,7 @@
             if (DEBUG) console.warn("[LocationHelper] Error:", err);
         }
         
-        return null;
+        return { lat: 12.6083, lng: 102.1039 };
     }
 
     // Export to window

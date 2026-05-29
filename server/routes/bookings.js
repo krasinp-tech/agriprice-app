@@ -74,7 +74,28 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (error) throw error;
     if (!data) return res.status(404).json(response.error('ไม่พบข้อมูลการจอง'));
 
-    res.json({ success: true, data });
+    // ดึงที่อยู่จาก user_addresses (สมุดที่อยู่) ของเกษตรกร
+    let farmerAddress = null;
+    if (data.farmer_id) {
+      const { data: addrData, error: addrError } = await supabaseAdmin
+        .from('user_addresses')
+        .select('*')
+        .eq('user_id', data.farmer_id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (!addrError && addrData && addrData.length > 0) {
+        const primaryAddr = addrData.find(a => a.is_default) || addrData[0];
+        farmerAddress = [primaryAddr.address_line1, primaryAddr.address_line2].filter(Boolean).join(' ').trim();
+      }
+    }
+
+    const resultData = {
+      ...data,
+      farmer_address: farmerAddress
+    };
+
+    res.json({ success: true, data: resultData });
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }
@@ -308,7 +329,7 @@ router.post('/', authMiddleware, async (req, res) => {
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, cancel_reason, complete_note } = req.body;
     const { id: userId, role } = req.user;
 
     const allowedStatuses = ['waiting', 'success', 'cancel'];
@@ -319,7 +340,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     // ดึงข้อมูล booking ก่อน เพื่อตรวจสอบ ownership
     let query = supabaseAdmin
       .from('bookings')
-      .select('booking_id, farmer_id, buyer_id, status');
+      .select('booking_id, booking_no, farmer_id, buyer_id, status, queue_no');
 
     if (!isNaN(Number(id))) {
       query = query.eq('booking_id', id);
@@ -348,6 +369,14 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     const updates = {};
     if (status) updates.status = status;
 
+    // บันทึกเหตุผลตามสถานะ
+    if (status === 'cancel' && cancel_reason) {
+      updates.cancel_reason = cancel_reason.trim().slice(0, 500);
+    }
+    if (status === 'success' && complete_note) {
+      updates.complete_note = complete_note.trim().slice(0, 500);
+    }
+
     const { data, error } = await supabaseAdmin
       .from('bookings')
       .update(updates)
@@ -356,6 +385,30 @@ router.patch('/:id', authMiddleware, async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // ส่ง notification พร้อมเหตุผล
+    const notifyUserId = isBuyerOwner ? booking.farmer_id : booking.buyer_id;
+    if (notifyUserId && status) {
+      let notifTitle = '';
+      let notifDesc = '';
+      if (status === 'cancel') {
+        notifTitle = `การจอง ${booking.booking_no} ถูกยกเลิก`;
+        notifDesc = cancel_reason ? `เหตุผล: ${cancel_reason}` : `คิว ${booking.queue_no || '-'} ถูกยกเลิกแล้ว`;
+      } else if (status === 'success') {
+        notifTitle = `การจอง ${booking.booking_no} สำเร็จแล้ว`;
+        notifDesc = complete_note ? `หมายเหตุ: ${complete_note}` : `คิว ${booking.queue_no || '-'} เสร็จสมบูรณ์`;
+      }
+      if (notifTitle) {
+        await supabaseAdmin.from('notifications').insert({
+          user_id: notifyUserId,
+          type: 'booking',
+          title: notifTitle,
+          description: notifDesc,
+          is_read: false
+        }).then(() => null).catch(() => null);
+      }
+    }
+
     res.json(response.success('อัปเดตสำเร็จ', data));
   } catch (e) {
     res.status(500).json(response.error(e.message));

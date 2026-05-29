@@ -57,10 +57,96 @@
             <span class="material-icons-outlined">add_location_alt</span>
             <span data-i18n="add_new_address">เพิ่มที่อยู่ใหม่</span>
         </button>
+
+        <!-- ── Address Modal ────────────────────────────────── -->
+        <div class="modal-fade" id="addressModal">
+            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">เพิ่มที่อยู่ใหม่</h2>
+                    <button class="close-modal-btn" id="closeModalBtn" aria-label="ปิด">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </header>
+                <form class="modal-form" id="addressForm">
+                    <input type="hidden" id="addressId" value="">
+                    
+                    <!-- Tag selection -->
+                    <div class="form-group">
+                        <label class="form-label">ประเภทที่อยู่ (Tag)</label>
+                        <div class="tag-selector">
+                            <button type="button" class="tag-btn active" data-tag="Home">
+                                <span class="material-icons-outlined">home</span>
+                                <span>บ้าน</span>
+                            </button>
+                            <button type="button" class="tag-btn" data-tag="Work">
+                                <span class="material-icons-outlined">work_outline</span>
+                                <span>ที่ทำงาน</span>
+                            </button>
+                            <button type="button" class="tag-btn" data-tag="Other">
+                                <span class="material-icons-outlined">place</span>
+                                <span>อื่นๆ</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- First/Last names -->
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label class="form-label" for="firstName">ชื่อจริง</label>
+                            <input type="text" id="firstName" class="form-input" placeholder="ระบุชื่อจริง" required>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label class="form-label" for="lastName">นามสกุล</label>
+                            <input type="text" id="lastName" class="form-input" placeholder="ระบุนามสกุล" required>
+                        </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label class="form-label" for="phone">เบอร์โทรศัพท์</label>
+                        <input type="tel" id="phone" class="form-input" placeholder="ระบุเบอร์โทรศัพท์" required>
+                    </div>
+
+                    <!-- Address Line 1 -->
+                    <div class="form-group">
+                        <label class="form-label" for="addressLine1">ที่อยู่/เลขที่บ้าน/ถนน</label>
+                        <input type="text" id="addressLine1" class="form-input" placeholder="ระบุเลขที่บ้าน ถนน ซอย" required>
+                    </div>
+
+                    <!-- Address Line 2 -->
+                    <div class="form-group">
+                        <label class="form-label" for="addressLine2">ตำบล อำเภอ จังหวัด รหัสไปรษณีย์</label>
+                        <input type="text" id="addressLine2" class="form-input" placeholder="ระบุตำบล อำเภอ จังหวัด รหัสไปรษณีย์">
+                    </div>
+
+                    <!-- Set as default toggle -->
+                    <div class="form-group flex-row align-center justify-between">
+                        <div>
+                            <label class="form-label margin-0">ตั้งเป็นที่อยู่เริ่มต้น</label>
+                            <p class="form-subtext">ใช้ที่อยู่นี้เป็นค่าเริ่มต้นสำหรับการจัดส่งและจองคิว</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="isDefault" class="toggle-input" style="display:none;">
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="cancelModalBtn">ยกเลิก</button>
+                        <button type="submit" class="btn-save" id="saveAddressBtn">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <!-- Scripts -->
     <script src="../../../js/config.js"></script>
+    <script src="../../../js/components/ui-common.js"></script>
     <script src="../../../js/global-anim.js"></script>
     <script src="../../../js/account/manage-address/address-book.js"></script>
     <script src="../../../js/auth/guard.js"></script>

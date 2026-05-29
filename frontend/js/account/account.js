@@ -199,17 +199,35 @@
 
     const tier = String(u.tier || "free").toLowerCase();
     const buyerUpgradeLink = document.getElementById("buyerUpgradeLink");
+    const buyerSubscriptionLink = document.getElementById("buyerSubscriptionLink");
 
     if (role === "buyer") {
-      if (tier === "pro") {
-        if (buyerDashboardLink) buyerDashboardLink.style.display = "flex";
-        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
-      } else {
-        if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
-        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "flex";
+      // Dashboard only for pro
+      if (buyerDashboardLink) {
+        buyerDashboardLink.style.display = (tier === "pro") ? "flex" : "none";
+      }
+      
+      // Always show subscription management for buyer
+      if (buyerSubscriptionLink) {
+        buyerSubscriptionLink.style.display = "flex";
+        
+        // Dynamically update description
+        const descEl = buyerSubscriptionLink.querySelector('.menu-sub');
+        if (descEl) {
+          const key = (tier === "pro") ? "manage_package" : "upgrade_pro_desc";
+          const defaultText = (tier === "pro") ? "จัดการหรือยกเลิกแพ็กเกจโปร" : "ปลดล็อกฟีเจอร์พรีเมียม";
+          descEl.textContent = window.i18nT ? window.i18nT(key, defaultText) : defaultText;
+          descEl.setAttribute('data-i18n', key);
+        }
+      }
+      
+      // Upgrade link is no longer needed separately
+      if (buyerUpgradeLink) {
+        buyerUpgradeLink.style.display = "none";
       }
     } else {
       if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
+      if (buyerSubscriptionLink) buyerSubscriptionLink.style.display = "none";
       if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
     }
 

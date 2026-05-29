@@ -299,24 +299,24 @@
       if (sellerSubEl) sellerSubEl.textContent = `${p.name || ''} ${p.variety || ''}`.trim();
 
       const unitStr = p.unit ? t(p.unit, p.unit) : t('kg_unit', 'กก.');
-      let prices = { A: null, B: null, C: null };
+      let prices = { A: null, B: null, C: null, D: null };
       
       let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
       if (gradesArr.length > 0) {
           gradesArr.forEach(g => {
               const gName = String(g.grade || 'คละ').toUpperCase();
               const pStr = `${Number(g.price || 0)} ${t('unit_baht', 'บ.')}/${unitStr}`;
-              if (['A','B','C'].includes(gName)) prices[gName] = pStr;
+              if (['A','B','C', 'D'].includes(gName)) prices[gName] = pStr;
               else prices.A = pStr;
           });
       } else {
           const priceStr = `${p.price} ${t('unit_baht', 'บ.')}/${unitStr}`;
           const gradeName = (p.grade || 'คละ').toUpperCase();
-          if (['A','B','C'].includes(gradeName)) prices[gradeName] = priceStr;
+          if (['A','B','C','D'].includes(gradeName)) prices[gradeName] = priceStr;
           else prices.A = priceStr;
       }
 
-      ['A', 'B', 'C'].forEach((grade) => {
+      ['A', 'B', 'C', 'D'].forEach((grade) => {
         const el = node.querySelector(`[data-bind="price${grade}"]`);
         if (!el) return;
         if (prices[grade]) {
@@ -331,12 +331,11 @@
       const hasSellerLoc = Number.isFinite(sellerLat) && Number.isFinite(sellerLng);
       const distanceEl = node.querySelector('[data-bind="distance"]');
       if (distanceEl) {
-        if (viewerLoc && hasSellerLoc && window.LocationHelper?.calculateDistance) {
-          const distKm = window.LocationHelper.calculateDistance(viewerLoc.lat, viewerLoc.lng, sellerLat, sellerLng);
-          const distText = window.LocationHelper?.formatDistance
-            ? window.LocationHelper.formatDistance(distKm)
-            : `${distKm.toFixed(1)} ${t('km', 'กม.')}`;
-          distanceEl.textContent = distText;
+        if (window.LocationHelper?.formatDistance) {
+          const uLat = viewerLoc?.lat;
+          const uLng = viewerLoc?.lng;
+          const distKm = window.LocationHelper.calculateDistance(uLat, uLng, sellerLat, sellerLng);
+          distanceEl.textContent = window.LocationHelper.formatDistance(distKm);
         } else {
           distanceEl.textContent = `${t('distance', 'ระยะทาง')} - ${t('km', 'กม.')}`;
         }

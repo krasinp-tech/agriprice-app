@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 unit: p.unit || 'กก.',
                                 _id: p.product_id,
                                 is_active: p.is_active !== false,
-                                distance: '',
+                                distance: '0 กม.',
                                 update: (window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(p.updated_at || p.created_at) : (p.updated_at || p.created_at)),
                             };
                         });
