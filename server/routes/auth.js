@@ -80,10 +80,15 @@ router.post('/otp/send', otpLimiter, async (req, res) => {
       if (error) {
         console.error('[Auth] Supabase OTP error:', error.message);
         
-        // [Fallback] ถ้าส่งจริงไม่ได้เพราะไม่ได้ตั้งค่า Provider ให้สลับมา Mock อัตโนมัติ
-        if (error.message.includes('Unsupported phone provider')) {
-          console.warn('[Auth] Falling back to Mock OTP for phone:', phone);
-          return res.json(response.success('ส่ง OTP แล้ว (Mock Mode - SMS Provider not configured)'));
+        // [Fallback] ถ้าส่งจริงไม่ได้เพราะไม่ได้ตั้งค่า Provider หรือ Key ไม่ถูกต้อง ให้สลับมา Mock อัตโนมัติ
+        const msg = error.message.toLowerCase();
+        if (
+          msg.includes('unsupported phone provider') || 
+          msg.includes('invalid api key') || 
+          msg.includes('api key not found')
+        ) {
+          console.warn('[Auth] Falling back to Mock OTP for phone:', phone, '(Reason:', error.message, ')');
+          return res.json(response.success('ส่ง OTP แล้ว (Mock Mode - Configuration issue)'));
         }
         
         return res.status(400).json(response.error(error.message));

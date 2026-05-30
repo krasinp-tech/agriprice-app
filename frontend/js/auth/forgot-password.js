@@ -52,8 +52,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (!recaptchaVerifier) {
+      // ใช้ size: 'invisible' เพื่อให้ราบรื่นขึ้น และไม่โดน parent display:none บังจนค้าง
       recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'normal',
+        size: 'invisible',
         callback: (response) => {
           console.log('[ForgotPwd] reCAPTCHA verified');
         }
@@ -81,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setLoading(btnSendOTP, true);
     hideError(1);
+    const error2 = document.getElementById('error2');
+    if (error2) { error2.textContent = ''; error2.classList.remove('is-show'); }
 
     const e164Phone = toE164(phone);
     const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888'];
@@ -90,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!TEST_PHONES.includes(e164Phone)) {
         try {
           await initFirebaseOtp();
+          // แสดง container เผื่อโดนท้าทาย
           const recaptchaEl = document.getElementById('recaptcha-container');
           if (recaptchaEl) recaptchaEl.style.display = 'flex';
 
@@ -112,6 +116,12 @@ document.addEventListener('DOMContentLoaded', function () {
       if (res.success) {
         currentPhone = phone;
         displayPhone.textContent = formatPhone(phone);
+        
+        // แจ้งเตือนถ้าเป็น Mock Mode
+        if (res.message && (res.message.includes('Mock') || res.message.includes('ทดสอบ'))) {
+           showError(2, 'ระบบอยู่ในโหมดทดสอบ: กรุณาใช้รหัส 123456');
+        }
+
         goToStep(2);
         startTimer(120);
         confirmationResult = { isFallback: true };

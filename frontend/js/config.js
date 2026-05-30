@@ -30,7 +30,19 @@
 			return 'http://localhost:5000';
 		}
 
-		// ALWAYS DEFAULT TO PRODUCTION RENDER for reliability during presentation/handoff
+		// For development (localhost), default to local backend at http://localhost:5000
+		if (hostname === 'localhost' || hostname === '127.0.0.1') {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Development mode: Using localhost:5000');
+			return 'http://localhost:5000';
+		}
+
+		// For native apps (Capacitor), use production Render
+		if (isNative) {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Native app: Using Production API: https://agriprice-app.onrender.com');
+			return 'https://agriprice-app.onrender.com';
+		}
+
+		// Default to production Render
 		if (window.AGRIPRICE_DEBUG) console.log('[config] Defaulting to Production API: https://agriprice-app.onrender.com');
 		return 'https://agriprice-app.onrender.com';
 	})();
