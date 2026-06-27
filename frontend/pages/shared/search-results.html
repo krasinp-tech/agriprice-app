@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api-client.js"></script>
     <script src="../../js/components/i18n.js"></script>
+    <script src="../../js/global-anim.js"></script>
+    <script src="../../js/auth/guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-i18n="search_results_title_page">ผลการค้นหา - AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +27,9 @@
 
     <link rel="stylesheet" href="../../css/global.css">
     <link rel="stylesheet" href="../../css/shared-pages/search.css">
+    <link rel="stylesheet" href="../../components/product-grade/product-grade.css">
     <link rel="stylesheet" href="../../components/product-card/product-card.css">
     <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css">
-    <script src="../../js/global-anim.js"></script>
-    <script src="../../js/permission-manager.js"></script>
     <link rel="stylesheet" href="../../css/dark-mode-patch.css">
 </head>
 
@@ -24,7 +37,7 @@
     <!-- ── Search Header ─────────────────────────────────── -->
     <section class="search-header-section">
         <div class="search-header-container">
-            <button class="back-btn" id="backBtn">
+            <button class="back-btn" id="backBtn" data-back>
                 <span class="material-icons-outlined">arrow_back</span>
             </button>
             <div class="search-box-header">
@@ -127,23 +140,9 @@
 </nav></div>
 
     <!-- Core Scripts -->
-    <script src="../../js/config.js"></script>
-    <script src="../../js/utils/storage-keys.js"></script>
-    <script src="../../js/api-client.js"></script>
-    <script src="../../js/utils/auth.js"></script>
-    <script src="../../js/auth/guard.js"></script>
     <script>window.AuthGuard.requireLogin();</script>
 
-    <!-- Component & Page Scripts -->
-    <script src="../../js/global-anim.js"></script>
-    <script src="../../js/config.js"></script>
-    <script src="../../js/api-client.js"></script>
-    <script src="../../js/components/i18n.js"></script>
-    <script src="../../js/components.js"></script>
-    <script src="../../js/utils/location-helper.js"></script>
-    <script src="../../js/utils/ui-helpers.js"></script>
-    <script src="../../js/shared-pages/search.js"></script>
-    <script src="../../components/product-card/product-card.js"></script>
+    <!-- Component & Page Scripts -->
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -162,19 +161,20 @@
 
             // Month Grid Generation
             const monthGrid = document.getElementById('monthGrid');
+            const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
             const months = [
-                window.i18nT('mon_jan', 'ม.ค.'),
-                window.i18nT('mon_feb', 'ก.พ.'),
-                window.i18nT('mon_mar', 'มี.ค.'),
-                window.i18nT('mon_apr', 'เม.ย.'),
-                window.i18nT('mon_may', 'พ.ค.'),
-                window.i18nT('mon_jun', 'มิ.ย.'),
-                window.i18nT('mon_jul', 'ก.ค.'),
-                window.i18nT('mon_aug', 'ส.ค.'),
-                window.i18nT('mon_sep', 'ก.ย.'),
-                window.i18nT('mon_oct', 'ต.ค.'),
-                window.i18nT('mon_nov', 'พ.ย.'),
-                window.i18nT('mon_dec', 'ธ.ค.')
+                t('mon_jan', 'ม.ค.'),
+                t('mon_feb', 'ก.พ.'),
+                t('mon_mar', 'มี.ค.'),
+                t('mon_apr', 'เม.ย.'),
+                t('mon_may', 'พ.ค.'),
+                t('mon_jun', 'มิ.ย.'),
+                t('mon_jul', 'ก.ค.'),
+                t('mon_aug', 'ส.ค.'),
+                t('mon_sep', 'ก.ย.'),
+                t('mon_oct', 'ต.ค.'),
+                t('mon_nov', 'พ.ย.'),
+                t('mon_dec', 'ธ.ค.')
             ];
             months.forEach((m, idx) => {
                 const btn = document.createElement('button');
@@ -189,6 +189,16 @@
         });
     </script>
     
-    <!-- Bottom Navigation Component -->
+    <script src="../../js/components.js"></script>
+    <script src="../../js/utils/location-helper.js"></script>
+    <script src="../../js/utils/ui-helpers.js"></script>
+    <script src="../../components/product-grade/product-grade.js"></script>
+    <script src="../../components/product-card/product-card.js"></script>
+    <script src="../../js/shared-pages/search.js"></script>
 </body>
 </html>
+
+
+
+
+

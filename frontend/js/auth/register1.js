@@ -3,11 +3,11 @@
   - เล่นวิดีโออัตโนมัติ (ด้านบน + ในการ์ด)
   - ถัดไป -> เปิด modal ยืนยัน
   - ยืนยัน -> ไป register2 พร้อม role และเก็บ sessionStorage
-  - พร้อมต่อ DB ภายหลัง: role ถูกส่งไปกับ query param
+  - role ใช้จาก sessionStorage เป็นแหล่งข้อมูลเดียว
 */
 
 (function () {
-  const KEY_ROLE = "register_role";
+  const KEY_ROLE = "reg_role";
 
   const cards = Array.from(document.querySelectorAll(".role-card"));
   const nextBtn = document.getElementById("nextBtn");
@@ -155,8 +155,8 @@
       const role = modal.dataset.role || sessionStorage.getItem(KEY_ROLE);
       if (!role) return;
 
-      // ไป step2 พร้อมส่ง role ให้ backend
-      if (window.navigateWithTransition) window.navigateWithTransition(`${ROUTES.register2}?role=${encodeURIComponent(role)}`); else window.location.href = `${ROUTES.register2}?role=${encodeURIComponent(role)}`;
+      // ไป step2 โดยใช้ role จาก sessionStorage
+      if (window.navigateWithTransition) window.navigateWithTransition(ROUTES.register2); else window.location.href = ROUTES.register2;
     });
   }
 

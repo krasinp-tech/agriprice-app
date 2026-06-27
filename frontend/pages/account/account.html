@@ -2,10 +2,17 @@
 <html lang="th">
 
 <head>
+   
+    <script src="../../js/api-client.js"></script>
+   
+    <script src="../../js/auth/guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="manage_account">จัดการบัญชี</title>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,11 +43,11 @@
     <section class="acc-content">
       <h1 class="acc-title" data-i18n="manage_account">จัดการบัญชี</h1>
 
-      <section class="profile-card" aria-label="โปรไฟล์">
+      <section class="profile-card" aria-label="โปรไฟล์" data-i18n-aria-label="tab_about">
         <div class="avatar-wrap">
-          <img id="avatarImg" class="avatar" src="../../assets/images/default.png" alt="รูปโปรไฟล์" />
+          <img id="avatarImg" class="avatar" src="../../assets/images/default.png" alt="รูปโปรไฟล์" data-i18n-alt="profile_title" />
           <button class="avatar-edit" id="avatarEditBtn" type="button" aria-label="แก้ไขรูปโปรไฟล์"
-            data-i18n-aria-label="edit_avatar">
+            data-i18n-aria-label="edit_profile_title">
             <span class="material-icons-outlined">edit</span>
           </button>
           <input id="avatarFile" type="file" accept="image/*" hidden />
@@ -116,15 +123,6 @@
           <div class="menu-text">
             <div class="menu-title" data-i18n="upgrade_pro">อัปเกรดเป็นโปร</div>
             <div class="menu-sub" data-i18n="upgrade_pro_desc">ปลดล็อกฟีเจอร์พรีเมียม</div>
-          </div>
-          <span class="material-icons-outlined chev">chevron_right</span>
-        </a>
-
-        <a class="menu-item" id="buyerSubscriptionLink" href="../account/subscription.html" style="display:none;">
-          <span class="menu-icon-wrap"><span class="material-icons-outlined mi">card_membership</span></span>
-          <div class="menu-text">
-            <div class="menu-title" data-i18n="my_package">แพ็กเกจของฉัน</div>
-            <div class="menu-sub" data-i18n="manage_package">จัดการหรือยกเลิกแพ็กเกจโปร</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -236,11 +234,9 @@
         <span class="material-icons-outlined">home</span>
         <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
       </a>
-      <a href="../../pages/shared/chat.html" class="bottom-nav-item" data-page="chat">
-        <div class="nav-icon-wrapper">
-          <span class="material-icons-outlined">chat_bubble_outline</span>
-          <span class="nav-badge" style="display: none;"></span>
-        </div>
+      <a href="../../pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
         <span class="nav-label" data-i18n="nav_chat">แชท</span>
       </a>
       <a href="../../pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
@@ -251,7 +247,7 @@
         <span class="material-icons-outlined">notifications_none</span>
         <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
       </a>
-      <a href="account.html" class="bottom-nav-item" data-page="account">
+      <a href="../../pages/account/account.html" class="bottom-nav-item" data-page="account">
         <span class="material-icons-outlined">person_outline</span>
         <span class="nav-label" data-i18n="nav_account">บัญชี</span>
       </a>
@@ -274,18 +270,25 @@
   </div>
 
   <!-- Core Scripts -->
-  <script src="../../js/config.js"></script>
-  <script src="../../js/utils/storage-keys.js"></script>
-  <script src="../../js/api-client.js"></script>
-  <script src="../../js/utils/auth.js"></script>
-  <script src="../../js/auth/guard.js"></script>
+ 
+    <script src="../../js/config.js"></script>
+ 
+    <script src="../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../js/api-client.js"></script>
+ 
+    <script src="../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
-  <script src="../../js/global-anim.js"></script>
-  <script src="../../js/components/i18n.js"></script>
-  <script src="../../js/components.js"></script>
-  <script src="../../js/account/account.js?v=2.5.56.2"></script>
+ 
+    <script src="../../js/global-anim.js"></script>
+ 
+    <script src="../../js/components/i18n.js"></script>
+ 
+    <script src="../../js/components.js"></script>
+ 
+    <script src="../../js/account/account.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       if (window.i18nInit) window.i18nInit();
@@ -294,3 +297,7 @@
 </body>
 
 </html>
+
+
+
+

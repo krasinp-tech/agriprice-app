@@ -1,23 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth/guard.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>สมัครสมาชิก | Agriprice</title>
+  <title data-i18n="register_now">สมัครสมาชิก | Agriprice</title>
+  <meta name="theme-color" content="#0B853C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/global.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
+  <link rel="stylesheet" href="../../css/global.css" />
   <link rel="stylesheet" href="../../css/auth/register2.css" />
-  <script src="../../js/config.js"></script>
-  <script src="../../js/utils/storage-keys.js"></script>
-  <script src="../../js/api-client.js"></script>
-  <script src="../../js/utils/auth.js"></script>
-  <script src="../../js/global-anim.js"></script>
-  <script src="../../js/permission-manager.js"></script>
   <link rel="stylesheet" href="../../css/dark-mode-patch.css">
+  
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
 </head>
 
 <body>
@@ -34,7 +42,6 @@
           loop
           playsinline
           preload="auto"
-          poster="../../assets/images/story-1.jpg"
           controlslist="nodownload noplaybackrate noremoteplayback"
           disablepictureinpicture
         >
@@ -46,38 +53,38 @@
       <!-- CONTENT SHEET -->
       <div class="content">
         <header class="head">
-          <h1 class="h1">สมัครสมาชิก</h1>
-          <p class="subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งาน</p>
+          <h1 class="h1" data-i18n="register_now">สมัครสมาชิก</h1>
+          <p class="subtitle" data-i18n="register_subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งาน</p>
         </header>
 
         <form class="form" id="registerForm" novalidate>
           <div class="field">
-            <label class="label" for="firstName">ชื่อ</label>
-            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" />
+            <label class="label" for="firstName" data-i18n="first_name_label">ชื่อ</label>
+            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" placeholder="ชื่อ" data-i18n-placeholder="first_name_label" required />
             <p class="help" id="firstNameHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="lastName">นามสกุล</label>
-            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" />
+            <label class="label" for="lastName" data-i18n="last_name_label">นามสกุล</label>
+            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" placeholder="นามสกุล" data-i18n-placeholder="last_name_label" required />
             <p class="help" id="lastNameHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="email">อีเมล <span class="req">*</span>ถ้ามี</label>
-            <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" />
+            <label class="label" for="email" data-i18n="email_optional">อีเมล (ถ้ามี)</label>
+            <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="email@example.com" />
             <p class="help" id="emailHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="phone">เบอร์โทรศัพท์</label>
-            <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" />
+            <label class="label" for="phone" data-i18n="phone_label">เบอร์โทรศัพท์</label>
+            <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0XXXXXXXXX" maxlength="10" required />
             <p class="help" id="phoneHelp"></p>
           </div>
 
           <div class="error" id="formError" role="alert" aria-live="polite"></div>
 
-          <button class="btn" id="nextBtn" type="submit">ถัดไป</button>
+          <button class="btn" id="nextBtn" type="submit" data-i18n="next_btn">ถัดไป</button>
           <p class="hint" id="hintText" aria-live="polite"></p>
         </form>
 
@@ -85,6 +92,13 @@
     </section>
   </main>
 
+  <script src="../../js/components/i18n.js"></script>
+  <script src="../../js/utils/location-helper.js"></script>
   <script src="../../js/auth/register2.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.i18nInit) window.i18nInit();
+    });
+  </script>
 </body>
 </html>

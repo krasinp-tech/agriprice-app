@@ -5,23 +5,11 @@
  */
 const path    = require('path');
 const fs      = require('fs');
-const { createClient } = require('@supabase/supabase-js');
+const { supabaseAdmin } = require('../utils/supabase');
 
-const UPLOAD_MODE   = process.env.UPLOAD_MODE   || 'supabase-storage';
-const UPLOAD_DIR    = process.env.UPLOAD_DIR    || path.join(__dirname, '..', 'uploads');
-const SUPABASE_URL  = process.env.SUPABASE_URL;
-const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const UPLOAD_MODE    = process.env.UPLOAD_MODE || 'supabase-storage';
+const UPLOAD_DIR     = process.env.UPLOAD_DIR  || path.join(__dirname, '..', 'uploads');
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'agriprice';
-
-let supabaseAdmin;
-if (UPLOAD_MODE === 'supabase-storage') {
-  if (!SUPABASE_URL || !SERVICE_KEY) {
-    throw new Error('❌ ต้องตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY ใน .env');
-  }
-  supabaseAdmin = createClient(SUPABASE_URL, SERVICE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
 
 /**
  * บันทึกไฟล์จาก multer และคืน URL หรือ path

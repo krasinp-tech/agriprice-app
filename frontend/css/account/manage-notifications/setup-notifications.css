@@ -1,4 +1,11 @@
 
+body {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 .notify-page {
   min-height: 100vh;
   background: var(--bg-page);

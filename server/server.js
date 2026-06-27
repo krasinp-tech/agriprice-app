@@ -31,7 +31,7 @@ const searchRateLimiter = rateLimit({
 
 // นำเข้าระบบอัตโนมัติ: ปิดคิวจองที่หมดเวลา และสแกนราคากลางจากเว็บรัฐ
 const { autoCompleteDueBookings, autoCloseStaleProductsAndSlots, AUTO_SUCCESS_SCAN_MS } = require('./services/automationService');
-require('./services/ditScraper');
+// require('./services/ditScraper');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,9 +52,7 @@ const ALWAYS_ALLOWED = [
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:5501',
-  'http://127.0.0.1:5501',
-  'http://localhost:5502',
-  'http://127.0.0.1:5502'
+  'http://127.0.0.1:5501'
 ];
 
 app.use(cors({
@@ -85,7 +83,6 @@ if ((process.env.UPLOAD_MODE || 'supabase-storage') === 'local') {
 }
 
 // --- 4. Routes Registration (การลงทะเบียนเส้นทาง API) ---
-// ส่วนนี้คือหัวใจสำคัญที่คอยบอกว่า URL ไหน ให้ไปทำงานที่ไฟล์ไหน
 app.use('/api/auth', require('./routes/auth'));                    // ระบบสมัครสมาชิก / ล็อกอิน
 app.use('/api/profile', require('./routes/profile'));              // จัดการข้อมูลส่วนตัวผู้ใช้
 app.use('/api/profiles', require('./routes/profile'));
@@ -134,7 +131,7 @@ app.listen(PORT, '0.0.0.0', async () => {
 
   // [WARN] แจ้งเตือนถ้า OTP_MOCK ยังเปิดอยู่ใน production
   if (process.env.OTP_MOCK === 'true' && process.env.NODE_ENV === 'production') {
-    logger.warn('⚠️  WARNING: OTP_MOCK=true ใน production! ทุกคนสามารถ login ด้วย OTP "123456" ได้ — ตั้งค่า OTP_MOCK=false ใน .env ทันที');
+    logger.warn('⚠️  WARNING: OTP_MOCK=true ใน production! โหมดนี้ไม่ควรถูกเปิดใช้งาน — ตั้งค่า OTP_MOCK=false ใน .env ทันที');
   }
 
   // สั่งรันระบบ Background Worker (ทำงานเบื้องหลังอัตโนมัติ)

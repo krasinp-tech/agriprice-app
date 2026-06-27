@@ -114,16 +114,17 @@
 
 /* product category items */
 [data-theme="dark"] .product-item {
-  background: var(--bg-card) !important;
-  border-color: var(--border-light) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .product-item:hover {
-  border-color: rgba(11,133,60,0.3) !important;
+  border: none !important;
 }
 
 [data-theme="dark"] .product-item .cat-icon {
-  background: rgba(11,133,60,0.15) !important;
+  /* No forced background, let the custom gradients handle it */
 }
 
 /* farmer listing cards */
@@ -163,15 +164,7 @@
    SECTION 3: bottom-nav/bottom-nav.css
    ============================================================ */
 
-/* bottom-nav ใช้ var() แล้ว แต่ inactive color hardcode #AAAAAA */
-[data-theme="dark"] .bottom-nav-item {
-  color: #636366 !important;
-}
-
-[data-theme="dark"] .bottom-nav-item.active,
-[data-theme="dark"] .bottom-nav-item.is-active {
-  color: var(--primary) !important;
-}
+/* (Overridden in base component) */
 
 
 /* ============================================================
@@ -333,6 +326,34 @@
 [data-theme="dark"] .card {
   background: var(--bg-card) !important;
   border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .round-card {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .round-card-title {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .round-card-status {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .round-card-details {
+  border-top-color: var(--border-light) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .round-card-details span {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .round-card-details .material-icons-outlined {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .round-card .icon-btn {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .round-card .icon-btn:hover {
+  background-color: rgba(239, 68, 68, 0.15) !important;
 }
 
 [data-theme="dark"] .timeslot {
@@ -1520,12 +1541,32 @@
 /* ============================================================
    SECTION 32: buyer/setbooking/setbooking-step1.css
    ============================================================ */
+[data-theme="dark"] .card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+}
 [data-theme="dark"] .label {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .hint {
   color: var(--text-muted) !important;
 }
-[data-theme="dark"] .combo-input {
-  color: var(--text-main) !important;
+[data-theme="dark"] .combo,
+[data-theme="dark"] .textarea-wrap,
+[data-theme="dark"] .text-input,
+[data-theme="dark"] .price-input {
   background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .combo-input,
+[data-theme="dark"] .textarea,
+[data-theme="dark"] .price-number {
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .combo-input::placeholder,
+[data-theme="dark"] .textarea::placeholder,
+[data-theme="dark"] .text-input::placeholder {
+  color: var(--text-dim) !important;
 }
 [data-theme="dark"] .combo-menu {
   background: var(--bg-card) !important;
@@ -1535,13 +1576,22 @@
 [data-theme="dark"] .combo-item:hover {
   background: rgba(255,255,255,0.05) !important;
 }
-[data-theme="dark"] .textarea {
-  background: var(--bg-input) !important;
+[data-theme="dark"] .combo-item strong {
   color: var(--text-main) !important;
-  border-color: var(--border-medium) !important;
+}
+[data-theme="dark"] .combo-item small {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .grade-card {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+[data-theme="dark"] .grade-price,
+[data-theme="dark"] .price-suffix {
+  color: var(--text-muted) !important;
 }
 [data-theme="dark"] .grade-remove {
-  background: var(--bg-input) !important;
+  background: var(--bg-card) !important;
   color: var(--text-muted) !important;
 }
 [data-theme="dark"] .add-grade {
@@ -1549,13 +1599,34 @@
   border-color: var(--border-medium) !important;
   color: var(--text-muted) !important;
 }
-[data-theme="dark"] .modal {
+[data-theme="dark"] .modal-overlay {
   background: rgba(0,0,0,0.7) !important;
 }
-[data-theme="dark"] .modal-title-btn,
-[data-theme="dark"] .modal-box {
+[data-theme="dark"] .modal {
   background: var(--bg-card) !important;
-  border-color: var(--border-light) !important;
+  border: 1px solid var(--border-light) !important;
+}
+[data-theme="dark"] .modal-title-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--primary) !important;
+}
+[data-theme="dark"] .pill {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .pill.selected {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+[data-theme="dark"] .btn.ghost {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .debug {
+  background: #000 !important;
+  border: 1px solid #333 !important;
 }
 
 /* ============================================================
@@ -1897,6 +1968,15 @@
   border-color: var(--border-light) !important;
 }
 
+[data-theme="dark"] .profile-hero-section {
+  background: #1c1c1e !important;
+}
+
+[data-theme="dark"] .profile-avatar-box {
+  background: var(--bg-input) !important;
+  border-color: var(--bg-card) !important;
+}
+
 [data-theme="dark"] .product-card-light {
   background: var(--bg-card) !important;
   border-color: var(--border-light) !important;
@@ -1917,6 +1997,7 @@
 }
 
 [data-theme="dark"] .pc-grade-box {
+  background: var(--bg-input) !important;
   border-color: var(--border-medium) !important;
 }
 
@@ -1930,10 +2011,12 @@
 }
 
 [data-theme="dark"] .pc-btn-contact,
-[data-theme="dark"] .btn-outline {
-  background: var(--bg-input) !important;
+[data-theme="dark"] .btn-contact,
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-follow {
+  background: rgba(255, 255, 255, 0.1) !important;
   color: var(--text-main) !important;
-  border-color: var(--border-medium) !important;
+  border-color: transparent !important;
 }
 
 [data-theme="dark"] .contact-item-row,
@@ -1959,8 +2042,8 @@
 }
 
 [data-theme="dark"] .profile-tab.active {
-  color: #4ade80 !important;
-  border-color: #4ade80 !important;
+  background: #0B853C !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .empty-state {
@@ -1969,6 +2052,7 @@
 
 [data-theme="dark"] .modal-content {
   background: var(--bg-card) !important;
+  border: 1px solid var(--border-light) !important;
 }
 
 [data-theme="dark"] .modal-content h3 {
@@ -1988,4 +2072,45 @@
 
 [data-theme="dark"] .location-text .location-sub {
   color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .location-link {
+  background: rgba(11, 133, 60, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .service-icon.green, 
+[data-theme="dark"] .service-icon.money { background: rgba(34, 197, 94, 0.15) !important; }
+[data-theme="dark"] .service-icon.orange { background: rgba(245, 158, 11, 0.15) !important; }
+[data-theme="dark"] .service-icon.purple { background: rgba(124, 58, 237, 0.15) !important; }
+
+[data-theme="dark"] .service-icon.green span,
+[data-theme="dark"] .service-icon.money span { color: #4ade80 !important; }
+[data-theme="dark"] .service-icon.orange span { color: #fbbf24 !important; }
+[data-theme="dark"] .service-icon.purple span { color: #a78bfa !important; }
+
+[data-theme="dark"] .profile-about-text {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .profile-back-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .pc-badge.open {
+  background: rgba(22, 163, 74, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .pc-badge.closed {
+  background: rgba(220, 38, 38, 0.2) !important;
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] #leafletMapDiv {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%) !important;
+}
+
+[data-theme="dark"] .leaflet-container {
+  background: #1c1c1e !important;
 }

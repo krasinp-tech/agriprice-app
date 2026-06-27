@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+   
+    <script src="../../../js/api-client.js"></script>
+   
+    <script src="../../../js/auth/guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="my_account">บัญชีของฉัน | AGRIPRICE</title>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +78,7 @@
         </a>
 
 
+
         <a class="ma-row ma-row-danger" href="deactivate-account.html">
           <div class="ma-row-copy">
             <div class="ma-label" data-i18n="delete_account">ปิดใช้งานหรือลบบัญชี</div>
@@ -83,19 +91,27 @@
   </main>
 
   <!-- Core Scripts -->
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/utils/storage-keys.js"></script>
-  <script src="../../../js/api-client.js"></script>
-  <script src="../../../js/utils/auth.js"></script>
-  <script src="../../../js/auth/guard.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../../js/api-client.js"></script>
+ 
+    <script src="../../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/components/i18n.js"></script>
-  <script src="../../../js/components.js"></script>
-  <script src="../../../js/account/manage-accounts/account-store.js"></script>
-  <script src="../../../js/account/manage-accounts/my-account.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/components/i18n.js"></script>
+ 
+    <script src="../../../js/components.js"></script>
+ 
+    <script src="../../../js/account/manage-accounts/account-store.js"></script>
+ 
+    <script src="../../../js/account/manage-accounts/my-account.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       if (window.i18nInit) window.i18nInit();
@@ -108,3 +124,7 @@
   </script>
 </body>
 </html>
+
+
+
+

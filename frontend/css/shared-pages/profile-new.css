@@ -34,18 +34,31 @@
     color: #8e8e93 !important;
 }
 
-[data-theme="dark"] .btn-follow,
-[data-theme="dark"] .pc-btn-contact {
+[data-theme="dark"] .btn-follow {
     background: #2c2c2e !important;
     color: #f2f2f7 !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-[data-theme="dark"] .product-card-light,
-[data-theme="dark"] .pc-grade-box,
-[data-theme="dark"] .pc-avatar {
+[data-theme="dark"] .pc-btn-contact {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #f2f2f7 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .pc-btn-contact:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .product-card-light {
     background: #2c2c2e !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .pc-grade-box,
+[data-theme="dark"] .pc-avatar {
+    background: #1c1c1e !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 [data-theme="dark"] .profile-tab {
@@ -102,7 +115,7 @@ body {
 
 .profile-back-btn {
     position: absolute;
-    top: max(var(--safe-area-top, 16px), 16px);
+    top: calc(16px + env(safe-area-inset-top, 0px));
     left: 16px;
     width: 40px;
     height: 40px;
@@ -123,7 +136,7 @@ body {
     background: #ffffff;
     border-radius: 30px 30px 0 0;
     margin-top: -40px; /* Overlap the hero */
-    padding: 0 24px 120px 24px;
+    padding: 0 24px 36px 24px;
     min-height: calc(100vh - 220px);
     z-index: 5;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
@@ -405,31 +418,38 @@ body {
     gap: 4px;
 }
 
-.pc-actions {
-    display: flex;
-    gap: 8px;
+
+
+/* ── Dark Mode Edit Profile Modal Patches ──────────────── */
+[data-theme="dark"] .modal-content {
+    background: #1c1c1e !important;
+    color: #ffffff !important;
 }
 
-.pc-btn-contact {
-    flex: 1;
-    height: 38px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    color: #666;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
+[data-theme="dark"] .modal-content label {
+    color: #8e8e93 !important;
 }
 
-.pc-btn-book {
-    flex: 1;
-    height: 38px;
-    background: #00c853;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
+[data-theme="dark"] #servicesEditor {
+    background: #2c2c2e !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] #servicesEditor label {
+    color: #f2f2f7 !important;
+}
+
+[data-theme="dark"] .modal .btn-outline {
+    background: transparent !important;
+    color: #f2f2f7 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .modal .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] #getCurrentLocationBtn {
+    color: #4ade80 !important;
+    border-color: #4ade80 !important;
 }

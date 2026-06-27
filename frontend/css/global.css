@@ -1,824 +1,281 @@
-.category-card img,
-.category-card svg {
-  display: block;
-  margin: 0 auto;
-  max-width: 40px;
-  max-height: 40px;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-.category-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-/* Responsive Product Card */
-.product-card {
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto 16px auto;
-  padding: 16px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  background: #181818;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ================================================================
+   AGRIPRICE — global.css
+   Base: ต้นฉบับที่สวย + CSS variables สำหรับ dark mode
+================================================================ */
+
+/* ── CSS Variables (สำหรับ dark mode และหน้าใหม่ๆ) ──────────── */
+:root {
+  --primary:          #0B853C;
+  --primary-gradient: linear-gradient(135deg, #0B853C 0%, #096d31 100%);
+  --primary-light:    #e8f5ed;
+  --secondary:        #0E3480;
+
+  --bg-page:  #f8f8f8;
+  --bg-card:  #ffffff;
+  --bg-input: #f1f5f9;
+
+  --text-main:     #333333;
+  --text-muted:    #7e7e7e;
+  --text-dim:      #AAAAAA;
+  --text-time-ago: #059669;
+
+  --border-light:  #EFEFEF;
+  --border-medium: #d6d6d6;
+
+  --shadow-xs: 0 1px 2px  rgba(0,0,0,0.05);
+  --shadow-sm: 0 2px 8px  rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+
+  --radius-xs:    4px;
+  --radius-sm:    8px;
+  --radius-md:    12px;
+  --radius-lg:    16px;
+  --radius-xl:    24px;
+  --radius-xxl:   32px;
+  --radius-round: 999px;
+
+  --space-xxs: 2px;
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-xxl: 48px;
+
+  --font-xs:   12px;
+  --font-sm:   13px;
+  --font-md:   15px;
+  --font-lg:   17px;
+  --font-xl:   20px;
+  --font-2xl:  24px;
+  --font-xxl:  28px;
+  --font-main: 'Sarabun', 'Kanit', -apple-system, system-ui, sans-serif;
+
+  --nav-height:     64px;
+  --page-gutter:    16px;
+  --tap-target-min: 44px;
+  --app-max-width:  480px;
+
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Responsive Button */
-.button, button {
-  width: 100%;
-  padding: 12px 0;
-  font-size: 1rem;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
-/* Responsive Categories Grid */
-
-
-.categories {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px; /* ลดช่องว่างให้เหลือน้อยที่สุด */
-  margin-bottom: 16px;
-}
-
-@media (max-width: 599px) {
-  .categories {
-    grid-template-columns: repeat(2, 1fr);
+/* ── Dark Mode ───────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-page:       #000000;
+    --bg-card:       #1c1c1e;
+    --bg-input:      #2c2c2e;
+    --text-main:     #f2f2f7;
+    --text-muted:    #8e8e93;
+    --text-dim:      #636366;
+    --border-light:  rgba(255,255,255,0.08);
+    --border-medium: rgba(255,255,255,0.15);
+    --shadow-sm:     0 2px 8px rgba(0,0,0,0.5);
+    --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+    --text-time-ago: #34d399;
   }
 }
 
-.category-card {
-  padding: 22px 0 12px 0;
-  border-radius: 14px;
-  min-width: 0;
-  min-height: 110px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #232323;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+[data-theme="dark"] {
+  --bg-page:       #000000;
+  --bg-card:       #1c1c1e;
+  --bg-input:      #2c2c2e;
+  --text-main:     #f2f2f7;
+  --text-muted:    #8e8e93;
+  --text-dim:      #636366;
+  --border-light:  rgba(255,255,255,0.08);
+  --border-medium: rgba(255,255,255,0.15);
+  --shadow-sm:     0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
+  --text-time-ago: #34d399;
 }
 
-/* General spacing for sections */
-.section {
-  margin-bottom: 32px;
-}
-
-/* Announcement Card Responsive */
-.announcement-card {
-  min-width: 220px;
-  max-width: 320px;
-  margin-right: 12px;
-  border-radius: 12px;
-  background: #222;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-/* Fix for bottom nav spacing */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  background: #181818;
-  z-index: 100;
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-}
-
-body {
-  padding-bottom: 64px; /* for bottom nav */
-}
-/* ================================
-   AGRIPRICE - Global Styles (NEW)
-   - Fix: Tablet side squeeze
-   - Mobile-first responsive container
-================================ */
-
-/* Reset & Base */
+/* ── Reset ───────────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* Allow text selection for inputs and textareas only */
-input,
-textarea {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-/* Hide scrollbars globally on ALL elements */
-*::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-* {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
 }
 
-html,
-body {
-  width: 100%;
-  background: var(--bg-page);
-  /* Theme background to prevent white flash */
-  overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-/* ☢️ ULTIMATE aggressive scrollbar removal */
-*::-webkit-scrollbar,
-*::-webkit-scrollbar-track,
-*::-webkit-scrollbar-thumb,
-*::-webkit-scrollbar-corner,
-::-webkit-scrollbar,
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-thumb,
-::-webkit-scrollbar-corner {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  background: transparent !important;
-  opacity: 0 !important;
-}
-
-html,
-body,
-* {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-:root {
-  --primary: #0B853C;
-  --primary-dark: #096d31;
-  --primary-light: #e8f5ed;
-
-  --bg-page: #f8f9fa;
-  --bg-card: #ffffff;
-  --bg-input: #f1f5f9;
-
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --text-dim: #9ca3af;
-
-  --border-light: rgba(0, 0, 0, 0.06);
-  --border-medium: rgba(0, 0, 0, 0.1);
-
-  --app-shell-width: 480px;
-  --nav-height: 68px;
-  --app-max-width: 500px;
-  --app-shell-radius: 34px;
-  --tap-target-min: 44px;
-  --page-gutter: 28px;
-  --font-main: 'Kanit', 'Sarabun', 'Inter', -apple-system, system-ui, sans-serif;
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
-
-  /* Design Tokens - Spacing */
-  --space-xxs: 4px;
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-xxl: 48px;
-
-  /* Design Tokens - Radius */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
-  --radius-xxl: 32px;
-  --radius-round: 999px;
-
-  /* Design Tokens - Typography (Fluid Scaling) */
-  --font-xs: clamp(0.7rem, 0.05vw + 0.65rem, 0.75rem);
-  --font-sm: clamp(0.75rem, 0.1vw + 0.7rem, 0.85rem);
-  --font-md: clamp(0.85rem, 0.2vw + 0.8rem, 0.95rem);
-  --font-lg: clamp(1rem, 0.4vw + 0.9rem, 1.15rem);
-  --font-xl: clamp(1.2rem, 0.6vw + 1.1rem, 1.5rem);
-  --font-xxl: clamp(1.4rem, 1vw + 1.3rem, 2rem);
-
-  /* Design Tokens - Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
-  --text-time-ago: #059669; /* Balanced emerald for light mode */
-}
-
-/* 🌙 Dark Mode Tokens (System & Manual) */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg-page: #000000;
-    --bg-card: #1c1c1e;
-    --bg-input: #2c2c2e;
-
-    --text-main: #f2f2f7;
-    --text-muted: #8e8e93;
-    --text-dim: #636366;
-
-    --border-light: rgba(255, 255, 255, 0.08);
-    --border-medium: rgba(255, 255, 255, 0.15);
-
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.7);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
-    --text-time-ago: #34d399; /* Brighter emerald for dark mode */
-  }
-}
-
-[data-theme="dark"] {
-  --bg-page: #000000;
-  --bg-card: #1c1c1e;
-  --bg-input: #2c2c2e;
-
-  --text-main: #f2f2f7;
-  --text-muted: #8e8e93;
-  --text-dim: #636366;
-
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.15);
-
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.7);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
-  --text-time-ago: #34d399;
-}
-
+/* ── Body (เหมือนต้นฉบับ — scroll ทำงานได้ทันที) ─────────────── */
 body {
   font-family: var(--font-main);
-  /* background กำหนดโดย #f8f9fa !important ข้างบน (html, body block) */
+  background: var(--bg-page);
   color: var(--text-main);
   line-height: 1.6;
   margin: 0;
-  min-height: 100dvh;
-  /* Standard Modern Height */
-
-  /* กัน horizontal scroll จาก element ที่ล้น */
   overflow-x: hidden;
-  overflow-y: auto;
-  padding-bottom: calc(var(--nav-height, 68px) + env(safe-area-inset-bottom)) !important;
-  scroll-padding-bottom: calc(var(--nav-height, 68px) + env(safe-area-inset-bottom)) !important;
-
-  /* Mobile app-like rendering */
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-/* Make viewport height stable on mobile browser chrome show/hide */
-:root {
-  --app-vh: 1vh;
-}
-
-html,
-body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--bg-page, #F8F9FA);
-  color: var(--text-main, #1A1A1A);
-  min-height: calc(var(--app-vh) * 100);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Critical flows in PWA/Cordova: stricter app-like interaction model */
-html.app-strict-mode,
-html.app-strict-mode body {
-  overscroll-behavior: none;
+/* ── App Container (index.html) ──────────────────────────────── */
+.app-container {
+  width: 100%;
 }
 
-html.app-strict-mode body {
-  touch-action: manipulation;
+/* ── Form Basics ─────────────────────────────────────────────── */
+input, select, textarea, button {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
+input, select, textarea {
+  font-size: 16px; /* กัน iOS zoom */
+  box-sizing: border-box;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+/* ── Container ───────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .container { max-width: 100%; padding: 0 24px; }
+}
+
+@media (min-width: 1024px) {
+  .container { max-width: 1440px; padding: 0 80px; }
+}
+
+/* ── Section Header & Title ──────────────────────────────────── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 8px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.section-title-home {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  padding: 0 16px;
+}
+
+/* ── Skeleton Loading ────────────────────────────────────────── */
+.shimmer, .skeleton {
+  background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-card) 50%, var(--bg-input) 75%);
+  background-size: 200% 100%;
+  animation: shimmerAnim 1.5s infinite linear;
+  border-radius: 8px;
+  display: block;
+}
+
+@keyframes shimmerAnim {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Scrollbar Hide ──────────────────────────────────────────── */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Button Helpers ──────────────────────────────────────────── */
+.btn-block {
+  width: 100%;
+  padding: 14px;
+  font-size: var(--font-md);
+  font-family: var(--font-main);
+  border-radius: var(--radius-lg);
+  box-sizing: border-box;
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* ── Soft Guard Modal ────────────────────────────────────────── */
 .soft-guard-modal {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: none;
 }
-
-.soft-guard-modal.show {
-  display: block;
-}
-
+.soft-guard-modal.show { display: block; }
 .soft-guard-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.44);
+  background: rgba(15,23,42,0.44);
   backdrop-filter: blur(2px);
 }
-
 .soft-guard-sheet {
   position: absolute;
   left: 50%;
   bottom: calc(20px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   width: min(92vw, 420px);
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.24);
-  padding: 16px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
 }
-
-.soft-guard-sheet h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  line-height: 1.35;
-}
-
-.soft-guard-sheet p {
-  margin: 0;
-  color: #5d6778;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.soft-guard-actions {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-}
-
+.soft-guard-actions { margin-top: 14px; display: flex; gap: 10px; }
 .soft-guard-btn {
   flex: 1;
   min-height: 44px;
-  border-radius: 12px;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.soft-guard-btn.ghost {
-  background: #f1f5f9;
-  color: #334155;
-}
-
-.soft-guard-btn.danger {
-  background: #1c1c1e; /* Premium Dark instead of red */
-  color: #ffffff;
-}
-
-/* Hide selection tint that causes "blue screen" feeling on long press/select */
-::selection {
-  background: transparent;
-  color: inherit;
-}
-
-/* Allow text selection by default for better web experience, restrict only on UI elements */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button, 
-.bottom-nav-item, 
-.seg-btn, 
-.action-btn {
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-img,
-svg,
-video,
-a {
-  -webkit-user-drag: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
-}
-
-/* Keep form fields usable */
-input,
-textarea,
-[contenteditable="true"],
-.allow-select {
-  -webkit-user-select: text;
-  user-select: text;
-  -webkit-touch-callout: default;
-}
-
-/* Touch-friendly defaults */
-a,
-button,
-input,
-select,
-textarea {
-  -webkit-tap-highlight-color: transparent;
-  font: inherit;
-}
-
-button,
-[role="button"],
-.bottom-nav-item {
-  touch-action: manipulation;
-  user-select: none;
-}
-
-/* Mobile polish baseline */
-:where(.menu-item, .logout-item) {
-  min-height: 52px;
-}
-
-:where(.ud-back,
-  .back-btn,
-  .btn-back,
-  .ma-back,
-  .detail-back,
-  .notify-back,
-  .room-back) {
-  width: var(--tap-target-min);
-  height: var(--tap-target-min);
-  min-width: var(--tap-target-min);
-  min-height: var(--tap-target-min);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-}
-
-:where(.ud-header,
-  .detail-header,
-  .ma-header,
-  .notify-header,
-  .dash-header,
-  .search-header-container,
-  .booking-header,
-  .chat-header-inner,
-  .room-header,
-  .profile-header) {
-  padding-top: calc(4px + var(--safe-top, 0px)) !important;
-  padding-left: var(--page-gutter);
-  padding-right: var(--page-gutter);
-}
-
-input,
-select,
-textarea {
-  font-size: 16px;
-  /* Prevent iOS zoom on focus */
-}
-
-/* App-like press feedback */
-.menu-item,
-.logout-item,
-.bottom-nav-item,
-button {
-  transition: transform 0.14s ease, opacity 0.14s ease, background-color 0.18s ease;
-}
-
-.menu-item:active,
-.logout-item:active,
-.bottom-nav-item:active,
-.search-button:active,
-.back-btn:active,
-.btn:active,
-.booking-card:active,
-.product-card:active,
-button:active {
-  transform: scale(0.96) translateY(1px);
-  filter: brightness(0.95);
-  opacity: 0.9;
-}
-
-/* 🌀 Local Button Loading State */
-.btn-loading {
-  position: relative;
-  color: transparent !important;
-  pointer-events: none;
-}
-
-.btn-loading::after {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  top: 50%;
-  left: 50%;
-  margin: -10px 0 0 -10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: btnSpin 0.6s linear infinite;
-}
-
-@keyframes btnSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Fix: Tap Highlight on some android browsers */
-* {
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Clear Search Button */
-.clear-search {
+  border-radius: var(--radius-md);
   border: none;
-  background: transparent;
-  padding: 8px;
-  color: #999;
+  font-weight: 600;
+  font-family: var(--font-main);
   cursor: pointer;
+}
+.soft-guard-btn.ghost  { background: var(--bg-input); color: var(--text-main); }
+.soft-guard-btn.danger { background: #1c1c1e; color: #fff; }
+
+/* ── Stat Rows ───────────────────────────────────────────────── */
+.profile-stats-row, .stats-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: -4px;
-}
-
-.clear-search span {
-  font-size: 20px;
-}
-
-/* Empty States */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--text-muted, #888);
-  /* 🌙 Fix: ใช้ var แทน hardcode */
-  animation: fadeIn 0.4s ease;
-}
-
-.empty-state span.material-icons-outlined {
-  font-size: 64px;
-  color: var(--text-dim, #E0E0E0);
-  /* 🌙 Fix */
-  margin-bottom: 16px;
-}
-
-.empty-state p {
-  font-size: 15px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.empty-state .booking-subtitle {
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  margin: 0;
-  font-weight: 400;
-}
-
-/* Hide desktop scrollbar visuals for cleaner app feel */
-body::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-/* =================================
-   Container (Mobile-first)
-   Mobile: จำกัดเหมาะกับมือถือ
-   Tablet+: ขยายเต็ม/ตามขนาดจอ (แก้บีบ)
-================================= */
-.container {
-  width: 100%;
-  max-width: 428px;
-  /* มือถือ */
-  margin: 0 auto;
-  padding: 0 var(--space-md);
-}
-
-/* Tablet */
-@media (min-width: 768px) {
-  :root {
-    --page-gutter: 20px;
-  }
-
-  .container {
-    max-width: 600px;
-    /* Controlled width for tablet to keep app-like feel */
-    padding: 0 var(--space-lg);
-  }
-}
-
-/* Desktop */
-@media (min-width: 1024px) {
-  .container {
-    max-width: 800px;
-    /* Max width for desktop to prevent over-stretching */
-    padding: 0 var(--space-xxl);
-  }
-}
-
-/* =================================
-   Web Layout (Removed top navbar override)
-================================= */
-@media (min-width: 1024px) {
-  body {
-    padding-bottom: calc(var(--nav-height, 68px) + env(safe-area-inset-bottom)) !important;
-    padding-left: 0 !important;
-    padding-top: 0 !important;
-    background: var(--bg-page, #f8f9fa) !important;
-    /* 🌙 Fix: ใช้ CSS var แทน hardcode ไม่งั้น dark mode ไม่ทำงานบน desktop */
-  }
-}
-
-/* =================================
-   Section Title (for Home page)
-================================= */
-.section-title-home {
-  font-size: 15px;
-  font-weight: 500;
-  color: #7e7e7e;
-  margin-bottom: 5px;
-  padding: 0 16px;
-}
-
-/* Tablet/Desk: เพิ่มระยะข้างให้พอดีกับ container */
-@media (min-width: 768px) {
-  .section-title-home {
-    padding: 0 24px;
-    font-size: 16px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section-title-home {
-    padding: 0 80px;
-    font-size: 16px;
-  }
-}
-
-/* ================================
-   Animations
-================================ */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ================================
-   Skeleton Loading (UX Polish)
-================================ */
-/* Standard Skeleton Utility */
-.skeleton {
-  background: linear-gradient(90deg, 
-    var(--border-light) 25%, 
-    var(--border-medium) 50%, 
-    var(--border-light) 75%);
-  background-size: 200% 100%;
-  animation: skeletonLoading 1.5s infinite linear;
-  border-radius: 8px;
-  display: block;
-}
-
-[data-theme="dark"] .skeleton {
-  background: linear-gradient(90deg, 
-    rgba(255,255,255,0.05) 25%, 
-    rgba(255,255,255,0.1) 50%, 
-    rgba(255,255,255,0.05) 75%);
-  background-size: 200% 100%;
-}
-
-@keyframes skeletonLoading {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.skeleton-text {
-  height: 14px;
-  margin-bottom: 8px;
+  justify-content: space-around;
+  gap: 10px;
   width: 100%;
 }
-
-.skeleton-title {
-  height: 18px;
-  width: 70%;
-  margin-bottom: 12px;
-}
-
-.skeleton-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
-
-.skeleton-card {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: var(--bg-card);
-  border-radius: 18px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
-}
-
-.empty-card {
-  background: var(--bg-card);
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
-  text-align: center;
-}
-
-.empty-emoji {
-  font-size: 32px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-.empty-title {
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.empty-desc {
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-.skeleton-card-content {
-  flex: 1;
-}
-
-/* ================================
-   Native-like Page Transition (Restored Original)
-================================ */
-/* ── Global Animation ───────────────────────────────────── */
-.fade-slide {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.38s cubic-bezier(.4,0,.2,1), transform 0.38s cubic-bezier(.4,0,.2,1);
-}
-.fade-slide.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.modal-fade {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.28s cubic-bezier(.4,0,.2,1);
-}
-.modal-fade.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-.modal-fade .modal-content {
-  transform: translateY(32px);
-  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-}
-.modal-fade.show .modal-content {
-  transform: translateY(0);
-}
+.stat-item { flex: 1; text-align: center; }

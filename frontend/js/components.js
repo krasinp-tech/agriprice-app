@@ -8,16 +8,17 @@
         // Show confirm dialog or block exit
         if (window.navigator && window.navigator.notification && window.navigator.notification.confirm) {
           window.navigator.notification.confirm(
-            'คุณต้องการออกจากแอพหรือไม่?',
+            window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?',
             function(buttonIndex) {
               if (buttonIndex === 1) { // 1 = OK
                 navigator.app.exitApp();
               }
             },
-            'ออกจากแอพ',
-            ['ตกลง','ยกเลิก']
+            window.i18nT ? window.i18nT('exit_app_title', 'ออกจากแอพ') : 'ออกจากแอพ',
+            [window.i18nT ? window.i18nT('ok', 'ตกลง') : 'ตกลง', window.i18nT ? window.i18nT('cancel', 'ยกเลิก') : 'ยกเลิก']
           );
-        } else {
+        }
+ else {
           // Block exit (do nothing)
         }
         e.preventDefault();
@@ -181,6 +182,13 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       if (!isBottomNav) return;
 
       const pageKey = isBottomNav.dataset.page;
+      
+      // ป้องกันการโหลดซ้ำหน้าเดิม (ป้องกันหน้าขาว/กระพริบ)
+      if (document.body && document.body.dataset.active === pageKey) {
+        e.preventDefault();
+        return;
+      }
+
       const protectedPages = ['chat', 'booking', 'notifications', 'account'];
 
       if (protectedPages.includes(pageKey)) {
@@ -191,10 +199,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           if (window.AuthGuard && window.AuthGuard.requireLogin) {
             window.AuthGuard.requireLogin();
           } else {
-            const path = window.location.pathname;
-            const pagesIdx = path.indexOf("/pages/");
-            const base = pagesIdx !== -1 ? path.substring(0, pagesIdx + 1) : "/";
-            window.location.href = base + "pages/auth/login1.html";
+            const pagesPrefix = getRelativePrefixToPages();
+            window.location.href = pagesPrefix + "auth/login1.html";
           }
         }
       }
@@ -218,14 +224,16 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
   function getRelativePrefixToRoot() {
     const path = (window.location.pathname || "").replace(/\\/g, "/");
-    const dir = path.endsWith("/") ? path : path.substring(0, path.lastIndexOf("/") + 1);
-
-    const idx = dir.lastIndexOf("/pages/");
-    if (idx === -1) return "";
-
-    const afterPages = dir.substring(idx + "/pages/".length);
-    const depth = afterPages.split("/").filter(Boolean).length;
-
+    const idx = path.lastIndexOf("/pages/");
+    if (idx === -1) return "./";
+    
+    // Calculate depth after /pages/
+    const afterPages = path.substring(idx + "/pages/".length);
+    const segments = afterPages.split("/").filter(Boolean);
+    const depth = segments.length > 0 ? segments.length - 1 : 0;
+    
+    // Depth 0 means inside pages/ (e.g. pages/test.html) -> need one ../ to get to root
+    // Depth 1 means inside pages/shared/ (e.g. pages/shared/chat.html) -> need two ../ to get to root
     return "../" + "../".repeat(depth);
   }
 
@@ -247,11 +255,9 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           <span class="material-icons-outlined">home</span>
           <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
         </a>
-        <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat">
-          <div class="nav-icon-wrapper">
-            <span class="material-icons-outlined">chat_bubble_outline</span>
-            <span class="nav-badge" style="display: none;"></span>
-          </div>
+        <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+          <span class="material-icons-outlined">chat_bubble_outline</span>
+          <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
           <span class="nav-label" data-i18n="nav_chat">แชท</span>
         </a>
         <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
@@ -301,31 +307,25 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const nav = document.getElementById("bottomNav");
     if (!nav) return;
 
-    const prefixToRoot = getRelativePrefixToRoot();
+    const base = getRelativePrefixToRoot(); // e.g. "../../" or "./"
 
     nav.querySelectorAll(".bottom-nav-item").forEach((a) => {
       const href = a.getAttribute("href") || "";
-      if (!href || /^(https?:\/\/|#|tel:|mailto:)/i.test(href)) return;
+      // Skip if already absolute, external, or special
+      if (!href || /^(https?:\/\/|#|tel:|mailto:|\/)/i.test(href)) return;
 
-      // 1. ลบ ../ หรือ ./ ออกให้หมด
+      // 1. Clean existing relative indicators to make it idempotent
       let clean = href.replace(/^(\.\.\/)+/g, "").replace(/^(\.\/)+/g, "");
       
-      // 2. ถ้าเป็นไฟล์ในโฟลเดอร์ที่เรารู้จัก แต่ไม่มี pages/ นำหน้า ให้เติมเข้าไป
-      const foldersToPrefix = ["shared/", "account/", "buyer/", "farmer/"];
-      const isKnownFolder = foldersToPrefix.some(f => clean.includes(f));
+      // 2. Ensure exactly one "pages/" prefix for subfolder links if missing
+      // (The template already has "pages/shared/chat.html" etc., so usually not needed)
       
-      if (isKnownFolder && !clean.startsWith("pages/")) {
-          clean = "pages/" + clean;
+      // 3. Set the final relative path
+      a.setAttribute("href", base + clean);
+      
+      if (window.AGRIPRICE_DEBUG) {
+        console.log(`[NAV_FIX] [${a.dataset.page}] ${href} -> ${base + clean}`);
       }
-      
-      // 3. รวมร่าง (prefixToRoot คำนวณถอยหลังไปหาจุดก่อนถึง pages/)
-      const pToRoot = getRelativePrefixToRoot();
-      const finalHref = pToRoot + clean;
-      
-      // 4. Log ออกมาให้เห็นจะๆ
-      console.log(`[NAV_FIX] [${a.dataset.page}] ${href} -> ${clean} -> FINAL: ${finalHref}`);
-      
-      a.setAttribute("href", finalHref);
     });
   }
 
@@ -340,14 +340,14 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       if (u && u.role) role = String(u.role);
     } catch (_) { }
 
-    const prefixToRoot = getRelativePrefixToRoot();
+    const base = getRelativePrefixToRoot();
 
     const bookingA = nav.querySelector('.bottom-nav-item[data-page="booking"]');
     if (bookingA) {
       const target = role === "buyer"
         ? "pages/buyer/setbooking/booking.html"
         : "pages/farmer/booking/booking.html";
-      bookingA.setAttribute("href", prefixToRoot + target);
+      bookingA.setAttribute("href", base + target);
     }
   }
 
@@ -661,6 +661,35 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
   /* ---------------------------
     Topbar helpers
   ---------------------------- */
+  window.initSmartBackButtons = function initSmartBackButtons() {
+    const backButtons = document.querySelectorAll('.back-btn, #btnBack, #backBtn, [data-back]');
+
+    backButtons.forEach(btn => {
+      // Remove inline onclick if it exists (HTML side should ideally have this removed)
+      btn.removeAttribute('onclick');
+      
+      // Clean up previous event listeners by cloning the node
+      const newBtn = btn.cloneNode(true);
+      if (btn.parentNode) {
+        btn.parentNode.replaceChild(newBtn, btn);
+      }
+
+      newBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        const fallbackUrl = newBtn.dataset.fallback || newBtn.getAttribute('data-back');
+        const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
+        const finalFallback = fallbackUrl || (baseRoot + 'index.html');
+
+        if (document.referrer && document.referrer.includes(window.location.host)) {
+          window.history.back();
+        } else {
+          window.location.href = finalFallback;
+        }
+      });
+    });
+  };
+
   function wireTopbar(options = {}) {
     const titleEl = document.querySelector("[data-title]");
     const subEl = document.querySelector("[data-subtitle]");
@@ -674,7 +703,14 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         if (options.backTo) {
           window.navigateWithTransition(options.backTo);
         }
-        else history.back();
+        else {
+           if (document.referrer && document.referrer.includes(window.location.host)) {
+             history.back();
+           } else {
+             const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
+             window.location.href = baseRoot + 'index.html';
+           }
+        }
       });
     }
   }
@@ -794,11 +830,11 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       fetch(currentBase + '/api/chats/unread', {
         headers: { 'Authorization': 'Bearer ' + token }
       }).then(r => r.ok ? r.json() : null).then(json => {
-        if (!json) {
+        if (!json || !json.data) {
           clearBadge();
           return;
         }
-        const count = json.unread_count || 0;
+        const count = json.data.unread_count || 0;
         document.querySelectorAll('.bottom-nav-item[data-page="chat"] .nav-badge').forEach(el => {
           el.textContent = count > 99 ? '99+' : (count || '');
           el.style.display = count > 0 ? 'flex' : 'none';
@@ -813,6 +849,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     fixBottomNavPaths();
     applyRoleBasedNav();
     setActiveNavFromBody();
+    if (typeof window.initSmartBackButtons === 'function') window.initSmartBackButtons();
   })();
 
 } // End of components ready guard

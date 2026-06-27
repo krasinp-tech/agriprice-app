@@ -10,47 +10,25 @@
     passwordUpdatedAt: "",
   };
 
-  function getApiBase() {
-    const API_BASE = (window.API_BASE_URL || 'https://agriprice-app.onrender.com').replace(/\/$/, '');
-    if (API_BASE) return API_BASE;
-
-    const origin = asText(window.location && window.location.origin);
-    if (/localhost|127\.0\.0\.1/i.test(origin)) return "https://agriprice-app.onrender.com";
-    if (/^https?:\/\//i.test(origin)) return origin.replace(/\/$/, "");
-    return "https://agriprice.com";
-  }
-
-  function getToken() {
-    try {
-      const tokenKey = window.AUTH_TOKEN_KEY || "token";
-      return asText(localStorage.getItem(tokenKey));
-    } catch (_) {
-      return "";
-    }
-  }
+  const api = window.api || {};
 
   async function apiFetch(path, options) {
-    const token = getToken();
+    if (api.call) {
+      return await api.call(options.method || 'GET', path, options.body ? JSON.parse(options.body) : null);
+    }
+    // Fallback if window.api is not yet ready
+    const token = localStorage.getItem('token');
     const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
     if (!token) throw new Error(t('please_login_again', "กรุณาเข้าสู่ระบบใหม่"));
-
-    const init = options || {};
-    const headers = {
-      ...(init.headers || {}),
-      Authorization: "Bearer " + token,
-    };
-
-    const res = await fetch(getApiBase() + path, { ...init, headers });
-    const text = await res.text();
-    let body = null;
-    try { body = text ? JSON.parse(text) : null; } catch (_) {}
-
-    if (!res.ok) {
-      const message = (body && (body.message || body.error || body.detail)) || `Request failed (${res.status})`;
-      throw new Error(message);
-    }
-
-    return body;
+    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+    const res = await fetch(currentBase + path, {
+      method: options.method || 'GET',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: options.body
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.message || `Request failed (${res.status})`);
+    return json;
   }
 
   function mapProfileToStore(profile) {
@@ -60,6 +38,10 @@
       email: profile.email,
       birthDate: profile.birth_date,
       accountStatus: profile.account_status === "disabled" ? "disabled" : "active",
+      fullName: (profile.first_name || profile.last_name) ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : "",
+      avatar: profile.avatar || "",
+      lat: profile.lat,
+      lng: profile.lng
     });
   }
 
@@ -116,8 +98,6 @@
 
   async function syncFromServer() {
     const res = await apiFetch("/api/profile", { method: "GET" });
-    // [FIX] GET /api/profile ส่ง object ตรงๆ ไม่มี wrapper {data:...}
-    // แต่เผื่อ API เปลี่ยนในอนาคต ให้รองรับทั้งสองรูปแบบ
     const profile = (res && typeof res === 'object' && res.data) ? res.data : res;
     const mapped = mapProfileToStore(profile);
     if (!mapped) return getData();
@@ -125,20 +105,16 @@
   }
 
   async function updateProfileOnServer(payload) {
-    const body = { ...(payload || {}) };
-    // [FIX] server PATCH /api/profile ส่ง {message: "อัปเดตโปรไฟล์สำเร็จ"} กลับมา
-    // ไม่ใช่ {data: {...}} — ดังนั้น response ใช้แค่ confirm success เท่านั้น
     const response = await apiFetch("/api/profile", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     const localPatch = {};
-    if (body.phone !== undefined) localPatch.phone = body.phone;
-    if (body.email !== undefined) localPatch.email = body.email;
-    if (body.birth_date !== undefined) localPatch.birthDate = body.birth_date;
-    if (body.account_status !== undefined) localPatch.accountStatus = body.account_status;
+    if (payload.phone !== undefined) localPatch.phone = payload.phone;
+    if (payload.email !== undefined) localPatch.email = payload.email;
+    if (payload.birth_date !== undefined) localPatch.birthDate = payload.birth_date;
+    if (payload.account_status !== undefined) localPatch.accountStatus = payload.account_status;
 
     if (Object.keys(localPatch).length) setData(localPatch);
     return { response, data: getData() };
@@ -167,7 +143,6 @@
   async function changePassword(currentPassword, newPassword) {
     const response = await apiFetch("/api/auth/change-password", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         current_password: asText(currentPassword),
         new_password: asText(newPassword),
@@ -180,7 +155,6 @@
   async function deleteAccount(reason) {
     return apiFetch("/api/profile", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reason: asText(reason) }),
     });
   }
@@ -188,13 +162,10 @@
   function formatThaiDate(dateValue) {
     const value = asText(dateValue);
     if (!value) return "-";
- 
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return "-";
- 
     const lang = localStorage.getItem('lang') || 'th';
     const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
-    
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(parsed);
   }
 
@@ -202,10 +173,8 @@
     const value = asText(phone);
     if (!value) return "-";
     if (value.includes("*")) return value;
-
     const digits = value.replace(/\D/g, "");
     if (digits.length < 6) return value;
-
     const last3 = digits.slice(-3);
     const prefix = value.startsWith("+66") ? "+66" : value.slice(0, 3);
     return `${prefix}*******${last3}`;
@@ -215,14 +184,11 @@
     const value = asText(email);
     const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
     if (!value) return t('no_email', "ยังไม่ได้เพิ่มอีเมล");
-
     const parts = value.split("@");
     if (parts.length !== 2) return value;
-
     const name = parts[0];
     const domain = parts[1];
     if (!name) return value;
-
     const maskedName = name.length <= 2 ? `${name[0]}*` : `${name.slice(0, 2)}***`;
     return `${maskedName}@${domain}`;
   }
@@ -231,8 +197,6 @@
     getData,
     setData,
     resetData,
-    getApiBase,
-    getToken,
     syncFromServer,
     updatePhone,
     updateEmail,

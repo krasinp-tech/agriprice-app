@@ -3,124 +3,25 @@
   - ยืนยัน OTP -> ได้ temp_token -> เก็บไว้ให้ register4
 */
 (function () {
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
-// DEBUG PATCH - inspect verification flow
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
 
-const D = {
-  log(step, data) {
-    if (!window.AGRIPRICE_DEBUG) return;
-    const t = new Date().toISOString().slice(11, 23);
-    console.log(`%c[DEBUG ${t}] ${step}`, 'color:#4fc3f7;font-weight:bold', data ?? '');
-  },
-  ok(step, data) {
-    if (!window.AGRIPRICE_DEBUG) return;
-    const t = new Date().toISOString().slice(11, 23);
-    console.log(`%c[OK ${t}] ${step}`, 'color:#a5d6a7;font-weight:bold', data ?? '');
-  // 1. Check sessionStorage phone
-  // 2. Check window.FIREBASE_CONFIG
-  },
-  err(step, e) {
-    if (!window.AGRIPRICE_DEBUG) return;
-    console.error(`[โ] ${step}`, {
-      code: e?.code ?? '-',
-      message: e?.message ?? String(e),
-      stack: e?.stack ?? '-'
-    });
-  }
-};
-
-// โ”€โ”€ 1. เธ•เธฃเธงเธ sessionStorage phone โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-D.log('1_SESSION', {
-  register_profile: sessionStorage.getItem('register_profile'),
-  otp_temp_token: sessionStorage.getItem('otp_temp_token')
-});
-
-// โ”€โ”€ 2. เธ•เธฃเธงเธ window.FIREBASE_CONFIG โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-D.log('2_FIREBASE_CONFIG', {
-  hasFirebase: !!window.firebase,
-  hasConfig: !!window.FIREBASE_CONFIG,
-  apiKey: window.FIREBASE_CONFIG?.apiKey?.slice(0,8) + '...',
-  authDomain: window.FIREBASE_CONFIG?.authDomain,
-  projectId: window.FIREBASE_CONFIG?.projectId
-});
-
-// โ”€โ”€ 3. เธ•เธฃเธงเธ API_BASE_URL โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-// 3. Check API_BASE_URL
-D.log('3_API_BASE', { API_BASE_URL: window.API_BASE_URL });
-
-// โ”€โ”€ 4. เธ•เธฃเธงเธ recaptcha-container โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
-// 4. Check recaptcha-container
-D.log('4_RECAPTCHA_EL', {
-  found: !!document.getElementById('recaptcha-container'),
-  el: document.getElementById('recaptcha-container')
-});
-
-// โ”€โ”€ 5. hook XMLHttpRequest โ€” เธ”เธน network call เธ—เธธเธเธ•เธฑเธง
-// 5. Hook XMLHttpRequest to inspect every network call
-(function hookXHR() {
-  const _open = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function(method, url) {
-    this._url = url;
-    this.addEventListener('load', function() {
-      if (String(this._url).includes('identitytoolkit') ||
-          String(this._url).includes('firebase') ||
-          String(this._url).includes('localhost')) {
-        D.log('5_XHR', {
-          method, url: this._url,
-          status: this.status,
-          responseSnippet: this.responseText?.slice(0, 300)
-        });
-      }
-    });
-    this.addEventListener('error', function() {
-      D.err('5_XHR_ERROR', { url: this._url });
-    });
-    return _open.apply(this, arguments);
-  };
-})();
-
-// โ”€โ”€ 6. hook fetch โ€” เธ”เธน /api/auth/firebase/verify-phone
-// 6. Hook fetch to inspect /api/auth/firebase/verify-phone
-(function hookFetch() {
-  const _fetch = window.fetch;
-  window.fetch = async function(url, opts) {
-    D.log('6_FETCH_REQ', { url, method: opts?.method, body: opts?.body });
-    try {
-      const res = await _fetch.apply(this, arguments);
-      const clone = res.clone();
-      clone.text().then(body =>
-        D.log('6_FETCH_RES', { url, status: res.status, body: body?.slice(0, 400) })
-      );
-      return res;
-    } catch (e) {
-      D.err('6_FETCH_FAIL', e); throw e;
-    }
-  };
-})();
-
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
-// ๐” END DEBUG PATCH
-// โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•โ•
-
-  const getApiBase = () => (window.API_BASE_URL || '').replace(/\/$/, '');
+  const getApiBase = () => (window.api && window.api.getBase) ? window.api.getBase() : (window.API_BASE_URL || '').replace(/\/$/, '');
   const DEBUG_OTP = !!window.AGRIPRICE_DEBUG;
   const DEBUG_REDIRECT_DELAY_MS = DEBUG_OTP ? 3500 : 0;
   const NEXT_ROUTE = './register4.html';
-  const KEY_PROFILE    = 'register_profile';
+  const KEY_PROFILE = 'reg_profile';
   const KEY_TEMP_TOKEN = 'otp_temp_token';
 
-  const otpTo   = document.getElementById('otpTo');
+  const otpTo = document.getElementById('otpTo');
   const timerTx = document.getElementById('timerText');
   const resendB = document.getElementById('resendBtn');
-  const form    = document.getElementById('otpForm');
-  const boxes   = Array.from(document.querySelectorAll('.otp-box'));
-  const errBox  = document.getElementById('formError');
-  const hint    = document.getElementById('hintText');
+  const form = document.getElementById('otpForm');
+  const boxes = Array.from(document.querySelectorAll('.otp-box'));
+  const errBox = document.getElementById('formError');
+  const hint = document.getElementById('hintText');
   const configSourceText = document.getElementById('configSourceText');
   const nextBtn = document.getElementById('nextBtn');
-  const video   = document.getElementById('registerVideo');
-  const fallbk  = document.getElementById('mediaFallback');
+  const video = document.getElementById('registerVideo');
+  const fallbk = document.getElementById('mediaFallback');
 
   const OTP_LEN = 6;
   let firebaseAuth = null;
@@ -130,10 +31,10 @@ D.log('4_RECAPTCHA_EL', {
   let confirmationResult = null;
   let timerId = null, remaining = 120;
 
-  const setHint  = msg => { if (hint)   hint.textContent   = msg || ''; };
-  const showErr  = msg => { if (errBox) { errBox.textContent = msg; errBox.classList.add('is-show'); } };
-  const clearErr = ()  => { if (errBox) { errBox.textContent = ''; errBox.classList.remove('is-show'); } };
-  const setLoad  = on  => { if (nextBtn) { nextBtn.disabled = !!on; nextBtn.classList.toggle('is-loading', !!on); } };
+  const setHint = msg => { if (hint) hint.textContent = msg || ''; };
+  const showErr = msg => { if (errBox) { errBox.textContent = msg; errBox.classList.add('is-show'); } };
+  const clearErr = () => { if (errBox) { errBox.textContent = ''; errBox.classList.remove('is-show'); } };
+  const setLoad = on => { if (nextBtn) { nextBtn.disabled = !!on; nextBtn.classList.toggle('is-loading', !!on); } };
 
   function setConfigSourceStatus() {
     if (!configSourceText) return;
@@ -193,8 +94,20 @@ D.log('4_RECAPTCHA_EL', {
     return d[0] + 'XX-XXX-' + d.slice(-3);
   }
 
+  function goLogin() {
+    if (window.navigateWithTransition) window.navigateWithTransition('./login2.html');
+    else window.location.href = './login2.html';
+  }
+
+  function markExistingAccount(message) {
+    showErr(message || 'เบอร์นี้มีบัญชีอยู่แล้ว กำลังพาไป Login...');
+    setTimeout(() => {
+      goLogin();
+    }, 1500);
+  }
+
   function formatTime(s) {
-    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   }
 
   function startTimer(sec) {
@@ -213,32 +126,32 @@ D.log('4_RECAPTCHA_EL', {
     }, 1000);
   }
 
-  function getOtp() { return boxes.map(b => (b.value||'').replace(/\D/g,'')).join(''); }
+  function getOtp() { return boxes.map(b => (b.value || '').replace(/\D/g, '')).join(''); }
   function setOtp(code) {
-    const d = String(code||'').replace(/\D/g,'').slice(0,OTP_LEN).split('');
-    boxes.forEach((b,i) => b.value = d[i]||'');
+    const d = String(code || '').replace(/\D/g, '').slice(0, OTP_LEN).split('');
+    boxes.forEach((b, i) => b.value = d[i] || '');
   }
 
   function bindBoxes() {
     boxes.forEach((box, i) => {
       box.addEventListener('input', () => {
         if (errBox) { errBox.textContent = ''; errBox.classList.remove('is-show'); }
-        box.value = (box.value||'').replace(/\D/g,'').slice(0,1);
-        if (box.value && i < boxes.length-1) boxes[i+1].focus();
+        box.value = (box.value || '').replace(/\D/g, '').slice(0, 1);
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
       });
       box.addEventListener('keydown', e => {
-        if (e.key==='Backspace') {
-          if (box.value) box.value='';
-          else if (i>0) { boxes[i-1].value=''; boxes[i-1].focus(); }
+        if (e.key === 'Backspace') {
+          if (box.value) box.value = '';
+          else if (i > 0) { boxes[i - 1].value = ''; boxes[i - 1].focus(); }
         }
-        if (e.key==='ArrowLeft'  && i>0)              boxes[i-1].focus();
-        if (e.key==='ArrowRight' && i<boxes.length-1) boxes[i+1].focus();
+        if (e.key === 'ArrowLeft' && i > 0) boxes[i - 1].focus();
+        if (e.key === 'ArrowRight' && i < boxes.length - 1) boxes[i + 1].focus();
       });
       box.addEventListener('paste', e => {
         e.preventDefault();
-        const d = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,OTP_LEN);
+        const d = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, OTP_LEN);
         setOtp(d);
-        boxes[Math.min(d.length, boxes.length)-1]?.focus();
+        boxes[Math.min(d.length, boxes.length) - 1]?.focus();
       });
     });
     boxes[0]?.focus();
@@ -303,7 +216,7 @@ D.log('4_RECAPTCHA_EL', {
       return 'ส่ง OTP บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่';
     }
     if (code === 'auth/invalid-app-credential') {
-      return 'สภาพแวดล้อมไม่รองรับการส่ง SMS (ทดสอบบนมือถือกรุณาใช้รหัส 123456)';
+      return 'สภาพแวดล้อมไม่รองรับการส่ง SMS กรุณาตรวจสอบการตั้งค่า Firebase';
     }
     return e?.message || 'ส่ง OTP ไม่สำเร็จ';
   }
@@ -319,61 +232,42 @@ D.log('4_RECAPTCHA_EL', {
     return e?.message || 'ยืนยัน OTP ไม่สำเร็จ';
   }
 
+  function isDevOtpMode() {
+    return !!window.AGRIPRICE_DEBUG;
+  }
+
   async function sendOtp() {
     clearErr();
     const phone = getPhone();
     if (!phone) { showErr('ไม่พบเบอร์โทรจากขั้นตอนก่อนหน้า'); return; }
-    
-    const e164Phone = toE164(phone);
-    const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888'];
-
     try {
-      setLoad(true);
-      
-      // 1. ตรวจสอบว่าเป็นเบอร์ทดสอบหรือไม่ (ถ้าใช่ ให้ข้าม Firebase ไปใช้ Server Mock เลย)
-      if (TEST_PHONES.includes(e164Phone)) {
-        console.log('[Register3] Test phone detected, skipping Firebase...');
-      } else {
-        // 2. พยายามส่งผ่าน Firebase (Real OTP)
-        try {
-          setHint('กำลังเตรียมการส่ง SMS...');
-          await initFirebaseOtp();
-          
-          // แสดง reCAPTCHA container เผื่อกรณีโดนท้าทาย (ปกติจะ invisible)
-          const recaptchaEl = document.getElementById('recaptcha-container');
-          if (recaptchaEl) recaptchaEl.style.display = 'flex';
-
-          confirmationResult = await firebaseAuth.signInWithPhoneNumber(e164Phone, recaptchaVerifier);
-          
-          logOtp('otp.send.firebase_success', { phone: e164Phone });
-          setHint('ส่งรหัส OTP เรียบร้อยแล้ว');
-          startTimer(120);
-          return; // ส่งสำเร็จผ่าน Firebase แล้ว จบฟังก์ชัน
-        } catch (fErr) {
-          console.error('[OTP] Firebase send failed:', fErr);
-          logOtp('otp.send.firebase_failed', { message: fErr.message });
-          // ถ้าเป็น error เรื่อง Billing หรืออื่นๆ ที่ทำให้ส่งไม่ได้ ให้ลอง Fallback ไปที่ Server
-        }
-      }
-
-      // 3. Fallback: ส่งผ่าน Server API (อาจจะเป็น Supabase หรือ Mock ตามค่า OTP_MOCK ใน .env)
-      console.log('[Register3] Falling back to Server API for OTP...');
-      setHint('กำลังส่งรหัสผ่านระบบสำรอง...');
-      const res = await window.api.otpSend(phone, 'register');
+      const res = await window.api.otpSend(phone);
       if (res && res.success) {
-        logOtp('otp.send.fallback_success', { phone });
-        setHint('ส่ง OTP แล้ว (หากไม่ได้รับใน 1 นาที ให้ลองรหัส 123456)');
-        startTimer(120);
-        confirmationResult = { isFallback: true }; 
-        return;
+        logOtp('otp.send.success', { phone });
+        const isMock = res.isMock || (res.data && res.data.isMock) || (res.message && res.message.includes('Mock'));
+        if (isMock) {
+          setHint('โหมดทดสอบ: กรุณากรอกรหัส 123456');
+          startTimer(120);
+          confirmationResult = { isFallback: true };
+          return;
+        } else {
+          // Real mode: Use Firebase Phone Auth to send OTP!
+          setHint('กำลังส่งรหัส OTP ผ่าน Firebase...');
+          await initFirebaseOtp();
+          const cleanPhone = toE164(phone);
+          logOtp('firebase.send.start', { phone: cleanPhone });
+          confirmationResult = await firebaseAuth.signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
+          logOtp('firebase.send.success');
+          setHint('ส่งรหัส OTP เข้ามือถือของคุณแล้ว');
+          startTimer(120);
+          return;
+        }
       } else {
         showErr(res?.message || 'ส่ง OTP ไม่สำเร็จ');
       }
     } catch (e) {
       logOtp('otp.send.error', { message: e.message });
-      showErr('เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองใหม่');
-    } finally {
-      setLoad(false);
+      showErr(mapFirebaseOtpError(e));
     }
   }
 
@@ -386,35 +280,6 @@ D.log('4_RECAPTCHA_EL', {
     }
 
     logOtp('otp.verify.request', { otpLength: String(otp || '').length });
-    
-    // --- MOCK OTP FOR TESTING (123456) ---
-    if (otp === '123456') {
-      logOtp('otp.verify.mock.active', { hint: 'Using magic code 123456' });
-      
-      // ถ้าเราใช้ระบบสำรอง (Server API) ให้ลองไปยืนยันที่ Server จริงๆ ด้วยรหัส 123456
-      if (confirmationResult && confirmationResult.isFallback) {
-         try {
-           const res = await window.api.otpVerify(phone, otp);
-           if (res && res.success) {
-             sessionStorage.setItem(KEY_TEMP_TOKEN, res.data.temp_token);
-             setHint('ยืนยันสำเร็จด้วยรหัสทดสอบ');
-             return;
-           }
-         } catch(fErr) { console.error('Fallback verify failed:', fErr); }
-      }
-
-      const mockToken = `mock_temp_token_${phone}_${Date.now()}`;
-      const mockJson = {
-        success: true,
-        isNewUser: true,
-        temp_token: mockToken,
-        message: 'Mock verification successful'
-      };
-      sessionStorage.setItem(KEY_TEMP_TOKEN, mockJson.temp_token);
-      setHint('เข้าสู่โหมดทดสอบ: ยืนยันสำเร็จด้วยรหัส 123456');
-      return; 
-    }
-    // --------------------------------------
 
     if (remaining <= 0) throw new Error('รหัสหมดอายุ กรุณาขอรหัสใหม่');
     if (!confirmationResult) {
@@ -425,13 +290,10 @@ D.log('4_RECAPTCHA_EL', {
     if (confirmationResult.isFallback) {
       const res = await window.api.otpVerify(phone, otp);
       if (!res || !res.success) throw new Error(res?.message || 'รหัส OTP ไม่ถูกต้อง');
-      
+
       sessionStorage.setItem(KEY_TEMP_TOKEN, res.data.temp_token || '');
       if (!res.data.isNewUser) {
-        showErr('เบอร์นี้มีบัญชีอยู่แล้ว กำลังพาไป Login...');
-        setTimeout(() => {
-          if (window.navigateWithTransition) window.navigateWithTransition('./login2.html'); else window.location.href = './login2.html';
-        }, 1500);
+        markExistingAccount();
         throw new Error('__redirect__');
       }
       return;
@@ -461,16 +323,11 @@ D.log('4_RECAPTCHA_EL', {
     if (!res.ok) throw new Error(json.message || 'ยืนยัน OTP ไม่สำเร็จ');
 
     // เธเธฑเธเธ—เธถเธ temp_token เน€เธชเธกเธญ (เนเธเนเนเธ”เนเธ—เธฑเนเธ user เนเธซเธกเนเนเธฅเธฐเน€เธเนเธฒ)
-      // Save temp_token immediately so it works for new and existing users
+    // Save temp_token immediately so it works for new and existing users
     sessionStorage.setItem(KEY_TEMP_TOKEN, json.temp_token || '');
 
-    // เธ–เนเธฒเน€เธเธญเธฃเนเธกเธตเธเธฑเธเธเธตเนเธฅเนเธง โ’ redirect เนเธ login เนเธ—เธ
-      // If the user already exists, redirect to login instead
     if (!json.isNewUser) {
-      showErr('เบอร์นี้มีบัญชีอยู่แล้ว กำลังพาไป Login...');
-      setTimeout(() => {
-        if (window.navigateWithTransition) window.navigateWithTransition('./login2.html'); else window.location.href = './login2.html';
-      }, 1500);
+      markExistingAccount();
       throw new Error('__redirect__');
     }
   }
@@ -503,7 +360,7 @@ D.log('4_RECAPTCHA_EL', {
       }
     } catch (err) {
       // __redirect__ เธเธทเธญ silent error เธ—เธตเนเธ•เธฑเนเธเนเธ redirect เนเธกเนเธ•เนเธญเธเนเธชเธ”เธ
-        // __redirect__ is a silent error used to stop explicit redirect logging
+      // __redirect__ is a silent error used to stop explicit redirect logging
       if (err?.message !== '__redirect__') {
         logOtp('otp.verify.error', {
           code: err?.code || '',

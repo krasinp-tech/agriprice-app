@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+   
+    <script src="../../../js/api-client.js"></script>
+   
+    <script src="../../../js/auth/guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Dashboard | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,9 +28,14 @@
   <link rel="stylesheet" href="../../../css/global.css" />
   <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css" />
   <link rel="stylesheet" href="../../../css/buyer/Dashboard/Dashboard1.css" />
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/permission-manager.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/permission-manager.js"></script>
+
+  <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
 </head>
 
 <body data-active="account" data-auth="required">
@@ -45,16 +63,6 @@
 
     <!-- KPI Grid (2x2 Cards) -->
     <section class="kpi-grid">
-      <!-- Monthly Revenue -->
-      <div class="kpi-card">
-        <div class="icon-circle icon-green">
-          <span class="material-icons-outlined">attach_money</span>
-        </div>
-        <div class="kpi-label" data-i18n="monthly_revenue">รายได้รายเดือน</div>
-        <div class="kpi-value" id="revenueVal">฿0</div>
-        <div class="kpi-trend trend-up" id="revenueTrend">-</div>
-      </div>
-
       <!-- Total Bookings -->
       <div class="kpi-card">
         <div class="icon-circle icon-blue">
@@ -65,22 +73,32 @@
         <div class="kpi-trend trend-blue" id="bookingsTrend">-</div>
       </div>
 
-      <!-- Total Views -->
+      <!-- Success Rate -->
+      <div class="kpi-card">
+        <div class="icon-circle icon-green">
+          <span class="material-icons-outlined">check_circle</span>
+        </div>
+        <div class="kpi-label" data-i18n="success_rate">อัตราการจองสำเร็จ</div>
+        <div class="kpi-value" id="successRateVal">0%</div>
+        <div class="kpi-trend trend-up" id="successRateTrend">-</div>
+      </div>
+
+      <!-- Feed Impressions -->
       <div class="kpi-card">
         <div class="icon-circle icon-orange">
           <span class="material-icons-outlined">visibility</span>
         </div>
-        <div class="kpi-label" data-i18n="total_views">ยอดการเข้าชมทั้งหมด</div>
+        <div class="kpi-label" data-i18n="impressions_feed">จำนวนประกาศที่ถูกแสดงบน Feed</div>
         <div class="kpi-value" id="viewsVal">0</div>
         <div class="kpi-trend trend-orange" id="viewsTrend">-</div>
       </div>
 
-      <!-- New Followers -->
+      <!-- Total Followers -->
       <div class="kpi-card">
         <div class="icon-circle icon-teal">
-          <span class="material-icons-outlined">forum</span>
+          <span class="material-icons-outlined">people</span>
         </div>
-        <div class="kpi-label" data-i18n="new_followers">ผู้ติดตามใหม่</div>
+        <div class="kpi-label" data-i18n="new_followers">ผู้ติดตามทั้งหมด</div>
         <div class="kpi-value" id="followersVal">0</div>
         <div class="kpi-trend trend-teal" id="followersTrend">-</div>
       </div>
@@ -101,16 +119,133 @@
         </div>
       </div>
 
-      <div class="chart-legend">
-        <div class="legend-item">
-          <div class="legend-color" style="background: #ef4444;"></div>
-          <span class="legend-label" data-i18n="completed">สำเร็จแล้ว</span>
+      <div class="chart-legend-grid">
+        <div class="legend-row">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #10B981;"></div>
+            <span class="legend-label" data-i18n="completed">สำเร็จแล้ว</span>
+          </div>
+          <span class="legend-value" id="completedVal">0</span>
         </div>
-        <span class="legend-value" id="completedVal">0</span>
+        <div class="legend-row">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #F59E0B;"></div>
+            <span class="legend-label" data-i18n="waiting">รอดำเนินการ</span>
+          </div>
+          <span class="legend-value" id="waitingVal">0</span>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #EF4444;"></div>
+            <span class="legend-label" data-i18n="cancel">ยกเลิก</span>
+          </div>
+          <span class="legend-value" id="cancelVal">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking Deep Details Card -->
+    <section class="detail-card" id="bookingAnalyticsCard">
+      <div class="detail-card-header">
+        <span class="material-icons-outlined text-blue">bar_chart</span>
+        <h3 data-i18n="booking_analytics">วิเคราะห์การจอง</h3>
+      </div>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-label" data-i18n="peak_time">ช่วงที่มีการจองมากที่สุด</span>
+          <span class="detail-value" id="peakTimeVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label" data-i18n="most_booked">ประกาศที่จองมากสุด</span>
+          <span class="detail-value text-green" id="mostBookedVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label" data-i18n="least_booked">ประกาศที่จองน้อยสุด</span>
+          <span class="detail-value text-orange" id="leastBookedVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">เฉลี่ยต่อวัน (ช่วงเวลานี้)</span>
+          <span class="detail-value" id="dailyAvgVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">เฉลี่ยต่อเดือน (ช่วงเวลานี้)</span>
+          <span class="detail-value" id="monthlyAvgVal">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Follower Growth Details Card -->
+    <section class="detail-card" id="followerGrowthCard">
+      <div class="detail-card-header">
+        <span class="material-icons-outlined text-teal">trending_up</span>
+        <h3 data-i18n="follower_growth">อัตราการเติบโตของผู้ติดตาม</h3>
+      </div>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-label">ผู้ติดตามทั้งหมด</span>
+          <span class="detail-value" id="totalFollowersVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">ผู้ติดตามเพิ่มขึ้น (30 วัน)</span>
+          <span class="detail-value text-green" id="newFollowers30dVal">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">อัตราการเติบโต (%)</span>
+          <span class="detail-value text-green" id="growthRateVal">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Competitors Analytics Card -->
+    <section class="detail-card" id="competitorAnalyticsCard">
+      <div class="detail-card-header">
+        <span class="material-icons-outlined text-purple">storefront</span>
+        <h3 id="competitorsHeaderTitle" data-i18n="competitor_count_label">ล้งคู่แข่งในพื้นที่</h3>
+      </div>
+      <div class="competitor-summary-box">
+        <div class="comp-icon-box">
+          <span class="material-icons-outlined">storefront</span>
+        </div>
+        <div class="comp-meta">
+          <div class="comp-count" id="competitorTotalVal">0 ราย</div>
+          <div class="comp-desc">ในพื้นที่ของท่าน</div>
+        </div>
+      </div>
+      <div class="competitor-list" id="competitorList">
+        <!-- Dyn rendered categories -->
+      </div>
+    </section>
+
+    <!-- Price Rankings Card -->
+    <section class="detail-card" id="priceRankingsCard">
+      <div class="detail-card-header">
+        <span class="material-icons-outlined text-orange">payments</span>
+        <h3 data-i18n="price_comparison">อันดับราคารับซื้อของเราเทียบกับตลาด</h3>
+      </div>
+      <div class="price-compare-list" id="priceCompareList">
+        <!-- Dyn rendered listings price rankings -->
       </div>
     </section>
 
   </main>
+
+  <!-- PRO Lock Overlay (shown for Free tier users) -->
+  <div id="proLockedOverlay" class="pro-lock-overlay" hidden>
+    <div class="pro-lock-card">
+      <div class="pro-lock-icon">
+        <span class="material-icons-outlined">lock</span>
+      </div>
+      <h2 class="pro-lock-title" data-i18n="pro_feature_locked">ฟีเจอร์สำหรับ PRO</h2>
+      <p class="pro-lock-desc" data-i18n="pro_lock_desc">แดชบอร์ดวิเคราะห์ข้อมูลให้บริการเฉพาะสมาชิก PRO เท่านั้น อัปเกรดเพื่อดูสถิติยอดจอง รายได้ และประสิทธิภาพสินค้าของคุณ</p>
+      <ul class="pro-lock-features">
+        <li><span class="material-icons-outlined">bar_chart</span><span data-i18n="dashboard_analytics">แดชบอร์ดวิเคราะห์ข้อมูล</span></li>
+        <li><span class="material-icons-outlined">attach_money</span><span data-i18n="monthly_revenue_summary">สรุปรายได้รายเดือน</span></li>
+        <li><span class="material-icons-outlined">trending_up</span><span data-i18n="top_booked_ranking">อันดับสินค้าที่ถูกจองสูงสุด</span></li>
+      </ul>
+      <button class="pro-lock-btn" id="goUpgradeBtn" data-i18n="upgrade_pro_btn">อัปเกรดเป็น PRO</button>
+      <button class="pro-lock-back" id="lockBackBtn" data-i18n="back">ย้อนกลับ</button>
+    </div>
+  </div>
 
   <!-- Bottom Nav -->
   <div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
@@ -138,27 +273,29 @@
 </nav></div>
 
   <!-- Scripts -->
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/utils/storage-keys.js"></script>
-  <script src="../../../js/api-client.js"></script>
-  <script src="../../../js/utils/auth.js"></script>
-  <script src="../../../js/auth/guard.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../../js/api-client.js"></script>
+ 
+    <script src="../../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
-  <script src="../../../js/components.js"></script>
-  <script src="../../../js/components/i18n.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="../../../js/buyer/Dashboard/Dashboard1.js"></script>
+ 
+    <script src="../../../js/components.js"></script>
+ 
+    <script src="../../../js/components/i18n.js"></script>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+ 
+    <script src="../../../js/buyer/Dashboard/Dashboard1.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (window.i18nInit) window.i18nInit();
 
-        // 📱 Trigger Native Permissions (GPS & Notifications)
-        if (window.AgriPermission && window.AgriPermission.requestAll) {
-            setTimeout(() => {
-                window.AgriPermission.requestAll();
-            }, 1500);
-        }
+        // 📱 Native Permissions handled Just-in-Time (JIT)
     });
 
     // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
@@ -170,3 +307,7 @@
   </script>
 </body>
 </html>
+
+
+
+

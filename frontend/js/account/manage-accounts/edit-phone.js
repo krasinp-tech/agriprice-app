@@ -55,14 +55,11 @@
     }
 
     try {
-      // [FIX] server ต้องการ OTP token สำหรับเปลี่ยนเบอร์
-      // ในโหมด dev (OTP_MOCK=true) ให้ส่ง otp_code='123456' ผ่านได้
-      await store.updatePhone(value, "123456");
+      await store.updatePhone(value);
       showMessage("บันทึกหมายเลขโทรศัพท์เรียบร้อย", "success");
     } catch (err) {
-      // [FIX] แสดง error ที่ชัดเจนขึ้นถ้า server ต้องการ OTP จริง
       const msg = err.message || "บันทึกหมายเลขโทรศัพท์ไม่สำเร็จ";
-      showMessage(msg.includes("OTP") ? "ต้องยืนยัน OTP ก่อนเปลี่ยนเบอร์โทร (ฟีเจอร์นี้อยู่ระหว่างพัฒนา)" : msg, "error");
+      showMessage(msg, "error");
       return;
     }
 

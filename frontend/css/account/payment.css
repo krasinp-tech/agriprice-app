@@ -1,317 +1,414 @@
-/* ================================
-   Payment Styles
- ================================ */
+/* ================================================================
+   AGRIPRICE — payment.css
+   Premium payment styling with support for Credit Card and PromptPay QR
+ ================================================================ */
 
 body {
   background: var(--bg-page) !important;
   min-height: 100dvh;
-  position: relative;
 }
 
-/* Header Background */
-.payment-header-bg {
-  background: var(--primary);
-  padding: 16px 20px 40px;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  color: white;
-}
-
-.back-btn-light {
-  background: transparent;
-  border: none;
-  color: white;
-  margin-bottom: 20px;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  margin-left: -4px;
-}
-
-.back-btn-light span {
-  font-size: 28px;
-}
-
-.header-titles h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 4px;
-  line-height: 1.2;
-}
-
-.header-titles p {
-  font-size: 14px;
-  margin: 0;
-  opacity: 0.9;
-}
-
-.payment-main {
-  padding: 0 20px 20px;
-  margin-top: -24px; /* Pull up to overlap header */
-}
-
-/* Cards */
-.summary-card, .method-card {
-  background: var(--bg-card);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 20px;
-  border: 1px solid var(--border-light);
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin: 0 0 16px;
-}
-
-/* Plan Summary */
-.plan-details {
+/* ── Header ───────────────────────────────────────── */
+.payment-header {
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
+  padding: calc(16px + var(--safe-top, 0px)) 16px 8px;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.plan-icon {
-  background: var(--primary);
-  color: white;
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
+.payment-header h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  display: grid;
+  place-items: center;
+  color: var(--text-main);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:active {
+  transform: scale(0.92);
+  background: var(--bg-input);
+}
+
+/* ── Container ────────────────────────────────────── */
+.payment-container {
+  max-width: var(--app-max-width, 480px);
+  margin: 0 auto;
+  padding: 8px 16px 40px;
   display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Section Title ────────────────────────────────── */
+.section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+/* ── Plan Summary ─────────────────────────────────── */
+.plan-summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card {
+  background: linear-gradient(135deg, #0B853C 0%, #065F2A 100%);
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 20px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  box-shadow: 0 10px 25px rgba(11, 133, 60, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.plan-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .plan-info {
-  flex: 1;
-}
-
-.plan-info-top {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1;
 }
 
 .plan-name {
-  font-weight: 700;
-  color: var(--text-main);
-  font-size: 15px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
 }
 
 .plan-desc {
   font-size: 12px;
-  color: var(--text-muted);
+  opacity: 0.9;
+  font-weight: 400;
 }
 
 .plan-price {
-  display: flex;
-  align-items: baseline;
+  text-align: right;
+  z-index: 1;
 }
 
-.plan-price .currency, .plan-price .amount {
+.plan-price .currency {
+  font-size: 16px;
+  font-weight: 700;
+  vertical-align: super;
+  margin-right: 2px;
+}
+
+.plan-price .amount {
+  font-size: 32px;
   font-weight: 800;
-  color: var(--text-main);
-  font-size: 24px;
+  letter-spacing: -1px;
 }
 
 .plan-price .period {
   font-size: 12px;
-  color: var(--text-muted);
+  opacity: 0.9;
   margin-left: 2px;
 }
 
-/* Tabs */
+/* ── Payment Methods & Inputs ─────────────────────── */
+.payment-methods {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border-light);
+  padding: 24px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Method Tabs ──────────────────────────────────── */
 .method-tabs {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 14px 10px;
+  height: 46px;
   border-radius: 12px;
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   background: var(--bg-input);
   color: var(--text-muted);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .tab-btn span {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .tab-btn.active {
   border-color: var(--primary);
-  background: var(--bg-input);
-  filter: brightness(0.95);
-  color: var(--text-main);
-}
-
-.tab-btn.active span {
+  background: rgba(11, 133, 60, 0.08);
   color: var(--primary);
 }
 
-/* Form Styles */
-.tab-content {
-  display: none;
-  animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-  display: block;
-}
-
+/* ── Form Styles ──────────────────────────────────── */
 .form-group {
-  margin-bottom: 16px;
-}
-
-.form-row {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.form-group.half {
-  flex: 1;
-}
-
-label {
-  display: block;
-  font-size: 13px;
+.form-group .label {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-muted);
-  margin-bottom: 8px;
-  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-input {
+.input {
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--border-light);
-  border-radius: 12px;
-  font-size: 15px;
-  color: var(--text-main);
-  outline: none;
-  transition: border-color 0.2s;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-light);
   background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0 16px;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-input:focus {
+.input:focus {
   border-color: var(--primary);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 4px rgba(11, 133, 60, 0.08);
 }
 
-input::placeholder {
+.input::placeholder {
   color: var(--text-dim);
 }
 
-.input-with-icon {
-  position: relative;
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.input-with-icon input {
-  padding-right: 40px;
-}
-
-.field-icon {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-main);
-}
-
-/* Security Alert */
-.security-alert {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg-input);
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-top: 20px;
-  border: 1px solid var(--border-light);
-}
-
-.alert-icon {
-  color: var(--text-muted);
-  font-size: 20px;
-}
-
-.security-alert p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* QR Code Section */
+/* ── PromptPay QR Card ────────────────────────────── */
 .qr-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 16px;
+  padding: 12px 0;
 }
 
-.qr-code {
-  width: 220px;
-  height: 220px;
+.promptpay-qr-card {
+  width: 240px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pp-header {
+  background: #0E3480; /* PromptPay Blue */
+  color: #ffffff;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.pp-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pp-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+}
+
+.pp-sub {
+  font-size: 9px;
+  opacity: 0.8;
+  font-weight: 600;
+  margin-top: -2px;
+}
+
+.pp-body {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.qr-code-svg {
   display: block;
 }
 
+.pp-footer {
+  background: #f5f5f7;
+  border-top: 1px dashed #d6d6d6;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pp-amount-label {
+  font-size: 11px;
+  color: #8e8e93;
+  font-weight: 600;
+}
+
+.pp-amount-val {
+  font-size: 20px;
+  color: #1c1c1e;
+  font-weight: 800;
+}
+
+/* ── Countdown Timer ──────────────────────────────── */
 .countdown-timer {
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-/* Bottom Action */
-.bottom-action {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 20px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  background: var(--bg-page);
-  /* Uncomment to add shadow if needed
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.03); */
+.timer-digits {
+  color: #ff3b30; /* Red */
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0 4px;
 }
 
-@media (min-width: 1200px) {
-  .bottom-action {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    border-bottom-left-radius: var(--app-shell-radius);
-    border-bottom-right-radius: var(--app-shell-radius);
-  }
+/* ── Secure Info ──────────────────────────────────── */
+.secure-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(11, 133, 60, 0.05);
+  border: 1.5px dashed rgba(11, 133, 60, 0.2);
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--primary);
 }
 
+.secure-info span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.secure-info .material-icons-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Button ───────────────────────────────────────── */
 .btn-primary {
   width: 100%;
-  padding: 16px;
-  background: var(--primary);
-  color: white;
-  border: none;
+  height: 52px;
   border-radius: 16px;
-  font-size: 16px;
+  border: none;
+  background: var(--primary-gradient, var(--primary));
+  color: #ffffff;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: opacity 0.2s;
+  box-shadow: 0 8px 24px rgba(11, 133, 60, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .btn-primary:active {
-  transform: scale(0.98);
-  opacity: 0.9;
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px rgba(11, 133, 60, 0.1);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── Dark Theme Overrides ────────────────────────── */
+[data-theme="dark"] .plan-card {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .secure-info {
+  background: rgba(11, 133, 60, 0.12);
+  border-color: rgba(11, 133, 60, 0.25);
+  color: #81c784;
+}
+
+[data-theme="dark"] .tab-btn {
+  border-color: var(--border-light);
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .tab-btn.active {
+  border-color: var(--primary);
+  background: rgba(11, 133, 60, 0.15);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .promptpay-qr-card {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }

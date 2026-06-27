@@ -15,9 +15,9 @@ router.get('/search', authMiddleware, async (req, res) => {
     const term = q.trim();
     const { data, error } = await supabaseAdmin
       .from('profiles')
-      .select('id, first_name, last_name, avatar, role, province')
+      .select('id:profile_id, first_name, last_name, avatar, role, address_line2')
       .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
-      .neq('id', req.user.id)
+      .neq('profile_id', req.user.id)
       .limit(Number(limit));
 
     if (error) throw error;

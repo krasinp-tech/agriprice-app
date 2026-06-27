@@ -1,9 +1,9 @@
 const logger = require('../utils/logger');
-const db = require('../db');
 const { supabaseAdmin } = require('../utils/supabase');
+const { decrementSlotBookedCount } = require('../utils/helpers');
 
 const AUTO_SUCCESS_DELAY_MIN = Number(process.env.BOOKING_AUTO_SUCCESS_DELAY_MIN || 5);
-const AUTO_SUCCESS_DEBUG = String(process.env.BOOKING_AUTO_SUCCESS_DEBUG || 'true').toLowerCase() === 'true';
+const AUTO_SUCCESS_DEBUG = String(process.env.BOOKING_AUTO_SUCCESS_DEBUG || 'false').toLowerCase() === 'true';
 
 /**
  * [Background Service] หุ่นยนต์ทำงานเบื้องหลังอัตโนมัติ (Cron Job)
@@ -20,7 +20,7 @@ async function autoCompleteDueBookings() {
 
     const { data: dueRows, error: dueErr } = await supabaseAdmin
       .from('bookings')
-      .select('booking_id')
+      .select('booking_id, slot_id')
       .eq('status', 'waiting')
       .lte('scheduled_time', cutoff)
       .limit(300);
@@ -33,9 +33,17 @@ async function autoCompleteDueBookings() {
       .from('bookings')
       .update({ status: 'cancel' })
       .in('booking_id', ids)
-      .select('booking_id');
+      .select('booking_id, slot_id');
 
     if (updErr) throw updErr;
+
+    if (updatedRows && updatedRows.length > 0) {
+      for (const row of updatedRows) {
+        if (row.slot_id) {
+          await decrementSlotBookedCount(supabaseAdmin, row.slot_id);
+        }
+      }
+    }
 
     logger.info(`[automation] marked ${(updatedRows || []).length} bookings as missed`);
   } catch (err) {
@@ -50,28 +58,45 @@ async function autoCompleteDueBookings() {
  */
 async function autoCloseStaleProductsAndSlots() {
   try {
-    // 1. Deactivate stale slots
-    await supabaseAdmin.rpc('exec_sql', {
-      sql: `
-        UPDATE public.product_slots
-        SET is_active = false
-        WHERE is_active = true
-        AND (end_date || ' ' || COALESCE(time_end, '23:59:59'))::timestamp < (NOW() AT TIME ZONE 'UTC' + INTERVAL '7 hours' - INTERVAL '1 hour');
-      `
-    });
+    // 1. Deactivate stale slots — ใช้ Supabase filter แทน exec_sql (safer)
+    const nowBangkok = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 19);
+    await supabaseAdmin
+      .from('offer_slots')
+      .update({ is_active: false })
+      .eq('is_active', true)
+      .lt('end_date', nowBangkok.slice(0, 10)); // end_date < today (Bangkok)
 
-    // 2. Deactivate products with no active slots
-    await supabaseAdmin.rpc('exec_sql', {
-      sql: `
-        UPDATE public.products p
-        SET is_active = false
-        WHERE p.is_active = true
-        AND NOT EXISTS (
-          SELECT 1 FROM public.product_slots s
-          WHERE s.product_id = p.product_id AND s.is_active = true
-        );
-      `
-    });
+    // ดึงรายการ product_id ที่ยังมี slot ที่ใช้งานอยู่ (active)
+    const { data: activeSlotProductIds } = await supabaseAdmin
+      .from('offer_slots')
+      .select('product_id')
+      .eq('is_active', true);
+
+    const activeIds = (activeSlotProductIds || []).map(r => r.product_id).filter(Boolean);
+
+    // ดึงรายการ product_id ทั้งหมดที่มี slot ในระบบ (ทั้ง active และ inactive)
+    const { data: allSlotProductIds } = await supabaseAdmin
+      .from('offer_slots')
+      .select('product_id');
+
+    const productsWithSlots = (allSlotProductIds || [])
+      .map(r => r.product_id)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i); // ดึงค่าที่ไม่ซ้ำ
+
+    // ค้นหารายการประกาศรับซื้อ (Products) ที่มี slot แต่สล็อตทั้งหมดหมดอายุแล้ว (ไม่อยู่ใน activeIds)
+    const expiredProductIds = productsWithSlots.filter(id => !activeIds.includes(id));
+
+    if (expiredProductIds.length > 0) {
+      const { error: deactivateErr } = await supabaseAdmin
+        .from('buy_offers')
+        .update({ is_active: false })
+        .eq('is_active', true)
+        .in('product_id', expiredProductIds);
+
+      if (deactivateErr) throw deactivateErr;
+      logger.info(`[automation] deactivated ${expiredProductIds.length} products due to expired slots`);
+    }
   } catch (err) {
     logger.error('[automation] autoCloseStaleProductsAndSlots failed: ' + err.message);
   }

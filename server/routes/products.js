@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     const to = from + Number(limit) - 1;
 
     let query = supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .select('*, profiles!user_id(profile_id, first_name, last_name, avatar, lat, lng)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -69,6 +69,22 @@ router.get('/', async (req, res) => {
       throw error;
     }
 
+    // Log impressions in the background
+    const optionalUser = getOptionalAuthUser(req);
+    const viewerId = optionalUser?.id;
+    if (data && data.length > 0 && (!user_id || user_id !== viewerId)) {
+      const impressionsToInsert = data.map(p => ({
+        product_id: p.product_id,
+        viewer_id: viewerId || null
+      }));
+      supabaseAdmin
+        .from('offer_impressions')
+        .insert(impressionsToInsert)
+        .then(({ error: impError }) => {
+          if (impError) console.error('[GET /api/products] Failed to log impressions:', impError.message);
+        });
+    }
+
     res.json({
       success: true,
       data: data || [],
@@ -87,12 +103,12 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    if (!req.params.id || req.params.id === 'undefined') {
+    if (!req.params.id || req.params.id === 'undefined' || isNaN(Number(req.params.id))) {
       return res.status(404).json(response.error('ไม่พบสินค้า'));
     }
 
     const { data, error } = await supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .select(
         'product_id, name, variety, grade, grades, price, category, unit, image, is_active, created_at, updated_at, user_id, ' +
         'profiles!user_id(profile_id, first_name, last_name, phone, avatar, lat, lng)'
@@ -115,6 +131,35 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, category, variety, price, grade, unit, grades } = req.body;
     
+    // Check Tier Limit
+    const { data: profile, error: profErr } = await supabaseAdmin
+      .from('profiles')
+      .select('tier')
+      .eq('profile_id', req.user.id)
+      .single();
+    
+    if (profErr) throw new Error('ไม่พบข้อมูลโปรไฟล์ผู้ใช้งาน');
+    
+    const tier = (profile?.tier || 'free').toLowerCase();
+    const limit = tier === 'pro' ? 10 : 3;
+
+    // Count active products
+    const { count, error: countErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.user.id)
+      .eq('is_active', true);
+
+    if (countErr) throw countErr;
+
+    if (count >= limit) {
+      return res.status(403).json(response.error(
+        tier === 'pro' 
+          ? 'บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการ' 
+          : 'บัญชี FREE จำกัดการสร้างรายการรับซื้อสูงสุด 3 รายการ กรุณาอัปเกรดเป็น PRO เพื่อสร้างเพิ่มได้ถึง 10 รายการ'
+      ));
+    }
+    
     // If grades array is provided, price at top level becomes optional
     if (!name) return res.status(400).json(response.error('กรุณาระบุชื่อผลผลิต'));
     if (!price && (!grades || JSON.parse(grades).length === 0)) {
@@ -132,6 +177,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       price: Number(price || firstGrade.price || 0),
       grade: grade || firstGrade.grade || 'คละ',
       unit: unit || 'กก.',
+      grades: parsedGrades,
       is_active: true
     };
 
@@ -139,10 +185,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       updates.image = await saveFile(req.file, 'products');
     }
 
-    const { data, error } = await supabaseAdmin.from('products').insert(updates).select().single();
+    const { data, error } = await supabaseAdmin.from('buy_offers').insert(updates).select().single();
     if (error) throw error;
-
-
 
     res.status(201).json(response.success('เพิ่มรายการสำเร็จ', data));
   } catch (e) {
@@ -156,14 +200,40 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 router.patch('/:id', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const productId = req.params.id;
+    if (isNaN(Number(productId))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
     const { name, category, variety, price, grade, unit, grades, is_active } = req.body;
 
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (category !== undefined) updates.category = category;
     if (variety !== undefined) updates.variety = variety;
-    if (price !== undefined) updates.price = Number(price);
-    if (grade !== undefined) updates.grade = grade;
+
+    let parsedGrades = [];
+    if (grades !== undefined) {
+      try { parsedGrades = typeof grades === 'string' ? JSON.parse(grades) : grades; } catch(e) {}
+    }
+    const firstGrade = parsedGrades[0] || {};
+
+    if (price !== undefined) {
+      updates.price = Number(price);
+    } else if (firstGrade.price !== undefined) {
+      updates.price = Number(firstGrade.price);
+    }
+
+    if (grade !== undefined) {
+      updates.grade = grade;
+    } else if (firstGrade.grade !== undefined) {
+      updates.grade = firstGrade.grade;
+    }
+
+    if (parsedGrades.length > 0) {
+      updates.grades = parsedGrades;
+    } else if (grades !== undefined && grades === '[]') {
+      updates.grades = [];
+    }
+
     if (unit !== undefined) updates.unit = unit;
     if (is_active !== undefined) updates.is_active = is_active === 'true' || is_active === true;
 
@@ -172,7 +242,7 @@ router.patch('/:id', authMiddleware, upload.single('image'), async (req, res) =>
     }
 
     const { data, error } = await supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .update(updates)
       .eq('product_id', productId)
       .eq('user_id', req.user.id) // Ensure ownership
@@ -194,8 +264,11 @@ router.patch('/:id', authMiddleware, upload.single('image'), async (req, res) =>
  */
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
+    if (isNaN(Number(req.params.id))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
     const { error } = await supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .update({ is_active: false })
       .eq('product_id', req.params.id)
       .eq('user_id', req.user.id);
@@ -212,8 +285,11 @@ router.delete('/:id', authMiddleware, async (req, res) => {
  */
 router.get('/:id/slots', async (req, res) => {
   try {
+    if (isNaN(Number(req.params.id))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
     const { data, error } = await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .select('*')
       .eq('product_id', req.params.id)
       .eq('is_active', true)
@@ -231,12 +307,29 @@ router.get('/:id/slots', async (req, res) => {
  */
 router.post('/:id/slots', authMiddleware, async (req, res) => {
   try {
+    if (isNaN(Number(req.params.id))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
+    // [BUG FIX] ตรวจสอบ ownership ก่อนเพิ่ม slot
+    const { data: product, error: pErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('user_id')
+      .eq('product_id', req.params.id)
+      .maybeSingle();
+
+    if (pErr || !product) {
+      return res.status(404).json(response.error('ไม่พบสินค้า'));
+    }
+    if (product.user_id !== req.user.id) {
+      return res.status(403).json(response.error('คุณไม่มีสิทธิ์เพิ่มคิวให้สินค้านี้'));
+    }
+
     const payload = {
       ...req.body,
       product_id: req.params.id
     };
     const { data, error } = await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .insert(payload)
       .select()
       .single();
@@ -267,8 +360,34 @@ const requireBuyer = (req, res, next) => {
 /** POST /api/buyer/products — สร้างประกาศรับซื้อ (Buyer) */
 buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), async (req, res) => {
   try {
-    const { name, category, variety, price, grade, unit, grades, description, quantity } = req.body;
+    const { name, category, variety, price, grade, unit, grades, description } = req.body;
     if (!name) return res.status(400).json(response.error('กรุณาระบุชื่อผลผลิต'));
+
+    // ── Check Tier Limit ──
+    const { data: buyerProfile, error: bpErr } = await supabaseAdmin
+      .from('profiles')
+      .select('tier')
+      .eq('profile_id', req.user.id)
+      .single();
+    if (bpErr) throw new Error('ไม่พบข้อมูลโปรไฟล์ผู้ใช้งาน');
+    const buyerTier = (buyerProfile?.tier || 'free').toLowerCase();
+    const buyerLimit = buyerTier === 'pro' ? 10 : 3;
+    const { count: buyerCount, error: bcErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.user.id)
+      .eq('is_active', true);
+    if (bcErr) throw bcErr;
+    if (buyerCount >= buyerLimit) {
+      return res.status(403).json(response.error(
+        buyerTier === 'pro'
+          ? 'บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการ'
+          : 'บัญชี FREE จำกัดการสร้างรายการรับซื้อสูงสุด 3 รายการ กรุณาอัปเกรดเป็น PRO เพื่อสร้างเพิ่มได้ถึง 10 รายการ'
+      ));
+    }
+    // ─────────────────────
+
+
 
     const parsedGrades = grades ? JSON.parse(grades) : [];
     const firstGrade   = parsedGrades[0] || {};
@@ -291,7 +410,7 @@ buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), asyn
     if (description) insertData.description = description;
     if (req.file) insertData.image = await saveFile(req.file, 'products');
 
-    const { data, error } = await supabaseAdmin.from('products').insert(insertData).select().single();
+    const { data, error } = await supabaseAdmin.from('buy_offers').insert(insertData).select().single();
     if (error) throw error;
 
 
@@ -306,6 +425,9 @@ buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), asyn
 buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), async (req, res) => {
   try {
     const productId = req.params.id;
+    if (isNaN(Number(productId))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
     const { name, category, variety, price, grade, unit, grades, description, is_active } = req.body;
 
     const updates = {};
@@ -350,7 +472,7 @@ buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), 
 
     // ลองหา product ก่อนว่ามีอยู่จริงไหม
     const { data: existing } = await supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .select('product_id, user_id')
       .eq('product_id', productId)
       .maybeSingle();
@@ -363,7 +485,7 @@ buyerRouter.patch('/:id', authMiddleware, requireBuyer, upload.single('image'), 
     }
 
     const { data, error } = await supabaseAdmin
-      .from('products')
+      .from('buy_offers')
       .update(updates)
       .eq('product_id', productId)
       .select()

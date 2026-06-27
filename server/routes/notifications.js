@@ -74,19 +74,11 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * PATCH /api/notifications/:id/read — อ่านแจ้งเตือนชิ้นเดียว
- */
-router.patch('/:id/read', authMiddleware, async (req, res) => {
-  try {
-    const result = await updateReadByAnyId(req.user.id, req.params.id);
-    if (result.error) return res.status(500).json(response.error('อ่านแจ้งเตือนไม่สำเร็จ', result.error.message));
-    if (!result.updated) return res.status(404).json(response.error('ไม่พบแจ้งเตือนรายการนี้'));
-    res.json(response.success('อ่านแจ้งเตือนสำเร็จ'));
-  } catch (e) {
-    res.status(500).json(response.error('อ่านแจ้งเตือนไม่สำเร็จ', e.message));
-  }
-});
+// ============================================================
+// [BUG FIX] Static routes MUST be declared BEFORE /:id
+// Otherwise Express matches "read-all", "settings", "push-token"
+// as the :id parameter and calls the wrong handler.
+// ============================================================
 
 /**
  * PATCH /api/notifications/read-all — อ่านทั้งหมด
@@ -103,20 +95,6 @@ router.patch('/read-all', authMiddleware, async (req, res) => {
     res.json(response.success('อ่านแจ้งเตือนทั้งหมดสำเร็จ'));
   } catch (e) {
     res.status(500).json(response.error('อ่านแจ้งเตือนทั้งหมดไม่สำเร็จ', e.message));
-  }
-});
-
-/**
- * DELETE /api/notifications/:id — ลบแจ้งเตือนรายการเดียว
- */
-router.delete('/:id', authMiddleware, async (req, res) => {
-  try {
-    const result = await deleteByAnyId(req.user.id, req.params.id);
-    if (result.error) return res.status(500).json(response.error('ลบแจ้งเตือนไม่สำเร็จ', result.error.message));
-    if (!result.deleted) return res.status(404).json(response.error('ไม่พบแจ้งเตือนรายการนี้'));
-    res.json(response.success('ลบแจ้งเตือนสำเร็จ'));
-  } catch (e) {
-    res.status(500).json(response.error('ลบแจ้งเตือนไม่สำเร็จ', e.message));
   }
 });
 
@@ -180,6 +158,34 @@ router.post('/push-token', authMiddleware, async (req, res) => {
     res.json(response.success('ลงทะเบียน Device Token สำเร็จ'));
   } catch (e) {
     res.status(500).json(response.error(e.message));
+  }
+});
+
+/**
+ * PATCH /api/notifications/:id/read — อ่านแจ้งเตือนชิ้นเดียว
+ */
+router.patch('/:id/read', authMiddleware, async (req, res) => {
+  try {
+    const result = await updateReadByAnyId(req.user.id, req.params.id);
+    if (result.error) return res.status(500).json(response.error('อ่านแจ้งเตือนไม่สำเร็จ', result.error.message));
+    if (!result.updated) return res.status(404).json(response.error('ไม่พบแจ้งเตือนรายการนี้'));
+    res.json(response.success('อ่านแจ้งเตือนสำเร็จ'));
+  } catch (e) {
+    res.status(500).json(response.error('อ่านแจ้งเตือนไม่สำเร็จ', e.message));
+  }
+});
+
+/**
+ * DELETE /api/notifications/:id — ลบแจ้งเตือนรายการเดียว
+ */
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const result = await deleteByAnyId(req.user.id, req.params.id);
+    if (result.error) return res.status(500).json(response.error('ลบแจ้งเตือนไม่สำเร็จ', result.error.message));
+    if (!result.deleted) return res.status(404).json(response.error('ไม่พบแจ้งเตือนรายการนี้'));
+    res.json(response.success('ลบแจ้งเตือนสำเร็จ'));
+  } catch (e) {
+    res.status(500).json(response.error('ลบแจ้งเตือนไม่สำเร็จ', e.message));
   }
 });
 

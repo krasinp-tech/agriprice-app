@@ -13,85 +13,67 @@
   };
   const Auth = window.Auth || { getRole: () => 'guest', getToken: () => null };
   const api = window.api || {};
-
-  // เปิดโหมด debug ได้ด้วย window.ACCOUNT_DEBUG = true
-  const DEBUG = !!(window.ACCOUNT_DEBUG || window.AGRIPRICE_DEBUG);
-
-  // =========================
-  // SAFE FALLBACK (no mock content)
-  // =========================
-  const emptyUser = {
-    id: 0,
-    fullName: "-",
-    roleLabel: "-",
-    memberSince: "",
-    avatarUrl: "",
-    stats: { following: 0, followers: 0, pros: 0 },
-  };
+  const AuthGuard = window.AuthGuard || {};
+  const DEBUG = !!window.AGRIPRICE_DEBUG;
 
   // =========================
   // DOM ELEMENTS
   // =========================
-  const avatarImg = document.getElementById("avatarImg");
+  const avatarImg   = document.getElementById("avatarImg");
   const profileName = document.getElementById("profileName");
-  const profileSub = document.getElementById("profileSub");
+  const profileSub  = document.getElementById("profileSub");
   const statFollowing = document.getElementById("statFollowing");
   const statFollowers = document.getElementById("statFollowers");
-  const statPros = document.getElementById("statPros");
+  const statPros      = document.getElementById("statPros");
 
-  const buyerProfileLink = document.getElementById("buyerProfileLink");
+  const buyerProfileLink   = document.getElementById("buyerProfileLink");
   const buyerDashboardLink = document.getElementById("buyerDashboardLink");
-
-  const editBtn = document.getElementById("avatarEditBtn");
-  const fileInput = document.getElementById("avatarFile");
-  const logoutBtn = document.getElementById("logoutBtn");
 
   // =========================
   // HELPERS
   // =========================
-  function log(...args) {
-    if (DEBUG) console.log("[account]", ...args);
-  }
-
   function safeText(el, v) {
     if (!el) return;
     el.textContent = v == null ? "" : String(v);
   }
 
-  function formatMemberSince(yearOrDate) {
-    if (!yearOrDate) return "-";
-    const year = String(yearOrDate).slice(0, 4);
+  function formatMemberSince(val) {
+    if (!val) return "-";
+    // val could be "2024" or ISO string
+    const year = String(val).slice(0, 4);
     const label = window.i18nT ? window.i18nT('member_since', 'สมาชิกตั้งแต่') : 'สมาชิกตั้งแต่';
     return `${label} ${year}`;
   }
 
-  function getRelativePrefixToRoot() {
-    const path = window.location.pathname.replace(/\\/g, "/");
-    const pagesIdx = path.lastIndexOf("/pages/");
-    if (pagesIdx === -1) return "";
-
-    const afterPages = path.substring(pagesIdx + "/pages/".length);
-    // นับจำนวน folder ที่อยู่หลัง pages/
-    const parts = afterPages.split("/").filter(p => p && !p.endsWith(".html"));
-    const depth = parts.length;
-
-    // ถ้าอยู่ที่ pages/directly.html -> depth=0 -> ../
-    // ถ้าอยู่ที่ pages/buyer/acc.html -> depth=1 -> ../../
-    return "../" + "../".repeat(depth);
-  }
-
-  function resolveAssetPath(p) {
-    const prefix = getRelativePrefixToRoot();
-    const normalized = String(p || "").replace(/^\/+/, "");
-    // ลองใช้ Path ที่เป็นมิตรกับทั้ง Web Server และ Cordova
-    return prefix + normalized;
-  }
-
   function getDefaultAvatarByRole(role) {
-    const normalizedRole = String(role || "guest").toLowerCase();
-    if (normalizedRole === "farmer") return resolveAssetPath("assets/images/avatar-farmer.svg");
-    if (normalizedRole === "buyer") return resolveAssetPath("assets/images/avatar-buyer.svg");
-    return resolveAssetPath("assets/images/avatar-guest.svg");
+    let root = '../../';
+    if (typeof window.getRelativePrefixToRoot === 'function') {
+      root = window.getRelativePrefixToRoot();
+    }
+    
+    if (role === 'buyer') return root + 'assets/images/avatar-buyer.svg';
+    if (role === 'farmer') return root + 'assets/images/avatar-farmer.svg';
+    return root + 'assets/images/avatar-guest.svg';
+  }
+
+  function loadSavedAvatar(role) {
+    if (!avatarImg) return false;
+    const key = KEYS.AVATAR(role);
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      avatarImg.src = saved;
+      return true;
+    }
+    return false;
+  }
+
+  function saveAvatarDataUrl(dataUrl) {
+    const role = api.getRole ? api.getRole() : 'guest';
+    localStorage.setItem(KEYS.AVATAR(role), dataUrl);
+  }
+
+  function clearSavedAvatar(role) {
+    localStorage.removeItem(KEYS.AVATAR(role));
   }
 
   function loadJsonByKeys(keys) {
@@ -100,73 +82,23 @@
       if (!raw) continue;
       try {
         return JSON.parse(raw);
-      } catch (err) {
-        if (DEBUG) console.warn('[Account] Error parsing JSON for key:', key, err);
-      }
+      } catch (_) {}
     }
     return null;
   }
 
-  // =========================
-  // AVATAR PERSIST (local + sync with myprofile)
-  // =========================
-  function loadSavedAvatar(role) {
-    try {
-      const avatarKey = KEYS.AVATAR(role);
-      let saved = localStorage.getItem(avatarKey);
-
-      // ถ้าไม่มี ให้ลองโหลดจาก myprofile data ตาม role
-      if (!saved) {
-        const profileKey = KEYS.PROFILE(role);
-        const parsed = loadJsonByKeys([profileKey]);
-        if (parsed && parsed.avatar && !parsed.avatar.includes("assets/images")) {
-          saved = parsed.avatar;
-        }
-      }
-
-      if (saved && avatarImg) {
-        // กรอง Path ที่เสีย (เช่น มีคำว่า undefined หรือขึ้นต้นด้วย ../ มากเกินไป)
-        if (saved.includes("undefined") || (saved.startsWith("../") && !window.location.pathname.includes("/pages/"))) {
-          if (DEBUG) console.warn('[Account] Ignoring broken saved avatar path:', saved);
-          return false;
-        }
-        avatarImg.src = saved;
-        return true;
-      }
-      return false;
-    } catch (err) {
-      if (DEBUG) console.warn('[Account] Error loading saved avatar:', err);
-      return false;
-    }
+  function getBase() {
+    return (window.API_BASE_URL || '').replace(/\/$/, '');
   }
 
-  function saveAvatarDataUrl(dataUrl) {
-    try {
-      const role = Auth.getRole();
-      const avatarKey = KEYS.AVATAR(role);
-
-      localStorage.setItem(avatarKey, dataUrl);
-
-      // อัปเดต myprofile_data ตาม role ด้วย
-      const profileKey = KEYS.PROFILE(role);
-      const parsed = loadJsonByKeys([profileKey]);
-      if (parsed) {
-        parsed.avatar = dataUrl;
-        localStorage.setItem(profileKey, JSON.stringify(parsed));
-      }
-    } catch (err) {
-      if (DEBUG) console.warn('[Account] Error saving avatar:', err);
-    }
-  }
-
-  function clearSavedAvatar() {
-    try {
-      const role = Auth.getRole();
-      localStorage.removeItem(KEYS.AVATAR(role));
-    } catch (err) {
-      if (DEBUG) console.warn('[Account] Error clearing avatar:', err);
-    }
-  }
+  // [FIX] emptyUser must be defined as fallback
+  const emptyUser = {
+    fullName: "-",
+    roleLabel: "-",
+    memberSince: null,
+    avatarUrl: "",
+    stats: { following: 0, followers: 0, pros: 0 },
+  };
 
   // =========================
   // RENDER
@@ -174,7 +106,7 @@
   function renderUser(u) {
     if (!u) return;
 
-    const role = Auth.getRole();
+    const role = api.getRole ? api.getRole() : 'guest';
     const defaultAvatar = getDefaultAvatarByRole(role);
 
     // avatar: ถ้ามีรูปที่ user เคยเลือกไว้ ให้ใช้ก่อน
@@ -199,35 +131,17 @@
 
     const tier = String(u.tier || "free").toLowerCase();
     const buyerUpgradeLink = document.getElementById("buyerUpgradeLink");
-    const buyerSubscriptionLink = document.getElementById("buyerSubscriptionLink");
 
     if (role === "buyer") {
-      // Dashboard only for pro
-      if (buyerDashboardLink) {
-        buyerDashboardLink.style.display = (tier === "pro") ? "flex" : "none";
-      }
-      
-      // Always show subscription management for buyer
-      if (buyerSubscriptionLink) {
-        buyerSubscriptionLink.style.display = "flex";
-        
-        // Dynamically update description
-        const descEl = buyerSubscriptionLink.querySelector('.menu-sub');
-        if (descEl) {
-          const key = (tier === "pro") ? "manage_package" : "upgrade_pro_desc";
-          const defaultText = (tier === "pro") ? "จัดการหรือยกเลิกแพ็กเกจโปร" : "ปลดล็อกฟีเจอร์พรีเมียม";
-          descEl.textContent = window.i18nT ? window.i18nT(key, defaultText) : defaultText;
-          descEl.setAttribute('data-i18n', key);
-        }
-      }
-      
-      // Upgrade link is no longer needed separately
-      if (buyerUpgradeLink) {
-        buyerUpgradeLink.style.display = "none";
+      if (tier === "pro") {
+        if (buyerDashboardLink) buyerDashboardLink.style.display = "flex";
+        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
+      } else {
+        if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
+        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "flex";
       }
     } else {
       if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
-      if (buyerSubscriptionLink) buyerSubscriptionLink.style.display = "none";
       if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
     }
 
@@ -293,11 +207,11 @@
     const roleRaw = String(data.role || "").toLowerCase();
     const roleLabel = roleRaw === "buyer" ? (window.i18nT ? window.i18nT('role_buyer', 'ผู้รับซื้อ') : "ผู้รับซื้อ") : roleRaw === "farmer" ? (window.i18nT ? window.i18nT('role_farmer', 'เกษตรกร') : "เกษตรกร") : (data.roleLabel || data.role || emptyUser.roleLabel);
 
-    // [FIX] Fallback: ถ้า API ไม่ส่ง tier มา หรือเป็น free ให้ลองเช็คจาก Token (เพราะเพิ่งจ่ายเงินอาจจะยังไม่ sync)
+    // Fallback: ถ้า API ไม่ส่ง tier มา หรือเป็น free ให้ลองเช็คจาก Token
     let finalTier = data.tier ?? data.tierLabel ?? "free";
     if (finalTier === "free") {
       try {
-        const token = Auth.getToken();
+        const token = api.getToken ? api.getToken() : '';
         if (token) {
           const parts = token.split('.');
           if (parts.length === 3) {
@@ -309,15 +223,13 @@
     }
 
     return {
-      // [FIX] server ส่ง profile_id ไม่ใช่ id
-      id: data.profile_id ?? data.id ?? data.userId ?? 0,
+      id: window.resolveProfileId ? window.resolveProfileId(data.profile_id, data.id, data.userId) : (data.id || 0),
       fullName: data.fullName ?? data.name ?? fullNameFromParts ?? emptyUser.fullName,
       roleLabel,
       memberSince: data.memberSince ?? data.createdAt ?? data.created_at ?? emptyUser.memberSince,
       avatarUrl: data.avatarUrl ?? data.avatar ?? emptyUser.avatarUrl,
       tier: finalTier,
       stats: {
-        // [FIX] server ส่ง following_count / followers_count (ไม่ใช่ followingCount / followerCount)
         following: data.stats?.following ?? data.following_count ?? data.followingCount ?? emptyUser.stats.following,
         followers: data.stats?.followers ?? data.followers_count ?? data.followerCount ?? emptyUser.stats.followers,
         pros: data.stats?.pros ?? data.promoCount ?? emptyUser.stats.pros,
@@ -353,7 +265,7 @@
       }
 
       // fallback: ใช้ข้อมูลจริงจาก localStorage
-      const role = Auth.getRole();
+      const role = api.getRole ? api.getRole() : 'guest';
       const roleLabel = role === "buyer" ? (window.i18nT ? window.i18nT('role_buyer', 'ผู้รับซื้อ') : "ผู้รับซื้อ") : role === "farmer" ? (window.i18nT ? window.i18nT('role_farmer', 'เกษตรกร') : "เกษตรกร") : (window.i18nT ? window.i18nT('role_user', 'ผู้ใช้งาน') : "ผู้ใช้งาน");
 
       let userData = {
@@ -398,7 +310,7 @@
   });
 
   window.addEventListener("storage", (e) => {
-    const role = Auth.getRole();
+    const role = api.getRole ? api.getRole() : 'guest';
     if (e.key === KEYS.AVATAR(role) || e.key === KEYS.PROFILE(role)) {
       syncLiveUser();
     }
@@ -408,12 +320,16 @@
       const isDark = e.newValue === 'dark';
       if (dmCheck) dmCheck.checked = isDark;
       if (dmStatus) dmStatus.textContent = isDark ? (window.i18nT ? window.i18nT('on', 'เปิดอยู่') : 'เปิดอยู่') : (window.i18nT ? window.i18nT('off', 'ปิดอยู่') : 'ปิดอยู่');
+      document.documentElement.setAttribute('data-theme', e.newValue || 'light');
     }
   });
 
   // =========================
   // AVATAR PICKER
   // =========================
+  const editBtn   = document.getElementById("avatarEditBtn");
+  const fileInput = document.getElementById("avatarFile");
+
   function readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -443,13 +359,12 @@
         avatarImg.src = dataUrl;
         saveAvatarDataUrl(dataUrl);
 
-        // [ADDED] อัปโหลดรูปขึ้นเซิร์ฟเวอร์จริงเพื่อให้รูปคงอยู่เมื่อเปิดเครื่องอื่น
         const formData = new FormData();
         formData.append('avatar', file);
 
         if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-        const token = Auth.getToken();
+        const currentBase = getBase();
+        const token = api.getToken ? api.getToken() : '';
 
         if (currentBase && token) {
           fetch(currentBase + '/api/profile', {
@@ -476,7 +391,7 @@
       }
     });
   } else {
-    loadSavedAvatar(Auth.getRole());
+    if (api.getRole) loadSavedAvatar(api.getRole());
   }
 
   startLiveSync();
@@ -520,18 +435,9 @@
 
     if (logoutConfirmBtn) {
       logoutConfirmBtn.addEventListener("click", () => {
-        clearSavedAvatar();
-        if (Auth.logout) Auth.logout();
-        else {
-          localStorage.removeItem(KEYS.TOKEN);
-          localStorage.removeItem(KEYS.USER_DATA);
-          localStorage.removeItem(KEYS.ROLE);
-
-          const path = window.location.pathname;
-          const pagesIdx = path.indexOf("/pages/");
-          const base = pagesIdx !== -1 ? path.substring(0, pagesIdx + 1) : "/";
-          window.location.href = base + "index.html";
-        }
+        if (api.getRole) clearSavedAvatar(api.getRole());
+        if (api.logout) api.logout();
+        else if (AuthGuard.logout) AuthGuard.logout();
       });
     }
 
@@ -543,6 +449,9 @@
     if (dmToggle && dmCheck) {
       const updateUI = (isDark) => {
         dmCheck.checked = isDark;
+        // sync toggle-track visual state
+        const track = dmToggle.querySelector('.toggle-track');
+        if (track) track.classList.toggle('on', isDark);
         if (dmStatus) dmStatus.textContent = isDark ? (window.i18nT ? window.i18nT('on', 'เปิดอยู่') : 'เปิดอยู่') : (window.i18nT ? window.i18nT('off', 'ปิดอยู่') : 'ปิดอยู่');
       };
 

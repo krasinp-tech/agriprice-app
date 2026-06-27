@@ -24,25 +24,20 @@
 			(window.Capacitor && window.Capacitor.isNative)
 		);
 
-		// If we explicitly want to use local server for development
-		if (localStorage.getItem('agriprice_use_local') === '1') {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Manual override: Using localhost:5000');
+		// Auto-detect local development (localhost, 127.0.0.1, file protocol, or local network IP)
+		const isLocal = (
+			hostname === 'localhost' || 
+			hostname === '127.0.0.1' || 
+			hostname.startsWith('192.168.') || 
+			protocol === 'file:'
+		);
+
+		if (isLocal || localStorage.getItem('agriprice_use_local') === '1') {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Local environment detected: Using http://localhost:5000');
 			return 'http://localhost:5000';
 		}
 
-		// For development (localhost), default to local backend at http://localhost:5000
-		if (hostname === 'localhost' || hostname === '127.0.0.1') {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Development mode: Using localhost:5000');
-			return 'http://localhost:5000';
-		}
-
-		// For native apps (Capacitor), use production Render
-		if (isNative) {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Native app: Using Production API: https://agriprice-app.onrender.com');
-			return 'https://agriprice-app.onrender.com';
-		}
-
-		// Default to production Render
+		// Default to Production Render
 		if (window.AGRIPRICE_DEBUG) console.log('[config] Defaulting to Production API: https://agriprice-app.onrender.com');
 		return 'https://agriprice-app.onrender.com';
 	})();
@@ -63,10 +58,16 @@
 	window.STORAGE_KEYS   = {
 		TOKEN: window.AUTH_TOKEN_KEY,
 		USER_DATA: window.AUTH_USER_KEY,
-		ROLE: window.AUTH_ROLE_KEY
+		ROLE: window.AUTH_ROLE_KEY,
+		THEME: 'agriprice_theme',
+		LANGUAGE: 'language',
+		AVATAR: (role) => `profile_avatar_dataurl_${role || 'guest'}`,
+		PROFILE: (role) => `myprofile_data_${role || 'guest'}`
 	};
 
 	// --- FIREBASE CONFIGURATION (MATCHING WEB CONSOLE) ---
+	// Note: Firebase config is exposed in frontend as required by Firebase Web SDK.
+	// This is standard practice - Firebase config is not sensitive, actual security is enforced by Firebase rules.
 	const FALLBACK_FIREBASE = {
 		apiKey: 'AIzaSyBUdCFBGSS0S1bbmsvJM7Lc3b4S2kNt5SE',
 		authDomain: 'agriprice-otp.firebaseapp.com',
@@ -125,4 +126,15 @@
 	const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 	const themeToApply = savedTheme || (systemDark ? 'dark' : 'light');
 	document.documentElement.setAttribute('data-theme', themeToApply);
+
+	// Define global resolve helper functions to prevent ReferenceErrors
+	window.resolveUserId = function(...ids) {
+		for (const id of ids) {
+			if (id !== undefined && id !== null && String(id).trim() !== '') {
+				return String(id);
+			}
+		}
+		return '';
+	};
+	window.resolveProfileId = window.resolveUserId;
 })();

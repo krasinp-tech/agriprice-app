@@ -7,15 +7,13 @@ const { toE164, JWT_SECRET, signToken } = require('../utils/helpers');
 const { saveFile } = require('../services/fileService');
 const jwt = require('jsonwebtoken');
 
-const DEV_OTP_MODE = process.env.OTP_MOCK !== 'false';
-
 /**
  * GET /api/profile (Current User)
  */
 router.get('/', authMiddleware, async (req, res) => {
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, links, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier')
+    .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, links, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier, services')
     .eq('profile_id', req.user.id)
     .single();
     
@@ -23,7 +21,6 @@ router.get('/', authMiddleware, async (req, res) => {
     console.warn(`[Profile] Not found for ID: ${req.user.id}`);
     return res.status(404).json({ message: 'ไม่พบโปรไฟล์' });
   }
-  console.log('[DEBUG] GET /api/profile result:', { profile_id: data.profile_id, tier: data.tier });
   res.json(data);
 });
 
@@ -43,8 +40,6 @@ router.patch('/', authMiddleware, (req, res, next) => {
   }
 }, async (req, res) => {
   try {
-    console.log('[DEBUG] Profile Update Request:', { body: req.body, user: req.user });
-
     const fields = ['first_name','last_name','tagline','about','address_line1','address_line2','map_link','links','email','birth_date','account_status','lat','lng','hero_image','services'];
     const updates = {};
     fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
@@ -72,14 +67,39 @@ router.patch('/', authMiddleware, (req, res, next) => {
 
     let { error } = await supabaseAdmin.from('profiles').update(updates).eq('profile_id', req.user.id);
     
-    // [FIX] ถ้า Error เพราะไม่มีคอลัมน์ lat/lng/services ให้ลองอัปเดตใหม่โดยตัดฟิลด์ที่อาจไม่มีออก
-    if (error && (error.code === 'PGRST204' || error.message.includes('column'))) {
-      console.warn('[DEBUG] Skipping some fields because columns might not exist in DB yet.');
-      delete updates.lat;
-      delete updates.lng;
-      delete updates.services;
-      const retry = await supabaseAdmin.from('profiles').update(updates).eq('profile_id', req.user.id);
-      error = retry.error;
+    // [FIXED] ดักจับ Error เฉพาะเจาะจง ไม่ตัด lat/lng ทิ้งถ้ามีคอลัมน์ใน DB แล้ว
+    if (error && (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('relationship'))) {
+      console.warn('[DEBUG] Profile update failed initially, trying smart fallback:', error.message);
+      
+      let modified = false;
+      if (error.message.includes('services') || error.message.includes('relationship between profiles and services')) {
+        console.warn('[DEBUG] Removing non-existent "services" column from updates');
+        delete updates.services;
+        modified = true;
+      }
+      if (error.message.includes('lat')) {
+        console.warn('[DEBUG] Removing non-existent "lat" column from updates');
+        delete updates.lat;
+        modified = true;
+      }
+      if (error.message.includes('lng')) {
+        console.warn('[DEBUG] Removing non-existent "lng" column from updates');
+        delete updates.lng;
+        modified = true;
+      }
+
+      if (!modified) {
+        if ('services' in updates) {
+          console.warn('[DEBUG] Fallback: Removing "services" column from updates');
+          delete updates.services;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        const retry = await supabaseAdmin.from('profiles').update(updates).eq('profile_id', req.user.id);
+        error = retry.error;
+      }
     }
 
     if (error) {
@@ -87,8 +107,11 @@ router.patch('/', authMiddleware, (req, res, next) => {
       return res.status(500).json({ message: 'Database Error: ' + error.message });
     }
     
-    console.log('[DEBUG] Profile Updated Successfully for:', req.user.id);
-    res.json({ message: 'อัปเดตโปรไฟล์สำเร็จ' });
+    res.json({
+      success: true,
+      message: 'อัปเดตโปรไฟล์สำเร็จ',
+      data: updates
+    });
   } catch (e) {
     console.error('[DEBUG] Catch-all Error:', e);
     res.status(500).json({ message: e.message });
@@ -120,7 +143,7 @@ router.get('/:userId', async (req, res) => {
 
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .select('profile_id, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, links, hero_image, followers_count, following_count, created_at, lat, lng')
+    .select('profile_id, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, links, hero_image, followers_count, following_count, created_at, lat, lng, services')
     .eq('profile_id', req.params.userId)
     .single();
 

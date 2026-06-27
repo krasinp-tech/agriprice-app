@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../utils/supabase');
 const verifyToken = require('../middlewares/auth');
+const excelPriceService = require('../services/excelPriceService');
 
 router.get('/', verifyToken, async (req, res) => {
   try {
@@ -19,7 +20,7 @@ router.get('/', verifyToken, async (req, res) => {
 
     const { data: bookingsData, error: bookingsError } = await supabaseAdmin
       .from('bookings')
-      .select('status, quantity, expected_price, product_id, farmer_id, created_at, product:products(price)')
+      .select('status, quantity, product_id, farmer_id, created_at, product:buy_offers(price)')
       .eq(role === 'farmer' ? 'farmer_id' : 'buyer_id', userId);
 
     if (!bookingsError && bookingsData) {
@@ -79,13 +80,13 @@ router.get('/', verifyToken, async (req, res) => {
     
     const top_products = [];
     for (const [pid, stats] of topProductPids) {
-      const { data: pData } = await supabaseAdmin.from('products').select('name, images').eq('product_id', pid).maybeSingle();
+      const { data: pData } = await supabaseAdmin.from('buy_offers').select('name, image').eq('product_id', pid).maybeSingle();
       top_products.push({
         id: pid,
         name: pData?.name || 'สินค้า',
         qty: stats.qty,
         spent: stats.spent,
-        image: pData?.images?.[0] || '../../../assets/images/default-product.png'
+        image: pData?.image || '../../../assets/images/default-product.png'
       });
     }
 
@@ -123,47 +124,36 @@ router.get('/', verifyToken, async (req, res) => {
       });
     }
 
-    // Market Prices (Latest from gov_prices)
-    const { data: mData } = await supabaseAdmin
-      .from('gov_prices')
-      .select('commodity, avg_price, price_date')
-      .order('price_date', { ascending: false })
-      .limit(30); // fetch more to ensure we get distinct top ones
-    
-    const marketPrices = [];
-    const seenM = new Set();
-    if (mData) {
-      for (const row of mData) {
-        if (!seenM.has(row.commodity)) {
-          seenM.add(row.commodity);
-          
-          // Get previous price to show trend
-          const { data: prevPriceData } = await supabaseAdmin
-            .from('gov_prices')
-            .select('avg_price')
-            .eq('commodity', row.commodity)
-            .lt('price_date', row.price_date)
-            .order('price_date', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          
-          let change = 0;
-          let trend = 'stable';
-          if (prevPriceData && prevPriceData.avg_price > 0) {
-            change = ((row.avg_price - prevPriceData.avg_price) / prevPriceData.avg_price) * 100;
-            trend = change > 0 ? 'up' : (change < 0 ? 'down' : 'stable');
-          }
+    // Market Prices (Latest from gov_prices) — loaded from Excel in real-time
+    const allPrices = excelPriceService.getAllPrices();
+    const sortedPrices = [...allPrices].sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
 
-          marketPrices.push({
-            name: row.commodity,
-            price: row.avg_price,
-            date: row.price_date,
-            change: Math.round(change * 10) / 10,
-            trend: trend
-          });
-        }
-        if (marketPrices.length >= 5) break;
+    const marketPrices = [];
+    const commodityRows = new Map(); // commodity -> [latest, prev]
+    for (const row of sortedPrices) {
+      const rows = commodityRows.get(row.commodity) || [];
+      if (rows.length < 2) {
+        rows.push(row);
+        commodityRows.set(row.commodity, rows);
       }
+    }
+    for (const [commodity, rows] of commodityRows) {
+      if (marketPrices.length >= 5) break;
+      const latest = rows[0];
+      const prev   = rows[1] || null;
+      let change = 0;
+      let trend  = 'stable';
+      if (prev && prev.avg_price > 0) {
+        change = ((latest.avg_price - prev.avg_price) / prev.avg_price) * 100;
+        trend  = change > 0 ? 'up' : (change < 0 ? 'down' : 'stable');
+      }
+      marketPrices.push({
+        name:   commodity,
+        price:  latest.avg_price,
+        date:   latest.price_date,
+        change: Math.round(change * 10) / 10,
+        trend,
+      });
     }
 
     const payload = {
@@ -202,42 +192,270 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/pro-stats', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    // In a real implementation, you would aggregate from bookings, payments, views, etc.
-    // For now, return mock aggregated data for the Pro Dashboard design.
+    const role = req.user.role || 'buyer';
 
-    // [REAL DATA] คำนวณจากฐานข้อมูลจริง
+    // ── Tier Guard: เฉพาะ PRO เท่านั้น ─────────────────────────
+    const { data: profileCheck, error: profCheckErr } = await supabaseAdmin
+      .from('profiles')
+      .select('tier')
+      .eq('profile_id', userId)
+      .single();
+
+    const userTier = (profileCheck?.tier || 'free').toLowerCase();
+    if (userTier !== 'pro') {
+      return res.status(403).json({
+        success: false,
+        tier_required: true,
+        message: 'ฟีเจอร์นี้ใช้ได้เฉพาะสมาชิก PRO เท่านั้น'
+      });
+    }
+    // ─────────────────────────────────────────────────────────────
+
+    const period = req.query.period || 'today';
+    const now = new Date();
+    let startDate = new Date();
+    if (period === 'today') {
+      startDate.setHours(0, 0, 0, 0); // start of today
+    } else if (period === 'week') {
+      startDate.setDate(now.getDate() - 7); // last 7 days
+    } else { // 'month'
+      startDate.setDate(now.getDate() - 30); // last 30 days
+    }
+
+    // [REAL DATA] 1. ดึงข้อมูลการจองจริง
     const { data: bookingsData, error: bookingsError } = await supabaseAdmin
       .from('bookings')
-      .select('status, quantity, product:products(price)')
-      .eq('buyer_id', userId);
+      .select('booking_id, status, created_at, quantity, product_id, products:buy_offers(product_id, name, category, variety, price)')
+      .eq(role === 'farmer' ? 'farmer_id' : 'buyer_id', userId);
 
     if (bookingsError) throw bookingsError;
 
-    const totalBookings = bookingsData ? bookingsData.length : 0;
-    const successBookings = bookingsData ? bookingsData.filter(b => b.status === 'success') : [];
-    const waitingBookings = bookingsData ? bookingsData.filter(b => b.status === 'waiting').length : 0;
-    const cancelBookings = bookingsData ? bookingsData.filter(b => b.status === 'cancel').length : 0;
+    // กรองข้อมูลการจองตามช่วงเวลาที่เลือก
+    const periodBookings = (bookingsData || []).filter(b => new Date(b.created_at) >= startDate);
+    const totalBookings = periodBookings.length;
+    const successBookings = periodBookings.filter(b => b.status === 'success');
+    const waitingBookingsCount = periodBookings.filter(b => b.status === 'waiting').length;
+    const cancelBookingsCount = periodBookings.filter(b => b.status === 'cancel').length;
+    const successRate = totalBookings > 0 ? (successBookings.length / totalBookings) * 100 : 0;
 
-    // คำนวณรายได้ (ยอดซื้อสำเร็จ)
-    const revenue = successBookings.reduce((acc, curr) => {
-      const qty = Number(curr.quantity || curr.qty || 0);
-      const price = Number(curr.expected_price || curr.product?.price || 0);
-      return acc + (qty * price);
-    }, 0);
+    // คำนวณช่วงเวลาการจองสูงสุด
+    const hourCounts = Array(24).fill(0);
+    periodBookings.forEach(b => {
+      const hr = new Date(b.created_at).getHours();
+      hourCounts[hr]++;
+    });
+    let peakHour = 0;
+    let maxHourCount = 0;
+    for (let h = 0; h < 24; h++) {
+      if (hourCounts[h] > maxHourCount) {
+        maxHourCount = hourCounts[h];
+        peakHour = h;
+      }
+    }
+    const peakBookingTime = maxHourCount > 0 
+      ? `${String(peakHour).padStart(2, '0')}:00 - ${String((peakHour + 1) % 24).padStart(2, '0')}:00`
+      : '-';
 
-    // สำหรับ Views และ Followers เนื่องจากยังไม่มี Table ในระบบตอนนี้ จึงให้เป็น 0 ไปก่อน (ของจริง)
-    const totalViews = 0; 
-    const newFollowers = 0;
+    // คำนวณความถี่การจองเฉลี่ยรายวัน/รายเดือน
+    const totalDays = period === 'today' ? 1 : (period === 'week' ? 7 : 30);
+    const dailyMap = {};
+    const monthlyMap = {};
+    periodBookings.forEach(b => {
+      const dateStr = new Date(b.created_at).toISOString().split('T')[0];
+      const monthStr = dateStr.substring(0, 7);
+      dailyMap[dateStr] = (dailyMap[dateStr] || 0) + 1;
+      monthlyMap[monthStr] = (monthlyMap[monthStr] || 0) + 1;
+    });
+    const avgDailyBookings = Object.values(dailyMap).reduce((a, b) => a + b, 0) / totalDays;
+    const avgMonthlyBookings = Object.values(monthlyMap).reduce((a, b) => a + b, 0) / (period === 'month' ? 1 : (totalDays / 30));
+
+    // ดึงสินค้าทั้งหมดของผู้ใช้งานเพื่อใช้หา ประกาศจองมากสุด/น้อยสุด และ วิเคราะห์ราคา/การเข้าชม
+    const { data: userProducts } = await supabaseAdmin
+      .from('buy_offers')
+      .select('product_id, name, category, variety, price, grades, is_active')
+      .eq('user_id', userId);
+
+    const productBookingCounts = {};
+    if (userProducts) {
+      userProducts.forEach(p => {
+        productBookingCounts[p.product_id] = { name: p.name, count: 0 };
+      });
+    }
+
+    periodBookings.forEach(b => {
+      if (b.product_id && productBookingCounts[b.product_id]) {
+        productBookingCounts[b.product_id].count++;
+      } else if (b.product_id && b.products) {
+        productBookingCounts[b.product_id] = { name: b.products.name, count: 1 };
+      }
+    });
+
+    const sortedProds = Object.values(productBookingCounts).sort((a, b) => b.count - a.count);
+    const mostBooked = sortedProds.length > 0 && sortedProds[0].count > 0 ? sortedProds[0] : null;
+    const leastBooked = sortedProds.length > 0 ? sortedProds[sortedProds.length - 1] : null;
+
+    // [REAL DATA] 2. คำนวณผู้ติดตาม
+    const { data: profileData } = await supabaseAdmin
+      .from('profiles')
+      .select('followers_count, address_line1, address_line2')
+      .eq('profile_id', userId)
+      .single();
+
+    const totalFollowers = profileData?.followers_count || 0;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const { count: newFollowersCount } = await supabaseAdmin
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', userId)
+      .gte('created_at', thirtyDaysAgo.toISOString());
+
+    const initialFollowers = totalFollowers - (newFollowersCount || 0);
+    const followerGrowthRate = initialFollowers > 0 
+      ? ((newFollowersCount || 0) / initialFollowers) * 100 
+      : (totalFollowers > 0 ? 100 : 0);
+
+    // [REAL DATA] 3. คำนวณยอดแสดงผล Feed (Impressions)
+    const userProductIds = userProducts ? userProducts.map(p => p.product_id) : [];
+    let totalImpressions = 0;
+    if (userProductIds.length > 0) {
+      const { count: impCount, error: impErr } = await supabaseAdmin
+        .from('offer_impressions')
+        .select('*', { count: 'exact', head: true })
+        .in('product_id', userProductIds)
+        .gte('created_at', startDate.toISOString());
+      if (!impErr) {
+        totalImpressions = impCount || 0;
+      }
+    }
+
+    // [REAL DATA] 4. จำนวนล้งคู่แข่งในพื้นที่เดียวกัน
+    let competitorsCount = 0;
+    let categoryCompetitors = [];
+    const getProvinceKeyword = (address) => {
+      if (!address) return '';
+      let clean = address.replace(/จังหวัด|จ\./g, '').trim();
+      const parts = clean.split(/[\s,]+/);
+      return parts[0] || '';
+    };
+    const provinceKeyword = getProvinceKeyword(profileData?.address_line2 || profileData?.address_line1);
+
+    if (provinceKeyword) {
+      const { data: competitorProfiles, error: compErr } = await supabaseAdmin
+        .from('profiles')
+        .select('profile_id')
+        .eq('role', role)
+        .neq('profile_id', userId)
+        .ilike('address_line2', `%${provinceKeyword}%`);
+
+      if (!compErr && competitorProfiles && competitorProfiles.length > 0) {
+        const compIds = competitorProfiles.map(cp => cp.profile_id);
+        competitorsCount = compIds.length;
+
+        const { data: compProducts } = await supabaseAdmin
+          .from('buy_offers')
+          .select('category')
+          .in('user_id', compIds)
+          .eq('is_active', true);
+
+        if (compProducts) {
+          const catMap = {};
+          compProducts.forEach(cp => {
+            if (cp.category) {
+              catMap[cp.category] = (catMap[cp.category] || 0) + 1;
+            }
+          });
+          categoryCompetitors = Object.entries(catMap).map(([category, count]) => ({
+            category,
+            count
+          }));
+        }
+      }
+    }
+
+    // [REAL DATA] 5. อันดับราคาของเราเทียบกับราคากลางตลาด (ดึงจาก Excel)
+    const priceComparison = [];
+    const activeProds = userProducts ? userProducts.filter(p => p.is_active) : [];
+    
+    for (const prod of activeProds) {
+      const commodityName = prod.category;
+      const varietyName = prod.variety;
+      
+      let matchingRows = excelPriceService.getPricesByCommodity(commodityName);
+      if (varietyName) {
+        const matchingVariety = matchingRows.filter(r => 
+          String(r.variety || '').toLowerCase().trim() === String(varietyName).toLowerCase().trim()
+        );
+        if (matchingVariety.length > 0) {
+          matchingRows = matchingVariety;
+        }
+      }
+
+      let marketAvg = null;
+      if (matchingRows.length > 0) {
+        matchingRows.sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
+        marketAvg = matchingRows[0].avg_price;
+      } else {
+        // Fallback search with Category containing commodity name or vice versa
+        const allPrices = excelPriceService.getAllPrices();
+        const fallbackRows = allPrices.filter(row => 
+          String(row.commodity || '').toLowerCase().includes(String(commodityName || '').toLowerCase()) ||
+          String(commodityName || '').toLowerCase().includes(String(row.commodity || '').toLowerCase())
+        );
+        if (fallbackRows.length > 0) {
+          fallbackRows.sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
+          marketAvg = fallbackRows[0].avg_price;
+        }
+      }
+
+      if (marketAvg) {
+        const myPrice = Number(prod.price);
+        const diffPercent = ((myPrice - marketAvg) / marketAvg) * 100;
+        const roundedDiff = Math.round(diffPercent * 10) / 10;
+        const diffText = roundedDiff > 0 
+          ? `สูงกว่าตลาด +${roundedDiff}%` 
+          : (roundedDiff < 0 ? `ต่ำกว่าตลาด ${roundedDiff}%` : 'เท่ากับราคาตลาด');
+
+        priceComparison.push({
+          product_id: prod.product_id,
+          name: prod.name,
+          variety: prod.variety,
+          myPrice,
+          marketPrice: marketAvg,
+          diffPercent: roundedDiff,
+          diffText
+        });
+      }
+    }
 
     res.json({
       success: true,
       data: {
-        monthlyRevenue: revenue,
-        totalBookings: totalBookings,
-        totalViews: totalViews,
-        newFollowers: newFollowers,
+        totalBookings,
+        successBookings: successBookings.length,
+        waitingBookings: waitingBookingsCount,
+        cancelBookings: cancelBookingsCount,
+        successRate: Math.round(successRate * 10) / 10,
+        peakBookingTime,
+        mostBooked,
+        leastBooked,
+        dailyAverage: Math.round(avgDailyBookings * 10) / 10,
+        monthlyAverage: Math.round(avgMonthlyBookings * 10) / 10,
+
+        totalFollowers,
+        newFollowers: newFollowersCount || 0,
+        followerGrowthRate: Math.round(followerGrowthRate * 10) / 10,
+
+        totalViews: totalImpressions,
+        province: provinceKeyword || '-',
+        competitorsCount,
+        categoryCompetitors,
+        priceComparison,
+
+        monthlyRevenue: 0, // skip monetary values
         trends: {
-          monthlyRevenue: "0%", 
+          monthlyRevenue: "0%",
           totalBookings: "0%",
           totalViews: "0%",
           newFollowers: "0%"
@@ -245,8 +463,8 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
         bookingSummary: {
           total: totalBookings,
           success: successBookings.length,
-          waiting: waitingBookings,
-          cancel: cancelBookings
+          waiting: waitingBookingsCount,
+          cancel: cancelBookingsCount
         }
       }
     });

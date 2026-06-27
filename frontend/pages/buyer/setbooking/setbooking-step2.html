@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+   
+    <script src="../../../js/api-client.js"></script>
+   
+    <script src="../../../js/auth/guard.js"></script>
     <script src="../../../js/components/i18n.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="set_date_and_rounds_title">กำหนดวันที่และรอบคิวรับซื้อ | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +27,8 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="../../../css/buyer/setbooking/setbooking-step2.css" />
-  <script src="../../../js/auth/guard.js"></script>
+ 
+    <script src="../../../js/auth/guard.js"></script>
   <script>
     window.AuthGuard.requireLogin();
     // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
@@ -26,8 +40,10 @@
       } catch(_) {}
     })();
   </script>
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/permission-manager.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/permission-manager.js"></script>
   <link rel="stylesheet" href="../../../css/global.css">
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
 </head>
@@ -156,10 +172,14 @@
     </div>
   </div>
 
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/components.js"></script>
-  <script src="../../../js/api-client.js"></script>
-  <script src="../../../js/buyer/setbooking/setbooking-step2.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/components.js"></script>
+ 
+    <script src="../../../js/api-client.js"></script>
+ 
+    <script src="../../../js/buyer/setbooking/setbooking-step2.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
@@ -173,3 +193,8 @@
 </script>
 </body>
 </html>
+
+
+
+
+

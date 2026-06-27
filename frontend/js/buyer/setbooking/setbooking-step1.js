@@ -481,10 +481,74 @@
   });
 
   // ===================== INIT =====================
-  function init() {
+  async function init() {
     renderGradeGrid();
     renderGradeCards();
     disableVariety();
+
+    // ── Tier Limit Guard ──
+    // ป้องกัน user พิมพ์ URL โดยตรงเข้าหน้านี้เมื่อเกิน limit
+    try {
+      const currentBase = CONFIG.getApiBase();
+      const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token');
+
+      // ดึง tier จาก localStorage ก่อน (instant)
+      let tier = 'free';
+      try {
+        const raw = localStorage.getItem('user_data');
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.tier) tier = u.tier.toLowerCase();
+        }
+      } catch (_) {}
+
+      const tierLimit = tier === 'pro' ? 10 : 3;
+
+      // ดึง active product count
+      if (currentBase && token) {
+        const userDataRaw = localStorage.getItem('user_data');
+        const userId = userDataRaw ? JSON.parse(userDataRaw).profile_id || JSON.parse(userDataRaw).id : null;
+        if (userId) {
+          const r = await fetch(`${currentBase}/api/products?user_id=${userId}&limit=1`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (r.ok) {
+            const json = await r.json();
+            const activeCount = json.total || (json.data || []).filter(p => p.is_active !== false).length;
+            if (activeCount >= tierLimit) {
+              const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
+              if (tier === 'free') {
+                const confirmMsg = t('error_free_limit', 'บัญชี FREE จำกัดการสร้างรายการรับซื้อสูงสุด 3 รายการ ต้องการอัปเกรดเป็น PRO เพื่อรับสิทธิ์เพิ่มรายการได้สูงสุด 10 รายการหรือไม่?');
+                if (window.showConfirm) {
+                  window.showConfirm(confirmMsg, (agreed) => {
+                    if (agreed) {
+                      window.location.href = '../../../pages/account/subscription.html';
+                    } else {
+                      window.history.back();
+                    }
+                  });
+                } else {
+                  const goUpgrade = confirm(confirmMsg);
+                  if (goUpgrade) {
+                    window.location.href = '../../../pages/account/subscription.html';
+                  } else {
+                    window.history.back();
+                  }
+                }
+              } else {
+                alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));
+                window.history.back();
+              }
+              return; // หยุดการแสดงผล step1
+            }
+          }
+        }
+      }
+    } catch (guardErr) {
+      // ถ้าตรวจสอบไม่ได้ แสดงหน้าปกติไปเลย (fail open)
+      console.warn('[setbooking-step1] Tier guard failed, proceeding:', guardErr.message);
+    }
+    // ────────────────────
 
     // try to restore previous step1 inputs when returning from step2
     try {
@@ -519,3 +583,4 @@
 
   init();
 })();
+

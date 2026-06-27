@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="gov_price">ราคากลางสินค้าเกษตร | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+  <script src="../../js/components/i18n.js"></script>
+  <script src="../../js/config.js" defer></script>
+  <script src="../../js/global-anim.js"></script>
+  <script src="../../js/components.js"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../css/dark-mode-patch.css" />
+  
+  <style>
+    :root {
+      --primary: #0B853C;
+      --primary-grad: linear-gradient(135deg, #0B853C 0%, #22c55e 100%);
+      --primary-glow: rgba(11, 133, 60, 0.15);
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: rgba(15, 23, 42, 0.06);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #090d16;
+      --card-bg: #131924;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-glow: rgba(34, 197, 94, 0.15);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      margin: 0; padding: 0;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .gov-header {
+      background: var(--primary-grad);
+      padding: calc(24px + env(safe-area-inset-top)) 24px 36px;
+      border-bottom-left-radius: var(--radius-lg);
+      border-bottom-right-radius: var(--radius-lg);
+      color: white;
+      position: relative;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .back-btn {
+      width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .back-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .header-titles {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-titles h1 { 
+      font-size: 22px; 
+      font-weight: 800; 
+      margin: 0; 
+      letter-spacing: -0.5px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .header-titles p { 
+      font-size: 13px; 
+      margin: 4px 0 0; 
+      opacity: 0.85; 
+      font-weight: 500;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* ── Category Tabs ───────────────────────────────────────── */
+    .category-tabs-container {
+      margin: 20px 16px 0;
+      position: relative;
+      z-index: 11;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 4px 12px;
+      scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      padding: 10px 20px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      border-radius: 99px;
+      cursor: pointer;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: var(--primary-grad);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    /* ── Lookup Card ──────────────────────────────────── */
+    .lookup-container {
+      margin: 12px 16px 20px;
+      position: relative; z-index: 10;
+    }
+
+    .lookup-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 20px 18px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--card-border);
+      display: flex; flex-direction: column; gap: 16px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .field-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lookup-label {
+      font-size: 13px; font-weight: 700; color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .select-field {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid #cbd5e1;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: #000000;
+      appearance: none;
+      background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-size: 18px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    [data-theme="dark"] .select-field {
+      background-color: #1e293b;
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    }
+
+    .select-field:focus { 
+      border-color: var(--primary); 
+      outline: none; 
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .select-field option {
+      background-color: #ffffff;
+      color: #000000;
+      font-weight: 600;
+    }
+
+    [data-theme="dark"] .select-field option {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+
+    /* ── Variety Chips ─────────────────────────────────────── */
+    .variety-group {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    
+    .variety-chip {
+      padding: 10px 18px;
+      background: #f1f5f9;
+      border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] .variety-chip {
+      background: #1e293b;
+    }
+
+    .variety-chip:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    [data-theme="dark"] .variety-chip:hover {
+      background: #334155;
+    }
+
+    .variety-chip.active {
+      background: #ecfdf5;
+      color: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(11, 133, 60, 0.1);
+    }
+
+    [data-theme="dark"] .variety-chip.active {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border-color: #4ade80;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.15);
+    }
+
+    /* ── Date Picker ───────────────────────────────────────── */
+    .date-range-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .date-range-row .field-inner { display: flex; flex-direction: column; gap: 4px; }
+    .date-range-row .sub-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0);
+    }
+
+    [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
+    /* ── Premium Price Card ────────────────────────────────── */
+    .result-view {
+      padding: 0 16px 100px;
+    }
+
+    .price-premium-card {
+      background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-bg) 100%);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .price-premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--primary-grad);
+    }
+
+    .price-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .category-badge {
+      background: var(--primary-glow);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    [data-theme="dark"] .category-badge {
+      color: #4ade80;
+      background: rgba(34, 197, 94, 0.15);
+    }
+
+    .price-date-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .price-commodity-info {
+      margin-bottom: 20px;
+    }
+
+    .commodity-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .variety-subtitle {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .price-divider {
+      height: 1px;
+      background: var(--card-border);
+      margin: 20px 0;
+    }
+
+    .price-value-container {
+      margin-bottom: 16px;
+    }
+
+    .price-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .price-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .currency-symbol {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .currency-symbol {
+      color: #4ade80;
+    }
+
+    .price-amount {
+      font-family: 'Outfit', sans-serif;
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -1px;
+      word-break: break-all;
+    }
+
+    .price-unit {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .price-footer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .footer-icon {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .footer-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* ── Shimmer & Animation ───────────────────────────────── */
+    .shimmer-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .shimmer-element {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: loading-shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    [data-theme="dark"] .shimmer-element {
+      background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+      background-size: 200% 100%;
+    }
+
+    @keyframes loading-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-hint-container {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-hint-icon {
+      font-size: 56px;
+      opacity: 0.3;
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .search-hint-icon {
+      color: #4ade80;
+    }
+
+    /* ── Responsive Safeguards ── */
+    @media (max-width: 375px) {
+      .price-amount {
+        font-size: 32px;
+      }
+      .commodity-title {
+        font-size: 18px;
+      }
+      .gov-header {
+        padding: calc(16px + env(safe-area-inset-top)) 16px 24px;
+      }
+      .lookup-card, .price-premium-card {
+        padding: 16px;
+      }
+      .tab-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <header class="gov-header">
+    <div class="header-top">
+      <button class="back-btn" data-back onclick="history.back()">
+        <span class="material-icons-outlined">chevron_left</span>
+      </button>
+      <div class="header-titles">
+        <h1 data-i18n="gov_price_search">ค้นหาราคากลาง</h1>
+        <p data-i18n="gov_price_subtitle">ข้อมูลราคากลางอ้างอิงกระทรวงพาณิชย์</p>
+      </div>
+    </div>
+  </header>
+
+
+
+  <div class="lookup-container">
+    <div class="lookup-card">
+      <div class="field-wrap">
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">category</span> <span data-i18n="select_product_type">เลือกชนิดสินค้า</span></label>
+        <select id="productSelect" class="select-field" onchange="onProductChange()">
+          <option value="" data-i18n="please_select">-- กรุณาเลือก --</option>
+        </select>
+      </div>
+
+      <div class="field-wrap" id="varietySection" style="display:none;">
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">eco</span> <span data-i18n="select_variety">เลือกสายพันธุ์</span></label>
+        <div class="variety-group" id="varietyGroup">
+          <!-- Varieties chips here -->
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">date_range</span> <span data-i18n="date_range_label">ช่วงวันที่</span></label>
+        <div class="date-range-row">
+          <div class="field-inner">
+            <span class="sub-label" data-i18n="start_date_label">ตั้งแต่วันที่</span>
+            <input type="date" id="dateFrom" class="select-field" onchange="renderResult()">
+          </div>
+          <div class="field-inner">
+            <span class="sub-label" data-i18n="end_date_label">ถึงวันที่</span>
+            <input type="date" id="dateTo" class="select-field" onchange="renderResult()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="result-view" id="resultView">
+    <div class="search-hint-container">
+      <span class="material-icons-outlined search-hint-icon">search</span>
+      <p data-i18n="select_to_see_price">เลือกสินค้าและสายพันธุ์เพื่อดูราคา</p>
+    </div>
+  </main>
+
+  <script>
+    let currentCat = 'all';
+    let selectedProduct = '';
+    let selectedVariety = null;
+    let commodityRegistry = []; 
+
+    async function init() {
+      if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
+      
+      const todayStr = new Date().toISOString().split('T')[0];
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      const fromStr = sevenDaysAgo.toISOString().split('T')[0];
+      document.getElementById('dateFrom').value = fromStr;
+      document.getElementById('dateFrom').max = todayStr;
+      document.getElementById('dateTo').value = todayStr;
+      document.getElementById('dateTo').max = todayStr;
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      let catParam = urlParams.get('category');
+      if (catParam) {
+        // Map English category strings from home page to matching Thai tabs
+        const catMap = {
+          'fruit': 'ผลไม้',
+          'vegetable': 'ผักสด',
+          'rice': 'ข้าว',
+          'rice_crops': 'ข้าว',
+          'crops': 'พืชไร่',
+          'economic': 'พืชไร่',
+          'oil': 'พืชไร่',
+          'livestock': 'ปศุสัตว์',
+          'aquatic': 'สัตว์น้ำ',
+          'organic': 'อินทรีย์',
+          'seedlings': 'สมุนไพร',
+          'herb': 'สมุนไพร',
+          'herbs': 'สมุนไพร'
+        };
+        currentCat = catMap[catParam.toLowerCase()] || catParam;
+      }
+
+      await fetchCommodities();
+      
+      // Filter dropdown items based on active category
+      updateProductDropdown();
+    }
+
+    async function fetchCommodities() {
+      try {
+        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+        const res = await fetch(currentBase + '/api/gov-prices');
+        const json = await res.json();
+        if (json.success && json.commodities) {
+          commodityRegistry = json.commodities;
+          updateProductDropdown();
+        }
+      } catch (err) {
+        console.error('[GovLookup] Fetch commodities failed:', err);
+      }
+    }
+
+    function filterCategory(cat) {
+      currentCat = cat;
+      updateProductDropdown();
+    }
+
+    function updateProductDropdown() {
+      const ps = document.getElementById('productSelect');
+      const pleaseSelect = window.i18nT ? window.i18nT('please_select', '-- กรุณาเลือก --') : '-- กรุณาเลือก --';
+      ps.innerHTML = `<option value="">${pleaseSelect}</option>`;
+      
+      const filtered = currentCat === 'all'
+        ? commodityRegistry
+        : commodityRegistry.filter(p => p.category === currentCat);
+
+      filtered.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.commodity;
+        opt.innerText = window.i18nT ? window.i18nT(p.commodity, p.commodity) : p.commodity;
+        ps.appendChild(opt);
+      });
+      
+      selectedProduct = '';
+      selectedVariety = null;
+      document.getElementById('varietySection').style.display = 'none';
+      renderResult();
+    }
+
+    async function onProductChange() {
+      selectedProduct = document.getElementById('productSelect').value;
+      selectedVariety = null;
+      
+      const vSection = document.getElementById('varietySection');
+      const vGroup = document.getElementById('varietyGroup');
+      
+      if (!selectedProduct) {
+        vSection.style.display = 'none';
+        renderResult();
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+        const res = await fetch(currentBase + `/api/gov-prices/${encodeURIComponent(selectedProduct)}`);
+        const json = await res.json();
+        
+        vSection.style.display = 'block';
+        vGroup.innerHTML = '';
+        
+        if (json.success && json.rows) {
+          const varieties = json.rows.map(r => ({
+            name: r.variety,
+            price: r.avg,
+            min: r.min,
+            max: r.max,
+            unit: json.unit || 'กก.',
+            date: json.date
+          }));
+
+          varieties.forEach(v => {
+            const chip = document.createElement('div');
+            chip.className = 'variety-chip';
+            chip.innerText = v.name;
+            chip.onclick = () => selectVariety(v, chip);
+            vGroup.appendChild(chip);
+          });
+        }
+      } catch (err) {
+        console.error('[GovLookup] Fetch product details failed:', err);
+      } finally {
+        setLoading(false);
+      }
+
+      renderResult();
+    }
+
+    function selectVariety(v, el) {
+      selectedVariety = v;
+      document.querySelectorAll('.variety-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderResult();
+    }
+
+    function setLoading(on) {
+      const view = document.getElementById('resultView');
+      if (on) {
+        view.innerHTML = `
+          <div class="shimmer-card">
+            <div class="shimmer-element" style="width: 40%; height: 24px;"></div>
+            <div class="shimmer-element" style="width: 80%; height: 32px;"></div>
+            <div class="shimmer-element" style="width: 100%; height: 1px;"></div>
+            <div class="shimmer-element" style="width: 60%; height: 60px;"></div>
+          </div>
+        `;
+      }
+    }
+
+    function renderResult() {
+      const view = document.getElementById('resultView');
+      const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
+
+      if (!selectedProduct || !selectedVariety) {
+        view.innerHTML = `
+          <div class="search-hint-container">
+            <span class="material-icons-outlined search-hint-icon">search</span>
+            <p>${t('select_to_see_price', 'เลือกสินค้าและสายพันธุ์เพื่อดูราคา')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const lang = (localStorage.getItem('lang') || 'th').toLowerCase();
+      const locale = lang === 'en' ? 'en-US' : (lang === 'zh' ? 'zh-CN' : 'th-TH');
+
+      const productLabel = t(selectedProduct, selectedProduct);
+      const varietyLabel = selectedVariety.name;
+      
+      // Determine date formatting
+      let dateStr = '';
+      if (selectedVariety.date) {
+        try {
+          dateStr = new Date(selectedVariety.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+        } catch(e) {
+          dateStr = selectedVariety.date;
+        }
+      }
+
+      // Find category for the product from registry
+      const regItem = commodityRegistry.find(item => item.commodity === selectedProduct);
+      const productCategory = regItem ? regItem.category : 'สินค้าเกษตร';
+
+      view.innerHTML = `
+        <div class="price-premium-card">
+          <div class="price-card-header">
+            <span class="category-badge">${productCategory}</span>
+            <span class="price-date-badge">${dateStr}</span>
+          </div>
+          <div class="price-commodity-info">
+            <h3 class="commodity-title">${productLabel}</h3>
+            <p class="variety-subtitle">${varietyLabel}</p>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-value-container">
+            <div class="price-label">ราคาขั้นต่ำ (Minimum Price)</div>
+            <div class="price-value-row">
+              <span class="currency-symbol">฿</span>
+              <span class="price-amount">${selectedVariety.min !== undefined ? selectedVariety.min.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</span>
+              <span class="price-unit">/ ${selectedVariety.unit || 'กก.'}</span>
+            </div>
+          </div>
+          <div class="price-footer">
+            <span class="material-icons-outlined footer-icon">info</span>
+            <span class="footer-text">${t('reference_only', 'ราคากลางเพื่อการอ้างอิงเท่านั้น')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function initI18n() {
+      if (window.i18nInit) window.i18nInit();
+    }
+    document.addEventListener('DOMContentLoaded', initI18n);
+    document.addEventListener('DOMContentLoaded', init);
+    
+    function applyTheme() {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+    applyTheme();
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'agriprice_theme') applyTheme();
+    });
+  </script>
+</body>
+</html>

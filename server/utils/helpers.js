@@ -45,6 +45,30 @@ function getOptionalAuthUser(req) {
   }
 }
 
+async function decrementSlotBookedCount(supabase, slotId) {
+  if (!slotId) return;
+  try {
+    const { error: rpcErr } = await supabase.rpc('decrement_booked_count', { p_slot_id: slotId });
+    if (rpcErr) {
+      console.warn('⚠️  RPC decrement_booked_count ไม่พบ — ใช้ manual decrement แทน:', rpcErr.message);
+      const { data: slotData } = await supabase
+        .from('offer_slots')
+        .select('booked_count')
+        .eq('slot_id', slotId)
+        .single();
+      if (slotData) {
+        const newCount = Math.max(0, (slotData.booked_count || 0) - 1);
+        await supabase
+          .from('offer_slots')
+          .update({ booked_count: newCount })
+          .eq('slot_id', slotId);
+      }
+    }
+  } catch (err) {
+    console.error('❌ decrementSlotBookedCount failed:', err.message);
+  }
+}
+
 module.exports = {
   signToken,
   signTempToken,
@@ -52,5 +76,6 @@ module.exports = {
   getDefaultAvatarByRole,
   makeBookingNo,
   getOptionalAuthUser,
+  decrementSlotBookedCount,
   JWT_SECRET,
 };

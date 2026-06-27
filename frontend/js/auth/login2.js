@@ -1,8 +1,5 @@
 /* js/login/register/login2.js
-   - Login flow with Future DB support
-   - If window.API_BASE_URL is set: POST to `${API_BASE_URL}/api/auth/login`
-   - Store token/user to localStorage (ready for guards)
-   - Redirect via AuthGuard.redirectAfterLogin() to next (query/sessionStorage) or default
+   - Unified Login flow using window.api and window.AuthGuard
 */
 
 (function () {
@@ -19,14 +16,6 @@
 
   const video = document.getElementById("loginVideo");
   const fallback = document.getElementById("mediaFallback");
-
-  // ====== FUTURE CONFIG ======
-  const CONFIG = {
-    API_AUTH_PREFIX: (window.API_AUTH_PREFIX || "/api/auth"),
-    TOKEN_KEY: (window.AUTH_TOKEN_KEY || "token"),
-    USER_KEY: (window.AUTH_USER_KEY || "user_data"),
-    REDIRECT_KEY: "redirectAfterAuth",
-  };
 
   function showError(msg) {
     if (!errBox) return;
@@ -48,12 +37,8 @@
     }
   }
 
-  function normalizeIdentifier(v) {
-    return (v || "").trim();
-  }
-
   function validate() {
-    const identifier = normalizeIdentifier(idEl?.value);
+    const identifier = (idEl?.value || "").trim();
     const password = (pwEl?.value || "").trim();
 
     if (idHelp) idHelp.textContent = "";
@@ -74,76 +59,14 @@
     return { ok, identifier, password };
   }
 
-  function persistAuth(token, user) {
-    localStorage.setItem(CONFIG.TOKEN_KEY, token);
-    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user || {}));
-    // บันทึก role ให้ components เข้าถึงได้ง่าย
-    if (user && user.role) {
-      localStorage.setItem("role", String(user.role).toLowerCase());
-    } else {
-      // ถ้าไม่มี role ให้ล้างค่าเดิม
-      localStorage.removeItem("role");
-    }
-  }
-
-  function redirectAfterLogin() {
-    // ใช้ AuthGuard ถ้ามี (แนะนำ)
-    if (window.AuthGuard && typeof window.AuthGuard.redirectAfterLogin === "function") {
-      window.AuthGuard.redirectAfterLogin();
-      return;
-    }
-
-    // fallback ถ้า guard ไม่ถูกโหลด
-    let next = "";
-    try {
-      const url = new URL(window.location.href);
-      next = url.searchParams.get("next") || "";
-    } catch (_) {}
-
-    const stored = sessionStorage.getItem(CONFIG.REDIRECT_KEY);
-    const target = next || stored || '../../index.html';
-
-    sessionStorage.removeItem(CONFIG.REDIRECT_KEY);
-    if (window.navigateWithTransition) window.navigateWithTransition(target); else window.location.href = target;
-  }
-
-  async function loginViaApi(identifier, password) {
-    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, "");
-    const API = currentBase + CONFIG.API_AUTH_PREFIX;
-
-    const res = await fetch(API + "/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: identifier, password }),
-    });
-
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(json?.message || "เข้าสู่ระบบไม่สำเร็จ");
-    }
-
-    const token = json.token || json.accessToken || json.access_token || json.data?.token;
-    const user = json.user || json.profile || json.data?.user;
-
-    if (!token) throw new Error("ไม่พบ token จากเซิร์ฟเวอร์");
-
-    return { token, user: user || { identifier } };
-  }
-
   // ===== Video fallback =====
   function setupVideo() {
     if (!video) return;
-
-    // ให้ autoplay ได้ชัวร์ขึ้น
     video.muted = true;
     video.playsInline = true;
-
     video.addEventListener("error", () => {
       if (fallback) fallback.classList.add("is-show");
     });
-
     video.play().catch(() => {
       if (fallback) fallback.classList.add("is-show");
     });
@@ -164,9 +87,8 @@
     const { ok, identifier, password } = validate();
     if (!ok) return;
 
-    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, "");
-    if (!currentBase) {
-      showError("ไม่พบการตั้งค่า API กรุณาตั้งค่า API_BASE_URL");
+    if (!window.api || !window.api.login) {
+      showError("ระบบ API ยังไม่พร้อมใช้งาน");
       return;
     }
 
@@ -174,31 +96,45 @@
     clearError();
 
     try {
-      const result = await loginViaApi(identifier, password);
+      // 1. Call unified login API
+      const result = await window.api.login(identifier, password);
 
-      // Login สำเร็จ — บันทึก auth
-      persistAuth(result.token, result.user);
+      if (!result.token) {
+        throw new Error(result.message || "ไม่ได้รับ Token จากเซิร์ฟเวอร์");
+      }
 
-      // ขอ Notification permission หลัง login (แบบ native เงียบๆ ถ้าไม่เคยถามมาก่อน)
+      // 2. Persist using unified logic (handled inside api.login, but we ensure state)
+      if (window.api.persistAuth) {
+        window.api.persistAuth(result.token, result.user);
+      }
+
+      // 3. Request permissions quietly
       try {
         if (window.AgriPermission) {
           const prefs = window.AgriPermission.getPrefs();
           if (!prefs.notification && typeof Notification !== 'undefined' && Notification.permission === 'default') {
-            // รอ 800ms ให้หน้าจอ settle ก่อนแสดง permission sheet
             await new Promise(resolve => setTimeout(resolve, 800));
             await window.AgriPermission.requestNotification();
           }
         }
       } catch (_) {}
 
-      // ไปหน้าที่ควรไปหลัง login
-      redirectAfterLogin();
+      if (window.showToast) window.showToast("เข้าสู่ระบบสำเร็จ", "success");
+
+      // 4. Unified Redirect
+      setTimeout(() => {
+        if (window.AuthGuard && window.AuthGuard.redirectAfterLogin) {
+          window.AuthGuard.redirectAfterLogin();
+        } else {
+          window.location.href = '../../index.html';
+        }
+      }, 600);
+
     } catch (err) {
-      // ใช้ Toast แทน Alert เพื่อให้ดูพรีเมียมและไม่ขัดจังหวะผู้ใช้
       if (window.appNotify) {
         window.appNotify(err?.message || "เข้าสู่ระบบไม่สำเร็จ", "error");
       } else {
-        console.error(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
+        showError(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
       }
     } finally {
       setLoading(false);
@@ -210,4 +146,3 @@
   setupPasswordToggle();
   form && form.addEventListener("submit", onSubmit);
 })();
-

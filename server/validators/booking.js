@@ -20,7 +20,6 @@ const bookingSchema = Joi.object({
   address: Joi.string().optional().allow('', null),
   contact_name: Joi.string().optional().allow('', null),
   contact_phone: Joi.string().optional().allow('', null),
-  product_amount: Joi.number().optional().allow(null),
   vehicle_plates: Joi.alternatives().try(Joi.array(), Joi.object(), Joi.string()).optional().allow(null),
 }).options({ allowUnknown: false });
 

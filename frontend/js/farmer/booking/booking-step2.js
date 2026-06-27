@@ -448,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (DEBUG_BOOKING) console.log("ข้อมูลรวม:", bookingData);
 
                     // ไปหน้าถัดไป
-                    if (window.navigateWithTransition) window.navigateWithTransition("pages/farmer/booking/booking-step3.html"); else window.location.href = "pages/farmer/booking/booking-step3.html";
+                    if (window.navigateWithTransition) window.navigateWithTransition("booking-step3.html"); else window.location.href = "booking-step3.html";
                 })
                 .catch(error => {
                     console.error("Error saving step 2:", error);
@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Event Listeners
     // ================================
     btnBack?.addEventListener("click", () => {
-        if (window.navigateWithTransition) window.navigateWithTransition("pages/farmer/booking/booking-step1.html"); else window.location.href = "pages/farmer/booking/booking-step1.html";
+        if (window.navigateWithTransition) window.navigateWithTransition("booking-step1.html"); else window.location.href = "booking-step1.html";
     });
 
     btnSubmit?.addEventListener("click", submitForm);

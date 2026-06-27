@@ -97,15 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const noteData = typeof d.note === 'string' ? JSON.parse(d.note || '{}') : (d.note || {});
           vehicles = Array.isArray(noteData.vehicles) ? noteData.vehicles : [];
-          productAmount = noteData.productAmount || d.product_amount || 0;
+          productAmount = noteData.productAmount || d.product_amount || d.expected_qty || d.quantity || 0;
         } catch(_) {}
         
-        if (vehicles.length === 0 && d.vehicle_plates) {
-          vehicles = String(d.vehicle_plates).split(',')
+        if (vehicles.length === 0 && (d.vehicle_plates || d.vehicle_info)) {
+          vehicles = String(d.vehicle_plates || d.vehicle_info).split(',')
             .map(p => p.trim()).filter(Boolean)
             .map(plate => ({ plate, type: 'truck', typeName: t('truck', 'รถบรรทุก') }));
         }
         if (!productAmount && d.product_amount) productAmount = d.product_amount;
+        if (!productAmount && d.expected_qty) productAmount = d.expected_qty;
+        if (!productAmount && d.quantity) productAmount = d.quantity;
 
         const resolvedAddress = d.address || (d.buyer?.address) || "";
         const shopLabel = d.buyer ? `${d.buyer.first_name} ${d.buyer.last_name}`.trim() : "";
@@ -244,7 +246,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // QR Code
   // ================================
   function buildQrPayload(bookingId) {
-    const base = (window.FRONTEND_URL || window.location.origin || "").replace(/\/$/, '') + "/pages/scan-checkin.html";
+    const origin = (window.location.origin || "").replace(/\/$/, '');
+    let prefix = "/pages/";
+    if (typeof window.getRelativePrefixToPages === 'function') {
+        const rel = window.getRelativePrefixToPages();
+        // Determine the absolute path by removing the relative dots
+        const path = window.location.pathname;
+        const pagesIdx = path.lastIndexOf("/pages/");
+        if (pagesIdx !== -1) {
+            prefix = path.substring(0, pagesIdx + 1) + "pages/";
+        }
+    }
+    const base = origin + prefix + "scan-checkin.html";
     return `${base}?bid=${encodeURIComponent(bookingId)}`;
   }
 

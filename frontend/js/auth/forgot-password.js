@@ -52,22 +52,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (!recaptchaVerifier) {
-      // ใช้ size: 'invisible' เพื่อให้ราบรื่นขึ้น และไม่โดน parent display:none บังจนค้าง
       recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
+        size: 'normal',
         callback: (response) => {
           console.log('[ForgotPwd] reCAPTCHA verified');
         }
       });
     }
-  }
-
-  function toE164(phone) {
-    const d = String(phone || '').replace(/\D/g, '');
-    if (!d) return '';
-    if (d.startsWith('66')) return '+' + d;
-    if (d.startsWith('0')) return '+66' + d.slice(1);
-    return '+' + d;
   }
 
   // --- Step 1: Send OTP ---
@@ -82,56 +73,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setLoading(btnSendOTP, true);
     hideError(1);
-    const error2 = document.getElementById('error2');
-    if (error2) { error2.textContent = ''; error2.classList.remove('is-show'); }
-
-    const e164Phone = toE164(phone);
-    const TEST_PHONES = ['+66812345678', '+66999999999', '+66888888888'];
 
     try {
-      // 1. ลองผ่าน Firebase ก่อน (ถ้าไม่ใช่เบอร์ทดสอบ)
-      if (!TEST_PHONES.includes(e164Phone)) {
-        try {
-          await initFirebaseOtp();
-          // แสดง container เผื่อโดนท้าทาย
-          const recaptchaEl = document.getElementById('recaptcha-container');
-          if (recaptchaEl) recaptchaEl.style.display = 'flex';
-
-          confirmationResult = await firebase.auth().signInWithPhoneNumber(e164Phone, recaptchaVerifier);
-          
-          currentPhone = phone;
-          displayPhone.textContent = formatPhone(phone);
-          goToStep(2);
-          startTimer(120);
-          console.log('[ForgotPwd] Firebase OTP sent successfully');
-          return;
-        } catch (fErr) {
-          console.error('[ForgotPwd] Firebase send failed:', fErr);
-          // Fallback to Server if Firebase fails
-        }
-      }
-
-      // 2. Fallback to Server API
-      const res = await window.api.otpSend(phone, 'reset');
+      const res = await window.api.otpSend(phone);
       if (res.success) {
         currentPhone = phone;
         displayPhone.textContent = formatPhone(phone);
-        
-        // แจ้งเตือนถ้าเป็น Mock Mode
-        if (res.message && (res.message.includes('Mock') || res.message.includes('ทดสอบ'))) {
-           showError(2, 'ระบบอยู่ในโหมดทดสอบ: กรุณาใช้รหัส 123456');
-        }
-
         goToStep(2);
+        
+        // Show mock OTP info or start Firebase Phone Auth
+        const isMock = res.isMock || (res.data && res.data.isMock) || (res.message && res.message.includes('Mock'));
+        if (isMock) {
+          showError(2, 'โหมดทดสอบ: กรุณากรอกรหัส 123456');
+          confirmationResult = { isFallback: true };
+        } else {
+          hideError(2);
+          showError(2, 'กำลังส่งรหัส OTP ผ่าน Firebase...');
+          await initFirebaseOtp();
+          const cleanPhone = toE164(phone);
+          confirmationResult = await firebase.auth().signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
+          showError(2, 'ส่ง OTP เข้ามือถือของคุณแล้ว');
+        }
+        
         startTimer(120);
-        confirmationResult = { isFallback: true };
-        console.log('[ForgotPwd] Server OTP sent successfully');
+        console.log('[ForgotPwd] OTP setup completed');
       } else {
         showError(1, res.message || 'เกิดข้อผิดพลาดในการส่ง OTP');
       }
     } catch (err) {
       console.error('[ForgotPwd] Step 1 Error:', err);
-      showError(1, 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      showError(1, err.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
     } finally {
       setLoading(btnSendOTP, false);
     }
@@ -142,7 +113,14 @@ document.addEventListener('DOMContentLoaded', function () {
   formStep2.addEventListener('submit', async (e) => {
     e.preventDefault();
     let otp = '';
-    otpInputs.forEach(input => otp += input.value);
+    if (otpInputs && otpInputs.length > 0) {
+      otpInputs.forEach(input => otp += input.value);
+    } else {
+      const singleOtpInput = document.getElementById('otpInput');
+      if (singleOtpInput) {
+        otp = singleOtpInput.value.trim();
+      }
+    }
 
     if (otp.length < 6) {
       showError(2, 'กรุณากรอกรหัส OTP ให้ครบ 6 หลัก');
@@ -153,28 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
     hideError(2);
 
     try {
-      // --- MOCK OTP 123456 BYPASS ---
-      if (otp === '123456') {
-         if (confirmationResult && confirmationResult.isFallback) {
-            const res = await window.api.otpVerify(currentPhone, otp);
-            if (res.success) {
-              tempToken = res.data.temp_token;
-              goToStep(3);
-              return;
-            }
-         }
-         tempToken = `mock_temp_token_${currentPhone}_${Date.now()}`;
-         goToStep(3);
-         return;
-      }
-
-      if (!confirmationResult) {
-        showError(2, 'กรุณากดขอรหัส OTP ใหม่อีกครั้ง');
-        return;
-      }
-
-      // ถ้าเป็น Fallback ให้ใช้ Server Verify
-      if (confirmationResult.isFallback) {
+      if (confirmationResult && confirmationResult.isFallback) {
         const res = await window.api.otpVerify(currentPhone, otp);
         if (res.success) {
           tempToken = res.data.temp_token;
@@ -182,27 +139,29 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           showError(2, res.message || 'รหัส OTP ไม่ถูกต้อง');
         }
-        return;
-      }
-
-      // ถ้าเป็น Firebase
-      const firebaseUserCredential = await confirmationResult.confirm(otp);
-      const idToken = await firebaseUserCredential.user.getIdToken();
-      
-      const res = await window.api.call('POST', '/api/auth/firebase/verify-phone', { idToken, phone: currentPhone });
-      if (res && res.success) {
-        tempToken = res.data.temp_token;
+      } else if (confirmationResult) {
+        // Firebase verification
+        const firebaseUserCredential = await confirmationResult.confirm(otp);
+        const idToken = await firebaseUserCredential.user.getIdToken();
+        
+        // Post to backend verify-phone endpoint to get our temp_token!
+        const currentBase = window.api.getBase();
+        const verifyRes = await fetch(currentBase + '/api/auth/firebase/verify-phone', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken, phone: currentPhone }),
+        });
+        const json = await verifyRes.json().catch(() => ({}));
+        if (!verifyRes.ok) throw new Error(json.message || 'ยืนยัน OTP กับระบบไม่สำเร็จ');
+        
+        tempToken = json.temp_token || (json.data && json.data.temp_token);
         goToStep(3);
       } else {
-        showError(2, res?.message || 'ยืนยัน OTP ไม่สำเร็จ');
+        throw new Error('ไม่พบการร้องขอ OTP กรุณาส่งรหัสอีกครั้ง');
       }
     } catch (err) {
       console.error('[ForgotPwd] Step 2 Error:', err);
-      const code = err.code || '';
-      let msg = 'รหัส OTP ไม่ถูกต้อง หรือเซิร์ฟเวอร์ไม่ตอบสนอง';
-      if (code === 'auth/invalid-verification-code') msg = 'รหัส OTP ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
-      if (code === 'auth/code-expired') msg = 'รหัส OTP หมดอายุแล้ว กรุณาขอใหม่';
-      showError(2, msg);
+      showError(2, err.message || 'รหัส OTP ไม่ถูกต้อง หรือเซิร์ฟเวอร์ไม่ตอบสนอง');
     } finally {
       setLoading(btnVerifyOTP, false);
     }
@@ -263,7 +222,12 @@ document.addEventListener('DOMContentLoaded', function () {
       step2.classList.add('active');
       stepTitle.textContent = 'ยืนยันตัวตน';
       stepSub.textContent = 'กรอกรหัส 6 หลักที่ส่งไปทาง SMS';
-      otpInputs[0].focus();
+      if (otpInputs && otpInputs[0]) {
+        otpInputs[0].focus();
+      } else {
+        const singleOtpInput = document.getElementById('otpInput');
+        if (singleOtpInput) singleOtpInput.focus();
+      }
     } else if (step === 3) {
       step3.classList.add('active');
       stepTitle.textContent = 'ตั้งรหัสผ่านใหม่';
@@ -302,6 +266,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function formatPhone(p) {
     return p.replace(/(\d{3})(\d{3})(\d{4})/, '$1-XXX-$3');
+  }
+
+  function toE164(phone) {
+    const d = String(phone || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.startsWith('66')) return '+' + d;
+    if (d.startsWith('0')) return '+66' + d.slice(1);
+    return '+' + d;
   }
 
   function startTimer(sec) {

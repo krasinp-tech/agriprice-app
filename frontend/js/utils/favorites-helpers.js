@@ -1,9 +1,11 @@
 (function initFavoritesHelpers() {
+  // uses global resolveUserId / resolveProfileId from utils/id-resolver.js
+
   function getCurrentUserId() {
     try {
       const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
       const user = raw ? JSON.parse(raw) : null;
-      return String(user?.id || user?.profile_id || "");
+      return resolveUserId(user?.profile_id, user?.id);
     } catch (_) {
       return "";
     }
@@ -43,13 +45,13 @@
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({
-          id: String(item?.user_id || item?.id || ""),
+          id: resolveUserId(item?.user_id, item?.profile_id, item?.id),
           kind: "seller",
           title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
           subtitle: item?.tagline || "",
           avatar: item?.avatar || "",
           source: "favorite",
-          profileId: String(item?.user_id || item?.id || ""),
+          profileId: resolveUserId(item?.user_id, item?.profile_id, item?.id),
         }))
         .filter((x) => x.id);
     } catch (_) {
@@ -73,13 +75,13 @@
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({
-          id: String(item?.profile_id || item?.id || ""),
+          id: resolveUserId(item?.profile_id, item?.id),
           kind: "seller",
           title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
           subtitle: item?.tagline || "",
           avatar: item?.avatar || "",
           source: "follow",
-          profileId: String(item?.profile_id || item?.id || ""),
+          profileId: resolveUserId(item?.profile_id, item?.id),
         }))
         .filter((x) => x.id);
     } catch (_) {
@@ -101,7 +103,7 @@
             productName: item?.productName || item?.sub || item?.sellerSub || item?.subtitle || "",
             avatar: item?.avatar || "",
             source: item?.source || (String(item?.kind || "seller") === "product" ? "product-favorite" : "favorite"),
-            profileId: String(item?.sellerId || item?.profileId || ""),
+            profileId: resolveUserId(item?.sellerId, item?.profileId),
             productId: String(item?.productId || ""),
             priceA: item?.priceA || "",
             priceB: item?.priceB || "",

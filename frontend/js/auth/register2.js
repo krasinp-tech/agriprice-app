@@ -5,8 +5,8 @@
 */
 
 (function () {
-  const KEY_PROFILE = "register_profile";
-  const KEY_ROLE = "register_role"; // มาจาก register1
+  const KEY_PROFILE = "reg_profile";
+  const KEY_ROLE = "reg_role"; // มาจาก register1
   const NEXT_ROUTE = "./register3.html";
 
   const form = document.getElementById("registerForm");

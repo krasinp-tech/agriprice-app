@@ -27,9 +27,9 @@
 
 /* Main Container */
 .booking-step1 {
-  min-height: auto;
-  background: var(--bg-page);
-  padding-bottom: 20px;
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 12px;
   width: 100%;
   overflow-x: hidden;
 }
@@ -40,7 +40,7 @@
 .header-card {
   background: linear-gradient(135deg, #0B853C 0%, #00C853 100%);
   border-radius: 0 0 32px 32px;
-  padding: calc(20px + env(safe-area-inset-top)) 28px 28px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 28px;
   position: relative;
   box-shadow: 0 6px 24px rgba(11, 133, 60, 0.2);
   max-width: 100%;
@@ -50,7 +50,7 @@
 
 .btn-back {
   position: absolute;
-  top: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
   left: 20px;
   width: 40px;
   height: 40px;
@@ -106,16 +106,16 @@
 }
 
 .product-icon {
-  width: 84px;
-  height: 84px;
+  width: 100px;
+  height: 100px;
   margin: 0 auto 20px;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  padding: 12px;
+  padding: 16px;
 }
 
 .product-icon img {
@@ -125,11 +125,11 @@
 }
 
 .header-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 6px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 0 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-subtitle {
@@ -152,7 +152,7 @@
 .calendar-section {
   margin: 24px auto;
   max-width: 100%;
-  padding: 0 28px;
+  padding: 0 16px;
 }
 
 .section-header {
@@ -170,16 +170,15 @@
 .section-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
   margin: 0;
 }
 
 .calendar-container {
-  background: var(--bg-card);
+  background: #fff;
   border-radius: 20px;
   padding: 16px 12px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   max-width: 100%;
   width: 100%;
 }
@@ -217,7 +216,7 @@
 .calendar-month {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
 }
 
 .calendar-grid {
@@ -242,11 +241,11 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-main);
+  color: #333;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--bg-card);
+  background: #fff;
   min-height: 32px;
 }
 
@@ -277,47 +276,20 @@
   opacity: 0.4;
 }
 
-/* Has Slots Indicator Dot */
-.calendar-day {
-  position: relative;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.has-slots-dot {
-  width: 4px;
-  height: 4px;
-  background-color: #22c55e;
-  border-radius: 50%;
-  position: absolute;
-  bottom: 6px;
-  transition: all 0.2s ease;
-}
-
-.calendar-day.selected .has-slots-dot {
-  background-color: #fff;
-  bottom: 4px;
-}
-
-.calendar-day.disabled .has-slots-dot {
-  display: none;
-}
-
 /* ================================
    Time Slots Section
 ================================ */
 .timeslots-section {
-  margin: 0 auto 12px;
+  margin: 0 auto 24px;
   max-width: 100%;
-  padding: 0 28px 20px;
+  padding: 0 16px 16px;
 }
 
 .timeslots-container {
-  background: var(--bg-card);
+  background: #fff;
   border-radius: 20px;
   padding: 12px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   max-width: 100%;
   width: 100%;
 }
@@ -328,11 +300,11 @@
   justify-content: space-between;
   padding: 14px 14px;
   margin-bottom: 10px;
-  border: 2px solid var(--border-light);
+  border: 2px solid #E8E8E8;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: var(--bg-input);
+  background: #fff;
 }
 
 .timeslot:last-child {
@@ -365,7 +337,7 @@
 .timeslot-time {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
 }
 
 .timeslot.disabled .timeslot-time {
@@ -407,20 +379,16 @@
    Submit Button
 ================================ */
 .submit-container {
-  position: relative;
-  margin-top: 10px;
-  padding: 10px 28px 40px;
-  background: transparent;
+  
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 16px 25px;
+  background: linear-gradient(to top, #F5F5F5 80%, transparent);
   z-index: 30;
   max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .submit-container {
-    max-width: 600px;
-    margin: 20px auto 0;
-    padding: 0 24px 60px;
-  }
+  pointer-events: none;
+  
 }
 
 .btn-submit {
@@ -478,7 +446,7 @@
     max-width: 600px;
     margin: 20px auto 0;
     border-radius: 24px;
-    padding: 20px 24px 20px;
+    padding: 20px 24px 32px;
   }
 
   .calendar-section,
@@ -490,7 +458,7 @@
   }
 
   .timeslots-section {
-    padding-bottom: 20px;
+    padding-bottom: 40px;
   }
 
   .calendar-container {
@@ -543,7 +511,7 @@
   .header-card {
     max-width: 700px;
     margin-top: 32px;
-    padding: 24px 32px 20px;
+    padding: 24px 32px 36px;
   }
 
   .calendar-section,
@@ -605,7 +573,6 @@
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -621,22 +588,8 @@
   animation: slideInUp 0.3s ease-out backwards;
 }
 
-.timeslot:nth-child(1) {
-  animation-delay: 0.05s;
-}
-
-.timeslot:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.timeslot:nth-child(3) {
-  animation-delay: 0.15s;
-}
-
-.timeslot:nth-child(4) {
-  animation-delay: 0.2s;
-}
-
-.timeslot:nth-child(5) {
-  animation-delay: 0.25s;
-}
+.timeslot:nth-child(1) { animation-delay: 0.05s; }
+.timeslot:nth-child(2) { animation-delay: 0.1s; }
+.timeslot:nth-child(3) { animation-delay: 0.15s; }
+.timeslot:nth-child(4) { animation-delay: 0.2s; }
+.timeslot:nth-child(5) { animation-delay: 0.25s; }

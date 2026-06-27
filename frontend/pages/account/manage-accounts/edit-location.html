@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+   
+    <script src="../../../js/api-client.js"></script>
+   
+    <script src="../../../js/auth/guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,39 +22,48 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <link rel="stylesheet" href="../../../css/global.css" />
+  <link rel="stylesheet" href="../../../css/dark-mode-patch.css" />
   
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
   <style>
     .location-page {
       padding: calc(20px + env(safe-area-inset-top)) 20px 40px;
       min-height: 100vh;
       display: flex; flex-direction: column;
+      background: var(--bg-page);
     }
     .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
     .back-btn { 
-      width: 44px; height: 44px; background: white; border-radius: 12px;
-      display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      width: 44px; height: 44px; background: var(--bg-card); border-radius: 12px;
+      display: grid; place-items: center; box-shadow: var(--shadow-sm);
       color: var(--text-main); border: none; cursor: pointer;
     }
-    .title { font-size: 20px; font-weight: 800; }
+    .title { font-size: 20px; font-weight: 800; color: var(--text-main); }
 
     #map {
       height: 350px;
       width: 100%;
       border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-md);
       margin-bottom: 24px;
       z-index: 1;
     }
 
     .info-card {
-      background: white; border-radius: 20px; padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;
+      background: var(--bg-card); border-radius: 20px; padding: 20px;
+      box-shadow: var(--shadow-xs); margin-bottom: 24px;
     }
-    .info-label { font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .info-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
     .info-val { font-size: 16px; font-weight: 800; color: var(--primary); }
 
     .btn-gps {
-      background: #f1f5f9; color: #475569; border: none;
+      background: var(--bg-input); color: var(--text-muted); border: none;
       padding: 14px; border-radius: 16px; font-weight: 700;
       display: flex; align-items: center; justify-content: center; gap: 8px;
       margin-bottom: 12px; cursor: pointer;
@@ -65,7 +81,7 @@
 
   <main class="location-page">
     <header class="header">
-      <button class="back-btn" onclick="history.back()">
+      <button class="back-btn" data-back>
         <span class="material-icons-outlined">chevron_left</span>
       </button>
       <h1 class="title">ปักหมุดตำแหน่งล้ง</h1>
@@ -89,21 +105,29 @@
   </main>
 
   <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+ 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Core Scripts -->
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/utils/storage-keys.js"></script>
-  <script src="../../../js/api-client.js"></script>
-  <script src="../../../js/utils/auth.js"></script>
-  <script src="../../../js/auth/guard.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../../js/api-client.js"></script>
+ 
+    <script src="../../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/components/i18n.js"></script>
-  <script src="../../../js/components.js"></script>
-  <script src="../../../js/account/manage-accounts/account-store.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/components/i18n.js"></script>
+ 
+    <script src="../../../js/components.js"></script>
+ 
+    <script src="../../../js/account/manage-accounts/account-store.js"></script>
 
   <script>
     let map, marker;
@@ -240,3 +264,7 @@
   </script>
 </body>
 </html>
+
+
+
+

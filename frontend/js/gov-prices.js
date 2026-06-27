@@ -38,10 +38,8 @@
               <table class="gov-price-table">
                 <thead>
                   <tr>
-                    <th>${window.i18nT ? window.i18nT('plant_class', 'ชั้นพืช') : 'ชั้นพืช'}</th>
-                    <th>${window.i18nT ? window.i18nT('min_price', 'ราคาต่ำสุด') : 'ราคาต่ำสุด'}</th>
-                    <th>${window.i18nT ? window.i18nT('max_price', 'ราคาสูงสุด') : 'ราคาสูงสุด'}</th>
-                    <th>${window.i18nT ? window.i18nT('avg_price', 'ราคาเฉลี่ย') : 'ราคาเฉลี่ย'}</th>
+                    <th style="text-align: left;">${window.i18nT ? window.i18nT('variety', 'สายพันธุ์') : 'สายพันธุ์'}</th>
+                    <th style="text-align: right;">${window.i18nT ? window.i18nT('min_price', 'ราคาขั้นต่ำ') : 'ราคาขั้นต่ำ'}</th>
                   </tr>
                 </thead>
                 <tbody id="govPriceRows"></tbody>
@@ -66,7 +64,7 @@
 
   async function fetchGovPrice(commodityDisplay) {
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || 'https://agriprice-app.onrender.com').replace(/\/$/, '');
+    const currentBase = window.api && window.api.getBase ? window.api.getBase() : (window.API_BASE_URL || '').replace(/\/$/, '');
     
     const modal = initPriceModal();
     const commodity = commodityMap[commodityDisplay] || commodityDisplay;
@@ -137,10 +135,8 @@
           const tr = document.createElement('tr');
           const mixedLabel = window.i18nT ? window.i18nT('mixed', 'คละ') : 'คละ';
           tr.innerHTML = `
-            <td>${row.variety || `${commodityLabel} (${mixedLabel})`}</td>
-            <td>${row.min ? row.min.toFixed(2) : '-'} ${json.unit}</td>
-            <td>${row.max ? row.max.toFixed(2) : '-'} ${json.unit}</td>
-            <td><strong>${row.avg ? row.avg.toFixed(2) : '-'}</strong> ${json.unit}</td>
+            <td style="text-align: left;">${row.variety || `${commodityLabel} (${mixedLabel})`}</td>
+            <td style="text-align: right;"><strong>฿${row.min ? row.min.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</strong> / ${json.unit || 'กก.'}</td>
           `;
           tbody.appendChild(tr);
         });

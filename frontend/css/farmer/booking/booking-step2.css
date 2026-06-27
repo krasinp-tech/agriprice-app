@@ -1,6 +1,6 @@
 /* ================================
    AGRIPRICE - Booking Step 2
-   จองคิว: ข้อมูลสถานพาหนะ
+   จองคิว: ข้อมูลยานพาหนะ
 ================================ */
 
 /* Responsive Container Wrapper */
@@ -8,7 +8,7 @@
   width: 100%;
   max-width: 428px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 16px;
 }
 
 @media (min-width: 768px) {
@@ -27,9 +27,9 @@
 
 /* Main Container */
 .booking-step2 {
-  min-height: auto;
-  background: var(--bg-page);
-  padding-bottom: 20px;
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 12px;
   width: 100%;
   overflow-x: hidden;
 }
@@ -40,7 +40,7 @@
 .header-card {
   background: linear-gradient(135deg, #0B853C 0%, #00C853 100%);
   border-radius: 0 0 32px 32px;
-  padding: 16px 28px 28px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 28px;
   position: relative;
   box-shadow: 0 6px 24px rgba(11, 133, 60, 0.2);
   max-width: 100%;
@@ -50,7 +50,7 @@
 
 .btn-back {
   position: absolute;
-  top: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
   left: 20px;
   width: 40px;
   height: 40px;
@@ -167,7 +167,7 @@
 .section-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
   margin: 0 0 6px;
 }
 
@@ -181,12 +181,11 @@
    Vehicle Card
 ================================ */
 .vehicle-card {
-  background: var(--bg-card);
+  background: #fff;
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   animation: slideInUp 0.3s ease-out;
 }
 
@@ -200,7 +199,7 @@
 .vehicle-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
   margin: 0;
 }
 
@@ -249,11 +248,11 @@
   width: 100%;
   height: 48px;
   padding: 0 40px 0 14px;
-  border: 1px solid var(--border-medium);
+  border: 1px solid #E0E0E0;
   border-radius: 12px;
   font-size: 14px;
-  color: var(--text-main);
-  background: var(--bg-input);
+  color: #333;
+  background: #fff;
   appearance: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -282,44 +281,16 @@
   font-weight: 600;
 }
 
-/* Plate Inputs Split */
-.plate-inputs {
-  display: flex;
-  gap: 12px;
-}
-
-.plate-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.plate-group.no {
-  flex: 2;
-}
-
-.plate-group.prov {
-  flex: 1.5;
-}
-
-.plate-sub-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 /* Form Input */
 .form-input {
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--border-medium);
+  border: 1px solid #E0E0E0;
   border-radius: 12px;
   font-size: 14px;
-  color: var(--text-main);
-  background: var(--bg-input);
+  color: #333;
+  background: #fff;
   transition: all 0.2s ease;
 }
 
@@ -408,11 +379,10 @@
 }
 
 .contact-card {
-  background: var(--bg-card);
+  background: #fff;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .contact-item {
@@ -432,7 +402,7 @@
 .contact-value {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1a1a1a;
 }
 
 .contact-note {
@@ -561,26 +531,22 @@
    Submit Button
 ================================ */
 .submit-container {
-  position: relative;
-  margin-top: 10px;
-  padding: 10px 28px 40px;
-  background: transparent;
+  
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 16px 25px;
+  background: linear-gradient(to top, #F5F5F5 80%, transparent);
   z-index: 30;
   max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .submit-container {
-    max-width: 600px;
-    margin: 20px auto 0;
-    padding: 0 24px 60px;
-  }
+  pointer-events: none;
+  
 }
 
 .btn-submit {
   width: 100%;
   max-width: 100%;
-
+  
   display: flex;
   align-items: center;
   justify-content: center;
@@ -718,7 +684,6 @@
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -729,7 +694,6 @@
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);

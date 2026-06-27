@@ -14,7 +14,7 @@ router.get('/:userId/status', authMiddleware, async (req, res) => {
 
     const { data, error } = await supabaseAdmin
       .from('follows')
-      .select('id')
+      .select('follower_id')
       .eq('follower_id', followerId)
       .eq('following_id', followingId)
       .maybeSingle();
@@ -35,7 +35,7 @@ router.get('/:userId/followers', authMiddleware, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('follows')
-      .select('follower:profiles!follower_id(id, first_name, last_name, avatar, role)')
+      .select('follower:profiles!follower_id(id:profile_id, first_name, last_name, avatar, role)')
       .eq('following_id', req.params.userId);
 
     if (error) {
@@ -55,7 +55,7 @@ router.get('/:userId/following', authMiddleware, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('follows')
-      .select('following:profiles!following_id(id, first_name, last_name, avatar, role)')
+      .select('following:profiles!following_id(id:profile_id, first_name, last_name, avatar, role)')
       .eq('follower_id', req.params.userId);
 
     if (error) {
@@ -75,7 +75,8 @@ router.post('/:userId', authMiddleware, async (req, res) => {
   try {
     const followerId = req.user.id;
     const followingId = req.params.userId;
-    if (followerId === followingId) return res.json(response.success('Follow สำเร็จ (Self)'));
+    if (followerId === followingId)
+      return res.status(400).json(response.error('ไม่สามารถ Follow ตัวเองได้'));
 
     const { error } = await supabaseAdmin
       .from('follows')
@@ -130,7 +131,7 @@ router.delete('/:userId', authMiddleware, async (req, res) => {
 
     res.json(response.success('Unfollow สำเร็จ'));
   } catch (e) {
-    res.json(response.success('Unfollow สำเร็จ (Fallback)'));
+    res.status(500).json(response.error('Unfollow ไม่สำเร็จ: ' + e.message));
   }
 });
 

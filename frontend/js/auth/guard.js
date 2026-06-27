@@ -4,38 +4,41 @@
 */
 
 (function () {
-  const KEYS = window.STORAGE_KEYS || { TOKEN: 'token', ROLE: 'role', USER_DATA: 'user_data' };
   const REDIRECT_KEY = "redirectAfterAuth";
-
-  // path ของไฟล์ login1 ภายในโปรเจกต์ (ไม่ใส่ / นำหน้า)
   const LOGIN1_REL = "pages/auth/login1.html";
 
   function isLoggedIn() {
-    if (window.Auth && window.Auth.isLoggedIn) return window.Auth.isLoggedIn();
-    return !!localStorage.getItem(KEYS.TOKEN);
-  }
-
-  function currentFullPath() {
-    return window.location.pathname + window.location.search + window.location.hash;
+    if (window.api && window.api.isLoggedIn) return window.api.isLoggedIn();
+    
+    // fallback logic if api not yet loaded or doesn't have the method
+    const KEYS = window.STORAGE_KEYS || { TOKEN: 'token', ROLE: 'role' };
+    const token = localStorage.getItem(KEYS.TOKEN);
+    const role = String(localStorage.getItem(KEYS.ROLE) || 'guest').toLowerCase();
+    
+    return !!token && role !== 'guest' && role !== 'null' && role !== 'undefined';
   }
 
   function getProjectBasePath() {
     const path = window.location.pathname;
     const pagesIdx = path.indexOf("/pages/");
-    if (pagesIdx !== -1) {
-      return path.substring(0, pagesIdx + 1);
-    }
-    const parts = path.split("/").filter(Boolean);
-    if (parts.length > 0) {
-      return "/" + parts[0] + "/";
-    }
-    return "/";
+    if (pagesIdx !== -1) return path.substring(0, pagesIdx + 1);
+    const lastSlash = path.lastIndexOf("/");
+    return path.substring(0, lastSlash + 1);
   }
 
   function goLogin1(nextPath) {
     const base = getProjectBasePath();
-    const url = new URL(base + LOGIN1_REL, window.location.origin);
-    url.searchParams.set("next", nextPath);
+    const loginUrl = base + LOGIN1_REL;
+    const url = new URL(loginUrl, window.location.origin);
+    if (nextPath) {
+      // Ensure nextPath is relative to root if it contains the base
+      let cleanNext = nextPath;
+      if (nextPath.startsWith(window.location.origin)) {
+        cleanNext = nextPath.substring(window.location.origin.length);
+      }
+      url.searchParams.set("next", cleanNext);
+    }
+    
     if (window.navigateWithTransition) window.navigateWithTransition(url.toString()); 
     else window.location.href = url.toString();
   }
@@ -45,7 +48,7 @@
 
     requireLogin() {
       if (isLoggedIn()) return true;
-      const next = currentFullPath();
+      const next = window.location.pathname + window.location.search;
       sessionStorage.setItem(REDIRECT_KEY, next);
       goLogin1(next);
       return false;
@@ -56,31 +59,25 @@
       const explicit = params.get("next") || sessionStorage.getItem(REDIRECT_KEY);
       sessionStorage.removeItem(REDIRECT_KEY);
 
-      if (explicit) {
-        if (window.navigateWithTransition) window.navigateWithTransition(explicit); 
-        else window.location.href = explicit;
+      if (explicit && explicit !== 'undefined' && explicit !== 'null') {
+        // Safe navigation to the explicit target
+        const target = explicit.startsWith('/') ? explicit : (getProjectBasePath() + explicit);
+        if (window.navigateWithTransition) window.navigateWithTransition(target); 
+        else window.location.href = target;
         return;
       }
 
-      // หน้าเริ่มต้นตาม role และ tier
-      let role = "";
-      let tier = "free";
-      try {
-        const u = JSON.parse(localStorage.getItem(KEYS.USER_DATA) || "null");
-        role = (u && u.role) ? String(u.role).toLowerCase() : (localStorage.getItem(KEYS.ROLE) || "").toLowerCase();
-        tier = (u && u.tier) ? String(u.tier).toLowerCase() : "free";
-      } catch (err) {}
-
+      const role = window.api ? window.api.getRole() : 'guest';
+      const user = window.api ? window.api.getUser() : null;
+      const tier = String(user?.tier || 'free').toLowerCase();
       const base = getProjectBasePath();
       
-      // ลำดับความสำคัญ: 1. defaultPath (ถ้าส่งมา) -> 2. หน้าที่เหมาะสมตามสิทธิ์ -> 3. index.html
-      let finalTarget = defaultPath;
+      let finalTarget = defaultPath || base + "index.html";
       
-      if (!finalTarget) {
+      // Smart redirect based on role
+      if (!defaultPath) {
         if (role === "buyer" && tier === "pro") {
           finalTarget = base + "pages/buyer/Dashboard/Dashboard1.html";
-        } else {
-          finalTarget = base + "index.html";
         }
       }
 
@@ -89,12 +86,8 @@
     },
 
     logout() {
-      if (window.Auth && window.Auth.logout) {
-        window.Auth.logout(false); // logout without immediate redirect
-      } else {
-        localStorage.removeItem(KEYS.TOKEN);
-        localStorage.removeItem(KEYS.USER_DATA);
-        localStorage.removeItem(KEYS.ROLE);
+      if (window.api && window.api.clearAuth) {
+        window.api.clearAuth();
       }
       sessionStorage.removeItem(REDIRECT_KEY);
       const base = getProjectBasePath();

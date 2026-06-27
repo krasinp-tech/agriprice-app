@@ -3,15 +3,36 @@ const router = express.Router();
 const { supabaseAdmin } = require('../utils/supabase');
 const authMiddleware = require('../middlewares/auth');
 const { signToken } = require('../utils/helpers');
+const rateLimit = require('express-rate-limit');
+
+// จำกัดการอัปเกรด: เพิ่มลิมิตเป็น 100 ครั้ง/ชั่วโมง เพื่อความสะดวกในการทดสอบของ Developer
+const checkoutLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 100,
+  message: { success: false, message: 'พยายามอัปเกรดบ่อยเกินไป กรุณารอสักครู่' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * POST /api/payments/checkout
  * อัปเกรด tier เป็น "pro"
  */
-router.post('/checkout', authMiddleware, async (req, res) => {
+router.post('/checkout', authMiddleware, checkoutLimiter, async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // ตรวจสอบ tier ปัจจุบันก่อน (idempotency guard)
+    const { data: current } = await supabaseAdmin
+      .from('profiles')
+      .select('tier')
+      .eq('profile_id', userId)
+      .single();
+
+    if (current?.tier === 'pro') {
+      return res.json({ success: true, message: 'คุณเป็น PRO อยู่แล้ว', data: { tier: 'pro' } });
+    }
+
     const { data, error } = await supabaseAdmin
       .from('profiles')
       .update({ tier: 'pro' })

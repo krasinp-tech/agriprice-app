@@ -18,8 +18,8 @@ router.get('/', async (req, res) => {
     }
 
     let query = supabaseAdmin
-      .from('product_slots')
-      .select('*, products!product_id(product_id, name, variety, user_id)')
+      .from('offer_slots')
+      .select('*, buy_offers!product_id(product_id, name, variety, user_id, profiles:profiles!user_id(profile_id, first_name, last_name, avatar))')
       .eq('is_active', true)
       .order('time_start');
 
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     } else if (farmer_id) {
       // กรณี farmer_id: หา products ของ buyer นั้นก่อน แล้วดึง slot
       const { data: products, error: pErr } = await supabaseAdmin
-        .from('products')
+        .from('buy_offers')
         .select('product_id')
         .eq('user_id', farmer_id)
         .eq('is_active', true);
@@ -68,6 +68,20 @@ router.post('/batch', authMiddleware, async (req, res) => {
       return res.status(400).json(response.error('ข้อมูลไม่ครบถ้วน (ต้องการ product_id และ rounds[])'));
     }
 
+    // [BUG FIX] Verify ownership — prevent any user from wiping another user's slots
+    const { data: product, error: prodErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('user_id')
+      .eq('product_id', product_id)
+      .maybeSingle();
+
+    if (prodErr || !product) {
+      return res.status(404).json(response.error('ไม่พบสินค้านี้'));
+    }
+    if (product.user_id !== req.user.id) {
+      return res.status(403).json(response.error('คุณไม่มีสิทธิ์แก้ไขคิวของสินค้านี้'));
+    }
+
     // เตรียมข้อมูลสำหรับการ Insert
     const slotsToInsert = rounds.map(r => ({
       product_id,
@@ -83,13 +97,13 @@ router.post('/batch', authMiddleware, async (req, res) => {
 
     // แทนที่จะลบทิ้ง (ซึ่งอาจติด FK) ให้ Mark เป็น inactive ของเก่าออกก่อน
     await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .update({ is_active: false })
       .eq('product_id', product_id);
 
     // Insert คิวใหม่
     const { data, error } = await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .insert(slotsToInsert)
       .select();
 
@@ -108,6 +122,35 @@ router.post('/batch', authMiddleware, async (req, res) => {
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    if (isNaN(Number(id))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
+
+    // [BUG FIX] ตรวจสอบ ownership ของ slot
+    const { data: slot, error: slotErr } = await supabaseAdmin
+      .from('offer_slots')
+      .select('product_id')
+      .eq('slot_id', id)
+      .maybeSingle();
+
+    if (slotErr || !slot) {
+      return res.status(404).json(response.error('ไม่พบรอบคิวนี้'));
+    }
+
+    const { data: product, error: prodErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('user_id')
+      .eq('product_id', slot.product_id)
+      .maybeSingle();
+
+    if (prodErr || !product) {
+      return res.status(404).json(response.error('ไม่พบสินค้านี้'));
+    }
+
+    if (product.user_id !== req.user.id) {
+      return res.status(403).json(response.error('คุณไม่มีสิทธิ์แก้ไขคิวของสินค้านี้'));
+    }
+
     const { slot_name, time_start, time_end, capacity, is_active, start_date, end_date } = req.body;
 
     const updates = {};
@@ -120,7 +163,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     if (end_date !== undefined) updates.end_date = end_date;
 
     const { data, error } = await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .update(updates)
       .eq('slot_id', id)
       .select()
@@ -140,8 +183,37 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    if (isNaN(Number(id))) {
+      return res.status(400).json(response.error('รูปแบบ ID ไม่ถูกต้อง'));
+    }
+
+    // [BUG FIX] ตรวจสอบ ownership ของ slot
+    const { data: slot, error: slotErr } = await supabaseAdmin
+      .from('offer_slots')
+      .select('product_id')
+      .eq('slot_id', id)
+      .maybeSingle();
+
+    if (slotErr || !slot) {
+      return res.status(404).json(response.error('ไม่พบรอบคิวนี้'));
+    }
+
+    const { data: product, error: prodErr } = await supabaseAdmin
+      .from('buy_offers')
+      .select('user_id')
+      .eq('product_id', slot.product_id)
+      .maybeSingle();
+
+    if (prodErr || !product) {
+      return res.status(404).json(response.error('ไม่พบสินค้านี้'));
+    }
+
+    if (product.user_id !== req.user.id) {
+      return res.status(403).json(response.error('คุณไม่มีสิทธิ์ลบคิวของสินค้านี้'));
+    }
+
     const { error } = await supabaseAdmin
-      .from('product_slots')
+      .from('offer_slots')
       .update({ is_active: false })
       .eq('slot_id', id);
 

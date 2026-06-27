@@ -186,6 +186,7 @@ router.get('/', async (req, res) => {
         link: item.link,
         source: item.source,
         published_at: item.publishedAt,
+        content: item.summary || '',
       }));
 
     thaiAnnouncementCache = {

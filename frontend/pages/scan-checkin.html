@@ -3,49 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ตรวจสอบการเช็คอิน | AGRIPRICE</title>
+  <title data-i18n="scan_checkin_title">ตรวจสอบการเช็คอิน | AGRIPRICE</title>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/dark-mode-patch.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
   <style>
-    :root {
-      --primary: #0B853C;
-      --primary-dark: #097534;
-      --bg-page: #F8F9FA;
-      --text-main: #1a1a1a;
-      --text-muted: #666;
-      --card-bg: #ffffff;
-      --border: rgba(0,0,0,0.05);
-    }
-
-    [data-theme="dark"] {
-      --bg-page: #000000;
-      --card-bg: #1c1c1e;
-      --text-main: #f2f2f7;
-      --text-muted: #8e8e93;
-      --border: rgba(255,255,255,0.1);
-    }
-
     body { 
-      background: var(--bg-page); 
+      margin: 0;
+      padding: 20px;
+      background: var(--bg-page, #F8F9FA); 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       min-height: 100vh; 
-      padding: 20px; 
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Outfit', -apple-system, sans-serif;
       transition: background 0.3s ease;
+      color: var(--text-main, #1a1a1a);
+      box-sizing: border-box;
     }
 
+    * { box-sizing: inherit; }
+
     .checkin-card { 
-      background: var(--card-bg); 
+      background: var(--bg-card, #ffffff); 
       border-radius: 28px; 
       padding: 32px 24px; 
       width: 100%; 
       max-width: 400px; 
       text-align: center; 
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.1));
+      border: 1px solid var(--border-light, #EFEFEF);
     }
 
     .status-icon-wrap {
@@ -57,7 +56,7 @@
       justify-content: center;
       margin: 0 auto 20px;
       background: rgba(11, 133, 60, 0.1);
-      color: var(--primary);
+      color: var(--primary, #0B853C);
     }
     .status-icon-wrap.error {
       background: rgba(229, 57, 53, 0.1);
@@ -65,8 +64,8 @@
     }
     .status-icon-wrap .material-icons-outlined { font-size: 40px; }
 
-    .title { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
-    .subtitle { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .title { font-size: 22px; font-weight: 800; color: var(--text-main, #1a1a1a); margin-bottom: 8px; margin-top: 0; }
+    .subtitle { font-size: 15px; color: var(--text-muted, #666); margin-bottom: 24px; margin-top: 0; line-height: 1.5; }
 
     .info-box { 
       background: rgba(0,0,0,0.02); 
@@ -74,15 +73,15 @@
       padding: 20px; 
       margin-bottom: 24px; 
       text-align: left;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-light, #EFEFEF);
     }
     [data-theme="dark"] .info-box { background: rgba(255,255,255,0.03); }
 
     .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
     .info-row:last-child { margin-bottom: 0; }
-    .info-label { color: var(--text-muted); }
-    .info-value { font-weight: 700; color: var(--text-main); }
-    .queue-value { color: var(--primary); font-size: 18px; }
+    .info-label { color: var(--text-muted, #666); }
+    .info-value { font-weight: 700; color: var(--text-main, #1a1a1a); }
+    .queue-value { color: var(--primary, #0B853C); font-size: 18px; }
 
     .action-group { display: flex; flex-direction: column; gap: 12px; }
     
@@ -99,10 +98,11 @@
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
+      font-family: inherit;
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: var(--primary, #0B853C);
       color: white;
       box-shadow: 0 8px 20px rgba(11, 133, 60, 0.25);
     }
@@ -110,15 +110,15 @@
 
     .btn-secondary {
       background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
+      color: var(--text-muted, #666);
+      border: 1px solid var(--border-light, #EFEFEF);
     }
     .btn-secondary:active { background: rgba(0,0,0,0.05); }
     [data-theme="dark"] .btn-secondary:active { background: rgba(255,255,255,0.05); }
 
     .loading-spinner { 
-      border: 3px solid var(--border); 
-      border-top: 3px solid var(--primary); 
+      border: 3px solid var(--border-light, #EFEFEF); 
+      border-top: 3px solid var(--primary, #0B853C); 
       border-radius: 50%; 
       width: 32px; 
       height: 32px; 
@@ -137,7 +137,11 @@
       100% { box-shadow: 0 0 0 0 rgba(11, 133, 60, 0); }
     }
   </style>
-  <script src="../js/config.js"></script>
+ 
+    <script src="../js/config.js"></script>
+    <script src="../js/components/i18n.js"></script>
+    <script src="../js/global-anim.js"></script>
+    <script src="../js/components.js"></script>
 </head>
 <body>
 
@@ -146,7 +150,7 @@
     <!-- Phase 1: Loading Details -->
     <div id="loadingSec">
       <div class="loading-spinner"></div>
-      <p class="subtitle">กำลังดึงข้อมูลการจอง...</p>
+      <p class="subtitle" data-i18n="fetching_booking_data">กำลังดึงข้อมูลการจอง...</p>
     </div>
 
     <!-- Phase 2: Confirmation Preview -->
@@ -154,24 +158,24 @@
       <div class="status-icon-wrap">
         <span class="material-icons-outlined">qr_code_2</span>
       </div>
-      <h2 class="title">ยืนยันการเช็คอิน</h2>
-      <p class="subtitle">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
+      <h2 class="title" data-i18n="confirm_checkin_title">ยืนยันการเช็คอิน</h2>
+      <p class="subtitle" data-i18n="confirm_checkin_subtitle">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
       
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว:</span>
+          <span class="info-label" data-i18n="queue_number_label">หมายเลขคิว:</span>
           <span class="info-value queue-value" id="prevQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร:</span>
+          <span class="info-label" data-i18n="farmer_name_label">ชื่อเกษตรกร:</span>
           <span class="info-value" id="prevFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า:</span>
+          <span class="info-label" data-i18n="product_label">สินค้า:</span>
           <span class="info-value" id="prevProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">จำนวน:</span>
+          <span class="info-label" data-i18n="amount_label">จำนวน:</span>
           <span class="info-value" id="prevAmount">-</span>
         </div>
       </div>
@@ -179,9 +183,9 @@
       <div class="action-group">
         <button id="btnConfirm" class="btn btn-primary">
           <span class="material-icons-outlined">check_circle</span>
-          ยืนยันการรับเข้า
+          <span data-i18n="confirm_reg_title">ยืนยันการรับเข้า</span>
         </button>
-        <button id="btnCancel" class="btn btn-secondary">ยกเลิก</button>
+        <button id="btnCancel" class="btn btn-secondary" data-i18n="cancel">ยกเลิก</button>
       </div>
     </div>
 
@@ -190,15 +194,15 @@
       <div class="status-icon-wrap success-pulse">
         <span class="material-icons-outlined">verified</span>
       </div>
-      <h2 class="title">เช็คอินสำเร็จ!</h2>
-      <p class="subtitle">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
+      <h2 class="title" data-i18n="checkin_success_title">เช็คอินสำเร็จ!</h2>
+      <p class="subtitle" data-i18n="checkin_success_subtitle">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
       
       <div class="info-box" style="text-align: center; background: rgba(11, 133, 60, 0.05);">
-        <div class="info-label" style="margin-bottom: 4px;">หมายเลขคิวของคุณ</div>
+        <div class="info-label" style="margin-bottom: 4px;" data-i18n="your_queue_number">หมายเลขคิวของคุณ</div>
         <div class="info-value" style="font-size: 32px; color: var(--primary);" id="resQueue">-</div>
       </div>
 
-      <button id="btnDone" class="btn btn-primary">ตกลง</button>
+      <button id="btnDone" class="btn btn-primary" data-i18n="ok">ตกลง</button>
     </div>
 
     <!-- Phase 4: Error Result -->
@@ -206,20 +210,17 @@
       <div class="status-icon-wrap error">
         <span class="material-icons-outlined">error_outline</span>
       </div>
-      <h2 class="title">เกิดข้อผิดพลาด</h2>
-      <p class="subtitle" id="errorMsg">ไม่สามารถดำเนินการได้ในขณะนี้</p>
-      <button onclick="window.history.back()" class="btn btn-secondary">กลับไปลองใหม่</button>
+      <h2 class="title" data-i18n="error_occurred_title">เกิดข้อผิดพลาด</h2>
+      <p class="subtitle" id="errorMsg" data-i18n="error_cannot_proceed">ไม่สามารถดำเนินการได้ในขณะนี้</p>
+      <button data-back class="btn btn-secondary" data-i18n="try_again">กลับไปลองใหม่</button>
     </div>
 
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      // Sync dark mode from localStorage/System
-      if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-
+      const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
+      
       const params = new URLSearchParams(window.location.search);
       const bid = params.get('bid') || params.get('bookingId');
       const API_BASE = (window.API_BASE_URL || '').replace(/\/$/, '');
@@ -232,7 +233,7 @@
 
       if (!bid || !TOKEN || !API_BASE) {
         showSection(errorSec);
-        document.getElementById('errorMsg').textContent = 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง';
+        document.getElementById('errorMsg').textContent = t('invalid_info_rescan', 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง');
         return;
       }
 
@@ -251,24 +252,24 @@
         if (res.ok && json.data) {
           const b = json.data;
           document.getElementById('prevQueue').textContent = b.queue_no || '-';
-          document.getElementById('prevFarmer').textContent = b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}` : 'ไม่ทราบชื่อ';
+          document.getElementById('prevFarmer').textContent = b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}` : t('booking_unknown_name', 'ไม่ทราบชื่อ');
           document.getElementById('prevProduct').textContent = b.product?.name || '-';
-          document.getElementById('prevAmount').textContent = (b.product_amount || 0).toLocaleString() + ' กก.';
+          document.getElementById('prevAmount').textContent = (b.product_amount || 0).toLocaleString() + ' ' + t('kg_unit', 'กก.');
           
           showSection(previewSec);
         } else {
-          document.getElementById('errorMsg').textContent = json.message || 'ไม่พบข้อมูลการจองนี้';
+          document.getElementById('errorMsg').textContent = json.message || t('booking_not_found', 'ไม่พบข้อมูลการจองนี้');
           showSection(errorSec);
         }
       } catch (e) {
-        document.getElementById('errorMsg').textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+        document.getElementById('errorMsg').textContent = t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ');
         showSection(errorSec);
       }
 
       // 2. Handle Confirmation
       document.getElementById('btnConfirm').addEventListener('click', async () => {
         showSection(loadingSec);
-        loadingSec.querySelector('p').textContent = 'กำลังบันทึกการเช็คอิน...';
+        loadingSec.querySelector('p').textContent = t('saving_checkin', 'กำลังบันทึกการเช็คอิน...');
 
         try {
           const res = await fetch(`${API_BASE}/api/bookings/${bid}/checkin`, {
@@ -281,11 +282,11 @@
             document.getElementById('resQueue').textContent = json.data?.queue_no || '-';
             showSection(successSec);
           } else {
-            document.getElementById('errorMsg').textContent = json.message || 'เช็คอินไม่สำเร็จ';
+            document.getElementById('errorMsg').textContent = json.message || t('checkin_failed', 'เช็คอินไม่สำเร็จ');
             showSection(errorSec);
           }
         } catch (e) {
-          document.getElementById('errorMsg').textContent = 'เกิดข้อผิดพลาดในการเช็คอิน';
+          document.getElementById('errorMsg').textContent = t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน');
           showSection(errorSec);
         }
       });

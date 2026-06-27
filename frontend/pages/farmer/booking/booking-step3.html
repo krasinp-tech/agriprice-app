@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-      <script src="../../../js/components/i18n.js"></script>
+   
+    <script src="../../../js/api-client.js"></script>
+   
+    <script src="../../../js/auth/guard.js"></script>
+     
+    <script src="../../../js/components/i18n.js"></script>
       <!-- Language Switcher (top-right) -->
-      <script src="../../../js/components/ui-common.js"></script>
+     
+    <script src="../../../js/components/ui-common.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="booking_summary_title">จองคิว - สรุปการจอง | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,8 +33,10 @@
   <link rel="stylesheet" href="../../../css/global.css">
   <link rel="stylesheet" href="../../../css/farmer/booking/booking-step3.css">
   <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css">
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/permission-manager.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/permission-manager.js"></script>
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
 </head>
 
@@ -86,6 +103,9 @@
           </div>
           <div class="card-body">
             <div class="product-summary">
+              <div class="product-icon-wrapper">
+                <img src="../../../assets/images/durian.png" alt="ทุเรียน" class="product-img" id="productImg">
+              </div>
               <div class="product-details">
                 <div class="product-name" id="productName">-</div>
                 <div class="product-info">
@@ -190,18 +210,25 @@
 </nav></div>
 
   <!-- Core Scripts -->
-  <script src="../../../js/config.js"></script>
-  <script src="../../../js/utils/storage-keys.js"></script>
-  <script src="../../../js/api-client.js"></script>
-  <script src="../../../js/utils/auth.js"></script>
-  <script src="../../../js/auth/guard.js"></script>
+ 
+    <script src="../../../js/config.js"></script>
+ 
+    <script src="../../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../../js/api-client.js"></script>
+ 
+    <script src="../../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
-  <script src="../../../js/global-anim.js"></script>
-  <script src="../../../js/components/i18n.js"></script>
-  <script src="../../../js/components.js"></script>
-  <script src="../../../js/farmer/booking/booking-step3.js"></script>
+ 
+    <script src="../../../js/global-anim.js"></script>
+ 
+    <script src="../../../js/components/i18n.js"></script>
+ 
+    <script src="../../../js/components.js"></script>
+ 
+    <script src="../../../js/farmer/booking/booking-step3.js"></script>
 
 
 <script>
@@ -217,3 +244,7 @@
 </script>
 </body>
 </html>
+
+
+
+

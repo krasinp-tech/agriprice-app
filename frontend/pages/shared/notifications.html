@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <script src="../../js/components/i18n.js"></script>
+   
+    <script src="../../js/api-client.js"></script>
+   
+    <script src="../../js/auth/guard.js"></script>
+ 
+    <script src="../../js/components/i18n.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="notifications_title_page">แจ้งเตือน | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,8 +26,10 @@
   <link rel="stylesheet" href="../../css/global.css" />
   <link rel="stylesheet" href="../../css/shared-pages/notifications.css" />
   <link rel="stylesheet" href="../../components/bottom-nav/bottom-nav.css" />
-  <script src="../../js/global-anim.js"></script>
-  <script src="../../js/permission-manager.js"></script>
+ 
+    <script src="../../js/global-anim.js"></script>
+ 
+    <script src="../../js/permission-manager.js"></script>
   <link rel="stylesheet" href="../../css/dark-mode-patch.css">
 </head>
 <body data-active="notifications">
@@ -30,6 +46,14 @@
         </div>
         <h1 class="noti-header-title" data-i18n="notifications_heading">การแจ้งเตือน</h1>
       </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="noti-refresh-btn" id="markAllReadBtn" title="อ่านทั้งหมด" data-i18n-title="mark_all_read">
+          <span class="material-icons-outlined">done_all</span>
+        </button>
+        <button class="noti-refresh-btn" id="refreshBtn" title="รีเฟรช" data-i18n-title="refresh">
+          <span class="material-icons-outlined">refresh</span>
+        </button>
+      </div>
     </header>
 
     <!-- Tabs -->
@@ -37,33 +61,28 @@
       <button class="noti-tab is-active" data-tab="all" role="tab" type="button" data-i18n="all">ทั้งหมด</button>
       <button class="noti-tab" data-tab="unread" role="tab" type="button">
         <span data-i18n="unread">ยังไม่อ่าน</span>
-        <span class="noti-tab-badge" id="unreadBadge">0</span>
+        <span class="noti-tab-badge" id="unreadBadge" style="display: none;">0</span>
       </button>
     </div>
 
     <!-- List -->
     <section class="noti-list-wrap" id="notiList">
-      <!-- Premium Skeleton Cards -->
-      <div class="skeleton-card">
-        <div class="skeleton skeleton-avatar"></div>
-        <div class="skeleton-card-content">
-          <div class="skeleton skeleton-title"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text" style="width: 40%;"></div>
+      <div id="notificationListMount">
+        <!-- Premium Skeleton Cards -->
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton-card-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text" style="width: 40%;"></div>
+          </div>
         </div>
-      </div>
-      <div class="skeleton-card">
-        <div class="skeleton skeleton-avatar"></div>
-        <div class="skeleton-card-content">
-          <div class="skeleton skeleton-title"></div>
-          <div class="skeleton skeleton-text"></div>
-        </div>
-      </div>
-      <div class="skeleton-card">
-        <div class="skeleton skeleton-avatar"></div>
-        <div class="skeleton-card-content">
-          <div class="skeleton skeleton-title"></div>
-          <div class="skeleton skeleton-text"></div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton-card-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -103,18 +122,25 @@
     </a>
 </nav></div>
   <!-- Core Scripts -->
-  <script src="../../js/config.js"></script>
-  <script src="../../js/utils/storage-keys.js"></script>
-  <script src="../../js/api-client.js"></script>
-  <script src="../../js/utils/auth.js"></script>
-  <script src="../../js/auth/guard.js"></script>
+ 
+    <script src="../../js/config.js"></script>
+ 
+    <script src="../../js/utils/storage-keys.js"></script>
+ 
+    <script src="../../js/api-client.js"></script>
+ 
+    <script src="../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
-  <script src="../../js/global-anim.js"></script>
-  <script src="../../js/components/i18n.js"></script>
-  <script src="../../js/components.js"></script>
-  <script src="../../js/shared-pages/notifications.js"></script>
+ 
+    <script src="../../js/global-anim.js"></script>
+ 
+    <script src="../../js/components/i18n.js"></script>
+ 
+    <script src="../../js/components.js"></script>
+ 
+    <script src="../../js/shared-pages/notifications.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
@@ -128,3 +154,7 @@
 </script>
 </body>
 </html>
+
+
+
+

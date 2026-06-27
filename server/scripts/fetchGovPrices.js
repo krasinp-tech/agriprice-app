@@ -1,88 +1,10 @@
 /**
  * server/scripts/fetchGovPrices.js
  * 
- * ระบบอัตโนมัติสำหรับดึงข้อมูลราคากลางสินค้าเกษตร (Scraper)
- * แหล่งข้อมูล: กรมการค้าภายใน (Department of Internal Trade)
- * 
- * วิธีใช้งาน:
- * 1. รันด่วน: node server/scripts/fetchGovPrices.js
- * 2. ตั้งเวลา: ใช้ Cron Job (เช่น 0 4 * * * เพื่อรันตอนตี 4 ทุกวัน)
+ * ระบบดึงราคากลางสินค้าเกษตร (DEACTIVATED)
+ * ข้อมูลทั้งหมดของราคากลางดึงจากไฟล์ Excel ใน data/gov_prices.xlsx โดยตรงแบบไดนามิก
  */
 
-require('dotenv').config({ path: './server/.env' });
-const { createClient } = require('@supabase/supabase-js');
+console.log('[Scraper] fetchGovPrices script is running in STUB/DEACTIVATED mode. All reference prices are read from server/data/gov_prices.xlsx.');
+process.exit(0);
 
-// ข้อมูลเชื่อมต่อ Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-// รายชื่อสินค้าที่เราสนใจ (Mapping ชื่อจาก DIT -> แอปเรา)
-const COMMODITY_MAP = [
-  { name: 'ทุเรียน', variety: 'หมอนทอง' },
-  { name: 'มังคุด', variety: 'คละ' },
-  { name: 'ลองกอง', variety: 'คละ' },
-  { name: 'เงาะ', variety: 'โรงเรียน' },
-  { name: 'ปาล์มน้ำมัน', variety: 'เปอร์เซ็นต์น้ำมัน 18%' },
-  { name: 'ยางพารา', variety: 'ยางแผ่นดิบ' }
-];
-
-async function runScraper() {
-  console.log('--- [Scraper] Starting Market Price Sync ---');
-  console.log('Target: DIT (Department of Internal Trade)');
-  
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const records = [];
-    
-    for (const item of COMMODITY_MAP) {
-      // Logic สำหรับดึงข้อมูลและจำลองกรณีถ้าเว็บต้นทางมีการเปลี่ยนแปลง
-      const avgPrice = getBasePrice(item.name);
-      const minPrice = avgPrice - 5;
-      const maxPrice = avgPrice + 5;
-
-      records.push({
-        commodity: item.name,
-        variety: item.variety,
-        unit: 'กก.',
-        min_price: minPrice,
-        max_price: maxPrice,
-        avg_price: avgPrice,
-        price_date: today,
-        source: 'กรมการค้าภายใน (DIT)'
-      });
-    }
-
-    console.log(`[Scraper] Found ${records.length} items to update.`);
-
-    // บันทึกลง Supabase (Upsert เพื่ออัปเดตราคาวันเดิมถ้ามีการรันซ้ำ)
-    const { data, error } = await supabase
-      .from('gov_prices')
-      .upsert(records, { onConflict: 'commodity,variety,price_date' });
-
-    if (error) throw error;
-
-    console.log('--- [Scraper] Sync Completed Successfully ---');
-    console.log(`Updated at: ${new Date().toLocaleString('th-TH')}`);
-    
-  } catch (error) {
-    console.error('!!! [Scraper] Sync Failed !!!');
-    console.error(error.message);
-  }
-}
-
-function getBasePrice(name) {
-  const prices = {
-    'ทุเรียน': 165,
-    'มังคุด': 75,
-    'ลองกอง': 45,
-    'เงาะ': 35,
-    'ปาล์มน้ำมัน': 6.2,
-    'ยางพารา': 68
-  };
-  return prices[name] || 50;
-}
-
-// Execute
-runScraper();

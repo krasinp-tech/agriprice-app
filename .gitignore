@@ -18,3 +18,7 @@ Thumbs.db
 frontend/www/
 frontend/android/app/capacitor.build.gradle
 frontend/android/capacitor.settings.gradle
+
+# Local node runtime
+.node/
+

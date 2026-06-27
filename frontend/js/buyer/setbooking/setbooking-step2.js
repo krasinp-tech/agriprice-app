@@ -129,8 +129,8 @@
           </div>
         </div>
         <div class="round-card-details">
-          <div>${window.i18nT ? window.i18nT('time_label', 'เวลา') : 'เวลา'}: <span>${escapeHtml(r.start)} - ${escapeHtml(r.end)}</span></div>
-          <div>${window.i18nT ? window.i18nT('capacity_label', 'จำนวนคิว') : 'จำนวนคิว'}: <span>${Number(r.capacity)}</span></div>
+          <div><span class="material-icons-outlined">schedule</span> ${window.i18nT ? window.i18nT('time_label', 'เวลา') : 'เวลา'}: <span>${escapeHtml(r.start)} - ${escapeHtml(r.end)}</span></div>
+          <div><span class="material-icons-outlined">people</span> ${window.i18nT ? window.i18nT('capacity_label', 'จำนวนคิว') : 'จำนวนคิว'}: <span>${Number(r.capacity)}</span></div>
         </div>
         <div class="round-card-actions">
           <button class="icon-btn" type="button" aria-label="${window.i18nT ? window.i18nT('delete_round', 'ลบรอบ') : 'ลบรอบ'}">

@@ -6,15 +6,14 @@ const { supabaseAdmin } = require('../utils/supabase');
 
 /**
  * GET /api/favorites
- * ดึงรายการผู้ใช้/สินค้าที่บันทึกไว้
+ * ดึงรายการผู้ใช้/ล้งที่กดติดตามไว้ (ดึงจากตาราง follows แทน user_relations เพื่อความเป็นระเบียบ)
  */
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { data: rels, error } = await supabaseAdmin
-      .from('user_relations')
-      .select('relation_id, target_user_id, created_at')
-      .eq('relation_type', 'favorite')
-      .eq('user_id', req.user.id)
+      .from('follows')
+      .select('follower_id, following_id, created_at')
+      .eq('follower_id', req.user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -22,7 +21,7 @@ router.get('/', authMiddleware, async (req, res) => {
       return res.json(response.success('ดึงรายการโปรดสำเร็จ (ไม่มีข้อมูลเนื่องจากข้อผิดพลาด)', []));
     }
 
-    const targetIds = (rels || []).map(r => r.target_user_id);
+    const targetIds = (rels || []).map(r => r.following_id);
     let profilesMap = {};
     
     if (targetIds.length > 0) {
@@ -37,13 +36,13 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 
     const result = (rels || []).map(fav => ({
-      id: fav.relation_id,
-      user_id: fav.target_user_id,
-      first_name: profilesMap[fav.target_user_id]?.first_name || '',
-      last_name:  profilesMap[fav.target_user_id]?.last_name  || '',
-      tagline:    profilesMap[fav.target_user_id]?.tagline    || '',
-      avatar:     profilesMap[fav.target_user_id]?.avatar     || '',
-      role:       profilesMap[fav.target_user_id]?.role       || '',
+      id: fav.following_id,
+      user_id: fav.following_id,
+      first_name: profilesMap[fav.following_id]?.first_name || '',
+      last_name:  profilesMap[fav.following_id]?.last_name  || '',
+      tagline:    profilesMap[fav.following_id]?.tagline    || '',
+      avatar:     profilesMap[fav.following_id]?.avatar     || '',
+      role:       profilesMap[fav.following_id]?.role       || '',
       created_at: fav.created_at,
     }));
 
@@ -55,7 +54,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/favorites
- * เพิ่มรายการโปรด
+ * เพิ่มรายการโปรด (ติดตามร้านค้า/ผู้ใช้)
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -64,16 +63,33 @@ router.post('/', authMiddleware, async (req, res) => {
     if (user_id === req.user.id) return res.status(400).json(response.error('ไม่สามารถเพิ่มตัวเองได้'));
 
     const { data, error } = await supabaseAdmin
-      .from('user_relations')
+      .from('follows')
       .upsert(
-        { relation_type: 'favorite', user_id: req.user.id, target_user_id: user_id },
-        { onConflict: 'relation_type,user_id,target_user_id' }
+        { follower_id: req.user.id, following_id: user_id },
+        { onConflict: 'follower_id,following_id' }
       )
       .select()
       .single();
 
     if (error) throw error;
-    res.status(201).json(response.success('เพิ่มรายการโปรดสำเร็จ', data));
+
+    // อัปเดตตัวเลข followers_count และ following_count เชิงสถิติ
+    try {
+      await supabaseAdmin.rpc('increment_follower_count', { target_id: user_id });
+      await supabaseAdmin.rpc('increment_following_count', { target_id: req.user.id });
+    } catch (e) {
+      console.warn('[FavoritesAPI] Counter increment failed:', e.message);
+    }
+
+    // Map ฟิลด์ให้สอดคล้องกับความคาดหวังของระบบ
+    const mappedData = {
+      id: data.following_id,
+      user_id: data.follower_id,
+      target_user_id: data.following_id,
+      created_at: data.created_at
+    };
+
+    res.status(201).json(response.success('เพิ่มรายการโปรดสำเร็จ', mappedData));
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }
@@ -81,18 +97,26 @@ router.post('/', authMiddleware, async (req, res) => {
 
 /**
  * DELETE /api/favorites/:targetUserId
- * ลบรายการโปรด
+ * ลบรายการโปรด (เลิกติดตามร้านค้า/ผู้ใช้)
  */
 router.delete('/:targetUserId', authMiddleware, async (req, res) => {
   try {
     const { error } = await supabaseAdmin
-      .from('user_relations')
+      .from('follows')
       .delete()
-      .eq('relation_type', 'favorite')
-      .eq('user_id', req.user.id)
-      .eq('target_user_id', req.params.targetUserId);
+      .eq('follower_id', req.user.id)
+      .eq('following_id', req.params.targetUserId);
 
     if (error) throw error;
+
+    // อัปเดตตัวเลขลดลง
+    try {
+      await supabaseAdmin.rpc('decrement_follower_count', { target_id: req.params.targetUserId });
+      await supabaseAdmin.rpc('decrement_following_count', { target_id: req.user.id });
+    } catch (e) {
+      console.warn('[FavoritesAPI] Counter decrement failed:', e.message);
+    }
+
     res.json(response.success('ลบรายการโปรดสำเร็จ'));
   } catch (e) {
     res.status(500).json(response.error(e.message));

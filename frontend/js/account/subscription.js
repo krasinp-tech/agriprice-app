@@ -1,9 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+  "use strict";
+
   const backBtn = document.getElementById('backBtn');
   const upgradeBtn = document.getElementById('upgradeBtn');
-  const freePlanBtn = document.getElementById('freePlanBtn');
   const carousel = document.querySelector('.plans-carousel');
   const dots = document.querySelectorAll('.dot');
+  const api = window.api || {};
+  
+  let currentTier = 'free';
+
+  function t(key, fallback) {
+    if (window.i18nT) return window.i18nT(key, fallback);
+    return fallback || key;
+  }
 
   // Go back
   if (backBtn) {
@@ -16,171 +25,138 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Upgrade Button -> go to payment
-  if (upgradeBtn) {
-    upgradeBtn.addEventListener('click', () => {
-      window.location.href = 'payment.html';
-    });
+  // Check current subscription from API
+  async function checkCurrentSubscription() {
+    try {
+      if (api.getProfile) {
+        const profile = await api.getProfile();
+        if (profile && profile.tier) {
+          currentTier = profile.tier.toLowerCase();
+          
+          // Update user_data in localStorage
+          const rawUser = localStorage.getItem("user_data");
+          if (rawUser) {
+            const user = JSON.parse(rawUser);
+            user.tier = currentTier;
+            localStorage.setItem("user_data", JSON.stringify(user));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[Subscription] Sync error, fallback to cache:', err);
+      try {
+        const rawUser = localStorage.getItem("user_data");
+        if (rawUser) {
+          const user = JSON.parse(rawUser);
+          currentTier = (user.tier || 'free').toLowerCase();
+        }
+      } catch (_) {}
+    }
+
+    renderUI();
   }
 
-  function updateUI(tier) {
-    const isPro = (String(tier).toLowerCase() === 'pro');
-    
-    if (isPro) {
-      // Pro plan card button: disabled, says "แพ็กเกจปัจจุบัน"
-      if (upgradeBtn) {
-        upgradeBtn.disabled = true;
-        upgradeBtn.innerText = window.i18nT ? window.i18nT('current_plan_btn', 'แพ็กเกจปัจจุบัน') : 'แพ็กเกจปัจจุบัน';
-        upgradeBtn.className = 'plan-btn btn-current';
+  function renderUI() {
+    const freeBtn = document.querySelector('.free-plan .plan-btn');
+    const proBtn = document.querySelector('.pro-plan .plan-btn');
+    const cancelSubWrap = document.getElementById('cancelSubWrap');
+    const cancelSubLink = document.getElementById('cancelSubLink');
+
+    if (currentTier === 'pro') {
+      // Free Plan card -> Disabled base plan style
+      if (freeBtn) {
+        freeBtn.textContent = t('free_plan_name', 'FREE');
+        freeBtn.disabled = true;
+        freeBtn.className = 'plan-btn btn-current';
+        freeBtn.onclick = null;
       }
-      // Free plan card button: enabled, says "ยกเลิกแพ็กเกจโปร"
-      if (freePlanBtn) {
-        freePlanBtn.disabled = false;
-        freePlanBtn.innerText = window.i18nT ? window.i18nT('cancel_pro_btn', 'ยกเลิกแพ็กเกจโปร') : 'ยกเลิกแพ็กเกจโปร';
-        freePlanBtn.className = 'plan-btn btn-upgrade'; // style as active button
-        freePlanBtn.style.background = '#ef4444'; // Red background for cancellation/downgrade
-        freePlanBtn.style.color = '#ffffff';
-        freePlanBtn.style.cursor = 'pointer';
+
+      // Pro Plan card -> Current package status
+      if (proBtn) {
+        proBtn.textContent = t('current_plan_btn', 'แพ็กเกจปัจจุบัน');
+        proBtn.disabled = true;
+        proBtn.className = 'plan-btn btn-current';
+        proBtn.onclick = null;
+      }
+
+      // Show cancel link below Pro card
+      if (cancelSubWrap) cancelSubWrap.style.display = 'block';
+      if (cancelSubLink) {
+        cancelSubLink.onclick = async (e) => {
+          e.preventDefault();
+          const confirmText = t('confirm_cancel_sub', 'คุณแน่ใจหรือไม่ที่จะยกเลิกแพ็กเกจ PRO?');
+
+          const runCancel = async () => {
+            cancelSubLink.style.pointerEvents = 'none';
+            cancelSubLink.textContent = t('processing', 'กำลังดำเนินการ...');
+            try {
+              const res = await api.call('POST', '/api/payments/cancel');
+              if (res && res.success) {
+                if (res.data && res.data.token) {
+                  localStorage.setItem('token', res.data.token);
+                  const rawUser = localStorage.getItem("user_data");
+                  if (rawUser) {
+                    const user = JSON.parse(rawUser);
+                    user.tier = 'free';
+                    localStorage.setItem("user_data", JSON.stringify(user));
+                  }
+                }
+                alert(t('cancel_success', 'ยกเลิกการสมัครเรียบร้อยแล้ว แพ็กเกจของคุณเป็น FREE'));
+                window.location.reload();
+              }
+            } catch (err) {
+              console.error('[Subscription] Cancel failed:', err);
+              alert(err.message || t('error_occurred', 'เกิดข้อผิดพลาด'));
+              cancelSubLink.style.pointerEvents = 'auto';
+              cancelSubLink.textContent = t('cancel_sub_btn', 'ยกเลิกการสมัคร PRO');
+            }
+          };
+
+          if (window.showConfirm) {
+            window.showConfirm(confirmText, (agreed) => {
+              if (agreed) runCancel();
+            });
+          } else {
+            if (confirm(confirmText)) {
+              runCancel();
+            }
+          }
+        };
       }
     } else {
-      // Free plan card button: disabled, says "แพ็กเกจปัจจุบัน"
-      if (freePlanBtn) {
-        freePlanBtn.disabled = true;
-        freePlanBtn.innerText = window.i18nT ? window.i18nT('current_plan_btn', 'แพ็กเกจปัจจุบัน') : 'แพ็กเกจปัจจุบัน';
-        freePlanBtn.className = 'plan-btn btn-current';
-        freePlanBtn.style.background = '';
-        freePlanBtn.style.color = '';
-        freePlanBtn.style.cursor = '';
+      // Free Plan card -> Current package status
+      if (freeBtn) {
+        freeBtn.textContent = t('current_plan_btn', 'แพ็กเกจปัจจุบัน');
+        freeBtn.disabled = true;
+        freeBtn.className = 'plan-btn btn-current';
+        freeBtn.onclick = null;
       }
-      // Pro plan card button: enabled, says "อัปเกรดเป็น Pro"
-      if (upgradeBtn) {
-        upgradeBtn.disabled = false;
-        upgradeBtn.innerText = window.i18nT ? window.i18nT('upgrade_pro_btn', 'อัปเกรดเป็น Pro') : 'อัปเกรดเป็น Pro';
-        upgradeBtn.className = 'plan-btn btn-upgrade';
+
+      // Pro Plan card -> Upgrade option
+      if (proBtn) {
+        proBtn.textContent = t('upgrade_pro_btn', 'อัปเกรดเป็น Pro');
+        proBtn.disabled = false;
+        proBtn.className = 'plan-btn btn-upgrade';
+        proBtn.onclick = () => {
+          window.location.href = 'payment.html';
+        };
       }
+
+      // Hide cancel link below Pro card
+      if (cancelSubWrap) cancelSubWrap.style.display = 'none';
     }
-  }
-
-  // Load initial state from local storage
-  let currentTier = 'free';
-  try {
-    const userStr = localStorage.getItem('user_data') || localStorage.getItem('user');
-    if (userStr) {
-      const userObj = JSON.parse(userStr);
-      currentTier = userObj.tier || 'free';
-    }
-  } catch(e) {}
-  updateUI(currentTier);
-
-  // Sync latest tier status from API in background
-  const token = localStorage.getItem('token') || '';
-  if (token && window.api && typeof window.api.getProfile === 'function') {
-    window.api.getProfile()
-      .then(profile => {
-        if (profile && profile.tier) {
-          const userStr = localStorage.getItem('user_data') || localStorage.getItem('user');
-          if (userStr) {
-            try {
-              const userObj = JSON.parse(userStr);
-              userObj.tier = profile.tier;
-              localStorage.setItem('user_data', JSON.stringify(userObj));
-              localStorage.setItem('user', JSON.stringify(userObj));
-            } catch(e) {}
-          }
-          updateUI(profile.tier);
-        }
-      })
-      .catch(err => console.warn('[Subscription] Sync profile status failed:', err));
-  }
-
-  // Downgrade/Cancellation Handler
-  if (freePlanBtn) {
-    freePlanBtn.addEventListener('click', async () => {
-      const isPro = (freePlanBtn.innerText.includes('ยกเลิก') || freePlanBtn.innerText.toLowerCase().includes('cancel') || freePlanBtn.innerText.includes('套餐'));
-      if (!isPro) return;
-
-      const message = window.i18nT 
-        ? window.i18nT('confirm_cancel_subscription', 'ต้องการยกเลิกแพ็กเกจโปรและกลับไปใช้แผนเริ่มต้นใช่หรือไม่? คุณจะเสียสิทธิ์ในการเข้าถึงแดชบอร์ดวิเคราะห์ข้อมูล') 
-        : 'ต้องการยกเลิกแพ็กเกจโปรและกลับไปใช้แผนเริ่มต้นใช่หรือไม่? คุณจะเสียสิทธิ์ในการเข้าถึงแดชบอร์ดวิเคราะห์ข้อมูล';
-      
-      const handleCancel = async () => {
-        const originalText = freePlanBtn.innerText;
-        freePlanBtn.disabled = true;
-        freePlanBtn.innerHTML = '<span class="material-icons-outlined" style="animation: spin 1s linear infinite; font-size: 20px; color: #fff;">autorenew</span>';
-
-        try {
-          if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-          const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-          
-          const response = await fetch(currentBase + '/api/payments/cancel', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            }
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            throw new Error(result.error || 'Cancellation failed');
-          }
-
-          if (result.data && result.data.token) {
-            localStorage.setItem(window.AUTH_TOKEN_KEY || 'token', result.data.token);
-          }
-          const userStr = localStorage.getItem('user_data') || localStorage.getItem('user');
-          if (userStr) {
-            const userObj = JSON.parse(userStr);
-            userObj.tier = 'free';
-            localStorage.setItem('user_data', JSON.stringify(userObj));
-            localStorage.setItem('user', JSON.stringify(userObj));
-          }
-
-          if (window.appNotify) {
-            window.appNotify(window.i18nT ? window.i18nT('cancel_success', 'ยกเลิกแพ็กเกจโปรสำเร็จ') : 'ยกเลิกแพ็กเกจโปรสำเร็จ', 'success');
-          }
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-
-        } catch (error) {
-          freePlanBtn.innerText = originalText;
-          freePlanBtn.disabled = false;
-          freePlanBtn.style.color = '#ffffff';
-          if (window.appNotify) {
-            window.appNotify(error.message, 'error');
-          } else {
-            alert(error.message);
-          }
-        }
-      };
-
-      if (window.showConfirm) {
-        window.showConfirm(message, (confirmed) => {
-          if (confirmed) handleCancel();
-        });
-      } else {
-        if (confirm(message)) {
-          handleCancel();
-        }
-      }
-    });
   }
 
   // Scroll detection for dots
   if (carousel && dots.length === 2) {
+    // Scroll to active plan after short delay
     setTimeout(() => {
-      const proCard = document.querySelector('.pro-plan');
-      if (proCard && currentTier !== 'pro') {
-        proCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      } else if (currentTier === 'pro') {
-        const freeCard = document.querySelector('.free-plan');
-        if (freeCard) {
-          freeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
+      const activeCardClass = currentTier === 'pro' ? '.pro-plan' : '.free-plan';
+      const activeCard = document.querySelector(activeCardClass);
+      if (activeCard) {
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
-    }, 300);
+    }, 400);
 
     carousel.addEventListener('scroll', () => {
       const scrollLeft = carousel.scrollLeft;
@@ -195,4 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Load state
+  checkCurrentSubscription();
 });

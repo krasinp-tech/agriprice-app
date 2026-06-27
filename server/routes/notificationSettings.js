@@ -43,7 +43,7 @@ router.patch('/', authMiddleware, async (req, res) => {
     // upsert
     const { data, error } = await supabaseAdmin
       .from('notification_settings')
-      .upsert({ user_id: req.user.id, settings }, { onConflict: 'user_id' })
+      .upsert({ user_id: req.user.id, settings, role: req.user.role || 'guest' }, { onConflict: 'user_id' })
       .select()
       .single();
 

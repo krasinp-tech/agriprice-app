@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   "use strict";
 
   const store = window.AccountManageStore;
@@ -105,32 +105,42 @@
         return;
       }
 
-      const accepted = window.confirm("ยืนยันลบบัญชีถาวรหรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้");
-      if (!accepted) return;
+      const runDelete = async () => {
+        try {
+          await store.deleteAccount("user_requested_delete");
+        } catch (err) {
+          showMessage(deleteMessage, err.message || "ลบบัญชีไม่สำเร็จ", "error");
+          return;
+        }
 
-      try {
-        await store.deleteAccount("user_requested_delete");
-      } catch (err) {
-        showMessage(deleteMessage, err.message || "ลบบัญชีไม่สำเร็จ", "error");
-        return;
+        store.resetData();
+
+        try {
+          const authTokenKey = window.AUTH_TOKEN_KEY || "token";
+          localStorage.removeItem(authTokenKey);
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user");
+          localStorage.removeItem("role");
+        } catch (_) {}
+
+        showMessage(deleteMessage, "ลบบัญชีเรียบร้อย กำลังพากลับหน้าแรก...", "success");
+
+        setTimeout(function () {
+          if (window.navigateWithTransition) window.navigateWithTransition("../../../index.html"); else window.location.href = "../../../index.html";
+        }, 900);
+      };
+
+      const msg = "ยืนยันลบบัญชีถาวรหรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้";
+      if (window.showConfirm) {
+        window.showConfirm(msg, (agreed) => {
+          if (agreed) runDelete();
+        });
+      } else {
+        if (window.confirm(msg)) {
+          runDelete();
+        }
       }
-
-      store.resetData();
-
-      try {
-        const authTokenKey = window.AUTH_TOKEN_KEY || "token";
-        localStorage.removeItem(authTokenKey);
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("role");
-      } catch (_) {}
-
-      showMessage(deleteMessage, "ลบบัญชีเรียบร้อย กำลังพากลับหน้าแรก...", "success");
-
-      setTimeout(function () {
-        if (window.navigateWithTransition) window.navigateWithTransition("../../../index.html"); else window.location.href = "../../../index.html";
-      }, 900);
     });
   }
 

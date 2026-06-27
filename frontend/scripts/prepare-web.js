@@ -7,10 +7,7 @@ const outDir = path.join(root, 'www');
 const includeList = [
   '.htaccess',
   'index.html',
-  'gov-price-lookup.html',
   'manifest.json',
-  'sw.js',
-  'favicon.ico',
   'assets',
   'components',
   'css',

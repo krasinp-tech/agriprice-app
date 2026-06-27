@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return [];
     }
 
+  // uses global resolveUserId / resolveProfileId from utils/id-resolver.js
+
     const productId = localStorage.getItem('bookingProductId') || '';
     const farmerId = localStorage.getItem('bookingFarmerId') || '';
     
@@ -70,11 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
         slot_name:   slot.slot_name || '',
         start_date:  slot.start_date,
         end_date:    slot.end_date,
-        farmerName:  slot.product?.profiles
-          ? `${slot.product.profiles.first_name||''} ${slot.product.profiles.last_name||''}`.trim()
+        farmerName:  (slot.buy_offers?.profiles || slot.product?.profiles)
+          ? `${(slot.buy_offers?.profiles || slot.product?.profiles).first_name||''} ${(slot.buy_offers?.profiles || slot.product?.profiles).last_name||''}`.trim()
           : '',
-        productName: slot.product?.name || '',
-        buyer_id:    slot.product?.user_id || '',
+        productName: slot.buy_offers?.name || slot.product?.name || '',
+        buyer_id:    slot.buy_offers?.user_id || slot.product?.user_id || '',
         farmer_id:   farmerId,
       }));
     } catch (e) {
@@ -320,12 +322,18 @@ document.addEventListener("DOMContentLoaded", () => {
     timeSlotsContainer.innerHTML = "";
     
     if (availableTimeSlots.length === 0) {
-      timeSlotsContainer.innerHTML = `
-        <div style="padding: 20px; text-align: center; color: #999;">
-          ${t('no_slots_today', 'ไม่มีช่วงเวลาว่างในวันนี้')}
-        </div>
-      `;
-      return;
+      if (DEBUG_BOOKING) console.log('[booking-step1] No slots from API, injecting fallback slot');
+      availableTimeSlots = [{
+        id: 'fallback_any_time',
+        time: 'ตลอดวัน (ไม่ระบุเวลา)',
+        available: 99,
+        capacity: 99,
+        product_id: localStorage.getItem('bookingProductId') || null,
+        slot_name: 'คิวทั่วไป',
+        farmerName: localStorage.getItem('bookingFarmerName') || '',
+        productName: localStorage.getItem('bookingProductName') || '',
+        buyer_id: localStorage.getItem('bookingBuyerId') || localStorage.getItem('bookingFarmerId') || null
+      }];
     }
 
     availableTimeSlots.forEach((slot) => {
@@ -448,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // farmer_id = เกษตรกรที่ login อยู่
     try {
       const u = JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || 'null');
-      bookingData.farmer_id = u?.id || u?.profile_id || null;
+      bookingData.farmer_id = resolveUserId(u?.profile_id, u?.id);
     } catch (_) {}
 
     localStorage.setItem("bookingStep1", JSON.stringify(bookingData));
@@ -464,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DEBUG_BOOKING) console.log("บันทึกข้อมูล Step 1:", bookingData);
 
     // ไปหน้าถัดไป
-    if (window.navigateWithTransition) window.navigateWithTransition("pages/farmer/booking/booking-step2.html"); else window.location.href = "pages/farmer/booking/booking-step2.html";
+    if (window.navigateWithTransition) window.navigateWithTransition("booking-step2.html"); else window.location.href = "booking-step2.html";
   });
 
   // ================================
@@ -560,6 +568,49 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize
   // ================================
   async function init() {
+    // Parse query params first to sync URL state with localStorage
+    const params = new URLSearchParams(window.location.search);
+    const urlProductId = params.get("product_id") || params.get("productId");
+    const urlFarmerId = params.get("farmer_id") || params.get("farmerId") || params.get("uid") || params.get("seller_id");
+    const urlFarmerName = params.get("seller") || params.get("farmerName");
+    const urlProductName = params.get("product") || params.get("productName");
+
+    if (urlProductId) {
+      localStorage.setItem('bookingProductId', urlProductId);
+    }
+    if (urlFarmerId) {
+      localStorage.setItem('bookingFarmerId', urlFarmerId);
+    }
+    if (urlFarmerName) {
+      localStorage.setItem('bookingFarmerName', urlFarmerName);
+    }
+    if (urlProductName) {
+      localStorage.setItem('bookingProductName', urlProductName);
+    }
+
+    // If product_id is specified in URL, fetch additional info from database
+    if (urlProductId && window.api) {
+      try {
+        const res = await window.api.getProduct(urlProductId);
+        const product = res.data || res;
+        if (product) {
+          localStorage.setItem('bookingProductName', product.name || '');
+          if (product.user_id) {
+            localStorage.setItem('bookingFarmerId', product.user_id);
+          }
+          if (product.profiles) {
+            const name = `${product.profiles.first_name || ''} ${product.profiles.last_name || ''}`.trim();
+            localStorage.setItem('bookingFarmerName', name);
+          } else if (product.user?.profiles) {
+            const name = `${product.user.profiles.first_name || ''} ${product.user.profiles.last_name || ''}`.trim();
+            localStorage.setItem('bookingFarmerName', name);
+          }
+        }
+      } catch (e) {
+        if (DEBUG_BOOKING) console.error('[booking-step1] failed to fetch product info:', e);
+      }
+    }
+
     loadHeaderInfo();
     loadPreviousData();
     await fetchMonthSlots();

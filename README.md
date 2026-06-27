@@ -33,8 +33,32 @@ npm run dev
 - สามารถใช้ **Live Server** (VS Code) เปิดจากโฟลเดอร์ `frontend/index.html`
 - ตัวแอปจะเชื่อมต่อกับ API ที่ `http://localhost:5000` โดยอัตโนมัติ
 
+### 3. [Infrastructure & Setup](./infrastructure/)
+- **Database Scripts**: รวมสคริปต์ SQL สำหรับสร้างและปรับปรุงฐานข้อมูลบน Supabase
+- **Optimization**: มีระบบ Indexing และ RLS Security ให้พร้อมใช้งาน
+
+## 🛠️ วิธีการรันโปรเจกต์ (Getting Started)
+
+### 1. การเตรียมฐานข้อมูล (Database)
+- เข้าไปที่โฟลเดอร์ `infrastructure/database/`
+- นำคำสั่งใน `SUPABASE_OPTIMIZE.sql` ไปรันใน SQL Editor ของ Supabase
+
+### 2. การรัน Backend
+```bash
+cd server
+npm install
+# คัดลอก .env.example เป็น .env และตั้งค่า DATABASE_URL
+npm run dev
+```
+
+### 3. การรัน Frontend
+- ใช้ **Live Server** เปิด `frontend/index.html`
+- ตัวแอปจะเชื่อมต่อกับ API อัตโนมัติ
+
 ## 📱 การพัฒนาแอปมือถือ (Mobile Development)
-- ดูคำแนะนำเพิ่มเติมได้ในไฟล์ [BUILD_APK.md](./frontend/BUILD_APK.md)
+- โปรเจกต์นี้รองรับ Capacitor สำหรับการ Build เป็น Android/iOS App
+- สามารถรัน `npm run cap:copy` ในโฟลเดอร์ frontend เพื่อซิงค์ไฟล์
+
 
 ---
 *โปรเจกต์นี้ได้รับการพัฒนาเพื่อยกระดับสินค้าเกษตรไทย* 🍎🍍🍇

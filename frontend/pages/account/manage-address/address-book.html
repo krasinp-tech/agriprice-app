@@ -1,160 +1,143 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-    <script src="../../../js/components/i18n.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="address_book_title">สมุดที่อยู่ | AGRIPRICE</title>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/auth/guard.js"></script>
+  <script src="../../../js/components/i18n.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title data-i18n="address_book_title">สมุดที่อยู่ | AGRIPRICE</title>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+  <meta name="theme-color" content="#0B853C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Google Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../../../css/global.css">
-    <link rel="stylesheet" href="../../../css/account/manage-address/address-book.css">
-    <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
-
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        })();
-    </script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../../css/global.css">
+  <link rel="stylesheet" href="../../../css/account/manage-address/address-book.css">
+  <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
 </head>
 
 <body>
-    <main class="address-page">
-        <!-- ── Header ───────────────────────────────────────── -->
-        <header class="address-header fade-slide">
-            <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
-                <span class="material-icons-outlined">chevron_left</span>
-            </a>
-            <h1 class="page-title" data-i18n="address">สมุดที่อยู่</h1>
-        </header>
+  <main class="address-page">
+    <!-- ── Header ───────────────────────────────────────── -->
+    <header class="address-header fade-slide">
+      <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+        <span class="material-icons-outlined">chevron_left</span>
+      </a>
+      <h1 class="page-title" data-i18n="address">สมุดที่อยู่</h1>
+    </header>
 
-        <!-- ── Address List (Skeleton Loading by default) ── -->
-        <div class="address-list" id="addressList">
-            <div class="shimmer" style="height: 120px; border-radius: 20px; margin-bottom: 12px;"></div>
-            <div class="shimmer" style="height: 120px; border-radius: 20px; margin-bottom: 12px;"></div>
-        </div>
+    <!-- ── Address List (Skeleton Loading) ── -->
+    <div class="address-list" id="addressList">
+      <div class="shimmer" style="height: 130px; border-radius: 20px; margin-bottom: 12px;"></div>
+      <div class="shimmer" style="height: 130px; border-radius: 20px; margin-bottom: 12px;"></div>
+    </div>
 
-        <!-- ── Empty State (Hidden by default if list exists) ── -->
-        <div class="empty-state" id="emptyState" style="display: none;">
-            <span class="material-icons-outlined empty-icon">location_off</span>
-            <h2 class="empty-title" data-i18n="no_address_saved">ยังไม่มีที่อยู่ถูกบันทึกไว้</h2>
-            <p class="empty-sub" data-i18n="add_address_hint">เพิ่มที่อยู่ของคุณเพื่อความสะดวกในการจองและจัดส่ง</p>
-        </div>
+    <!-- ── Empty State ── -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <span class="material-icons-outlined empty-icon">location_off</span>
+      <h2 class="empty-title" data-i18n="no_address_saved">ยังไม่มีที่อยู่ถูกบันทึกไว้</h2>
+      <p class="empty-sub" data-i18n="add_address_hint">เพิ่มที่อยู่ของคุณเพื่อความสะดวกในการจองและจัดส่ง</p>
+    </div>
 
-        <!-- ── Action Button ────────────────────────────────── -->
-        <button class="btn-add-address fade-slide" id="addAddressBtn">
-            <span class="material-icons-outlined">add_location_alt</span>
-            <span data-i18n="add_new_address">เพิ่มที่อยู่ใหม่</span>
+    <!-- ── Action Button ────────────────────────────────── -->
+    <button class="btn-add-address fade-slide" id="addAddressBtn">
+      <span class="material-icons-outlined">add_location_alt</span>
+      <span data-i18n="add_new_address">เพิ่มที่อยู่ใหม่</span>
+    </button>
+  </main>
+
+  <!-- ── Address Modal (Bottom Sheet) ────────────────────── -->
+  <div class="addr-modal-backdrop" id="addrModalBackdrop">
+    <div class="addr-modal" id="addrModal" role="dialog" aria-modal="true" aria-labelledby="addrModalTitle">
+      <div class="addr-modal-drag"></div>
+      <h2 class="addr-modal-title" id="addrModalTitle">เพิ่มที่อยู่ใหม่</h2>
+
+      <!-- Tag Selector -->
+      <div class="tag-selector" id="tagSelector">
+        <button type="button" class="tag-btn active" data-tag="Home" id="tagHome">
+          <span class="material-icons-outlined" style="font-size:18px;">home</span> บ้าน
         </button>
+        <button type="button" class="tag-btn" data-tag="Work" id="tagWork">
+          <span class="material-icons-outlined" style="font-size:18px;">work</span> ที่ทำงาน
+        </button>
+        <button type="button" class="tag-btn" data-tag="Other" id="tagOther">
+          <span class="material-icons-outlined" style="font-size:18px;">place</span> อื่นๆ
+        </button>
+      </div>
 
-        <!-- ── Address Modal ────────────────────────────────── -->
-        <div class="modal-fade" id="addressModal">
-            <div class="modal-overlay" id="modalOverlay"></div>
-            <div class="modal-content">
-                <header class="modal-header">
-                    <h2 class="modal-title" id="modalTitle">เพิ่มที่อยู่ใหม่</h2>
-                    <button class="close-modal-btn" id="closeModalBtn" aria-label="ปิด">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </header>
-                <form class="modal-form" id="addressForm">
-                    <input type="hidden" id="addressId" value="">
-                    
-                    <!-- Tag selection -->
-                    <div class="form-group">
-                        <label class="form-label">ประเภทที่อยู่ (Tag)</label>
-                        <div class="tag-selector">
-                            <button type="button" class="tag-btn active" data-tag="Home">
-                                <span class="material-icons-outlined">home</span>
-                                <span>บ้าน</span>
-                            </button>
-                            <button type="button" class="tag-btn" data-tag="Work">
-                                <span class="material-icons-outlined">work_outline</span>
-                                <span>ที่ทำงาน</span>
-                            </button>
-                            <button type="button" class="tag-btn" data-tag="Other">
-                                <span class="material-icons-outlined">place</span>
-                                <span>อื่นๆ</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- First/Last names -->
-                    <div class="form-row">
-                        <div class="form-group flex-1">
-                            <label class="form-label" for="firstName">ชื่อจริง</label>
-                            <input type="text" id="firstName" class="form-input" placeholder="ระบุชื่อจริง" required>
-                        </div>
-                        <div class="form-group flex-1">
-                            <label class="form-label" for="lastName">นามสกุล</label>
-                            <input type="text" id="lastName" class="form-input" placeholder="ระบุนามสกุล" required>
-                        </div>
-                    </div>
-
-                    <!-- Phone Number -->
-                    <div class="form-group">
-                        <label class="form-label" for="phone">เบอร์โทรศัพท์</label>
-                        <input type="tel" id="phone" class="form-input" placeholder="ระบุเบอร์โทรศัพท์" required>
-                    </div>
-
-                    <!-- Address Line 1 -->
-                    <div class="form-group">
-                        <label class="form-label" for="addressLine1">ที่อยู่/เลขที่บ้าน/ถนน</label>
-                        <input type="text" id="addressLine1" class="form-input" placeholder="ระบุเลขที่บ้าน ถนน ซอย" required>
-                    </div>
-
-                    <!-- Address Line 2 -->
-                    <div class="form-group">
-                        <label class="form-label" for="addressLine2">ตำบล อำเภอ จังหวัด รหัสไปรษณีย์</label>
-                        <input type="text" id="addressLine2" class="form-input" placeholder="ระบุตำบล อำเภอ จังหวัด รหัสไปรษณีย์">
-                    </div>
-
-                    <!-- Set as default toggle -->
-                    <div class="form-group flex-row align-center justify-between">
-                        <div>
-                            <label class="form-label margin-0">ตั้งเป็นที่อยู่เริ่มต้น</label>
-                            <p class="form-subtext">ใช้ที่อยู่นี้เป็นค่าเริ่มต้นสำหรับการจัดส่งและจองคิว</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="isDefault" class="toggle-input" style="display:none;">
-                            <span class="toggle-track">
-                                <span class="toggle-thumb"></span>
-                            </span>
-                        </label>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="modal-actions">
-                        <button type="button" class="btn-cancel" id="cancelModalBtn">ยกเลิก</button>
-                        <button type="submit" class="btn-save" id="saveAddressBtn">บันทึก</button>
-                    </div>
-                </form>
-            </div>
+      <!-- Form Fields -->
+      <div class="addr-field-group">
+        <div class="addr-field-row">
+          <div class="addr-field">
+            <label for="addrFirstName">ชื่อ</label>
+            <input type="text" id="addrFirstName" placeholder="ชื่อ" autocomplete="given-name">
+          </div>
+          <div class="addr-field">
+            <label for="addrLastName">นามสกุล</label>
+            <input type="text" id="addrLastName" placeholder="นามสกุล" autocomplete="family-name">
+          </div>
         </div>
-    </main>
+        <div class="addr-field">
+          <label for="addrPhone">เบอร์โทรศัพท์</label>
+          <input type="tel" id="addrPhone" placeholder="0812345678" autocomplete="tel">
+        </div>
+        <div class="addr-field">
+          <label for="addrLine1">ที่อยู่</label>
+          <input type="text" id="addrLine1" placeholder="บ้านเลขที่ ถนน ซอย" autocomplete="address-line1">
+        </div>
+        <div class="addr-field">
+          <label for="addrLine2">ตำบล / อำเภอ / จังหวัด</label>
+          <input type="text" id="addrLine2" placeholder="ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" autocomplete="address-line2">
+        </div>
+      </div>
 
-    <!-- Scripts -->
-    <script src="../../../js/config.js"></script>
-    <script src="../../../js/components/ui-common.js"></script>
-    <script src="../../../js/global-anim.js"></script>
-    <script src="../../../js/account/manage-address/address-book.js"></script>
-    <script src="../../../js/auth/guard.js"></script>
-    <script>
-        window.AuthGuard.requireLogin();
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.i18nInit) window.i18nInit();
-        });
-    </script>
+      <!-- Default Toggle -->
+      <div class="addr-default-row">
+        <span class="addr-default-label">ตั้งเป็นที่อยู่เริ่มต้น</span>
+        <label class="notify-switch">
+          <input type="checkbox" id="addrIsDefault">
+          <span class="notify-slider"></span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="addr-modal-actions">
+        <button type="button" class="addr-btn-cancel" id="addrCancelBtn">ยกเลิก</button>
+        <button type="button" class="addr-btn-save" id="addrSaveBtn">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/global-anim.js"></script>
+  <script src="../../../js/account/manage-address/address-book.js"></script>
+  <script>
+    window.AuthGuard.requireLogin();
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.i18nInit) window.i18nInit();
+    });
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'lang') {
+        if (window.i18nInit) window.i18nInit();
+      }
+    });
+  </script>
 </body>
+
 </html>

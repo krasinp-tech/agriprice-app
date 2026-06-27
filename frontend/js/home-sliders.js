@@ -45,7 +45,6 @@
     'เมล็ดพันธุ์': 'seedlings.png',
     'ไม้ประดับ': 'ornamental-plants.png',
     'สมุนไพร': 'herbs.png',
-    'ลำไย': 'default.png',
   };
 
   // --- 1. Hero Slider ---
@@ -140,7 +139,7 @@
     }
 
     function renderCategories(categories) {
-      const PREFERRED_ORDER = ['ทุเรียน', 'ลองกอง', 'มังคุด', 'เงาะ', 'ปาล์ม', 'ยางพารา', 'ผักสด', 'เมล็ดพันธุ์', 'ไม้ประดับ', 'สมุนไพร', 'ลำไย'];
+      const PREFERRED_ORDER = ['ทุเรียน', 'ลองกอง', 'มังคุด', 'เงาะ', 'ปาล์ม', 'ยางพารา', 'ผักสด', 'เมล็ดพันธุ์', 'ไม้ประดับ', 'สมุนไพร'];
       const catMap = {};
       categories.forEach(cat => catMap[cat.name] = cat);
       const fullCats = PREFERRED_ORDER.map(name => catMap[name] || { id: name, name });
@@ -160,11 +159,11 @@
           else window.location.href = item.getAttribute('href');
         };
 
-        const imgName = categoryImageMap[cat.name] || 'default.png';
+        const imgName = categoryImageMap[cat.name] || 'durian.png';
         item.innerHTML = `
           <div class="cat-icon">
             <img src="${window.AgriPriceRouter?.resolveAsset('assets/images/' + imgName) || ('assets/images/' + imgName)}" 
-                 alt="${t(cat.name, cat.name)}" onerror="this.src='${window.AgriPriceRouter?.resolveAsset('assets/images/default.png') || 'assets/images/default.png'}'"
+                 alt="${t(cat.name, cat.name)}" onerror="this.src='${window.AgriPriceRouter?.resolveAsset('assets/images/durian.png') || 'assets/images/durian.png'}'"
                  style="width: 32px; height: 32px; object-fit: contain;">
           </div>
           <span>${t(cat.name, cat.name)}</span>
@@ -204,29 +203,51 @@
 
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const currentBase = getApiBase();
-    const formatTime = (d) => window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(d) : d;
 
     // [NEW] Reusable location fetching
     async function fetchUserLocation() {
       try {
         const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
         const user = rawUser ? JSON.parse(rawUser) : null;
-        const role = (user?.role || "").toLowerCase();
+        const role = (user?.role || localStorage.getItem("role") || "").toLowerCase();
         
-        // 1. Try Profile (Buyer always uses this)
-        if (role === 'buyer' && (user?.lat || user?.latitude)) {
-          return { lat: parseFloat(user.lat || user.latitude), lng: parseFloat(user.lng || user.longitude) };
+        // 1. Try profile location from myprofile.html (stored in myprofile_data_${role})
+        if (role) {
+          const rawProfile = localStorage.getItem(`myprofile_data_${role}`);
+          if (rawProfile) {
+            const profile = JSON.parse(rawProfile);
+            const lat = parseFloat(profile.location?.lat || profile.lat || null);
+            const lng = parseFloat(profile.location?.lng || profile.lng || null);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              return { lat, lng };
+            }
+          }
+        }
+
+        // 2. Try coordinates from user_data
+        if (user && (user.lat || user.latitude)) {
+          const lat = parseFloat(user.lat || user.latitude);
+          const lng = parseFloat(user.lng || user.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            return { lat, lng };
+          }
         }
         
-        // 2. Try GPS (Farmer/Guest)
+        // 3. Try GPS (Browser/Device location)
         if (window.LocationHelper?.getUserLocation) {
           const loc = await window.LocationHelper.getUserLocation();
           if (loc) return loc;
         }
-        
-        // 3. Fallback to profile for Farmers
-        if (user && (user.lat || user.latitude)) {
-          return { lat: parseFloat(user.lat || user.latitude), lng: parseFloat(user.lng || user.longitude) };
+
+        // 4. Try coordinates from location key
+        const rawLoc = localStorage.getItem("location");
+        if (rawLoc) {
+          const loc = JSON.parse(rawLoc);
+          const lat = parseFloat(loc?.lat || loc?.latitude);
+          const lng = parseFloat(loc?.lng || loc?.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            return { lat, lng };
+          }
         }
       } catch (e) { console.warn("[Home] fetchUserLocation failed:", e); }
       return null;
@@ -246,7 +267,9 @@
       const titleEl = document.querySelector(".products-section .section-title");
       if (titleEl) {
         if (sellerId) {
-          titleEl.innerHTML = `<span style="color:var(--primary)">${sellerName || t('recommend', 'รายการแนะนำ')}</span> <span style="font-weight:400; font-size: 14px; color:#666;">(${t('buying_posts', 'รายการรับซื้อ')})</span>`;
+          const recommendLabel = t('recommend', 'รายการแนะนำ');
+          const buyingPostsLabel = t('buying_posts', 'รายการรับซื้อ');
+          titleEl.innerHTML = `<span style="color:var(--primary)">${sellerName || recommendLabel}</span> <span style="font-weight:400; font-size: 14px; color:#666;">(${buyingPostsLabel})</span>`;
           // Add clear button if not exists
           let clearBtn = document.getElementById('clearSellerFilter');
           if (!clearBtn) {
@@ -256,7 +279,8 @@
             clearBtn.style.border = 'none';
             clearBtn.style.background = 'none';
             clearBtn.style.marginLeft = 'auto';
-            clearBtn.innerHTML = `<span style="font-size:12px">${t('clear_filter', 'ล้างตัวกรอง')}</span>`;
+            const clearFilterLabel = t('clear_filter', 'ล้างตัวกรอง');
+            clearBtn.innerHTML = `<span style="font-size:12px">${clearFilterLabel}</span>`;
             clearBtn.onclick = () => window.filterProductsBySeller(null);
             titleEl.parentNode.appendChild(clearBtn);
           }
@@ -269,21 +293,12 @@
       }
 
       const userLoc = await fetchUserLocation();
-      renderProducts(ALL_PRODUCTS, userLoc, mount, tpl, isBuyer);
+      renderProducts(ALL_PRODUCTS, userLoc, mount);
     };
 
     try {
       const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
       const user = rawUser ? JSON.parse(rawUser) : null;
-      const isBuyer = user?.role?.toLowerCase() === "buyer";
-
-      const tplRes = await fetch("components/product-card/product-card.html").catch(() => null);
-      if (!tplRes?.ok) return;
-      const tplHtml = await tplRes.text();
-      const holder = document.createElement("div");
-      holder.innerHTML = tplHtml;
-      const tpl = holder.querySelector("#productCardTpl");
-      if (!tpl) return;
 
       // ── ใช้ cache ถ้ายังไม่หมดอายุ ──
       const cachedRows = getCachedProducts();
@@ -292,7 +307,7 @@
         ALL_PRODUCTS = cachedRows; // Update global state
         // Render immediately from cache, fetch location quietly for sorting
         const locTask = fetchUserLocation();
-        renderProducts(cachedRows, await locTask, mount, tpl, isBuyer);
+        renderProducts(cachedRows, await locTask, mount);
 
         // Background-refresh silently after 1s (no skeleton shown)
         setTimeout(async () => {
@@ -303,7 +318,7 @@
             ALL_PRODUCTS = rows; // Update global state
             setCachedProducts(rows);
             const userLoc = await fetchUserLocation();
-            renderProducts(rows, userLoc, mount, tpl, isBuyer);
+            renderProducts(rows, userLoc, mount);
           }
         }, 1000);
         return;
@@ -320,13 +335,13 @@
         ALL_PRODUCTS = rows; // Save to global
         if (userLoc) window._loc_found = true;
         setCachedProducts(rows); // บันทึก cache
-        renderProducts(rows, userLoc, mount, tpl, isBuyer);
+        renderProducts(rows, userLoc, mount);
       }
     } catch (err) { if (DEBUG_HOME) console.error("[ProductCards] Error:", err); }
   }
 
   // ── Shared render helper (แยกออกมาให้ใช้ร่วมกับ cache path) ──
-  function renderProducts(rows, userLoc, mount, tpl, isBuyer) {
+  function renderProducts(rows, userLoc, mount) {
     const formatTime = (d) => window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(d) : d;
     const rules = window.AgriPriceRules || {};
     const staleDaysLimit = Number.isFinite(rules.STALE_DAYS) ? rules.STALE_DAYS : 7;
@@ -349,26 +364,26 @@
       .filter(p => !isStaleProduct(p))
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
-        let prices = { A: null, B: null, C: null, D: null };
-        const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
+        let prices = { priceA: null, priceB: null, priceC: null };
+        const bahtUnit = t('unit_baht', 'บ.');
+        const unitStr = `${bahtUnit}/${unit}`;
+        const mixedLabel = t('mixed', 'คละ');
         
         let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
         if (gradesArr.length > 0) {
             gradesArr.forEach(g => {
-                const gName = String(g.grade || 'คละ').toUpperCase();
+                const gName = String(g.grade || mixedLabel).toUpperCase();
                 const pStr = `${Number(g.price || 0)} ${unitStr}`;
-                if (gName === 'B') prices.B = pStr;
-                else if (gName === 'C') prices.C = pStr;
-                else if (gName === 'D') prices.D = pStr;
-                else prices.A = pStr; // A, คละ, หรืออื่นๆ → A
+                if (gName === 'B') prices.priceB = pStr;
+                else if (gName === 'C') prices.priceC = pStr;
+                else prices.priceA = pStr;
             });
         } else {
             const priceStr = `${Number(p.price || 0)} ${unitStr}`;
-            const gradeName = (p.grade || 'คละ').toUpperCase();
-            if (gradeName === 'B') prices.B = priceStr;
-            else if (gradeName === 'C') prices.C = priceStr;
-            else if (gradeName === 'D') prices.D = priceStr;
-            else prices.A = priceStr;
+            const gradeName = (p.grade || mixedLabel).toUpperCase();
+            if (gradeName === 'B') prices.priceB = priceStr;
+            else if (gradeName === 'C') prices.priceC = priceStr;
+            else prices.priceA = priceStr;
         }
 
         const profile = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
@@ -388,7 +403,7 @@
           avatar: profile?.avatar || 'assets/images/avatar-guest.svg',
           ...prices,
           updateTime: formatTime(p.created_at),
-          distance: window.LocationHelper?.formatDistance?.(distKm) || '',
+          distance: (distKm !== null) ? (window.LocationHelper.formatDistance?.(distKm) || '') : '',
           _distKm: distKm,
           productId: p.product_id,
           isStale
@@ -401,44 +416,63 @@
     let currentIndex = 0;
     const PAGE_SIZE = 3;
 
-    const renderNextBatch = () => {
+    const renderNextBatch = async () => {
       const batch = products.slice(currentIndex, currentIndex + PAGE_SIZE);
+      
+      let templateHtml = "";
+      if (window.ProductCard) {
+        try {
+          // Use relative path from root for home page
+          templateHtml = await window.ProductCard.loadTemplate("components/product-card/product-card.html");
+        } catch (e) { 
+          console.error("[Home] Failed to load product-card template:", e);
+          // Fallback if loadTemplate fails
+          const tplRes = await fetch("components/product-card/product-card.html").catch(() => null);
+          if (tplRes?.ok) templateHtml = await tplRes.text();
+        }
+      }
+
+      if (!templateHtml) {
+          console.error("[Home] templateHtml is empty, cards will not render properly.");
+      }
+
       batch.forEach(item => {
-        const node = tpl.content.firstElementChild.cloneNode(true);
-        node.dataset.sellerId = item.sellerId;
-        node.dataset.productId = item.productId;
-        const avatar = node.querySelector('[data-bind="avatar"]');
-        if (avatar) avatar.src = window.AgriPriceRouter?.resolveAsset(item.avatar) || item.avatar;
-        node.querySelector('[data-bind="sellerName"]').textContent = item.sellerName;
-        node.querySelector('[data-bind="sellerSub"]').textContent = item.sellerSub;
-        ['A', 'B', 'C', 'D'].forEach(g => {
-          const el = node.querySelector(`[data-bind="price${g}"]`);
-          if (el) { if (item[g]) el.textContent = item[g]; else el.closest('.pc-grade-box, .price-box')?.remove(); }
-        });
-        const distEl = node.querySelector('[data-bind="distance"]');
-        if (distEl) distEl.textContent = item.distance || (t('distance', 'ระยะทาง') + ' - ' + t('km', 'กม.'));
-        node.querySelector('[data-bind="updateTime"]').textContent = item.updateTime;
+        if (window.ProductCard && templateHtml) {
+          const data = {
+            ...item,
+            id: item.productId,
+            user_id: item.sellerId,
+            title: item.sellerName,
+            subtitle: item.sellerSub,
+            avatar: item.avatar,
+            updated: item.updateTime,
+            distance: item.distance,
+            staleText: t('stale_buyer_label', 'จองไม่ได้'),
+            staleTooltip: t('stale_buyer_tooltip', `ไม่สามารถจองได้ (ไม่ได้อัปเดทเกิน ${staleDaysLimit} วัน)`)
+          };
 
-        // Disable booking button if stale
-        if (item.isStale) {
-          const bookBtn = node.querySelector('[data-action="book"]');
-          if (bookBtn) {
-            bookBtn.disabled = true;
-            bookBtn.classList.add('btn-disabled');
-            bookBtn.title = t('stale_buyer_tooltip', `ไม่สามารถจองได้ (ไม่ได้อัปเดทเกิน ${staleDaysLimit} วัน)`);
-            bookBtn.textContent = t('stale_buyer_label', 'จองไม่ได้');
+          const node = window.ProductCard.createCardEl(data, {}, templateHtml);
+          
+          // Favorite sync for home page (if not buyer)
+          const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
+          const user = rawUser ? JSON.parse(rawUser) : null;
+          const isBuyer = user?.role?.toLowerCase() === "buyer";
+
+          if (!isBuyer) {
+            const favId = item.productId || item.sellerId;
+            if (window.FavoritesStore?.has(favId, item.productId ? 'product' : 'seller')) {
+              node.querySelector('[data-action="toggle-favorite"]')?.classList.add('active');
+            }
           }
-        }
 
-        if (isBuyer) {
-          node.querySelectorAll('[data-action="book"], [data-action="contact"], [data-action="toggle-favorite"]').forEach(el => el.remove());
+          mount.appendChild(node);
         } else {
-          const favId = item.productId || item.sellerId;
-          if (window.FavoritesStore?.has(favId, item.productId ? 'product' : 'seller')) {
-            node.querySelector('[data-action="toggle-favorite"]')?.classList.add('active');
-          }
+            // Minimal fallback if template failed
+            const fallback = document.createElement('div');
+            fallback.className = 'product-card';
+            fallback.textContent = item.sellerName;
+            mount.appendChild(fallback);
         }
-        mount.appendChild(node);
       });
       currentIndex += PAGE_SIZE;
       updateButtonVisibility();
