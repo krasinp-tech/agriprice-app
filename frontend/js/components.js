@@ -314,10 +314,27 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
     const base = getRelativePrefixToRoot(); // e.g. "../../" or "./"
 
+    const cap = window.Capacitor;
+    const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+    const isNative = (
+      window.location.protocol === 'capacitor:' ||
+      window.location.protocol === 'ionic:' ||
+      (window.Capacitor && window.Capacitor.isNative) ||
+      capPlatform === 'android' ||
+      capPlatform === 'ios' ||
+      !!cap?.isNative ||
+      (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+    );
+
     nav.querySelectorAll(".bottom-nav-item").forEach((a) => {
-      const href = a.getAttribute("href") || "";
+      let href = a.getAttribute("href") || "";
       // Skip if already absolute, external, or special
       if (!href || /^(https?:\/\/|#|tel:|mailto:|\/)/i.test(href)) return;
+
+      // Swap index.html to home.html for native shell-less routing
+      if (isNative && href.endsWith("index.html")) {
+        href = href.replace("index.html", "home.html");
+      }
 
       // 1. Clean existing relative indicators to make it idempotent
       let clean = href.replace(/^(\.\.\/)+/g, "").replace(/^(\.\/)+/g, "");

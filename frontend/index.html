@@ -44,6 +44,25 @@
         }
     </style>
     <script>
+        // Check if running on native Capacitor app to bypass the WebView iframe IME input bug
+        (function () {
+            const cap = window.Capacitor;
+            const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+            const isNative = (
+                window.location.protocol === 'capacitor:' ||
+                window.location.protocol === 'ionic:' ||
+                (window.Capacitor && window.Capacitor.isNative) ||
+                capPlatform === 'android' ||
+                capPlatform === 'ios' ||
+                !!cap?.isNative ||
+                (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+            );
+
+            if (isNative) {
+                window.location.replace('home.html');
+            }
+        })();
+
         // Recursive loop prevention: if we are loaded inside an iframe, load home.html instead of the shell!
         if (window.self !== window.top) {
             window.location.replace('home.html');
