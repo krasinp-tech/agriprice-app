@@ -24,7 +24,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../../css/global.css" />
   <link rel="stylesheet" href="../../css/dark-mode-patch.css" />
-  
+
   <style>
     :root {
       --primary: #0B853C;
@@ -94,7 +94,7 @@
       transition: background 0.2s, transform 0.2s;
       flex-shrink: 0;
     }
-    
+
     .back-btn:active {
       transform: scale(0.95);
       background: rgba(255, 255, 255, 0.25);
@@ -105,18 +105,18 @@
       min-width: 0;
     }
 
-    .header-titles h1 { 
-      font-size: 22px; 
-      font-weight: 800; 
-      margin: 0; 
+    .header-titles h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
       letter-spacing: -0.5px;
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
-    .header-titles p { 
-      font-size: 13px; 
-      margin: 4px 0 0; 
-      opacity: 0.85; 
+    .header-titles p {
+      font-size: 13px;
+      margin: 4px 0 0;
+      opacity: 0.85;
       font-weight: 500;
       word-wrap: break-word;
       overflow-wrap: break-word;
@@ -217,9 +217,9 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     }
 
-    .select-field:focus { 
-      border-color: var(--primary); 
-      outline: none; 
+    .select-field:focus {
+      border-color: var(--primary);
+      outline: none;
       box-shadow: 0 0 0 3px var(--primary-glow);
     }
 
@@ -239,7 +239,7 @@
       display: flex; gap: 8px; flex-wrap: wrap;
       margin-top: 4px;
     }
-    
+
     .variety-chip {
       padding: 10px 18px;
       background: #f1f5f9;
@@ -521,7 +521,7 @@
   </style>
 </head>
 <body>
-  
+
   <header class="gov-header">
     <div class="header-top">
       <button class="back-btn" data-back onclick="history.back()">
@@ -557,11 +557,11 @@
         <div class="date-range-row">
           <div class="field-inner">
             <span class="sub-label" data-i18n="start_date_label">ตั้งแต่วันที่</span>
-            <input type="date" id="dateFrom" class="select-field" onchange="renderResult()">
+            <input type="date" id="dateFrom" class="select-field" onchange="onDateChange()">
           </div>
           <div class="field-inner">
             <span class="sub-label" data-i18n="end_date_label">ถึงวันที่</span>
-            <input type="date" id="dateTo" class="select-field" onchange="renderResult()">
+            <input type="date" id="dateTo" class="select-field" onchange="onDateChange()">
           </div>
         </div>
       </div>
@@ -579,20 +579,33 @@
     let currentCat = 'all';
     let selectedProduct = '';
     let selectedVariety = null;
-    let commodityRegistry = []; 
+    let commodityRegistry = [];
+
+    function formatLocalDate(date) {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
     async function init() {
       if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-      
-      const todayStr = new Date().toISOString().split('T')[0];
+
+      const todayStr = formatLocalDate(new Date());
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-      const fromStr = sevenDaysAgo.toISOString().split('T')[0];
-      document.getElementById('dateFrom').value = fromStr;
-      document.getElementById('dateFrom').max = todayStr;
-      document.getElementById('dateTo').value = todayStr;
-      document.getElementById('dateTo').max = todayStr;
-      
+      const fromStr = formatLocalDate(sevenDaysAgo);
+
+      const dateFromEl = document.getElementById('dateFrom');
+      const dateToEl = document.getElementById('dateTo');
+      if (dateFromEl && dateToEl) {
+        dateFromEl.value = fromStr;
+        dateFromEl.max = todayStr;
+        dateToEl.value = todayStr;
+        dateToEl.max = todayStr;
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       let catParam = urlParams.get('category');
       if (catParam) {
@@ -616,9 +629,12 @@
       }
 
       await fetchCommodities();
-      
-      // Filter dropdown items based on active category
-      updateProductDropdown();
+
+      if (catParam) {
+        filterCategory(currentCat);
+      } else {
+        updateProductDropdown();
+      }
     }
 
     async function fetchCommodities() {
@@ -637,6 +653,18 @@
 
     function filterCategory(cat) {
       currentCat = cat;
+
+      // Update UI active buttons
+      const btns = document.querySelectorAll('.nav-tab-btn');
+      btns.forEach(btn => {
+        const onClickAttr = btn.getAttribute('onclick') || '';
+        if (onClickAttr.includes(`'${cat}'`)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
       updateProductDropdown();
     }
 
@@ -644,7 +672,7 @@
       const ps = document.getElementById('productSelect');
       const pleaseSelect = window.i18nT ? window.i18nT('please_select', '-- กรุณาเลือก --') : '-- กรุณาเลือก --';
       ps.innerHTML = `<option value="">${pleaseSelect}</option>`;
-      
+
       const filtered = currentCat === 'all'
         ? commodityRegistry
         : commodityRegistry.filter(p => p.category === currentCat);
@@ -655,22 +683,36 @@
         opt.innerText = window.i18nT ? window.i18nT(p.commodity, p.commodity) : p.commodity;
         ps.appendChild(opt);
       });
-      
+
       selectedProduct = '';
       selectedVariety = null;
       document.getElementById('varietySection').style.display = 'none';
       renderResult();
     }
 
+    let selectedVarietyName = '';
+    let rawDetails = null;
+
     async function onProductChange() {
       selectedProduct = document.getElementById('productSelect').value;
-      selectedVariety = null;
-      
+      selectedVarietyName = '';
+      await fetchProductDetails();
+    }
+
+    async function onDateChange() {
+      if (selectedProduct) {
+        await fetchProductDetails();
+      }
+    }
+
+    async function fetchProductDetails() {
       const vSection = document.getElementById('varietySection');
       const vGroup = document.getElementById('varietyGroup');
-      
+      const dateFromVal = document.getElementById('dateFrom').value;
+      const dateToVal = document.getElementById('dateTo').value;
+
       if (!selectedProduct) {
-        vSection.style.display = 'none';
+        if (vSection) vSection.style.display = 'none';
         renderResult();
         return;
       }
@@ -678,41 +720,58 @@
       setLoading(true);
       try {
         const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-        const res = await fetch(currentBase + `/api/gov-prices/${encodeURIComponent(selectedProduct)}`);
-        const json = await res.json();
-        
-        vSection.style.display = 'block';
-        vGroup.innerHTML = '';
-        
-        if (json.success && json.rows) {
-          const varieties = json.rows.map(r => ({
-            name: r.variety,
-            price: r.avg,
-            min: r.min,
-            max: r.max,
-            unit: json.unit || 'กก.',
-            date: json.date
-          }));
+        let url = currentBase + `/api/gov-prices/${encodeURIComponent(selectedProduct)}?startDate=${dateFromVal}&endDate=${dateToVal}`;
 
-          varieties.forEach(v => {
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (vSection) vSection.style.display = 'block';
+        if (vGroup) vGroup.innerHTML = '';
+
+        if (json.success && json.rows && json.rows.length > 0) {
+          rawDetails = json;
+
+          // Get unique variety names
+          const uniqueVarieties = [...new Set(json.rows.map(r => r.variety))];
+
+          uniqueVarieties.forEach(vName => {
             const chip = document.createElement('div');
             chip.className = 'variety-chip';
-            chip.innerText = v.name;
-            chip.onclick = () => selectVariety(v, chip);
+            chip.innerText = vName;
+            chip.onclick = () => selectVariety(vName, chip);
             vGroup.appendChild(chip);
           });
+
+          // Auto select first variety if none selected or not in response
+          const hasSelectedVar = uniqueVarieties.includes(selectedVarietyName);
+          if (!selectedVarietyName || !hasSelectedVar) {
+            selectedVarietyName = uniqueVarieties[0];
+          }
+
+          // Highlight active chip
+          const activeChip = Array.from(vGroup.children).find(c => c.innerText === selectedVarietyName);
+          if (activeChip) {
+            activeChip.classList.add('active');
+          }
+
+          renderResult();
+        } else {
+          rawDetails = null;
+          selectedVarietyName = '';
+          if (vGroup) {
+            vGroup.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--red, #ef4444); font-weight:600;">ไม่มีข้อมูลราคากลางสำหรับช่วงวันที่คุณเลือก</div>`;
+          }
+          renderNoDataResult();
         }
       } catch (err) {
         console.error('[GovLookup] Fetch product details failed:', err);
       } finally {
         setLoading(false);
       }
-
-      renderResult();
     }
 
-    function selectVariety(v, el) {
-      selectedVariety = v;
+    function selectVariety(vName, el) {
+      selectedVarietyName = vName;
       document.querySelectorAll('.variety-chip').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
       renderResult();
@@ -736,7 +795,7 @@
       const view = document.getElementById('resultView');
       const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
 
-      if (!selectedProduct || !selectedVariety) {
+      if (!selectedProduct || !selectedVarietyName || !rawDetails || !rawDetails.rows) {
         view.innerHTML = `
           <div class="search-hint-container">
             <span class="material-icons-outlined search-hint-icon">search</span>
@@ -746,31 +805,77 @@
         return;
       }
 
+      // Filter rows by selected variety name
+      const varietyRows = rawDetails.rows.filter(r => r.variety === selectedVarietyName);
+
+      if (varietyRows.length === 0) {
+        renderNoDataResult();
+        return;
+      }
+
+      // Sort rows chronologically (ascending date) to compute trend changes
+      varietyRows.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+      // The latest row is the last one in the sorted list
+      const latestRow = varietyRows[varietyRows.length - 1];
+
       const lang = (localStorage.getItem('lang') || 'th').toLowerCase();
       const locale = lang === 'en' ? 'en-US' : (lang === 'zh' ? 'zh-CN' : 'th-TH');
 
       const productLabel = t(selectedProduct, selectedProduct);
-      const varietyLabel = selectedVariety.name;
-      
-      // Determine date formatting
+      const varietyLabel = selectedVarietyName;
+
       let dateStr = '';
-      if (selectedVariety.date) {
+      if (latestRow.date) {
         try {
-          dateStr = new Date(selectedVariety.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+          dateStr = new Date(latestRow.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
         } catch(e) {
-          dateStr = selectedVariety.date;
+          dateStr = latestRow.date;
         }
       }
 
-      // Find category for the product from registry
       const regItem = commodityRegistry.find(item => item.commodity === selectedProduct);
       const productCategory = regItem ? regItem.category : 'สินค้าเกษตร';
 
+      // Build daily trend rows
+      let tableRowsHtml = '';
+      for (let i = 0; i < varietyRows.length; i++) {
+        const row = varietyRows[i];
+        const prevRow = varietyRows[i - 1];
+
+        let changeHtml = '<span style="color: var(--text-muted);">-</span>';
+        if (prevRow && prevRow.avg > 0) {
+          const diff = row.avg - prevRow.avg;
+          const diffPct = (diff / prevRow.avg) * 100;
+          const formattedPct = diffPct.toFixed(1);
+
+          if (diff > 0) {
+            changeHtml = `<span style="color: #22c55e; font-weight:700;">▲ +${formattedPct}%</span>`;
+          } else if (diff < 0) {
+            changeHtml = `<span style="color: #ef4444; font-weight:700;">▼ ${formattedPct}%</span>`;
+          } else {
+            changeHtml = `<span style="color: var(--text-muted);">0.0%</span>`;
+          }
+        }
+
+        const rowDateFormatted = new Date(row.date).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+
+        tableRowsHtml += `
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 8px 4px; font-weight: 500;">${rowDateFormatted}</td>
+            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">฿${row.min.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">฿${row.max.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: right; font-weight: 700; color: var(--primary);">฿${row.avg.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: center;">${changeHtml}</td>
+          </tr>
+        `;
+      }
+
       view.innerHTML = `
-        <div class="price-premium-card">
+        <div class="price-premium-card" style="margin-bottom: 20px;">
           <div class="price-card-header">
             <span class="category-badge">${productCategory}</span>
-            <span class="price-date-badge">${dateStr}</span>
+            <span class="price-date-badge">ข้อมูลล่าสุด: ${dateStr}</span>
           </div>
           <div class="price-commodity-info">
             <h3 class="commodity-title">${productLabel}</h3>
@@ -778,16 +883,61 @@
           </div>
           <div class="price-divider"></div>
           <div class="price-value-container">
-            <div class="price-label">ราคาขั้นต่ำ (Minimum Price)</div>
+            <div class="price-label">ราคาเฉลี่ยล่าสุด (Latest Average Price)</div>
             <div class="price-value-row">
               <span class="currency-symbol">฿</span>
-              <span class="price-amount">${selectedVariety.min !== undefined ? selectedVariety.min.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</span>
-              <span class="price-unit">/ ${selectedVariety.unit || 'กก.'}</span>
+              <span class="price-amount">${latestRow.avg.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span class="price-unit">/ ${rawDetails.unit || 'กก.'}</span>
             </div>
           </div>
           <div class="price-footer">
             <span class="material-icons-outlined footer-icon">info</span>
             <span class="footer-text">${t('reference_only', 'ราคากลางเพื่อการอ้างอิงเท่านั้น')}</span>
+          </div>
+        </div>
+
+        <!-- Trend Table Card -->
+        <div class="price-premium-card" style="padding: 18px;">
+          <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons-outlined" style="font-size: 18px; color: var(--primary);">trending_up</span>
+            <span>ประวัติราคาและแนวโน้มในช่วงวันที่เลือก</span>
+          </h4>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700;">
+                  <th style="padding: 6px 4px;">วันที่</th>
+                  <th style="padding: 6px 4px; text-align: right;">ต่ำสุด</th>
+                  <th style="padding: 6px 4px; text-align: right;">สูงสุด</th>
+                  <th style="padding: 6px 4px; text-align: right;">เฉลี่ย</th>
+                  <th style="padding: 6px 4px; text-align: center;">เปลี่ยนแปลง</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNoDataResult() {
+      const view = document.getElementById('resultView');
+      const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
+      const productLabel = selectedProduct ? t(selectedProduct, selectedProduct) : 'สินค้า';
+
+      view.innerHTML = `
+        <div class="price-premium-card">
+          <div class="price-card-header">
+            <span class="category-badge" style="background: var(--card-border); color: var(--text-muted);">ไม่มีข้อมูล</span>
+          </div>
+          <div class="price-commodity-info" style="text-align: center; padding: 20px 0;">
+            <h3 class="commodity-title" style="color: var(--text-muted);">${productLabel}</h3>
+            <p style="margin-top: 10px; color: #ef4444; font-size: 13px; font-weight: 700;">
+              <span class="material-icons-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">error_outline</span>
+              ไม่มีข้อมูลราคากลางในช่วงเวลาที่เลือก
+            </p>
           </div>
         </div>
       `;
@@ -798,7 +948,7 @@
     }
     document.addEventListener('DOMContentLoaded', initI18n);
     document.addEventListener('DOMContentLoaded', init);
-    
+
     function applyTheme() {
       const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);

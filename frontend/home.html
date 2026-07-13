@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="js/components/i18n.js"></script>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="home_title">AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
+
+    <!-- PWA & Mobile Meta Tags -->
+    <meta name="theme-color" content="#0B853C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AGRIPRICE">
+    <link rel="apple-touch-icon" href="assets/icon.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="components/bottom-nav/bottom-nav.css">
+    <link rel="stylesheet" href="components/product-card/product-card.css">
+    <link rel="stylesheet" href="components/favorites/favorites.css">
+    <link rel="stylesheet" href="css/dark-mode-patch.css">
+
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <script src="js/global-anim.js"></script>
+    <script src="js/permission-manager.js"></script>
+</head>
+
+<body data-active="home">
+    <div class="app-container">
+        <!-- ── Hero Carousel ──────────────────────────────────── -->
+        <section class="hero-background">
+            <div class="hero-carousel" id="heroCarousel">
+                <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกร"
+                        data-i18n-alt="slider_farmer"></div>
+                <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลผลิตสดใหม่"
+                        data-i18n-alt="slider_fresh_produce"></div>
+                <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="โปรโมชัน"
+                        data-i18n-alt="slider_promotion"></div>
+            </div>
+            <div class="hero-indicator" id="heroIndicator"></div>
+        </section>
+
+        <!-- ── Search & Overlap ────────────────────────────────── -->
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ หรือผลผลิต..." class="search-input" id="searchInput"
+                    data-i18n-placeholder="search_buyer">
+                <button class="search-button" id="searchBtn">
+                    <span class="material-icons-outlined" style="color: #fff; font-size: 24px;">search</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ── Categories ────────────────────────────────────── -->
+        <section class="product-tabs-section">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="categories_title">หมวดหมู่สินค้า</h2>
+            </div>
+            <div class="product-grid">
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=fruit">
+                    <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="fruit">ผลไม้</span>
+                </a>
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=vegetable">
+                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="vegetable">ผักสด</span>
+                </a>
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=rice">
+                    <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="rice_crops">ข้าว/พืชไร่</span>
+                </a>
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=oil">
+                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="oil">น้ำมัน</span>
+                </a>
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=organic">
+                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="organic">อินทรีย์</span>
+                </a>
+                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=seedlings">
+                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์"
+                            style="width:40px;height:40px;object-fit:contain;"></div>
+                    <span data-i18n="seedlings">พืชพันธุ์</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- ── Favorites (Farmer only - injected via JS) ────────── -->
+        <div id="favoritesPlaceholder"></div>
+
+        <!-- ── Recommendations ────────────────────────────────── -->
+        <section class="products-section">
+            <div class="container">
+                <div class="section-header" style="padding-left: 0; padding-right: 0;">
+                    <h2 class="section-title" data-i18n="recommend">รายการแนะนำ</h2>
+                </div>
+                <div id="productCardsMount">
+                    <!-- Skeleton Loading -->
+                    <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
+                    <div class="shimmer" style="height: 120px; border-radius: 16px;"></div>
+                </div>
+                <button class="btn-load-more" id="loadMoreBtn" style="display: none;"
+                    data-i18n="load_more">ดูเพิ่มเติม</button>
+            </div>
+        </section>
+
+        <!-- ── Announcements / Banners ────────────────────────── -->
+        <section class="banner-section">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="announcements_title">ข่าวสารและประชาสัมพันธ์</h2>
+            </div>
+            <div class="banner-carousel" id="bannerCarousel">
+                <!-- Skeleton Loading -->
+                <div style="padding: 0 16px; width: 100%; display: flex; gap: 12px;">
+                    <div class="shimmer" style="flex: 1; height: 120px; border-radius: 12px;"></div>
+                    <div class="shimmer" style="flex: 1; height: 120px; border-radius: 12px;"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ── Bottom Nav ────────────────────────────────────── -->
+    <div id="bottomNavMount"></div>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/api-client.js" defer></script>
+    <script src="js/auth/guard.js" defer></script>
+    <script src="js/utils/location-helper.js" defer></script>
+    <script src="js/utils/ui-helpers.js" defer></script>
+    <script src="js/utils/favorites-helpers.js" defer></script>
+    <script src="components/product-grade/product-grade.js" defer></script>
+    <script src="components/product-card/product-card.js" defer></script>
+    <script src="components/favorites/favorites.js" defer></script>
+    <script src="js/home-sliders.js" defer></script>
+    <script src="js/components.js" defer></script>
+    <script src="js/gov-prices.js" defer></script>
+    <script src="js/push-manager.js" defer></script>
+
+    <script>
+        // Check permissions and notify user
+        document.addEventListener('deviceready', function () {
+            if (window.AGRIPRICE_DEBUG) console.log("[Home] App Ready (JIT Permissions Mode)");
+        });
+    </script>
+</body>
+
+</html>

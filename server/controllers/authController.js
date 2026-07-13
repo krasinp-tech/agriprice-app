@@ -37,12 +37,6 @@ class AuthController {
 
   async registerFinish(req, res) {
     try {
-      console.log('[AuthController] RegisterFinish attempt with:', {
-        hasToken: !!req.body.temp_token,
-        role: req.body.role,
-        hasProfile: !!req.body.profile
-      });
-
       const result = await authService.registerFinish(req.body);
       res.status(201).json(response.success('สมัครสมาชิกสำเร็จ', result));
     } catch (e) {
@@ -62,7 +56,7 @@ class AuthController {
       // Record active device session in background
       try {
         const { supabaseAdmin } = require('../utils/supabase');
-        const { recordDeviceSession } = require('../routes/deviceSessions');
+        const { recordDeviceSession } = require('../services/deviceSessionService');
         await recordDeviceSession(supabaseAdmin, result.user.id, req);
       } catch (sessErr) {
         console.warn('[AuthController] Failed to record device session:', sessErr.message);
@@ -72,6 +66,32 @@ class AuthController {
     } catch (e) {
       res.status(401).json(response.error(e.message));
     }
+  }
+
+  async passwordReset(req, res) {
+    try {
+      const { temp_token, password } = req.body;
+      if (!temp_token || !password) return res.status(400).json(response.error('กรุณาระบุ temp_token และ password'));
+      const result = await authService.passwordReset(temp_token, password);
+      res.json(response.success('รีเซ็ตรหัสผ่านสำเร็จ', result));
+    } catch (e) {
+      res.status(500).json(response.error(e.message));
+    }
+  }
+
+  async changePassword(req, res) {
+    try {
+      const { current_password, new_password } = req.body;
+      if (!current_password || !new_password) return res.status(400).json(response.error('กรุณาระบุรหัสผ่านเดิมและรหัสผ่านใหม่'));
+      const result = await authService.changePassword(req.user.id, current_password, new_password);
+      res.json(response.success('เปลี่ยนรหัสผ่านสำเร็จ', result));
+    } catch (e) {
+      res.status(500).json(response.error(e.message));
+    }
+  }
+
+  async logout(_req, res) {
+    res.json(response.success('Logged out'));
   }
 }
 

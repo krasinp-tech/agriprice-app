@@ -2,77 +2,189 @@
   "use strict";
 
   const api = window.api || {};
+  let pendingSessionId = null;
 
-  async function loadSessions() {
-    const list = document.getElementById('deviceList');
-    if (!list) return;
+  function t(key, fallback) {
+    return window.i18nT ? window.i18nT(key, fallback) : fallback;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function getApiBase() {
+    return window.getAgriPriceApiUrl
+      ? window.getAgriPriceApiUrl()
+      : (window.API_BASE_URL || "").replace(/\/$/, "");
+  }
+
+  function authHeaders(extra = {}) {
+    const token = localStorage.getItem(window.AUTH_TOKEN_KEY || "token") || "";
+    return token ? { Authorization: "Bearer " + token, ...extra } : extra;
+  }
+
+  function normalizeSessions(payload) {
+    const rows = Array.isArray(payload) ? payload : (payload?.data || []);
+    const sessions = rows.map((s) => ({
+      id: String(s.id || s.session_id || ""),
+      name: s.deviceName || s.device_name || s.name || t("unknown_device", "Unknown device"),
+      icon: s.icon || s.device_type || "devices",
+      location: s.location || s.ip_address || t("unknown_location", "Unknown location"),
+      lastActiveText: s.last_active_text || s.lastActive || s.last_active || s.created_at || "",
+      isCurrent: s.isCurrent === true || s.current === true,
+    })).filter((s) => s.id);
+
+    if (sessions.length > 0 && !sessions.some((s) => s.isCurrent)) {
+      sessions[0].isCurrent = true;
+    }
+    return sessions;
+  }
+
+  async function fetchSessions() {
+    if (api.getDeviceSessions) {
+      return normalizeSessions(await api.getDeviceSessions());
+    }
+
+    const res = await fetch(getApiBase() + "/api/device-sessions", {
+      headers: authHeaders()
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.message || "Failed to load device sessions");
+    return normalizeSessions(json);
+  }
+
+  function renderDevice(session) {
+    const badge = session.isCurrent
+      ? `<span class="current-badge">${escapeHtml(t("current_device", "This device"))}</span>`
+      : "";
+
+    return `
+      <div class="device-item fade-slide">
+        <div class="device-icon"><span class="material-icons-outlined">${escapeHtml(session.icon)}</span></div>
+        <div class="device-info">
+          <div class="device-name">${escapeHtml(session.name)} ${badge}</div>
+          <div class="device-meta">${escapeHtml(session.location)} &bull; ${escapeHtml(session.lastActiveText || "-")}</div>
+        </div>
+        ${session.isCurrent ? "" : `<button class="device-logout-btn" type="button" data-logout-device="${escapeHtml(session.id)}">${escapeHtml(t("logout_device", "Log out"))}</button>`}
+      </div>
+    `;
+  }
+
+  function setModalError(message) {
+    const errorEl = document.getElementById("modalError");
+    if (errorEl) errorEl.textContent = message || "";
+  }
+
+  function openLogoutModal(sessionId) {
+    pendingSessionId = sessionId;
+    const modal = document.getElementById("logoutModal");
+    const password = document.getElementById("modalPassword");
+
+    setModalError("");
+    if (password) password.value = "";
+    if (modal) modal.classList.add("show");
+    setTimeout(() => password?.focus(), 50);
+  }
+
+  function closeLogoutModal() {
+    const modal = document.getElementById("logoutModal");
+    const password = document.getElementById("modalPassword");
+
+    pendingSessionId = null;
+    setModalError("");
+    if (password) password.value = "";
+    if (modal) modal.classList.remove("show");
+  }
+
+  async function logoutDevice(sessionId, password) {
+    if (api.logoutDevice) {
+      return api.logoutDevice(sessionId, password);
+    }
+
+    const res = await fetch(getApiBase() + "/api/device-sessions/" + encodeURIComponent(sessionId) + "/logout", {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ password })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.message || "Failed to log out device");
+    return json;
+  }
+
+  async function confirmLogout() {
+    const password = document.getElementById("modalPassword")?.value || "";
+    const button = document.getElementById("modalLogoutBtn");
+
+    if (!pendingSessionId) return;
+    if (!password) {
+      setModalError(t("password_required", "Password is required"));
+      return;
+    }
 
     try {
-      let data = [];
-      if (api.getDeviceSessions) {
-        data = await api.getDeviceSessions();
-      } else {
-        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-        const token = localStorage.getItem('token');
-        const res = await fetch(currentBase + '/api/device-sessions', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        data = await res.json();
-      }
-
-      list.innerHTML = "";
-      (data || []).forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'device-item fade-slide';
-        div.innerHTML = `
-          <div class="device-icon"><span class="material-icons-outlined">${s.isCurrent ? 'smartphone' : 'devices'}</span></div>
-          <div class="device-info">
-            <div class="device-name">${s.deviceName || 'อุปกรณ์นิรนาม'} ${s.isCurrent ? '<span class="current-badge">เครื่องนี้</span>' : ''}</div>
-            <div class="device-meta">${s.location || 'ไม่ทราบตำแหน่ง'} • ${window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(s.lastActive) : s.lastActive}</div>
-          </div>
-          ${!s.isCurrent ? `<button class="logout-device-btn" data-id="${s.id}">ออกจากระบบ</button>` : ''}
-        `;
-        list.appendChild(div);
-      });
-
-      list.querySelectorAll('.logout-device-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const runLogout = async () => {
-            try {
-              const sid = btn.dataset.id;
-              if (api.logoutDevice) {
-                await api.logoutDevice(sid);
-              } else {
-                const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-                const token = localStorage.getItem('token');
-                await fetch(currentBase + '/api/device-sessions/' + encodeURIComponent(sid) + '/logout', {
-                  method: 'POST',
-                  headers: { 'Authorization': 'Bearer ' + token }
-                });
-              }
-              loadSessions();
-            } catch (err) {
-              console.error('[DeviceMgmt] Logout failed:', err);
-            }
-          };
-
-          const msg = 'ต้องการให้อุปกรณ์นี้ออกจากระบบใช่หรือไม่?';
-          if (window.showConfirm) {
-            window.showConfirm(msg, (agreed) => {
-              if (agreed) runLogout();
-            });
-          } else {
-            if (confirm(msg)) {
-              runLogout();
-            }
-          }
-        });
-      });
-
+      if (button) button.disabled = true;
+      await logoutDevice(pendingSessionId, password);
+      closeLogoutModal();
+      await loadSessions();
     } catch (err) {
-      console.error('[DeviceMgmt] Load failed:', err);
+      setModalError(err.message || t("logout_device_failed", "Failed to log out device"));
+    } finally {
+      if (button) button.disabled = false;
     }
   }
 
-  document.addEventListener('DOMContentLoaded', loadSessions);
+  async function loadSessions() {
+    const currentEl = document.getElementById("deviceCurrent");
+    const otherEl = document.getElementById("deviceOther");
+    if (!currentEl && !otherEl) return;
+
+    try {
+      const sessions = await fetchSessions();
+      const current = sessions.find((s) => s.isCurrent);
+      const others = sessions.filter((s) => !s.isCurrent);
+
+      if (currentEl) {
+        currentEl.innerHTML = current ? renderDevice(current) : "";
+      }
+      if (otherEl) {
+        otherEl.innerHTML = others.length
+          ? others.map(renderDevice).join("")
+          : `<div class="device-meta">${escapeHtml(t("no_other_devices", "No other active sessions"))}</div>`;
+      }
+    } catch (err) {
+      console.error("[DeviceMgmt] Load failed:", err);
+      if (otherEl) {
+        otherEl.innerHTML = `<div class="modal-error">${escapeHtml(err.message || "Failed to load device sessions")}</div>`;
+      }
+    }
+  }
+
+  function bindEvents() {
+    document.addEventListener("click", (event) => {
+      const logoutBtn = event.target.closest("[data-logout-device]");
+      if (logoutBtn) {
+        openLogoutModal(logoutBtn.dataset.logoutDevice);
+        return;
+      }
+
+      if (event.target.id === "modalCloseBtn" || event.target.id === "logoutModal") {
+        closeLogoutModal();
+      }
+    });
+
+    document.getElementById("modalLogoutBtn")?.addEventListener("click", confirmLogout);
+    document.getElementById("modalPassword")?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") confirmLogout();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    bindEvents();
+    loadSessions();
+  });
 })();

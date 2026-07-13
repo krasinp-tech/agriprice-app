@@ -3,50 +3,159 @@ const router = express.Router();
 const response = require('../utils/response');
 const { supabaseAdmin } = require('../utils/supabase');
 const { getOptionalAuthUser } = require('../utils/helpers');
+const { NORMALIZED_OFFER_SELECT, getOfferId, normalizeOffer } = require('../utils/offers');
+
+async function searchProfiles(term, limit) {
+  const select = 'id:profile_id, first_name, last_name, avatar, role, lat, lng, address_line2';
+
+  if (!term) {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select(select)
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  const [firstNameRes, lastNameRes] = await Promise.all([
+    supabaseAdmin
+      .from('profiles')
+      .select(select)
+      .ilike('first_name', `%${term}%`)
+      .limit(limit),
+    supabaseAdmin
+      .from('profiles')
+      .select(select)
+      .ilike('last_name', `%${term}%`)
+      .limit(limit),
+  ]);
+
+  if (firstNameRes.error) throw firstNameRes.error;
+  if (lastNameRes.error) throw lastNameRes.error;
+
+  const seen = new Set();
+  return [...(firstNameRes.data || []), ...(lastNameRes.data || [])]
+    .filter((row) => {
+      const id = row.id || row.profile_id;
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    })
+    .slice(0, limit);
+}
+
+async function searchOffers(term, limit) {
+  if (!term) {
+    const { data, error } = await supabaseAdmin
+      .from('buy_offers')
+      .select(NORMALIZED_OFFER_SELECT)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data || []).map(normalizeOffer);
+  }
+
+  const pattern = `%${term}%`;
+  const lookupLimit = Math.min(limit * 4, 200);
+  const [descriptionRes, productNameRes, productCategoryRes, varietyNameRes] = await Promise.all([
+    supabaseAdmin
+      .from('buy_offers')
+      .select(NORMALIZED_OFFER_SELECT)
+      .eq('is_active', true)
+      .ilike('description', pattern)
+      .order('created_at', { ascending: false })
+      .limit(lookupLimit),
+    supabaseAdmin
+      .from('products')
+      .select('product_id')
+      .ilike('product_name', pattern)
+      .limit(lookupLimit),
+    supabaseAdmin
+      .from('products')
+      .select('product_id')
+      .ilike('category', pattern)
+      .limit(lookupLimit),
+    supabaseAdmin
+      .from('varieties')
+      .select('variety_id')
+      .ilike('variety_name', pattern)
+      .limit(lookupLimit),
+  ]);
+
+  if (descriptionRes.error) throw descriptionRes.error;
+  if (productNameRes.error) throw productNameRes.error;
+  if (productCategoryRes.error) throw productCategoryRes.error;
+  if (varietyNameRes.error) throw varietyNameRes.error;
+
+  const productIds = [
+    ...(productNameRes.data || []),
+    ...(productCategoryRes.data || [])
+  ].map((row) => row.product_id).filter(Boolean);
+
+  let productVarietyIds = [];
+  if (productIds.length > 0) {
+    const { data, error } = await supabaseAdmin
+      .from('varieties')
+      .select('variety_id')
+      .in('product_id', [...new Set(productIds)])
+      .limit(lookupLimit);
+    if (error) throw error;
+    productVarietyIds = (data || []).map((row) => row.variety_id).filter(Boolean);
+  }
+
+  const varietyIds = [
+    ...(varietyNameRes.data || []).map((row) => row.variety_id),
+    ...productVarietyIds,
+  ].filter(Boolean);
+
+  let varietyOfferRows = [];
+  if (varietyIds.length > 0) {
+    const { data, error } = await supabaseAdmin
+      .from('buy_offers')
+      .select(NORMALIZED_OFFER_SELECT)
+      .eq('is_active', true)
+      .in('variety_id', [...new Set(varietyIds)])
+      .order('created_at', { ascending: false })
+      .limit(lookupLimit);
+    if (error) throw error;
+    varietyOfferRows = data || [];
+  }
+
+  const seen = new Set();
+  return [...(descriptionRes.data || []), ...varietyOfferRows]
+    .map(normalizeOffer)
+    .filter((offer) => {
+      const id = getOfferId(offer);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    })
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, limit);
+}
 
 /**
  * GET /api/search?q=...
- * ค้นหาสินค้า (products) และผู้ใช้ (profiles)
  */
 router.get('/', async (req, res) => {
   try {
     const { q = '' } = req.query;
-    // [FIXED #1] จำกัด limit ไม่ให้เกิน 50 และต้องเป็นตัวเลขบวก ป้องกัน scraping / server overload
     const safeLimit = Math.min(Math.max(1, parseInt(req.query.limit, 10) || 20), 50);
-    const term = q.trim();
+    const term = String(q || '').trim();
 
-    let prodQuery = supabaseAdmin
-      .from('buy_offers')
-      .select('product_id, user_id, name, variety, category, unit, price, grade, grades, image, is_active, created_at, profiles!user_id(first_name, last_name, avatar, lat, lng)')
-      .eq('is_active', true)
-      .limit(safeLimit);
-
-    let userQuery = supabaseAdmin
-      .from('profiles')
-      .select('id:profile_id, first_name, last_name, avatar, role, lat, lng, address_line2')
-      .limit(safeLimit);
-
-    if (term) {
-      prodQuery = prodQuery.or(`name.ilike.%${term}%,variety.ilike.%${term}%,category.ilike.%${term}%`);
-      userQuery = userQuery.or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`);
-    }
-
-    const [prodRes, userRes] = await Promise.all([
-      prodQuery,
-      userQuery
+    const [products, users] = await Promise.all([
+      searchOffers(term, safeLimit),
+      searchProfiles(term, safeLimit),
     ]);
 
-    if (prodRes.error) throw prodRes.error;
-    if (userRes.error) throw userRes.error;
-
-    // Log impressions in the background
     const optionalUser = getOptionalAuthUser(req);
     const viewerId = optionalUser?.id;
-    if (prodRes.data && prodRes.data.length > 0) {
-      const impressionsToInsert = prodRes.data
-        .filter(p => p.user_id !== viewerId) // Exclude searcher's own products
+    if (products.length > 0) {
+      const impressionsToInsert = products
+        .filter(p => p.user_id !== viewerId)
         .map(p => ({
-          product_id: p.product_id,
+          offer_id: getOfferId(p),
           viewer_id: viewerId || null
         }));
 
@@ -56,13 +165,14 @@ router.get('/', async (req, res) => {
           .insert(impressionsToInsert)
           .then(({ error: impError }) => {
             if (impError) console.error('[GET /api/search] Failed to log impressions:', impError.message);
-          });
+          })
+          .catch((err) => console.error('[GET /api/search] impression insert failed:', err.message));
       }
     }
 
-    res.json(response.success('ผลการค้นหา', {
-      products: prodRes.data || [],
-      users: userRes.data || [],
+    res.json(response.success('OK', {
+      products,
+      users,
     }));
   } catch (e) {
     res.status(500).json(response.error(e.message));

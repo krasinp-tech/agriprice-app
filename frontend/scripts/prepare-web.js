@@ -5,8 +5,8 @@ const root = path.resolve(__dirname, '..');
 const outDir = path.join(root, 'www');
 
 const includeList = [
-  '.htaccess',
   'index.html',
+  'home.html',
   'manifest.json',
   'assets',
   'components',

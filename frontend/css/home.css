@@ -142,7 +142,7 @@
     outline: none;
     background: var(--bg-card);
     color: var(--text-main);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Sarabun', sans-serif;
 }
 
 .search-input::placeholder {

@@ -2,42 +2,193 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../utils/supabase');
 const verifyToken = require('../middlewares/auth');
-const excelPriceService = require('../services/excelPriceService');
+const { NORMALIZED_OFFER_SELECT, getOfferId, normalizeOffer } = require('../utils/offers');
+
+function normalizeText(value) {
+  return String(value || '').toLowerCase().trim();
+}
+
+function firstRelation(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getBookingUnitPrice(row) {
+  const product = firstRelation(row?.product) || firstRelation(row?.products) || firstRelation(row?.slot?.product);
+  const firstGrade = firstRelation(product?.grades) || firstRelation(product?.offer_grades) || firstRelation(product?.offerGrades);
+  const candidate = product?.price ?? firstGrade?.price ?? row?.expected_price ?? row?.price ?? 0;
+  return Number(candidate || 0);
+}
+
+function getBookingValue(row) {
+  const qty = Number(row?.quantity || row?.qty || 0);
+  return qty * getBookingUnitPrice(row);
+}
+
+function normalizeDashboardBooking(row) {
+  const slot = firstRelation(row?.slot);
+  const product = normalizeOffer(firstRelation(slot?.product) || firstRelation(row?.product) || firstRelation(row?.products));
+  const offerOwnerId = product?.user_id || row?.offer_owner_id || null;
+  const requester = firstRelation(row?.farmer) || firstRelation(row?.buyer) || null;
+  const requesterId = row?.farmer_id || row?.requester_id || row?.buyer_id || requester?.profile_id || null;
+  return {
+    ...row,
+    slot,
+    product,
+    products: product,
+    offer_id: getOfferId(product),
+    product_id: getOfferId(product),
+    farmer_id: requesterId,
+    requester_id: requesterId,
+    requester,
+    offer_owner_id: offerOwnerId,
+  };
+}
+
+async function getSlotIdsForOfferOwner(userId) {
+  const { data: offers, error: offerError } = await supabaseAdmin
+    .from('buy_offers')
+    .select('offer_id')
+    .eq('user_id', userId);
+
+  if (offerError) throw offerError;
+  const offerIds = (offers || []).map((offer) => offer.offer_id).filter(Boolean);
+  if (offerIds.length === 0) return [];
+
+  const { data: slots, error: slotError } = await supabaseAdmin
+    .from('offer_slots')
+    .select('slot_id')
+    .in('offer_id', offerIds);
+
+  if (slotError) throw slotError;
+  return (slots || []).map((slot) => slot.slot_id).filter(Boolean);
+}
+
+async function fetchDashboardBookings(userId, role) {
+  let query = supabaseAdmin
+    .from('bookings')
+    .select(`
+      booking_id,
+      status,
+      created_at,
+      quantity,
+      buyer_id,
+      slot_id,
+      buyer:profiles!buyer_id(profile_id, first_name, last_name, avatar),
+      slot:offer_slots!slot_id(
+        slot_id,
+        offer_id,
+        product:buy_offers!offer_id(${NORMALIZED_OFFER_SELECT})
+      )
+    `);
+
+  if (role === 'farmer') {
+    query = query.eq('buyer_id', userId);
+  } else {
+    const slotIds = await getSlotIdsForOfferOwner(userId);
+    if (slotIds.length === 0) return [];
+    query = query.in('slot_id', slotIds);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map(normalizeDashboardBooking);
+}
+
+async function getLatestMarketPrices(limit = 5) {
+  const { data, error } = await supabaseAdmin
+    .from('gov_prices')
+    .select('commodity, avg_price, price_date')
+    .order('price_date', { ascending: false });
+
+  if (error) throw error;
+
+  const commodityDates = new Map();
+  for (const row of data || []) {
+    if (!row.commodity || !row.price_date) continue;
+    const commodityMap = commodityDates.get(row.commodity) || new Map();
+    const bucket = commodityMap.get(row.price_date) || { total: 0, count: 0 };
+    bucket.total += Number(row.avg_price || 0);
+    bucket.count += 1;
+    commodityMap.set(row.price_date, bucket);
+    commodityDates.set(row.commodity, commodityMap);
+  }
+
+  return Array.from(commodityDates.entries()).slice(0, limit).map(([commodity, dateMap]) => {
+    const dates = Array.from(dateMap.entries())
+      .sort(([dateA], [dateB]) => String(dateB).localeCompare(String(dateA)));
+    const [latestDate, latestBucket] = dates[0] || [];
+    const [, prevBucket] = dates[1] || [];
+    const latestPrice = latestBucket ? latestBucket.total / latestBucket.count : 0;
+    const prevPrice = prevBucket ? prevBucket.total / prevBucket.count : 0;
+    let change = 0;
+    let trend = 'stable';
+
+    if (prevPrice > 0) {
+      change = ((latestPrice - prevPrice) / prevPrice) * 100;
+      trend = change > 0 ? 'up' : (change < 0 ? 'down' : 'stable');
+    }
+
+    return {
+      name: commodity,
+      price: latestPrice,
+      date: latestDate || null,
+      change: Math.round(change * 10) / 10,
+      trend,
+    };
+  });
+}
+
+async function findLatestMarketAverage(commodityName, varietyName) {
+  if (!commodityName) return null;
+
+  const { data, error } = await supabaseAdmin
+    .from('gov_prices')
+    .select('commodity, variety, avg_price, price_date')
+    .order('price_date', { ascending: false });
+
+  if (error) throw error;
+
+  const commodityKey = normalizeText(commodityName);
+  const varietyKey = normalizeText(varietyName);
+  const rows = (data || []).filter((row) => {
+    const rowCommodity = normalizeText(row.commodity);
+    return rowCommodity.includes(commodityKey) || commodityKey.includes(rowCommodity);
+  });
+
+  const varietyRows = varietyKey
+    ? rows.filter((row) => normalizeText(row.variety) === varietyKey)
+    : [];
+
+  const latest = (varietyRows.length > 0 ? varietyRows : rows)[0];
+  return latest ? Number(latest.avg_price || 0) : null;
+}
 
 router.get('/', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const role = req.user.role || 'buyer'; // default to buyer logic
 
-    // To implement dashboard, we would query the database to get real stats.
-    // For now, let's fetch basic stats and build some dummy data for trend.
-    // Real implementation would aggregate over the `bookings`, `products`, `profiles` etc.
-
     let bookingsTotal = 0;
     let totalSpent = 0;
+    let estimatedTotalSpent = 0;
     let productsTotal = 0;
     let avgPrice = 0;
 
-    const { data: bookingsData, error: bookingsError } = await supabaseAdmin
-      .from('bookings')
-      .select('status, quantity, product_id, farmer_id, created_at, product:buy_offers(price)')
-      .eq(role === 'farmer' ? 'farmer_id' : 'buyer_id', userId);
+    const normalizedBookingsData = await fetchDashboardBookings(userId, role);
 
-    if (!bookingsError && bookingsData) {
-      bookingsTotal = bookingsData.length;
+    if (normalizedBookingsData) {
+      bookingsTotal = normalizedBookingsData.length;
       
-      const successBookings = bookingsData.filter(b => b.status === 'success');
+      const successBookings = normalizedBookingsData.filter(b => b.status === 'success');
+      const chargeableBookings = normalizedBookingsData.filter(b => b.status !== 'cancel');
       
       productsTotal = successBookings.length; // Count of successful transactions
 
-      totalSpent = successBookings.reduce((acc, curr) => {
-        const qty = Number(curr.quantity || curr.qty || 0);
-        const price = Number(curr.expected_price || curr.product?.price || 0);
-        return acc + (qty * price);
-      }, 0);
+      totalSpent = successBookings.reduce((acc, curr) => acc + getBookingValue(curr), 0);
+      estimatedTotalSpent = chargeableBookings.reduce((acc, curr) => acc + getBookingValue(curr), 0);
 
       const totalPrices = successBookings.reduce((acc, curr) => {
-        return acc + Number(curr.expected_price || curr.product?.price || 0);
+        return acc + getBookingUnitPrice(curr);
       }, 0);
       
       if (successBookings.length > 0) {
@@ -49,21 +200,19 @@ router.get('/', verifyToken, async (req, res) => {
     const productMap = new Map();
     const sellerMap = new Map();
 
-    if (bookingsData) {
-      bookingsData.forEach(b => {
+    if (normalizedBookingsData) {
+      normalizedBookingsData.forEach(b => {
         if (b.status === 'success') {
           // Products
           const pid = b.product_id;
           if (pid) {
             const current = productMap.get(pid) || { qty: 0, spent: 0 };
             current.qty += 1;
-            const bQty = Number(b.quantity || b.qty || 0);
-            const bPrice = Number(b.expected_price || b.product?.price || 0);
-            current.spent += (bQty * bPrice);
+            current.spent += getBookingValue(b);
             productMap.set(pid, current);
           }
           // Sellers
-          const sid = b.farmer_id;
+          const sid = b.offer_owner_id || b.farmer_id;
           if (sid) {
             const current = sellerMap.get(sid) || { orders: 0 };
             current.orders += 1;
@@ -80,7 +229,8 @@ router.get('/', verifyToken, async (req, res) => {
     
     const top_products = [];
     for (const [pid, stats] of topProductPids) {
-      const { data: pData } = await supabaseAdmin.from('buy_offers').select('name, image').eq('product_id', pid).maybeSingle();
+      const { data: pRaw } = await supabaseAdmin.from('buy_offers').select(NORMALIZED_OFFER_SELECT).eq('offer_id', pid).maybeSingle();
+      const pData = normalizeOffer(pRaw);
       top_products.push({
         id: pid,
         name: pData?.name || 'สินค้า',
@@ -108,10 +258,10 @@ router.get('/', verifyToken, async (req, res) => {
 
     // Trend Data (Last 7 days)
     const trendData = [0, 0, 0, 0, 0, 0, 0];
-    if (bookingsData) {
+    if (normalizedBookingsData) {
       const now = new Date();
       now.setHours(0, 0, 0, 0); // Start of today
-      bookingsData.forEach(b => {
+      normalizedBookingsData.forEach(b => {
         if (b.status === 'success' || b.status === 'waiting') {
            const d = new Date(b.created_at);
            d.setHours(0, 0, 0, 0);
@@ -124,41 +274,13 @@ router.get('/', verifyToken, async (req, res) => {
       });
     }
 
-    // Market Prices (Latest from gov_prices) — loaded from Excel in real-time
-    const allPrices = excelPriceService.getAllPrices();
-    const sortedPrices = [...allPrices].sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
-
-    const marketPrices = [];
-    const commodityRows = new Map(); // commodity -> [latest, prev]
-    for (const row of sortedPrices) {
-      const rows = commodityRows.get(row.commodity) || [];
-      if (rows.length < 2) {
-        rows.push(row);
-        commodityRows.set(row.commodity, rows);
-      }
-    }
-    for (const [commodity, rows] of commodityRows) {
-      if (marketPrices.length >= 5) break;
-      const latest = rows[0];
-      const prev   = rows[1] || null;
-      let change = 0;
-      let trend  = 'stable';
-      if (prev && prev.avg_price > 0) {
-        change = ((latest.avg_price - prev.avg_price) / prev.avg_price) * 100;
-        trend  = change > 0 ? 'up' : (change < 0 ? 'down' : 'stable');
-      }
-      marketPrices.push({
-        name:   commodity,
-        price:  latest.avg_price,
-        date:   latest.price_date,
-        change: Math.round(change * 10) / 10,
-        trend,
-      });
-    }
+    // Market Prices (Latest from Supabase gov_prices)
+    const marketPrices = await getLatestMarketPrices(5);
 
     const payload = {
       bookings_total: bookingsTotal,
       total_spent: totalSpent,
+      estimated_total_spent: estimatedTotalSpent,
       products_total: productsTotal,
       avg_price: avgPrice,
       purchaseTrend: {
@@ -171,9 +293,9 @@ router.get('/', verifyToken, async (req, res) => {
       top_sellers: top_sellers,
       market_prices: marketPrices,
       booking_stats: {
-        waiting: bookingsData?.filter(b => b.status === 'waiting').length || 0,
-        success: bookingsData?.filter(b => b.status === 'success').length || 0,
-        cancel: bookingsData?.filter(b => b.status === 'cancel').length || 0,
+        waiting: normalizedBookingsData?.filter(b => b.status === 'waiting').length || 0,
+        success: normalizedBookingsData?.filter(b => b.status === 'success').length || 0,
+        cancel: normalizedBookingsData?.filter(b => b.status === 'cancel').length || 0,
       }
     };
 
@@ -195,7 +317,7 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     const role = req.user.role || 'buyer';
 
     // ── Tier Guard: เฉพาะ PRO เท่านั้น ─────────────────────────
-    const { data: profileCheck, error: profCheckErr } = await supabaseAdmin
+    const { data: profileCheck } = await supabaseAdmin
       .from('profiles')
       .select('tier')
       .eq('profile_id', userId)
@@ -223,12 +345,7 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     }
 
     // [REAL DATA] 1. ดึงข้อมูลการจองจริง
-    const { data: bookingsData, error: bookingsError } = await supabaseAdmin
-      .from('bookings')
-      .select('booking_id, status, created_at, quantity, product_id, products:buy_offers(product_id, name, category, variety, price)')
-      .eq(role === 'farmer' ? 'farmer_id' : 'buyer_id', userId);
-
-    if (bookingsError) throw bookingsError;
+    const bookingsData = await fetchDashboardBookings(userId, role);
 
     // กรองข้อมูลการจองตามช่วงเวลาที่เลือก
     const periodBookings = (bookingsData || []).filter(b => new Date(b.created_at) >= startDate);
@@ -272,12 +389,13 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     // ดึงสินค้าทั้งหมดของผู้ใช้งานเพื่อใช้หา ประกาศจองมากสุด/น้อยสุด และ วิเคราะห์ราคา/การเข้าชม
     const { data: userProducts } = await supabaseAdmin
       .from('buy_offers')
-      .select('product_id, name, category, variety, price, grades, is_active')
+      .select(NORMALIZED_OFFER_SELECT)
       .eq('user_id', userId);
+    const normalizedUserProducts = (userProducts || []).map(normalizeOffer);
 
     const productBookingCounts = {};
-    if (userProducts) {
-      userProducts.forEach(p => {
+    if (normalizedUserProducts) {
+      normalizedUserProducts.forEach(p => {
         productBookingCounts[p.product_id] = { name: p.name, count: 0 };
       });
     }
@@ -286,7 +404,7 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
       if (b.product_id && productBookingCounts[b.product_id]) {
         productBookingCounts[b.product_id].count++;
       } else if (b.product_id && b.products) {
-        productBookingCounts[b.product_id] = { name: b.products.name, count: 1 };
+        productBookingCounts[b.product_id] = { name: normalizeOffer(b.products).name, count: 1 };
       }
     });
 
@@ -317,13 +435,13 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
       : (totalFollowers > 0 ? 100 : 0);
 
     // [REAL DATA] 3. คำนวณยอดแสดงผล Feed (Impressions)
-    const userProductIds = userProducts ? userProducts.map(p => p.product_id) : [];
+    const userProductIds = normalizedUserProducts ? normalizedUserProducts.map(p => getOfferId(p)).filter(Boolean) : [];
     let totalImpressions = 0;
     if (userProductIds.length > 0) {
       const { count: impCount, error: impErr } = await supabaseAdmin
         .from('offer_impressions')
         .select('*', { count: 'exact', head: true })
-        .in('product_id', userProductIds)
+        .in('offer_id', userProductIds)
         .gte('created_at', startDate.toISOString());
       if (!impErr) {
         totalImpressions = impCount || 0;
@@ -355,13 +473,13 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
 
         const { data: compProducts } = await supabaseAdmin
           .from('buy_offers')
-          .select('category')
+          .select(NORMALIZED_OFFER_SELECT)
           .in('user_id', compIds)
           .eq('is_active', true);
 
         if (compProducts) {
           const catMap = {};
-          compProducts.forEach(cp => {
+          compProducts.map(normalizeOffer).forEach(cp => {
             if (cp.category) {
               catMap[cp.category] = (catMap[cp.category] || 0) + 1;
             }
@@ -374,40 +492,14 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
       }
     }
 
-    // [REAL DATA] 5. อันดับราคาของเราเทียบกับราคากลางตลาด (ดึงจาก Excel)
+    // [REAL DATA] Price comparison against Supabase gov_prices
     const priceComparison = [];
-    const activeProds = userProducts ? userProducts.filter(p => p.is_active) : [];
+    const activeProds = normalizedUserProducts ? normalizedUserProducts.filter(p => p.is_active) : [];
     
     for (const prod of activeProds) {
-      const commodityName = prod.category;
+      const commodityName = prod.name || prod.variety || prod.category;
       const varietyName = prod.variety;
-      
-      let matchingRows = excelPriceService.getPricesByCommodity(commodityName);
-      if (varietyName) {
-        const matchingVariety = matchingRows.filter(r => 
-          String(r.variety || '').toLowerCase().trim() === String(varietyName).toLowerCase().trim()
-        );
-        if (matchingVariety.length > 0) {
-          matchingRows = matchingVariety;
-        }
-      }
-
-      let marketAvg = null;
-      if (matchingRows.length > 0) {
-        matchingRows.sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
-        marketAvg = matchingRows[0].avg_price;
-      } else {
-        // Fallback search with Category containing commodity name or vice versa
-        const allPrices = excelPriceService.getAllPrices();
-        const fallbackRows = allPrices.filter(row => 
-          String(row.commodity || '').toLowerCase().includes(String(commodityName || '').toLowerCase()) ||
-          String(commodityName || '').toLowerCase().includes(String(row.commodity || '').toLowerCase())
-        );
-        if (fallbackRows.length > 0) {
-          fallbackRows.sort((a, b) => String(b.price_date || '').localeCompare(String(a.price_date || '')));
-          marketAvg = fallbackRows[0].avg_price;
-        }
-      }
+      const marketAvg = await findLatestMarketAverage(commodityName, varietyName);
 
       if (marketAvg) {
         const myPrice = Number(prod.price);
@@ -418,7 +510,8 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
           : (roundedDiff < 0 ? `ต่ำกว่าตลาด ${roundedDiff}%` : 'เท่ากับราคาตลาด');
 
         priceComparison.push({
-          product_id: prod.product_id,
+          product_id: getOfferId(prod),
+          offer_id: getOfferId(prod),
           name: prod.name,
           variety: prod.variety,
           myPrice,

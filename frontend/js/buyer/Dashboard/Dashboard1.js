@@ -1,383 +1,318 @@
-(function() {
+(function () {
   "use strict";
 
   const api = window.api || {};
 
-  // ── Tier Guard ───────────────────────────────────────────────
+  function t(key, fallback) {
+    return window.i18nT ? window.i18nT(key, fallback) : fallback;
+  }
+
   async function getUserTier() {
-    // 1. Try localStorage first (instant)
     try {
-      const raw = localStorage.getItem('user_data');
+      const raw = localStorage.getItem("user_data");
       if (raw) {
-        const u = JSON.parse(raw);
-        if (u && u.tier) return u.tier.toLowerCase();
+        const user = JSON.parse(raw);
+        if (user?.tier) return String(user.tier).toLowerCase();
       }
     } catch (_) {}
 
-    // 2. Fallback: fetch from API
     try {
       if (api.getProfile) {
         const profile = await api.getProfile();
-        if (profile && profile.tier) {
-          // Sync back to localStorage
-          try {
-            const raw2 = localStorage.getItem('user_data');
-            if (raw2) {
-              const u2 = JSON.parse(raw2);
-              u2.tier = profile.tier.toLowerCase();
-              localStorage.setItem('user_data', JSON.stringify(u2));
-            }
-          } catch (_) {}
-          return profile.tier.toLowerCase();
+        const tier = String(profile?.tier || profile?.data?.tier || "free").toLowerCase();
+        const raw = localStorage.getItem("user_data");
+        if (raw) {
+          const user = JSON.parse(raw);
+          user.tier = tier;
+          localStorage.setItem("user_data", JSON.stringify(user));
         }
+        return tier;
       }
     } catch (_) {}
 
-    return 'free'; // default to free if unknown
+    return "free";
   }
 
-  function showLockedOverlay() {
-    const overlay = document.getElementById('proLockedOverlay');
-    if (overlay) {
-      overlay.hidden = false;
-      // i18n refresh
-      if (window.i18nInit) window.i18nInit();
-    }
-
-    const goUpgradeBtn = document.getElementById('goUpgradeBtn');
-    if (goUpgradeBtn) {
-      goUpgradeBtn.addEventListener('click', () => {
-        window.location.href = '../../../pages/account/subscription.html';
-      });
-    }
-
-    const lockBackBtn = document.getElementById('lockBackBtn');
-    if (lockBackBtn) {
-      lockBackBtn.addEventListener('click', () => {
-        window.location.href = '../../../pages/account/account.html';
-      });
-    }
+  function getEmptyStats() {
+    return {
+      totalBookings: 0,
+      successBookings: 0,
+      waitingBookings: 0,
+      cancelBookings: 0,
+      successRate: 0,
+      peakBookingTime: "-",
+      mostBooked: null,
+      leastBooked: null,
+      dailyAverage: 0,
+      monthlyAverage: 0,
+      totalFollowers: 0,
+      newFollowers: 0,
+      followerGrowthRate: 0,
+      totalViews: 0,
+      province: "-",
+      competitorsCount: 0,
+      categoryCompetitors: [],
+      priceComparison: [],
+      bookingSummary: { total: 0, success: 0, waiting: 0, cancel: 0 },
+    };
   }
 
-  // ── Dashboard Data ────────────────────────────────────────────
+  function normalizeFreeStats(data) {
+    const summary = data.booking_stats || { waiting: 0, success: 0, cancel: 0 };
+    const total = Number(data.bookings_total || 0);
+    return {
+      totalBookings: total,
+      successRate: total > 0 ? Math.round((Number(summary.success || 0) / total) * 100) : 0,
+      totalViews: Number(data.totalViews || 0),
+      totalFollowers: Number(data.totalFollowers || 0),
+      bookingSummary: {
+        total,
+        success: Number(summary.success || 0),
+        waiting: Number(summary.waiting || 0),
+        cancel: Number(summary.cancel || 0),
+      },
+    };
+  }
+
+  async function fetchDashboardStats(period, isPro) {
+    const endpoint = isPro ? `/api/dashboard/pro-stats?period=${encodeURIComponent(period)}` : "/api/dashboard";
+    if (api.call) return api.call("GET", endpoint);
+
+    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, "");
+    const token = localStorage.getItem("token") || "";
+    const res = await fetch(`${currentBase}${endpoint}`, {
+      headers: token ? { Authorization: "Bearer " + token } : {},
+    });
+    return res.json();
+  }
+
   async function loadStats(period) {
     try {
       const tier = await getUserTier();
-      const isPro = tier === 'pro';
-      const endpoint = isPro 
-        ? `/api/dashboard/pro-stats?period=${period}` 
-        : `/api/dashboard`;
+      const isPro = tier === "pro";
+      let response = null;
 
-      let data;
-      if (api.call) {
-        data = await api.call('GET', endpoint);
-      } else {
-        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${currentBase}${endpoint}`, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        data = await res.json();
+      try {
+        response = await fetchDashboardStats(period, isPro);
+      } catch (err) {
+        console.warn("[Dashboard] Load from API failed:", err.message);
       }
 
-      if (data && data.success && data.data) {
-        let stats = data.data;
-        if (!isPro) {
-          const summary = stats.booking_stats || { waiting: 0, success: 0, cancel: 0 };
-          const total = stats.bookings_total || 0;
-          const successRate = total > 0 ? Math.round((summary.success / total) * 100) : 0;
-          stats = {
-            totalBookings: total,
-            successRate: successRate,
-            totalViews: 0,
-            totalFollowers: 0,
-            bookingSummary: {
-              total: total,
-              success: summary.success || 0,
-              waiting: summary.waiting || 0,
-              cancel: summary.cancel || 0
-            }
-          };
-        }
-        renderDashboard(stats, isPro);
-      } else if (data && !data.success && data.tier_required) {
+      if (response && !response.success && response.tier_required) {
         showLockedOverlay();
+        renderDashboard(getEmptyStats(), false);
+        return;
       }
+
+      const rawStats = response?.success && response?.data ? response.data : getEmptyStats();
+      const stats = isPro ? rawStats : normalizeFreeStats(rawStats);
+      renderDashboard(stats, isPro);
     } catch (err) {
-      console.error('[Dashboard] Load failed:', err);
+      console.error("[Dashboard] Load failed:", err);
+      renderDashboard(getEmptyStats(), false);
     }
   }
 
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function formatCount(value) {
+    return Number(value || 0).toLocaleString();
+  }
+
   function renderDashboard(stats, isPro) {
-    if (!stats) return;
+    const summary = stats.bookingSummary || {};
+    const total = Number(summary.total || stats.totalBookings || 0);
+    const success = Number(summary.success || stats.successBookings || 0);
+    const waiting = Number(summary.waiting || stats.waitingBookings || 0);
+    const cancel = Number(summary.cancel || stats.cancelBookings || 0);
+    const completedPct = total > 0 ? Math.round((success / total) * 100) : 0;
+    const waitingPct = total > 0 ? Math.round((waiting / total) * 100) : 0;
+    const cancelPct = total > 0 ? Math.round((cancel / total) * 100) : 0;
 
     toggleCardLocks(isPro);
 
-    // KPI Cards
-    const bookingsEl = document.getElementById('bookingsVal');
-    const successRateEl = document.getElementById('successRateVal');
-    const viewsEl = document.getElementById('viewsVal');
-    const followersEl = document.getElementById('followersVal');
-    
-    const centerValueEl = document.getElementById('centerValue');
-    const completedEl = document.getElementById('completedVal');
-    const waitingEl = document.getElementById('waitingVal');
-    const cancelEl = document.getElementById('cancelVal');
-    const welcomeEl = document.getElementById('welcomeMsg');
+    setText("bookingsVal", formatCount(stats.totalBookings || total));
+    setText("successRateVal", `${Number(stats.successRate || 0)}%`);
+    setText("viewsVal", formatCount(stats.totalViews));
+    setText("followersVal", formatCount(stats.totalFollowers));
+    setText("centerValue", formatCount(total));
+    setText("completedVal", formatCount(success));
+    setText("waitingVal", formatCount(waiting));
+    setText("cancelVal", formatCount(cancel));
+    setText("completedPercentVal", `(${completedPct}%)`);
+    setText("waitingPercentVal", `(${waitingPct}%)`);
+    setText("cancelPercentVal", `(${cancelPct}%)`);
 
-    if (bookingsEl) bookingsEl.textContent = (stats.totalBookings || 0).toLocaleString();
-    if (successRateEl) successRateEl.textContent = (stats.successRate || 0) + '%';
-    if (viewsEl) viewsEl.textContent = (stats.totalViews || 0).toLocaleString();
-    if (followersEl) followersEl.textContent = (stats.totalFollowers || 0).toLocaleString();
+    const completedFill = document.getElementById("completedFill");
+    const waitingFill = document.getElementById("waitingFill");
+    const cancelFill = document.getElementById("cancelFill");
+    if (completedFill) completedFill.style.width = `${completedPct}%`;
+    if (waitingFill) waitingFill.style.width = `${waitingPct}%`;
+    if (cancelFill) cancelFill.style.width = `${cancelPct}%`;
 
-    // Welcome message
-    if (welcomeEl) {
-      try {
-        const raw = localStorage.getItem('user_data');
-        if (raw) {
-          const u = JSON.parse(raw);
-          const name = u.first_name || u.name || '';
-          if (name) {
-            const greeting = window.i18nT ? window.i18nT('welcome_back_name', 'ยินดีต้อนรับกลับมา, ') : 'ยินดีต้อนรับกลับมา, ';
-            welcomeEl.textContent = greeting + name;
-          }
-        }
-      } catch (_) {}
-    }
+    setText("peakTimeVal", stats.peakBookingTime || "-");
+    setText("mostBookedVal", stats.mostBooked ? `${stats.mostBooked.name} (${formatCount(stats.mostBooked.count)} ครั้ง)` : "-");
+    setText("leastBookedVal", stats.leastBooked ? `${stats.leastBooked.name} (${formatCount(stats.leastBooked.count)} ครั้ง)` : "-");
+    setText("dailyAvgVal", stats.dailyAverage !== undefined ? `${formatCount(stats.dailyAverage)} รายการ` : "-");
+    setText("monthlyAvgVal", stats.monthlyAverage !== undefined ? `${formatCount(stats.monthlyAverage)} รายการ` : "-");
+    setText("totalFollowersVal", formatCount(stats.totalFollowers));
+    setText("newFollowers30dVal", `${formatCount(stats.newFollowers)} คน`);
+    setText("growthRateVal", `${Number(stats.followerGrowthRate || 0) >= 0 ? "+" : ""}${Number(stats.followerGrowthRate || 0)}%`);
 
-    // Booking Summary Donut
-    const summary = stats.bookingSummary || {};
-    const total = summary.total || 0;
-    const success = summary.success || 0;
-    const waiting = summary.waiting || 0;
-    const cancel = summary.cancel || 0;
-
-    if (centerValueEl) centerValueEl.textContent = total;
-    if (completedEl) completedEl.textContent = success;
-    if (waitingEl) waitingEl.textContent = waiting;
-    if (cancelEl) cancelEl.textContent = cancel;
-
-    // Render donut chart
-    const canvas = document.getElementById('bookingSummaryChart');
-    if (canvas && window.Chart) {
-      if (canvas._chartInstance) {
-        canvas._chartInstance.destroy();
-      }
-      canvas._chartInstance = new window.Chart(canvas, {
-        type: 'doughnut',
-        data: {
-          labels: ['สำเร็จ', 'รอดำเนินการ', 'ยกเลิก'],
-          datasets: [{
-            data: [success || 0, waiting || 0, cancel || 0],
-            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
-            borderWidth: 0,
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          cutout: '72%',
-          plugins: { legend: { display: false } },
-          animation: { animateRotate: true, duration: 700 }
-        }
-      });
-    }
-
-    // Booking Deep Details
-    const peakTimeEl = document.getElementById('peakTimeVal');
-    const mostBookedEl = document.getElementById('mostBookedVal');
-    const leastBookedEl = document.getElementById('leastBookedVal');
-    const dailyAvgEl = document.getElementById('dailyAvgVal');
-    const monthlyAvgEl = document.getElementById('monthlyAvgVal');
-
-    if (peakTimeEl) peakTimeEl.textContent = stats.peakBookingTime || '-';
-    if (mostBookedEl) {
-      mostBookedEl.textContent = stats.mostBooked 
-        ? `${stats.mostBooked.name} (${stats.mostBooked.count} ครั้ง)`
-        : '-';
-    }
-    if (leastBookedEl) {
-      leastBookedEl.textContent = stats.leastBooked 
-        ? `${stats.leastBooked.name} (${stats.leastBooked.count} ครั้ง)`
-        : '-';
-    }
-    if (dailyAvgEl) {
-      dailyAvgEl.textContent = stats.dailyAverage !== undefined
-        ? `${stats.dailyAverage.toLocaleString()} รายการ`
-        : '-';
-    }
-    if (monthlyAvgEl) {
-      monthlyAvgEl.textContent = stats.monthlyAverage !== undefined
-        ? `${stats.monthlyAverage.toLocaleString()} รายการ`
-        : '-';
-    }
-
-    // Follower Growth Details
-    const totalFollowersEl = document.getElementById('totalFollowersVal');
-    const newFollowers30dEl = document.getElementById('newFollowers30dVal');
-    const growthRateEl = document.getElementById('growthRateVal');
-
-    if (totalFollowersEl) totalFollowersEl.textContent = (stats.totalFollowers || 0).toLocaleString();
-    if (newFollowers30dEl) newFollowers30dEl.textContent = `${stats.newFollowers || 0} คน`;
-    if (growthRateEl) {
-      const growthSign = (stats.followerGrowthRate || 0) >= 0 ? '+' : '';
-      growthRateEl.textContent = `${growthSign}${stats.followerGrowthRate || 0}%`;
-    }
-
-    // Competitors Header & List
-    const compHeader = document.getElementById('competitorsHeaderTitle');
+    const compHeader = document.getElementById("competitorsHeaderTitle");
     if (compHeader) {
-      const rawTitle = window.i18nT ? window.i18nT('competitors_in_area', 'ล้งคู่แข่งในพื้นที่เดียวกัน ({province})') : 'ล้งคู่แข่งในพื้นที่เดียวกัน ({province})';
-      compHeader.textContent = rawTitle.replace('{province}', stats.province || '-');
+      compHeader.textContent = t("competitors_in_area", "ล้งคู่แข่งในพื้นที่เดียวกัน ({province})").replace("{province}", stats.province || "-");
     }
-    const compTotalEl = document.getElementById('competitorTotalVal');
-    if (compTotalEl) {
-      const countWord = window.i18nT ? window.i18nT('buyer_count', '{count} ราย') : '{count} ราย';
-      compTotalEl.textContent = countWord.replace('{count}', stats.competitorsCount || 0);
+    setText("competitorTotalVal", t("buyer_count", "{count} ราย").replace("{count}", formatCount(stats.competitorsCount)));
+    renderCompetitors(stats.categoryCompetitors || []);
+    renderPriceComparison(stats.priceComparison || []);
+    renderWelcome();
+  }
+
+  function renderWelcome() {
+    const welcomeEl = document.getElementById("welcomeMsg");
+    if (!welcomeEl) return;
+    try {
+      const raw = localStorage.getItem("user_data");
+      const user = raw ? JSON.parse(raw) : null;
+      const name = user?.first_name || user?.name || "";
+      if (name) welcomeEl.textContent = t("welcome_back_name", "ยินดีต้อนรับกลับมา, ") + name;
+    } catch (_) {}
+  }
+
+  function renderCompetitors(items) {
+    const list = document.getElementById("competitorList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "competitor-list-item";
+      empty.style.justifyContent = "center";
+      empty.textContent = t("no_competitor_data", "ไม่พบข้อมูลคู่แข่งในพื้นที่นี้");
+      list.appendChild(empty);
+      return;
     }
 
-    const competitorList = document.getElementById('competitorList');
-    if (competitorList) {
-      competitorList.innerHTML = '';
-      if (stats.categoryCompetitors && stats.categoryCompetitors.length > 0) {
-        stats.categoryCompetitors.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'competitor-list-item';
-          
-          const catName = document.createElement('span');
-          catName.className = 'competitor-cat';
-          catName.textContent = `ล้งที่รับซื้อ${item.category}`;
-          
-          const countVal = document.createElement('span');
-          countVal.className = 'competitor-count-val';
-          const countText = window.i18nT ? window.i18nT('buyer_count', '{count} ราย') : '{count} ราย';
-          countVal.textContent = countText.replace('{count}', item.count);
-          
-          div.appendChild(catName);
-          div.appendChild(countVal);
-          competitorList.appendChild(div);
-        });
-      } else {
-        const noData = document.createElement('div');
-        noData.className = 'competitor-list-item';
-        noData.style.justifyContent = 'center';
-        noData.textContent = 'ไม่พบข้อมูลคู่แข่งในพื้นที่นี้';
-        competitorList.appendChild(noData);
-      }
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "competitor-list-item";
+
+      const cat = document.createElement("span");
+      cat.className = "competitor-cat";
+      cat.textContent = `${t("buyer_prefix", "ล้งที่รับซื้อ")}${item.category || "-"}`;
+
+      const count = document.createElement("span");
+      count.className = "competitor-count-val";
+      count.textContent = t("buyer_count", "{count} ราย").replace("{count}", formatCount(item.count));
+
+      row.appendChild(cat);
+      row.appendChild(count);
+      list.appendChild(row);
+    });
+  }
+
+  function renderPriceComparison(items) {
+    const list = document.getElementById("priceCompareList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "price-compare-item";
+      empty.style.textAlign = "center";
+      empty.textContent = t("no_price_compare_data", "ไม่มีราคาสมบูรณ์สำหรับเปรียบเทียบในขณะนี้");
+      list.appendChild(empty);
+      return;
     }
 
-    // Price Rankings Card
-    const priceList = document.getElementById('priceCompareList');
-    if (priceList) {
-      priceList.innerHTML = '';
-      if (stats.priceComparison && stats.priceComparison.length > 0) {
-        stats.priceComparison.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'price-compare-item';
-          
-          const isHigher = item.diffPercent >= 0;
-          const badgeClass = isHigher ? 'higher' : 'lower';
-          
-          div.innerHTML = `
-            <div class="price-comp-header">
-              <span class="price-comp-title">${item.name || 'สินค้า'} ${item.variety ? '(' + item.variety + ')' : ''}</span>
-              <span class="price-comp-badge ${badgeClass}">${item.diffText}</span>
-            </div>
-            <div class="price-comp-details">
-              <div class="price-val-row">
-                <span class="price-val-label" data-i18n="my_price">ราคาที่ประกาศ</span>
-                <span class="price-val-num">฿${item.myPrice} / กก.</span>
-              </div>
-              <div class="price-val-row">
-                <span class="price-val-label" data-i18n="market_average">ค่าเฉลี่ยตลาด</span>
-                <span class="price-val-num">฿${item.marketPrice} / กก.</span>
-              </div>
-            </div>
-          `;
-          priceList.appendChild(div);
-        });
-        
-        // Translate child elements of dynamically rendered list
-        if (window.i18nT) {
-          priceList.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            el.textContent = window.i18nT(key, el.textContent);
-          });
-        }
-      } else {
-        const noData = document.createElement('div');
-        noData.className = 'price-compare-item';
-        noData.style.textAlign = 'center';
-        noData.textContent = 'ไม่มีราคาสมบูรณ์สำหรับเปรียบเทียบในขณะนี้';
-        priceList.appendChild(noData);
-      }
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "price-compare-item";
+      const isHigher = Number(item.diffPercent || 0) >= 0;
+      row.innerHTML = `
+        <div class="price-comp-header">
+          <span class="price-comp-title">${item.name || t("product", "สินค้า")} ${item.variety ? "(" + item.variety + ")" : ""}</span>
+          <span class="price-comp-badge ${isHigher ? "higher" : "lower"}">${item.diffText || "-"}</span>
+        </div>
+        <div class="price-comp-details">
+          <div class="price-val-row">
+            <span class="price-val-label">${t("my_price", "ราคาที่ประกาศ")}</span>
+            <span class="price-val-num">฿${Number(item.myPrice || 0)} / กก.</span>
+          </div>
+          <div class="price-val-row">
+            <span class="price-val-label">${t("market_average", "ค่าเฉลี่ยตลาด")}</span>
+            <span class="price-val-num">฿${Number(item.marketPrice || 0)} / กก.</span>
+          </div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function showLockedOverlay() {
+    const overlay = document.getElementById("proLockedOverlay");
+    if (overlay) {
+      overlay.hidden = false;
+      if (window.i18nInit) window.i18nInit();
     }
+
+    const goUpgradeBtn = document.getElementById("goUpgradeBtn");
+    if (goUpgradeBtn) goUpgradeBtn.onclick = () => { window.location.href = "../../../pages/account/subscription.html"; };
+
+    const lockBackBtn = document.getElementById("lockBackBtn");
+    if (lockBackBtn) lockBackBtn.onclick = () => { window.location.href = "../../../pages/account/account.html"; };
   }
 
   function toggleCardLocks(isPro) {
     const cardIds = [
-      { id: 'bookingAnalyticsCard', desc: 'ดูสถิติเวลาที่จองมากที่สุด และแนวโน้มวัน/เวลาสำหรับล้งของท่าน' },
-      { id: 'followerGrowthCard', desc: 'วิเคราะห์แนวโน้มและอัตราการเติบโตของเกษตรกรที่ติดตามล้งของท่าน' },
-      { id: 'competitorAnalyticsCard', desc: 'ตรวจสอบจำนวนล้งและประเภทสินค้าที่ทับซ้อนในจังหวัดเดียวกัน' },
-      { id: 'priceRankingsCard', desc: 'เปรียบเทียบราคาเสนอซื้อของท่านกับราคาเฉลี่ยในตลาดแบบเรียลไทม์' }
+      { id: "bookingAnalyticsCard", desc: t("booking_analytics_desc", "ดูสถิติเวลาที่จองมากที่สุด และแนวโน้มวัน/เวลาสำหรับล้งของท่าน") },
+      { id: "followerGrowthCard", desc: t("follower_growth_desc", "วิเคราะห์แนวโน้มและอัตราการเติบโตของเกษตรกรที่ติดตามล้งของท่าน") },
+      { id: "competitorAnalyticsCard", desc: t("competitor_analytics_desc", "ตรวจสอบจำนวนล้งและประเภทสินค้าที่ทับซ้อนในจังหวัดเดียวกัน") },
+      { id: "priceRankingsCard", desc: t("price_rankings_desc", "เปรียบเทียบราคาเสนอซื้อของท่านกับราคาเฉลี่ยในตลาดแบบเรียลไทม์") },
     ];
 
-    cardIds.forEach(card => {
+    cardIds.forEach((card) => {
       const el = document.getElementById(card.id);
       if (!el) return;
-
-      const existing = el.querySelector('.card-locked-overlay');
+      const existing = el.querySelector(".card-locked-overlay");
       if (existing) existing.remove();
+      if (isPro) return;
 
-      if (!isPro) {
-        const overlay = document.createElement('div');
-        overlay.className = 'card-locked-overlay';
-        
-        const upgradeText = window.i18nT ? window.i18nT('upgrade_pro_btn', 'อัปเกรดเป็น PRO') : 'อัปเกรดเป็น PRO';
-        const proFeatureText = window.i18nT ? window.i18nT('pro_feature_locked', 'ฟีเจอร์สำหรับ PRO') : 'ฟีเจอร์สำหรับ PRO';
-        
-        overlay.innerHTML = `
-          <div class="card-locked-icon">
-            <span class="material-icons-outlined">lock</span>
-          </div>
-          <div class="card-locked-title">${proFeatureText}</div>
-          <div class="card-locked-desc">${card.desc}</div>
-          <button class="card-locked-btn" onclick="window.location.href='../../../pages/account/subscription.html'">${upgradeText}</button>
-        `;
-        el.appendChild(overlay);
-      }
+      const overlay = document.createElement("div");
+      overlay.className = "card-locked-overlay";
+      overlay.innerHTML = `
+        <div class="card-locked-icon"><span class="material-icons-outlined">lock</span></div>
+        <div class="card-locked-title">${t("pro_feature_locked", "ฟีเจอร์สำหรับ PRO")}</div>
+        <div class="card-locked-desc">${card.desc}</div>
+        <button class="card-locked-btn" onclick="window.location.href='../../../pages/account/subscription.html'">${t("upgrade_pro_btn", "อัปเกรดเป็น PRO")}</button>
+      `;
+      el.appendChild(overlay);
     });
   }
 
-  // ── Period Tabs ───────────────────────────────────────────────
   function initPeriodTabs() {
-    const tabs = document.querySelectorAll('.period-tab');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        loadStats(tab.dataset.period || 'today');
+    const tabs = document.querySelectorAll(".period-tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((tEl) => tEl.classList.remove("active"));
+        tab.classList.add("active");
+        loadStats(tab.dataset.period || "today");
       });
     });
   }
 
-  // ── Back button ───────────────────────────────────────────────
   function initBackBtn() {
-    const backBtn = document.getElementById('backBtn');
-    if (backBtn) {
-      backBtn.addEventListener('click', () => {
-        window.location.href = '../../../pages/account/account.html';
-      });
-    }
+    const backBtn = document.getElementById("backBtn");
+    if (backBtn) backBtn.onclick = () => { window.location.href = "../../../pages/account/account.html"; };
   }
 
-  // ── Init ─────────────────────────────────────────────────────
-  async function init() {
+  document.addEventListener("DOMContentLoaded", () => {
     initPeriodTabs();
     initBackBtn();
-
-    loadStats('today');
-  }
-
-  document.addEventListener('DOMContentLoaded', init);
+    loadStats("today");
+  });
 })();
-

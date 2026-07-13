@@ -222,9 +222,12 @@
       const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
       
       const params = new URLSearchParams(window.location.search);
-      const bid = params.get('bid') || params.get('bookingId');
-      const API_BASE = (window.API_BASE_URL || '').replace(/\/$/, '');
-      const TOKEN = localStorage.getItem('token') || '';
+      const bid = params.get('bid') || params.get('bookingId') || params.get('id');
+      if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
+      const API_BASE = window.getAgriPriceApiUrl
+        ? window.getAgriPriceApiUrl()
+        : (window.API_BASE_URL || '').replace(/\/$/, '');
+      const TOKEN = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
 
       const loadingSec = document.getElementById('loadingSec');
       const previewSec = document.getElementById('previewSec');
@@ -244,17 +247,19 @@
 
       // 1. Fetch Booking Details first (Preview)
       try {
-        const res = await fetch(`${API_BASE}/api/bookings/${bid}`, {
+        const res = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(bid)}`, {
           headers: { 'Authorization': 'Bearer ' + TOKEN }
         });
         const json = await res.json();
         
         if (res.ok && json.data) {
           const b = json.data;
+          const amountKg = b.quantity || b.product_amount || b.expected_qty || 0;
+          const amountValue = Number(amountKg);
           document.getElementById('prevQueue').textContent = b.queue_no || '-';
           document.getElementById('prevFarmer').textContent = b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}` : t('booking_unknown_name', 'ไม่ทราบชื่อ');
           document.getElementById('prevProduct').textContent = b.product?.name || '-';
-          document.getElementById('prevAmount').textContent = (b.product_amount || 0).toLocaleString() + ' ' + t('kg_unit', 'กก.');
+          document.getElementById('prevAmount').textContent = (Number.isFinite(amountValue) ? amountValue.toLocaleString() : '-') + ' ' + t('kg_unit', 'กก.');
           
           showSection(previewSec);
         } else {
@@ -272,7 +277,7 @@
         loadingSec.querySelector('p').textContent = t('saving_checkin', 'กำลังบันทึกการเช็คอิน...');
 
         try {
-          const res = await fetch(`${API_BASE}/api/bookings/${bid}/checkin`, {
+          const res = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(bid)}/checkin`, {
             method: 'PATCH',
             headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }
           });

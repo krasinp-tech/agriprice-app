@@ -60,7 +60,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json(response.error('กรุณาระบุ user_id'));
-    if (user_id === req.user.id) return res.status(400).json(response.error('ไม่สามารถเพิ่มตัวเองได้'));
+    if (String(user_id) === String(req.user.id)) return res.status(400).json(response.error('ไม่สามารถเพิ่มตัวเองได้'));
 
     const { data, error } = await supabaseAdmin
       .from('follows')
@@ -84,7 +84,7 @@ router.post('/', authMiddleware, async (req, res) => {
     // Map ฟิลด์ให้สอดคล้องกับความคาดหวังของระบบ
     const mappedData = {
       id: data.following_id,
-      user_id: data.follower_id,
+      user_id: data.following_id,
       target_user_id: data.following_id,
       created_at: data.created_at
     };

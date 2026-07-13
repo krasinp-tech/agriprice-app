@@ -1,7 +1,6 @@
 /**
- * AGRIPRICE - Booking Step 4 JavaScript
- * ฟีเจอร์: การจองสำเร็จ, QR Code, สถานะคิว, แผนที่, ยกเลิกการจอง
- * แนวทาง QR ที่ถูกต้อง: เก็บ URL/bookingId สั้น ๆ แล้ว lookup จาก DB ในอนาคต
+ * AGRIPRICE - buyer booking detail
+ * Uses the backend booking API only. No sample booking records are kept here.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,13 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-  // ================================
-  // Elements
-  // ================================
+
   const btnBack = document.getElementById("btnBack");
   const toggleDetailBtn = document.getElementById("toggleDetailBtn");
   const btnCancelBooking = document.getElementById("btnCancelBooking");
-
   const queueNo = document.getElementById("queueNo");
   const timeText = document.getElementById("timeText");
   const bookingIdText = document.getElementById("bookingIdText");
@@ -38,19 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const vehicleCountTotal = document.getElementById("vehicleCountTotal");
   const vehiclesList = document.getElementById("vehiclesList");
 
-  // ================================
-  // Path helpers (สำคัญ: ให้ทำงานได้ทุกระดับ)
-  // ================================
+  function t(key, fallback) {
+    return window.i18nT ? window.i18nT(key, fallback) : fallback;
+  }
+
   function getRelativePrefixToRoot() {
     const path = (window.location.pathname || "").replace(/\\/g, "/");
     const dir = path.endsWith("/") ? path : path.substring(0, path.lastIndexOf("/") + 1);
-
     const idx = dir.lastIndexOf("/pages/");
     if (idx === -1) return "";
-
     const afterPages = dir.substring(idx + "/pages/".length);
     const depth = afterPages.split("/").filter(Boolean).length;
-
     return "../" + "../".repeat(depth);
   }
 
@@ -63,167 +57,103 @@ document.addEventListener("DOMContentLoaded", () => {
     return prefixRoot + normalized;
   }
 
-  // ================================
-  // API LAYER - เชื่อม server จริง
-  // ================================
-  const _API = (window.API_BASE_URL || '').replace(/\/$/, '');
-  const _TKEY = window.AUTH_TOKEN_KEY || 'token';
-  const _aH = () => { const t = localStorage.getItem(_TKEY) || ''; return t ? { 'Authorization': 'Bearer ' + t } : {}; };
+  const getApiBase = () => window.getAgriPriceApiUrl
+    ? window.getAgriPriceApiUrl()
+    : (window.API_BASE_URL || "").replace(/\/$/, "");
 
-  /* =========================
-     Mock data (fallback)
-  ========================= */
-  const MOCK_BOOKINGS = [
-    {
-      bookingId: "BK2602191266-E-844",
-      status: "waiting",
-      shopName: "นายหญิง นายแดง",
-      fullName: "สิงคองพันธุ์ไทย นายแดง",
-      phone: "081-234-5678",
-      address: "ตำบลบางแก้ว อำเภอบางพลี จังหวัดชุมพร",
-      queueNo: "E-844",
-      time: "14:00",
-      date: "26 กุมภาพันธ์ 2569",
-      createdAt: "2026-02-19 10:00",
-      productName: "ทุเรียน หมอนทอง",
-      quantityKg: 8000,
-      productType: "เกรด A",
-      vehicles: [
-        { slot: 1, plate: "กด5485", type: "รถบรรทุก 10ล้อ" },
-        { slot: 2, plate: "กด5486", type: "รถบรรทุก 10ล้อ" },
-      ],
-      notes: "รับ 8,000 กก.",
-    },
-    {
-      bookingId: "BK2602191267-E-845",
-      status: "waiting",
-      shopName: "พิมรี่พาย สายเขียว",
-      fullName: "นายทองดี ใจงาม",
-      phone: "089-555-0011",
-      address: "ตำบลท่าช้าง อำเภอเมือง จังหวัดจันทบุรี",
-      queueNo: "E-845",
-      time: "14:30",
-      date: "26 กุมภาพันธ์ 2569",
-      createdAt: "2026-02-19 10:05",
-      productName: "ทุเรียน ก้านยาว",
-      quantityKg: 2500,
-      productType: "เกรด B",
-      vehicles: [
-        { slot: 1, plate: "กข1234", type: "รถบรรทุก 6ล้อ" },
-      ],
-      notes: "รับ 2,500 กก.",
-    },
-    {
-      bookingId: "BK2602191268-E-846",
-      status: "waiting",
-      shopName: "นางรจนา เงาะป่า",
-      fullName: "นางสาวมะลิ ใจดี",
-      phone: "082-777-3344",
-      address: "ตำบลสวนใหม่ อำเภอบ้านสวน จังหวัดสุราษฎร์ธานี",
-      queueNo: "E-846",
-      time: "15:00",
-      date: "26 กุมภาพันธ์ 2569",
-      createdAt: "2026-02-19 10:10",
-      productName: "ทุเรียน ชะนี",
-      quantityKg: 1200,
-      productType: "เกรด A",
-      vehicles: [
-        { slot: 1, plate: "กข5678", type: "รถตู้ 4ล้อ" },
-      ],
-      notes: "รับ 1,200 กก.",
-    },
-    {
-      bookingId: "BK240115002",
-      status: "waiting",
-      shopName: "นายดำรงค์ สุพรรณ",
-      address: "88/1 ถนนสายผลไม้ อ.เมือง จ.จันทบุรี 22000",
-      queueNo: "B-012",
-      time: "15:10",
-      createdAt: "2026-02-12 14:05",
-      vehicles: [
-        { slot: 1, plate: "กค9456", type: "รถบรรทุก 10ล้อ" },
-      ],
-    },
-    {
-      bookingId: "BK240115003",
-      status: "cancel",
-      shopName: "คุณสมชาย นายสมหญิง",
-      address: "77/7 อ.ท่าใหม่ จ.จันทบุรี 22120",
-      queueNo: "C-003",
-      time: "10:00",
-      createdAt: "2026-02-11 09:12",
-      vehicles: [
-        { slot: 1, plate: "กง7890", type: "รถบรรทุก 6ล้อ" },
-      ],
-    },
-  ];
+  const tokenKey = window.AUTH_TOKEN_KEY || "token";
+  const authHeaders = () => {
+    const token = localStorage.getItem(tokenKey) || "";
+    return token ? { Authorization: "Bearer " + token } : {};
+  };
+
+  function readStoredBooking() {
+    try {
+      const raw = localStorage.getItem("confirmedBooking");
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function normalizeVehicles(d) {
+    if (Array.isArray(d.vehicles)) return d.vehicles;
+    if (Array.isArray(d.booking_vehicles)) {
+      return d.booking_vehicles
+        .map((v) => ({ plate: v.plate || v.plate_no || "", type: v.type || t("truck", "รถบรรทุก") }))
+        .filter((v) => v.plate || v.type);
+    }
+    const plates = d.vehicle_plates || d.vehicle_info || "";
+    if (plates) {
+      return String(plates).split(",")
+        .map((plate) => plate.trim())
+        .filter(Boolean)
+        .map((plate) => ({ plate, type: t("truck", "รถบรรทุก") }));
+    }
+    try {
+      const note = typeof d.note === "string" ? JSON.parse(d.note || "{}") : (d.note || {});
+      if (Array.isArray(note.vehicles)) return note.vehicles;
+    } catch (_) {}
+    return [];
+  }
+
+  function mapBookingRecord(raw, fallbackId) {
+    const d = raw?.data?.booking || raw?.data || raw?.booking || raw || {};
+    const farmer = d.farmer || d.seller || d.buyer_profile || null;
+    const product = d.product || d.products || d.buy_offer || {};
+    const vehicles = normalizeVehicles(d);
+    const bookingId = String(d.booking_no || d.booking_id || fallbackId || "");
+
+    return {
+      bookingId,
+      booking_id: d.booking_id || null,
+      booking_no: d.booking_no || null,
+      status: d.status || "waiting",
+      shopName: farmer
+        ? (farmer.shop_name || `${farmer.first_name || ""} ${farmer.last_name || ""}`.trim())
+        : (d.shop_name || ""),
+      fullName: farmer ? `${farmer.first_name || ""} ${farmer.last_name || ""}`.trim() : "",
+      phone: farmer?.phone || d.farmer_phone || d.contact_phone || "",
+      address: farmer
+        ? [farmer.address_line1, farmer.address_line2].filter(Boolean).join(" ")
+        : (d.address || ""),
+      queueNo: d.queue_no || "",
+      time: d.scheduled_time
+        ? new Date(d.scheduled_time).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })
+        : "",
+      date: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : "",
+      productName: product.name || product.product_name || d.product_name || "",
+      quantityKg: d.quantity || d.product_amount || d.expected_qty || 0,
+      vehicles,
+      vehicleCount: d.vehicle_count || vehicles.length || 0,
+      slotName: d.slot?.slot_name || d.slot_name || "",
+      mapLink: farmer?.map_link || farmer?.mapLink || "",
+      chatTargetId: farmer?.profile_id || d.farmer_id || d.seller_id || null,
+      dateFormatted: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : "",
+    };
+  }
 
   const BookingAPI = {
     async loadConfirmedBooking() {
-      // อ่าน bookingId จาก URL หรือ localStorage
       const urlP = new URLSearchParams(window.location.search);
-      const bid = urlP.get("bookingId") || urlP.get("bid") || null;
+      const requestedId = urlP.get("bookingId") || urlP.get("bid") || urlP.get("id") || null;
+      const stored = readStoredBooking();
+      const lookupId = requestedId || stored?.booking_id || stored?.booking_no || stored?.bookingId || null;
 
-      // ตรวจสอบว่าเป็น Mock หรือไม่ (เพื่อไม่ให้ยิง API ไป 404 ให้รก Console)
-      const isMock = bid && MOCK_BOOKINGS.some(m => m.bookingId === bid);
-
-      // ถ้าไม่ใช่ Mock และมี API และ bid ให้ดึงจาก server
-      if (_API && bid && !isMock) {
-        try {
-          const res = await fetch(`${_API}/api/bookings/${bid}`, { headers: _aH() });
-          if (res.ok) {
-            const json = await res.json();
-            // server ส่ง { success, message, data, ...data } ใช้ json.data หรือ json ตรง ๆ
-            const d = json.data || json;
-            // หา farmer/seller จากฟิลด์ที่ API ส่งมา (รองรับหลายชื่อ)
-            const farmer = d.farmer || d.seller || d.buyer_profile || null;
-            const buyer  = d.buyer  || d.farmer_profile || null; // ไม่ได้ใช้แสดงในส่วนเกษตรกร
-            return {
-              bookingId: String(d.booking_no || d.booking_id || bid),
-              status: d.status || 'waiting',
-              shopName: farmer
-                ? (farmer.shop_name || `${farmer.first_name || ''} ${farmer.last_name || ''}`.trim())
-                : (d.shop_name || 'AgriPrice Store'),
-              fullName: farmer ? `${farmer.first_name || ''} ${farmer.last_name || ''}`.trim() : '',
-              phone: farmer?.phone || d.farmer_phone || '',
-              address: farmer
-                ? [farmer.address_line1, farmer.address_line2].filter(Boolean).join(' ')
-                : (d.address || ''),
-              queueNo: d.queue_no || '',
-              time: d.scheduled_time ? new Date(d.scheduled_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '',
-              date: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : '',
-              productName: d.product?.name || '',
-              quantityKg: d.product_amount || 0,
-              vehicles: Array.isArray(d.vehicles) && d.vehicles.length > 0
-                ? d.vehicles
-                : (d.vehicle_plates
-                  ? String(d.vehicle_plates).split(',').map(p => p.trim()).filter(Boolean).map(plate => ({ plate, type: 'รถบรรทุก' }))
-                  : []),
-              vehicleCount: d.vehicle_count || 0,
-              slotName: d.slot?.slot_name || '',
-              mapLink: farmer?.map_link || farmer?.mapLink || '',
-              chatTargetId: farmer?.profile_id || d.farmer_id || d.seller_id || null,
-              booking_id: d.booking_id || null,
-              booking_no: d.booking_no || null,
-              dateFormatted: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : '',
-            };
-          }
-        } catch (e) { if (DEBUG_BOOKING) console.warn('[BookingAPI] loadConfirmedBooking:', e.message); }
+      if (lookupId && window.api?.getBooking) {
+        const json = await window.api.getBooking(lookupId);
+        return mapBookingRecord(json, lookupId);
       }
 
-      // fallback 1: Mock data (ถ้าตรง bid)
-      if (bid) {
-        const found = MOCK_BOOKINGS.find(m => m.bookingId === bid);
-        if (found) {
-          if (DEBUG_BOOKING) console.log('[BookingAPI] Found in mock data:', bid);
-          return found;
-        }
+      const apiBase = getApiBase();
+      if (lookupId && apiBase) {
+        const res = await fetch(`${apiBase}/api/bookings/${encodeURIComponent(lookupId)}`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(t("booking_not_found", "ไม่พบข้อมูลการจองจากเซิร์ฟเวอร์"));
+        const json = await res.json();
+        return mapBookingRecord(json, lookupId);
       }
 
-      // fallback 2: localStorage (ข้อมูลจาก step3)
-      const local = localStorage.getItem("confirmedBooking");
-      if (local) return JSON.parse(local);
-
+      if (stored && !requestedId) return mapBookingRecord(stored, stored.bookingId);
       return null;
     },
 
@@ -234,156 +164,129 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async loadQueueStatus(bookingData) {
       const lookupId = bookingData?.booking_id || bookingData?.booking_no || bookingData?.bookingId;
-      const isMock = lookupId && MOCK_BOOKINGS.some(m => m.bookingId === lookupId);
-
-      // ถ้าไม่ใช่ Mock และมี API ให้ดึงจาก server
-      if (_API && lookupId && !isMock) {
-        try {
-          const res = await fetch(`${_API}/api/bookings/${lookupId}/queue-status`, { headers: _aH() });
-          if (res.ok) {
-            const json = await res.json();
-            const d = json?.data || {};
-            return {
-              currentQueue: d.currentQueue || '-',
-              waitingQueues: Number(d.waitingAhead || 0),
-              estimatedMinutes: Number(d.estimatedMinutes || 0),
-              averageTimePerQueue: Number(d.averageTimePerQueue || 30),
-            };
-          }
-        } catch (e) { if (DEBUG_BOOKING) console.warn('[Buyer BookingAPI] loadQueueStatus:', e.message); }
+      if (!lookupId) {
+        return { currentQueue: "-", waitingQueues: 0, estimatedMinutes: 0, averageTimePerQueue: 0 };
       }
 
-      // สำหรับ Mock หรือเมื่อ API พลาด: สุ่มเลขให้ดูเหมือนจริง
-      return {
-        currentQueue: 'A-001',
-        waitingQueues: 2,
-        estimatedMinutes: 45,
-        averageTimePerQueue: 20,
-      };
-    },
+      try {
+        const json = window.api?.getQueueStatus
+          ? await window.api.getQueueStatus(lookupId)
+          : null;
+        if (json) {
+          const d = json.data || json || {};
+          return {
+            currentQueue: d.currentQueue || "-",
+            waitingQueues: Number(d.waitingAhead || 0),
+            estimatedMinutes: Number(d.estimatedMinutes || 0),
+            averageTimePerQueue: Number(d.averageTimePerQueue || 0),
+          };
+        }
+      } catch (e) {
+        if (DEBUG_BOOKING) console.warn("[BookingAPI] queue-status:", e.message);
+      }
 
-    async loadLocationData() {
-      // ที่อยู่มาจาก booking data แล้ว หากไม่มีให้ return ว่าง
-      return {
-        name: "",
-        address: "",
-        lat: 0,
-        lng: 0,
-        googleMapsUrl: "",
-      };
+      return { currentQueue: "-", waitingQueues: 0, estimatedMinutes: 0, averageTimePerQueue: 0 };
     },
 
     async cancelBooking(bookingId) {
-      if (_API && bookingId) {
-        try {
-          const res = await fetch(`${_API}/api/bookings/${bookingId}`, {
-            method: 'PATCH',
-            headers: { ..._aH(), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'cancel' }),
+      if (!bookingId) return { success: false, message: t("booking_id_not_found", "ไม่พบรหัสการจอง") };
+      try {
+        if (window.api?.updateBooking) {
+          await window.api.updateBooking(bookingId, "cancel");
+        } else {
+          const apiBase = getApiBase();
+          if (!apiBase) throw new Error(t("api_not_ready", "ยังไม่พร้อมเชื่อมต่อเซิร์ฟเวอร์"));
+          const res = await fetch(`${apiBase}/api/bookings/${encodeURIComponent(bookingId)}`, {
+            method: "PATCH",
+            headers: { ...authHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "cancel" }),
           });
-          if (res.ok) {
-            localStorage.removeItem("confirmedBooking");
-            localStorage.removeItem("bookingSlotId");
-            localStorage.removeItem("bookingStep1");
-            localStorage.removeItem("bookingStep2");
-            localStorage.removeItem("bookingData");
-            localStorage.removeItem("bookingReferrer");
-            return { success: true, message: "ยกเลิกการจองสำเร็จ" };
-          }
-          return { success: false, message: "ยกเลิกการจองไม่สำเร็จ" };
-        } catch (e) { if (DEBUG_BOOKING) console.warn('[BookingAPI] cancelBooking:', e.message); }
+          if (!res.ok) throw new Error(t("cancel_error", "ยกเลิกการจองไม่สำเร็จ"));
+        }
+
+        localStorage.removeItem("confirmedBooking");
+        localStorage.removeItem("bookingSlotId");
+        localStorage.removeItem("bookingStep1");
+        localStorage.removeItem("bookingStep2");
+        localStorage.removeItem("bookingData");
+        localStorage.removeItem("bookingReferrer");
+        return { success: true, message: t("cancel_success", "ยกเลิกการจองสำเร็จ") };
+      } catch (e) {
+        return { success: false, message: e.message || t("cancel_error", "ยกเลิกการจองไม่สำเร็จ") };
       }
-      return { success: false, message: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้" };
     },
   };
 
-
-  // ================================
-  // Utilities
-  // ================================
-  function generateBookingId(slotId) {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
-    // ใส่ slotId ต่อท้ายเล็กน้อยเพื่อไม่ให้ซ้ำง่าย (ยังคงสั้น)
-    const slot = String(slotId || "").replace(/\s+/g, "").slice(0, 8);
-    return `BK${year}${month}${day}${random}${slot ? "-" + slot : ""}`;
-  }
-
   function formatBookingDate(dateValue) {
-    if (window.AgriPriceUI && window.AgriPriceUI.formatThaiDate) return window.AgriPriceUI.formatThaiDate(dateValue);
+    if (window.AgriPriceUI?.formatThaiDate) return window.AgriPriceUI.formatThaiDate(dateValue);
     if (!dateValue) return "-";
     const d = new Date(dateValue);
-    if (isNaN(d.getTime())) return "-";
-    const lang = localStorage.getItem('lang') || 'th';
-    const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
-    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+    if (Number.isNaN(d.getTime())) return "-";
+    const lang = localStorage.getItem("lang") || "th";
+    const locale = lang === "en" ? "en-US" : lang === "zh" ? "zh-CN" : "th-TH";
+    return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(d);
   }
 
   function formatEstimatedTime(minutes) {
-    if (window.AgriPriceUI && window.AgriPriceUI.formatEstimatedTime) return window.AgriPriceUI.formatEstimatedTime(minutes);
-    const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
-    if (minutes < 60) return `${minutes} ${t('minute', 'นาที')}`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (mins === 0) return `${hours} ${t('hour', 'ชั่วโมง')}`;
-    return `${hours} ${t('hour', 'ชั่วโมง')} ${mins} ${t('minute', 'นาที')}`;
+    if (window.AgriPriceUI?.formatEstimatedTime) return window.AgriPriceUI.formatEstimatedTime(minutes);
+    const value = Number(minutes || 0);
+    if (value < 60) return `${value} ${t("minute", "นาที")}`;
+    const hours = Math.floor(value / 60);
+    const mins = value % 60;
+    if (mins === 0) return `${hours} ${t("hour", "ชั่วโมง")}`;
+    return `${hours} ${t("hour", "ชั่วโมง")} ${mins} ${t("minute", "นาที")}`;
   }
 
   function renderDetailPanel(bookingData) {
     return `
-      <div><b>${window.i18nT('shop_label', 'ร้าน')}:</b> ${escapeHtml(bookingData.shopName || "-")}</div>
-      <div><b>${window.i18nT('address_label', 'ที่อยู่')}:</b> ${escapeHtml(bookingData.address || "-")}</div>
-      <div><b>${window.i18nT('queue_number', 'หมายเลขคิว')}:</b> ${escapeHtml(bookingData.queueNo || "-")}</div>
-      <div><b>${window.i18nT('queue_time', 'เวลานัดคิว')}:</b> ${escapeHtml(bookingData.time ? bookingData.time + " น." : "-")}</div>
-      <div><b>${window.i18nT('transaction_date', 'วันที่')}:</b> ${escapeHtml(formatBookingDate(bookingData.date || bookingData.dateFormatted))}</div>
-      <div><b>${window.i18nT('booking_number', 'Booking ID')}:</b> ${escapeHtml(bookingData.bookingId || bookingData.booking_no || "-")}</div>
+      <div><b>${t("shop_label", "ร้าน")}:</b> ${escapeHtml(bookingData.shopName || "-")}</div>
+      <div><b>${t("address_label", "ที่อยู่")}:</b> ${escapeHtml(bookingData.address || "-")}</div>
+      <div><b>${t("queue_number", "หมายเลขคิว")}:</b> ${escapeHtml(bookingData.queueNo || "-")}</div>
+      <div><b>${t("queue_time", "เวลานัดคิว")}:</b> ${escapeHtml(bookingData.time ? bookingData.time + " น." : "-")}</div>
+      <div><b>${t("transaction_date", "วันที่")}:</b> ${escapeHtml(formatBookingDate(bookingData.date || bookingData.dateFormatted))}</div>
+      <div><b>${t("booking_number", "Booking ID")}:</b> ${escapeHtml(bookingData.bookingId || bookingData.booking_no || "-")}</div>
     `;
   }
 
-  // ================================
-  // Render Vehicles Information
-  // ================================
   function renderVehicles(bookingData) {
     const vehicles = Array.isArray(bookingData.vehicles) ? bookingData.vehicles : [];
-    // แสดงจำนวนรถจาก vehicle_count (API) หรือ vehicles.length
     const count = vehicles.length || bookingData.vehicleCount || 0;
     if (vehicleCountTotal) vehicleCountTotal.textContent = count || "-";
 
-    if (vehicles.length === 0) return; // ไม่มี plate/type ให้แสดง
-
-    if (vehiclesList) {
-      vehiclesList.innerHTML = vehicles
-        .map(
-          (v) => `
-        <div class="vehicleRow">
-          <div class="vehicleRowContent">
-            <div class="vehicleRowPlate">${String(v.plate || "-").toUpperCase()}</div>
-            <div class="vehicleRowType">${v.type || "-"}</div>
-          </div>
-        </div>
-      `
-        )
-        .join("");
+    if (!vehiclesList) return;
+    if (vehicles.length === 0) {
+      vehiclesList.innerHTML = "";
+      return;
     }
+
+    vehiclesList.innerHTML = vehicles.map((v) => `
+      <div class="vehicleRow">
+        <div class="vehicleRowContent">
+          <div class="vehicleRowPlate">${escapeHtml(String(v.plate || "-").toUpperCase())}</div>
+          <div class="vehicleRowType">${escapeHtml(v.type || "-")}</div>
+        </div>
+      </div>
+    `).join("");
   }
 
-  // ================================
-  // QR Code (แก้ overflow + สแกนแล้วใช้งานได้จริง)
-  // ================================
   function buildQrPayload(bookingId) {
-    // แนะนำให้ QR เป็น URL สั้น แล้วฝั่งปลายทางใช้ bookingId ไป lookup DB
-    // สแกนแล้วเปิดหน้า step4 พร้อม bid (ตอนนี้ใช้ localStorage fallback ได้)
-    const base =
-      (window.location.origin || "") + resolveToRootUrl("pages/buyer/setbooking/booking-information.html");
-    return `${base}?bid=${encodeURIComponent(bookingId)}`;
+    let baseUrl = window.FRONTEND_URL || window.location.origin;
+    if (baseUrl.startsWith('capacitor://') || baseUrl.startsWith('ionic://')) {
+      const apiBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : '';
+      if (apiBase && !apiBase.startsWith('capacitor://') && !apiBase.startsWith('ionic://')) {
+        baseUrl = apiBase;
+      } else {
+        baseUrl = 'https://agriprice-otp.web.app';
+      }
+    }
+    const url = new URL("pages/buyer/setbooking/booking-information.html", baseUrl);
+    url.searchParams.set("bid", bookingId);
+    return url.href;
   }
 
-  function drawFallbackQR() {
+  function drawQrUnavailable() {
     if (!qrCanvas) return;
-    qrCanvas.innerHTML = '<div style="width:110px;height:110px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;border-radius:4px;">QR</div>';
+    qrCanvas.innerHTML = `<div style="width:110px;height:110px;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;text-align:center;border:1px solid #ddd;border-radius:4px;">${escapeHtml(t("qr_unavailable", "ไม่สามารถสร้าง QR ได้"))}</div>`;
   }
 
   function generateQRCode(text) {
@@ -398,62 +301,33 @@ document.addEventListener("DOMContentLoaded", () => {
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M,
       });
-      if (DEBUG_BOOKING) console.log("สร้าง QR Code:", text);
     } catch (error) {
       console.error("Error generating QR code:", error);
-      drawFallbackQR();
+      drawQrUnavailable();
     }
   }
 
-  // ================================
-  // Load Success Data
-  // ================================
   async function loadSuccessData() {
     const bookingData = await BookingAPI.loadConfirmedBooking();
-    if (!bookingData) throw new Error("ไม่พบข้อมูลการจอง");
+    if (!bookingData) throw new Error(t("booking_not_found", "ไม่พบข้อมูลการจอง"));
+    if (!bookingData.bookingId) throw new Error(t("booking_id_not_found", "ไม่พบรหัสการจองจากเซิร์ฟเวอร์"));
 
-    // slot - ใช้ queueNo จากข้อมูล, fallback ไป slotId หรือ localStorage
     const slot = bookingData.queueNo || bookingData.slotId || localStorage.getItem("bookingSlotId") || "";
-    if (queueNo) queueNo.textContent = slot;
-    if (myQueue) myQueue.textContent = slot;
+    if (queueNo) queueNo.textContent = slot || "-";
+    if (myQueue) myQueue.textContent = slot || "-";
+    if (bookingData.time && timeText) timeText.textContent = bookingData.time;
 
-    // time - ใช้ time จากข้อมูล
-    if (bookingData.time) {
-      if (timeText) timeText.textContent = bookingData.time;
-    }
-
-    // bookingId (ต้องคงที่: ถ้ายังไม่มีให้สร้าง แล้ว save กลับ)
-    let bkId = bookingData.bookingId;
-
-    // รองรับกรณีสแกน QR เปิดกลับมา: อ่าน bid จาก query ก่อน
-    const bidFromUrl = new URLSearchParams(window.location.search).get("bid");
-    if (bidFromUrl) bkId = bidFromUrl;
-
-    if (!bkId) {
-      bkId = generateBookingId(slot);
-    }
-
-    // sync ลง data และ save (เพื่ออนาคต DB ใช้ id นี้เป็น key)
-    bookingData.bookingId = bkId;
     await BookingAPI.saveConfirmedBooking(bookingData);
+    if (bookingIdText) bookingIdText.textContent = bookingData.bookingId;
+    generateQRCode(buildQrPayload(bookingData.bookingId));
 
-    if (bookingIdText) bookingIdText.textContent = bkId;
-
-    // QR: ใช้ URL สั้น
-    const qrText = buildQrPayload(bkId);
-    generateQRCode(qrText);
-
-    // queue status
     const queueStatus = await BookingAPI.loadQueueStatus(bookingData);
     if (currentQueue) currentQueue.textContent = queueStatus.currentQueue || "-";
-    const qSuffix = window.i18nT ? window.i18nT('queue_suffix', 'คิว') : 'คิว';
-    if (aheadCount) aheadCount.textContent = `${queueStatus.waitingQueues ?? 0} ${qSuffix}`;
+    if (aheadCount) aheadCount.textContent = `${queueStatus.waitingQueues ?? 0} ${t("queue_suffix", "คิว")}`;
     if (eta) eta.textContent = formatEstimatedTime(queueStatus.estimatedMinutes ?? 0);
 
-    // location - ถ้า bookingData มี shopName/address ให้ใช้ค่านั้น
-    const locationData = bookingData.shopName ? bookingData : await BookingAPI.loadLocationData();
-    if (shopName) shopName.textContent = locationData.shopName || locationData.name || "-";
-    if (shopAddr) shopAddr.textContent = locationData.address || "-";
+    if (shopName) shopName.textContent = bookingData.shopName || "-";
+    if (shopAddr) shopAddr.textContent = bookingData.address || "-";
     if (farmerPhone) farmerPhone.textContent = bookingData.phone || "-";
 
     if (btnCall) {
@@ -461,124 +335,91 @@ document.addEventListener("DOMContentLoaded", () => {
         if (bookingData.phone) window.location.href = `tel:${bookingData.phone}`;
       };
     }
+
     if (btnChat) {
       btnChat.onclick = () => {
         const targetId = bookingData.chatTargetId || bookingData.farmerId;
-        if (DEBUG_BOOKING) console.log("[Chat] Attempting to chat with:", targetId);
-
         if (targetId) {
           const chatUrl = resolveToRootUrl(`pages/shared/chat.html?targetId=${targetId}`);
-          if (DEBUG_BOOKING) console.log("[Chat] Navigating to:", chatUrl);
-          if (window.navigateWithTransition) window.navigateWithTransition(chatUrl); else window.location.href = chatUrl;
-        } else {
-          const msg = window.i18nT ? window.i18nT('chat_not_available', 'ไม่พบข้อมูลสำหรับการแชท') : 'ไม่พบข้อมูลสำหรับการแชท';
-          if (window.appNotify) window.appNotify(msg, "warning");
-          else console.warn("[Chat] No targetId found for booking:", bookingData);
+          if (window.navigateWithTransition) window.navigateWithTransition(chatUrl);
+          else window.location.href = chatUrl;
+        } else if (window.appNotify) {
+          window.appNotify(t("chat_not_available", "ไม่พบข้อมูลสำหรับการแชท"), "warning");
         }
       };
     }
 
     if (btnOpenMap) {
-      const mUrl = bookingData.mapLink || locationData.googleMapsUrl || "";
+      const mUrl = bookingData.mapLink || "";
       btnOpenMap.style.display = mUrl ? "flex" : "none";
       btnOpenMap.onclick = () => {
-        const mapsUrl = mUrl;
-        if (mapsUrl) {
-          const finalUrl = mapsUrl.startsWith('http') ? mapsUrl : `https://www.google.com/maps?q=${encodeURIComponent(mapsUrl)}`;
-          window.open(finalUrl, "_blank");
-        }
+        const finalUrl = mUrl.startsWith("http") ? mUrl : `https://www.google.com/maps?q=${encodeURIComponent(mUrl)}`;
+        window.open(finalUrl, "_blank");
       };
     }
 
-    // detail panel
     if (detailPanel) detailPanel.innerHTML = renderDetailPanel(bookingData);
-
-    // Render vehicles information
     renderVehicles(bookingData);
-
-    if (DEBUG_BOOKING) console.log("โหลดข้อมูลสำเร็จ:", { bookingData, queueStatus, location: locationData });
   }
 
-  // ================================
-  // Event Handlers
-  // ================================
   function handleToggleDetail() {
     if (!detailPanel || !toggleDetailBtn) return;
     const isHidden = detailPanel.hidden;
     detailPanel.hidden = !isHidden;
-    const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
-    toggleDetailBtn.textContent = isHidden ? t('hide_booking_details', "ซ่อนรายละเอียดการจอง") : t('show_booking_details', "แสดงรายละเอียดการจอง");
+    toggleDetailBtn.textContent = isHidden
+      ? t("hide_booking_details", "ซ่อนรายละเอียดการจอง")
+      : t("show_booking_details", "แสดงรายละเอียดการจอง");
   }
 
   async function handleCancelBooking() {
     const confirmed = await new Promise((resolve) => {
-      const message = window.i18nT ? window.i18nT('confirm_cancel_booking', "คุณต้องการยกเลิกการจองหรือไม่?\n\nการยกเลิกจะไม่สามารถย้อนกลับได้") : "คุณต้องการยกเลิกการจองหรือไม่?\n\nการยกเลิกจะไม่สามารถย้อนกลับได้";
+      const message = t("confirm_cancel_booking", "คุณต้องการยกเลิกการจองหรือไม่?\n\nการยกเลิกจะไม่สามารถย้อนกลับได้");
       if (window.showConfirm) window.showConfirm(message, resolve);
       else resolve(window.confirm(message));
     });
     if (!confirmed) return;
 
-    try {
-      const bkId = (bookingIdText?.textContent || "").trim();
-      const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
-      if (!bkId || bkId === "-") {
-        if (window.appNotify) window.appNotify(t('booking_id_not_found', "ไม่พบรหัสการจอง"), "error");
-        else console.warn(t('booking_id_not_found', "ไม่พบรหัสการจอง"));
-        return;
-      }
-
-      const result = await BookingAPI.cancelBooking(bkId);
-      if (result?.success) {
-        if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");
-        else console.log(t('cancel_success', "ยกเลิกการจองสำเร็จ"));
-
-        const nextHref = resolveToRootUrl("pages/buyer/setbooking/booking.html?filter=cancel");
-        if (window.navigateWithTransition) window.navigateWithTransition(nextHref); else window.location.href = nextHref;
-      } else {
-        if (window.appNotify) window.appNotify(t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง"), "error");
-        else console.error(t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง"));
-      }
-    } catch (error) {
-      console.error("Error canceling booking:", error);
-      const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
-      if (window.appNotify) window.appNotify(t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง กรุณาลองใหม่อีกครั้ง"), "error");
-      else console.error(t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง กรุณาลองใหม่อีกครั้ง"));
+    const bkId = (bookingIdText?.textContent || "").trim();
+    const result = await BookingAPI.cancelBooking(bkId);
+    if (result?.success) {
+      if (window.appNotify) window.appNotify(t("cancel_success", "ยกเลิกการจองสำเร็จ"), "success");
+      const nextHref = resolveToRootUrl("pages/buyer/setbooking/booking.html?filter=cancel");
+      if (window.navigateWithTransition) window.navigateWithTransition(nextHref);
+      else window.location.href = nextHref;
+      return;
     }
+
+    if (window.appNotify) window.appNotify(result?.message || t("cancel_error", "ยกเลิกการจองไม่สำเร็จ"), "error");
   }
 
-  // ================================
-  // Event Listeners
-  // ================================
   btnBack?.addEventListener("click", () => {
-    // [FIX] แก้ path ให้ถูกต้อง: pages/buyer/setbooking/booking.html
-    if (window.navigateWithTransition) window.navigateWithTransition(resolveToRootUrl("pages/buyer/setbooking/booking.html")); else window.location.href = resolveToRootUrl("pages/buyer/setbooking/booking.html");
+    const href = resolveToRootUrl("pages/buyer/setbooking/booking.html");
+    if (window.navigateWithTransition) window.navigateWithTransition(href);
+    else window.location.href = href;
   });
-
   toggleDetailBtn?.addEventListener("click", handleToggleDetail);
   btnCancelBooking?.addEventListener("click", handleCancelBooking);
 
-  // ================================
-  // Initialize
-  // ================================
   async function init() {
     const urlParams = new URLSearchParams(window.location.search);
-    const bookingId = urlParams.get("bookingId") || urlParams.get("bid");
-    const confirmedBooking = localStorage.getItem("confirmedBooking");
+    const bookingId = urlParams.get("bookingId") || urlParams.get("bid") || urlParams.get("id");
+    const confirmedBooking = readStoredBooking();
 
-    // ถ้ามี bookingId ใน URL ให้ดึงจาก API ได้เลย ไม่ต้องอาศัย localStorage
-    // ถ้าไม่มีทั้งคู่ ให้กลับหน้ารายการจอง
     if (!bookingId && !confirmedBooking) {
-      if (window.navigateWithTransition) window.navigateWithTransition(resolveToRootUrl("pages/buyer/setbooking/booking.html")); else window.location.href = resolveToRootUrl("pages/buyer/setbooking/booking.html");
+      const href = resolveToRootUrl("pages/buyer/setbooking/booking.html");
+      if (window.navigateWithTransition) window.navigateWithTransition(href);
+      else window.location.href = href;
       return;
     }
 
     try {
       await loadSuccessData();
-      if (DEBUG_BOOKING) console.log("Booking Step 4 initialized");
+      if (DEBUG_BOOKING) console.log("Booking detail initialized");
     } catch (err) {
-      console.error("Error loading success data:", err);
-      const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
-      window.appNotify(t('load_data_error', "เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"), "error");
+      console.error("Error loading booking data:", err);
+      if (window.appNotify) {
+        window.appNotify(err.message || t("load_data_error", "เกิดข้อผิดพลาดในการโหลดข้อมูล"), "error");
+      }
     }
   }
 

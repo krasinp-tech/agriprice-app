@@ -36,6 +36,12 @@ window.initFavoritesComponent = function initFavoritesComponent() {
       .replaceAll("'", "&#039;");
   }
 
+  function safeUrl(value, fallback) {
+    const raw = String(value || "").trim();
+    if (!raw || /^(javascript|data):/i.test(raw)) return fallback;
+    return raw;
+  }
+
   async function loadFavoriteItems() {
     const fromApi = await helpers.fetchFavoritesFromApi();
     const fromStore = helpers.loadFavoritesFromStore();
@@ -71,10 +77,10 @@ window.initFavoritesComponent = function initFavoritesComponent() {
       button.setAttribute("role", "listitem");
       button.dataset.sellerId = item.id;
       button.dataset.profileId = item.profileId || item.id;
-      const avatarUrl = item.avatar || (helpers.getRelativePrefixToPages() + '../assets/images/avatar-guest.svg');
+      const avatarUrl = safeUrl(item.avatar, helpers.getRelativePrefixToPages() + '../assets/images/avatar-guest.svg');
       button.innerHTML = `
         <div class="fav-avatar">
-          <img src="${avatarUrl}" alt="${escapeHtml(item.title)}">
+          <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(item.title)}">
         </div>
         <span class="fav-title">${escapeHtml(item.title)}</span>
       `;

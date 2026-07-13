@@ -1,10 +1,8 @@
 /**
  * setbooking-step2.js
- * - UI เธ•เธฒเธกเธฃเธนเธ: เธเนเธงเธเธงเธฑเธเธ—เธตเน + เธ•เธฒเธฃเธฒเธเธฃเธญเธเธเธดเธง + toggle + เธฅเธ + modal เน€เธเธดเนเธกเธฃเธญเธ
- * - เธฃเธญเธเธฃเธฑเธ DB: เธฃเธงเธก payload เธเธฒเธ step1 เนเธฅเนเธงเน€เธ•เธฃเธตเธขเธกเธชเนเธ API เนเธเธญเธเธฒเธเธ•
- * NOTE: เธชเธฃเนเธฒเธ product เนเธ /api/products เน€เธเนเธ flow เธเธญเธ Farmer เนเธกเนเนเธเน Buyer
- * เธ–เนเธฒ token เธเธญเธ buyer เธ–เธนเธเนเธเนเธชเธฃเนเธฒเธ product server เธเธฐเธเธเธดเน€เธชเธ (role เนเธกเนเธ–เธนเธเธ•เนเธญเธ)
- * เธเธงเธฃเธขเนเธฒเธขเนเธเธฅเนเธซเธฃเธทเธญเธเธฃเธฑเธ flow เนเธซเนเธ•เธฃเธเธเธฑเธเธเธ—เธเธฒเธ—
+ * - UI ตามรูป: ช่วงวันที่ + ตารางรอบคิว + toggle + ลบ + modal เพิ่มรอบ
+ * - รองรับ DB: รวม payload จาก step1 แล้วเตรียมส่ง API
+ * - ใช้ /api/buyer/products สำหรับ flow ของ Buyer
  */
 
 (function () {
@@ -13,7 +11,7 @@
     USE_API: !!(window.API_BASE_URL),
     getApiBase: () => window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, ""),
     ENDPOINTS: {
-      save: "/api/buyer/products", // POST [FIXED Bug1: Buyer-specific endpoint, not Farmer/Admin /api/products] เธชเธฃเนเธฒเธเธชเธดเธเธเนเธฒ
+      save: "/api/buyer/products", // POST [FIXED Bug1: Buyer-specific endpoint, not Farmer/Admin /api/products]
     },
   };
 
@@ -357,30 +355,43 @@
       };
 
       // ตรวจสอบว่าเป็นอาการแก้ไข (Update) หรือสร้างใหม่ (Create)
-      const productIdFromStep1 = state.step1.product?.id || state.step1.editSource?.product_id;
+      const offerIdFromStep1 =
+        state.step1.product?.offer_id ||
+        state.step1.product?.offerId ||
+        state.step1.editSource?.offer_id ||
+        state.step1.editSource?.offerId ||
+        state.step1.product?.id ||
+        state.step1.editSource?.product_id;
       // [FIXED] ตรวจสอบว่าเป็นหมายเลข ID จริงหรือไม่ (กันกรณีเป็นชื่อสินค้าจาก Fallback)
       const isNumericId = (id) => id && !isNaN(id) && Number.isSafeInteger(Number(id));
-      const isEdit = state.step1.editSource?.isEdit && isNumericId(productIdFromStep1);
+      const isEdit = state.step1.editSource?.isEdit && isNumericId(offerIdFromStep1);
       
       let productResult;
       if (isEdit) {
         // [UPDATE] แก้ไขสินค้าเดิม [FIXED Bug1: ใช้ /api/buyer/products]
-        productResult = await apiCall('PATCH', `/api/buyer/products/${productIdFromStep1}`, productData);
+        productResult = await apiCall('PATCH', `/api/buyer/products/${offerIdFromStep1}`, productData);
       } else {
         // [CREATE] สร้างสินค้าใหม่ [FIXED Bug1: ใช้ /api/buyer/products]
         productResult = await apiCall('POST', '/api/buyer/products', productData);
       }
       
-      const productId = productResult.data?.product_id || productResult.product_id || productResult.id || productIdFromStep1;
+      const offerId =
+        productResult.data?.offer_id ||
+        productResult.offer_id ||
+        productResult.data?.product_id ||
+        productResult.product_id ||
+        productResult.id ||
+        offerIdFromStep1;
 
-      if (!productId) {
-        console.error('Failed to get productId from response:', productResult);
+      if (!offerId) {
+        console.error('Failed to get offerId from response:', productResult);
         throw new Error('ไม่สามารถรับหมายเลขสินค้าได้ กรุณาลองใหม่อีกครั้ง');
       }
 
       // สร้าง slots แบบ batch
       const slotsPayload = {
-        product_id: productId,
+        offer_id: offerId,
+        product_id: offerId,
         start_date: start,
         end_date: end,
         rounds: state.rounds.filter(r => r.enabled).map(r => ({
@@ -433,12 +444,18 @@
     const isNumericId = (id) => id && !isNaN(id) && Number.isSafeInteger(Number(id));
 
     // หากเป็นการแก้ไข (Edit) ให้ดึงข้อมูลรอบเดิมมาจาก DB
-    const productId = state.step1?.product?.id || state.step1?.editSource?.product_id;
-    const isEdit = state.step1?.editSource?.isEdit && isNumericId(productId);
+    const offerId =
+      state.step1?.product?.offer_id ||
+      state.step1?.product?.offerId ||
+      state.step1?.editSource?.offer_id ||
+      state.step1?.editSource?.offerId ||
+      state.step1?.product?.id ||
+      state.step1?.editSource?.product_id;
+    const isEdit = state.step1?.editSource?.isEdit && isNumericId(offerId);
 
     if (isEdit) {
         try {
-            const res = await apiCall('GET', `/api/product-slots?product_id=${productId}`);
+            const res = await apiCall('GET', `/api/product-slots?offer_id=${offerId}&product_id=${offerId}`);
             const slots = res.data || [];
             if (slots.length > 0) {
                 // ดึงวันเริ่มต้น-สิ้นสุดจากรอบแรก (ปกติเซตเดียวกันทุกรอบใน Batch)

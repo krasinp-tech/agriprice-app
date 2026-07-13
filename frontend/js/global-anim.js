@@ -2,6 +2,27 @@
 (function() {
   "use strict";
 
+  if (window.__AGRIPRICE_GLOBAL_ANIM_READY) return;
+  window.__AGRIPRICE_GLOBAL_ANIM_READY = true;
+
+  // Hide bottom nav inside iframe to avoid duplicate bars
+  if (window.self !== window.top) {
+    const iframeStyle = document.createElement('style');
+    iframeStyle.textContent = `
+      #bottomNavMount, .bottom-nav {
+        display: none !important;
+      }
+      body {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+        height: auto !important;
+      }
+    `;
+    document.head.appendChild(iframeStyle);
+  }
+
+  const supportsViewTransition = ('startViewTransition' in document);
+
   // --- Inject Custom Toast & Alert Modal Styles ---
   const style = document.createElement('style');
   style.textContent = `
@@ -48,7 +69,7 @@
     .agri-toast.success span.material-icons-outlined { color: #0b853c; }
     .agri-toast.error span.material-icons-outlined { color: #ff3b30; }
     .agri-toast.info span.material-icons-outlined { color: #007aff; }
-    
+
     [data-theme="dark"] .agri-toast {
       background: rgba(30, 41, 59, 0.9);
       border-color: rgba(255, 255, 255, 0.08);
@@ -133,7 +154,7 @@
       margin: 0 0 24px;
       font-weight: 500;
     }
-    
+
     .agri-alert-footer {
       border-top: 1px solid rgba(15, 23, 42, 0.08);
       margin-left: -24px;
@@ -155,7 +176,7 @@
     .agri-alert-btn:active {
       background: rgba(15, 23, 42, 0.05);
     }
-    
+
     [data-theme="dark"] .agri-alert-dialog {
       background: rgba(30, 41, 59, 0.95);
       border-color: rgba(255, 255, 255, 0.08);
@@ -195,8 +216,46 @@
     [data-theme="dark"] .agri-alert-footer.confirm-footer .confirm-btn {
       color: #22c55e;
     }
+
+    /* ── Page Transition Animations ── */
+    @view-transition {
+      navigation: auto;
+    }
+    html {
+      background-color: var(--html-bg, #F7F9FA) !important;
+    }
+    body {
+      opacity: 0;
+      background-color: var(--html-bg, #F7F9FA) !important;
+      transition: opacity 0.12s ease-in-out !important;
+    }
+    body.page-ready {
+      opacity: 1 !important;
+    }
+    body.page-exit {
+      opacity: 0 !important;
+    }
   `;
+
+  const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+  const bgColor = savedTheme === 'dark' ? '#121212' : '#F7F9FA';
+  document.documentElement.style.setProperty('--html-bg', bgColor);
+
   document.head.appendChild(style);
+
+  // Trigger page-ready fade-in when DOM is ready
+  const makePageReady = () => {
+    if (document.body) document.body.classList.add('page-ready');
+  };
+
+  // Failsafe: force fade-in after 300ms in case DOMContentLoaded is delayed
+  setTimeout(makePageReady, 300);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', makePageReady);
+  } else {
+    makePageReady();
+  }
 
   // 1. Toast Notification System
   function showToast(message, type = 'info') {
@@ -210,14 +269,14 @@
     const toast = document.createElement('div');
     toast.className = `agri-toast ${type}`;
     const icon = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : 'info');
-    
+
     toast.innerHTML = `
       <span class="material-icons-outlined">${icon}</span>
       <span class="toast-message">${message}</span>
     `;
-    
+
     container.appendChild(toast);
-    
+
     // Auto remove
     setTimeout(() => {
       toast.classList.add('fade-out');
@@ -258,10 +317,10 @@
     const backdrop = document.createElement('div');
     backdrop.id = 'agri-custom-alert';
     backdrop.className = 'agri-alert-backdrop';
-    
+
     const dialog = document.createElement('div');
     dialog.className = 'agri-alert-dialog';
-    
+
     const icon = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : 'info');
 
     dialog.innerHTML = `
@@ -274,18 +333,18 @@
         <button class="agri-alert-btn">ตกลง</button>
       </div>
     `;
-    
+
     backdrop.appendChild(dialog);
     document.body.appendChild(backdrop);
-    
+
     // Lock scroll
     document.body.style.overflow = 'hidden';
-    
+
     // Animate open
     setTimeout(() => {
       backdrop.classList.add('open');
     }, 10);
-    
+
     const dismiss = () => {
       backdrop.classList.remove('open');
       document.body.style.overflow = '';
@@ -309,10 +368,10 @@
     const backdrop = document.createElement('div');
     backdrop.id = 'agri-custom-confirm';
     backdrop.className = 'agri-alert-backdrop';
-    
+
     const dialog = document.createElement('div');
     dialog.className = 'agri-alert-dialog';
-    
+
     dialog.innerHTML = `
       <div class="agri-alert-icon-wrap info">
         <span class="material-icons-outlined">help_outline</span>
@@ -324,16 +383,16 @@
         <button class="agri-alert-btn confirm-btn">ตกลง</button>
       </div>
     `;
-    
+
     backdrop.appendChild(dialog);
     document.body.appendChild(backdrop);
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     setTimeout(() => {
       backdrop.classList.add('open');
     }, 10);
-    
+
     const dismiss = (result) => {
       backdrop.classList.remove('open');
       document.body.style.overflow = '';
@@ -345,7 +404,7 @@
 
     dialog.querySelector('.cancel-btn').addEventListener('click', () => dismiss(false));
     dialog.querySelector('.confirm-btn').addEventListener('click', () => dismiss(true));
-    
+
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) dismiss(false);
     });
@@ -363,10 +422,13 @@
 
   // 3. Page Transitions
   window.navigateWithTransition = function(url) {
-    document.body.classList.add('page-exit');
+    if (document.body) {
+      document.body.classList.remove('page-ready');
+      document.body.classList.add('page-exit');
+    }
     setTimeout(() => {
       window.location.href = url;
-    }, 300);
+    }, 120); // match the 0.12s fade out
   };
 
   // 4. Haptics (Native Vibration)
@@ -388,6 +450,46 @@
     if (e.target.closest('button, .bottom-nav-item, .cat-item, .product-item')) {
       window.triggerHaptic('light');
     }
+  });
+
+  // Global click handler to capture relative links and animate them
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented) return;
+    if (e.button !== 0) return; // Only left clicks
+
+    const anchor = e.target.closest('a[href]');
+    if (!anchor) return;
+
+    const href = anchor.getAttribute('href');
+    if (!href || href.startsWith('#') || anchor.getAttribute('target') === '_blank') return;
+
+    // Ignore external or non-http links
+    if (/^(mailto:|tel:|javascript:|https?:\/\/)/i.test(href)) return;
+
+    // Support Auth Guard logic on bottom nav: let components.js handle redirects if not logged in
+    const isBottomNav = anchor.closest('.bottom-nav-item');
+    if (isBottomNav) {
+      const pageKey = isBottomNav.dataset.page;
+      const protectedPages = ['chat', 'booking', 'notifications', 'account'];
+      if (protectedPages.includes(pageKey)) {
+        const tokenKey = window.AUTH_TOKEN_KEY || 'token';
+        const isLoggedIn = window.AuthGuard ? window.AuthGuard.isLoggedIn() : !!localStorage.getItem(tokenKey);
+        if (!isLoggedIn) return; // let components.js handle it
+      }
+    }
+
+    // Check if the link target is the same page to prevent reloading
+    try {
+      const targetUrl = new URL(anchor.href, window.location.origin);
+      if (targetUrl.pathname === window.location.pathname && targetUrl.search === window.location.search) {
+        e.preventDefault();
+        return;
+      }
+    } catch (_) {}
+
+    // Intercept and navigate smoothly!
+    e.preventDefault();
+    window.navigateWithTransition(href);
   });
 
 })();

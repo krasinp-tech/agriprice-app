@@ -4,17 +4,20 @@
 */
 
 (function () {
+  if (window.__AGRIPRICE_AUTH_GUARD_READY) return;
+  window.__AGRIPRICE_AUTH_GUARD_READY = true;
+
   const REDIRECT_KEY = "redirectAfterAuth";
   const LOGIN1_REL = "pages/auth/login1.html";
 
   function isLoggedIn() {
     if (window.api && window.api.isLoggedIn) return window.api.isLoggedIn();
-    
+
     // fallback logic if api not yet loaded or doesn't have the method
     const KEYS = window.STORAGE_KEYS || { TOKEN: 'token', ROLE: 'role' };
     const token = localStorage.getItem(KEYS.TOKEN);
     const role = String(localStorage.getItem(KEYS.ROLE) || 'guest').toLowerCase();
-    
+
     return !!token && role !== 'guest' && role !== 'null' && role !== 'undefined';
   }
 
@@ -38,8 +41,8 @@
       }
       url.searchParams.set("next", cleanNext);
     }
-    
-    if (window.navigateWithTransition) window.navigateWithTransition(url.toString()); 
+
+    if (window.navigateWithTransition) window.navigateWithTransition(url.toString());
     else window.location.href = url.toString();
   }
 
@@ -59,29 +62,23 @@
       const explicit = params.get("next") || sessionStorage.getItem(REDIRECT_KEY);
       sessionStorage.removeItem(REDIRECT_KEY);
 
+      const base = getProjectBasePath();
+
+      // If we are inside the iframe, redirect the top window to reload the Shell state
+      if (window.self !== window.top) {
+        window.top.location.href = base + "index.html";
+        return;
+      }
+
       if (explicit && explicit !== 'undefined' && explicit !== 'null') {
-        // Safe navigation to the explicit target
-        const target = explicit.startsWith('/') ? explicit : (getProjectBasePath() + explicit);
-        if (window.navigateWithTransition) window.navigateWithTransition(target); 
+        const target = explicit.startsWith('/') ? explicit : (base + explicit);
+        if (window.navigateWithTransition) window.navigateWithTransition(target);
         else window.location.href = target;
         return;
       }
 
-      const role = window.api ? window.api.getRole() : 'guest';
-      const user = window.api ? window.api.getUser() : null;
-      const tier = String(user?.tier || 'free').toLowerCase();
-      const base = getProjectBasePath();
-      
       let finalTarget = defaultPath || base + "index.html";
-      
-      // Smart redirect based on role
-      if (!defaultPath) {
-        if (role === "buyer" && tier === "pro") {
-          finalTarget = base + "pages/buyer/Dashboard/Dashboard1.html";
-        }
-      }
-
-      if (window.navigateWithTransition) window.navigateWithTransition(finalTarget); 
+      if (window.navigateWithTransition) window.navigateWithTransition(finalTarget);
       else window.location.href = finalTarget;
     },
 
@@ -91,8 +88,14 @@
       }
       sessionStorage.removeItem(REDIRECT_KEY);
       const base = getProjectBasePath();
-      if (window.navigateWithTransition) window.navigateWithTransition(base + "index.html"); 
-      else window.location.href = base + "index.html";
+
+      // If we are inside the iframe, redirect the top window to reload the Shell state
+      if (window.self !== window.top) {
+        window.top.location.href = base + "index.html";
+      } else {
+        if (window.navigateWithTransition) window.navigateWithTransition(base + "index.html");
+        else window.location.href = base + "index.html";
+      }
     }
   };
 })();

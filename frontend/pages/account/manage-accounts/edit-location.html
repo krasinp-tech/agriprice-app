@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+<meta charset="UTF-8">
    
     <script src="../../../js/api-client.js"></script>
    
     <script src="../../../js/auth/guard.js"></script>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
@@ -227,7 +227,10 @@
 
       try {
         await window.APP_CONFIG_READY;
-        const API_BASE = window.API_BASE_URL.replace(/\/$/, '');
+        const API_BASE = window.getAgriPriceApiUrl
+          ? window.getAgriPriceApiUrl()
+          : (window.API_BASE_URL || '').replace(/\/$/, '');
+        if (!API_BASE) throw new Error('API Base URL not initialized');
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token');
         
         const res = await fetch(API_BASE + '/api/profile', {
@@ -246,7 +249,6 @@
           }
           const okMsg = 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
           if (window.appNotify) window.appNotify(okMsg, 'success');
-          else console.log(okMsg);
           history.back();
         } else {
           throw new Error('บันทึกไม่สำเร็จ');

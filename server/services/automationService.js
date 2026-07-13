@@ -1,6 +1,5 @@
 const logger = require('../utils/logger');
 const { supabaseAdmin } = require('../utils/supabase');
-const { decrementSlotBookedCount } = require('../utils/helpers');
 
 const AUTO_SUCCESS_DELAY_MIN = Number(process.env.BOOKING_AUTO_SUCCESS_DELAY_MIN || 5);
 const AUTO_SUCCESS_DEBUG = String(process.env.BOOKING_AUTO_SUCCESS_DEBUG || 'false').toLowerCase() === 'true';
@@ -38,11 +37,7 @@ async function autoCompleteDueBookings() {
     if (updErr) throw updErr;
 
     if (updatedRows && updatedRows.length > 0) {
-      for (const row of updatedRows) {
-        if (row.slot_id) {
-          await decrementSlotBookedCount(supabaseAdmin, row.slot_id);
-        }
-      }
+      logger.info(`[automation] processed ${updatedRows.length} overdue bookings`);
     }
 
     logger.info(`[automation] marked ${(updatedRows || []).length} bookings as missed`);
@@ -66,21 +61,21 @@ async function autoCloseStaleProductsAndSlots() {
       .eq('is_active', true)
       .lt('end_date', nowBangkok.slice(0, 10)); // end_date < today (Bangkok)
 
-    // ดึงรายการ product_id ที่ยังมี slot ที่ใช้งานอยู่ (active)
+    // ดึงรายการ offer_id ที่ยังมี slot ที่ใช้งานอยู่ (active)
     const { data: activeSlotProductIds } = await supabaseAdmin
       .from('offer_slots')
-      .select('product_id')
+      .select('offer_id')
       .eq('is_active', true);
 
-    const activeIds = (activeSlotProductIds || []).map(r => r.product_id).filter(Boolean);
+    const activeIds = (activeSlotProductIds || []).map(r => r.offer_id).filter(Boolean);
 
-    // ดึงรายการ product_id ทั้งหมดที่มี slot ในระบบ (ทั้ง active และ inactive)
+    // ดึงรายการ offer_id ทั้งหมดที่มี slot ในระบบ (ทั้ง active และ inactive)
     const { data: allSlotProductIds } = await supabaseAdmin
       .from('offer_slots')
-      .select('product_id');
+      .select('offer_id');
 
     const productsWithSlots = (allSlotProductIds || [])
-      .map(r => r.product_id)
+      .map(r => r.offer_id)
       .filter(Boolean)
       .filter((v, i, a) => a.indexOf(v) === i); // ดึงค่าที่ไม่ซ้ำ
 
@@ -92,7 +87,7 @@ async function autoCloseStaleProductsAndSlots() {
         .from('buy_offers')
         .update({ is_active: false })
         .eq('is_active', true)
-        .in('product_id', expiredProductIds);
+        .in('offer_id', expiredProductIds);
 
       if (deactivateErr) throw deactivateErr;
       logger.info(`[automation] deactivated ${expiredProductIds.length} products due to expired slots`);

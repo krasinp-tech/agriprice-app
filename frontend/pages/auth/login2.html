@@ -33,10 +33,10 @@
 </head>
 
 <body>
-  <main class="screen" role="main" aria-label="Agriprice Login Screen">
+  <main class="screen" role="main" aria-label="Agriprice Login Screen" data-i18n-aria-label="auth_login_screen_label">
     <section class="card">
 
-      <div class="media" aria-label="Login media">
+      <div class="media" aria-label="Login media" data-i18n-aria-label="auth_login_media_label">
         <video id="loginVideo" class="media-video" autoplay muted loop playsinline preload="auto"
           poster="../../assets/images/story-1.jpg" controlslist="nodownload noplaybackrate noremoteplayback"
           disablepictureinpicture></video>
@@ -63,7 +63,7 @@
               <input id="password" name="password" class="input input-password" type="password"
                 autocomplete="current-password" placeholder="รหัสผ่าน" data-i18n-placeholder="password_label" required
                 minlength="4" />
-              <button class="eye" id="togglePwd" type="button" aria-label="แสดง/ซ่อน รหัสผ่าน">
+              <button class="eye" id="togglePwd" type="button" aria-label="แสดง/ซ่อน รหัสผ่าน" data-i18n-aria-label="toggle_password_visibility">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8" />
                   <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor"
@@ -97,7 +97,5 @@
   <script src="../../js/auth/guard.js"></script>
   <script src="../../js/auth/login2.js"></script>
 </body>
-
-</html>
 
 </html>

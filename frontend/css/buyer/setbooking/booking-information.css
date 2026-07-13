@@ -149,9 +149,24 @@
 }
 
 #qrCanvas {
+  width: 130px !important;
+  height: 130px !important;
+  display: grid !important;
+  place-items: center;
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.03);
+  background: #ffffff;
   padding: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#qrCanvas canvas,
+#qrCanvas img,
+#qrCanvas table {
+  width: 110px !important;
+  height: 110px !important;
+  display: block;
+  flex: 0 0 auto;
 }
 
 /* ================================

@@ -53,7 +53,7 @@ router.patch('/', authMiddleware, async (req, res) => {
     }
     res.json(response.success('บันทึกการตั้งค่าสำเร็จ', data?.settings || settings));
   } catch (e) {
-    res.json(response.success('บันทึกการตั้งค่าสำเร็จ', req.body.settings));
+    res.status(500).json(response.error('บันทึกการตั้งค่าไม่สำเร็จ', e.message));
   }
 });
 

@@ -13,9 +13,10 @@ async function updateReadByAnyId(userId, notificationId) {
     .eq('user_id', userId)
     .select('notification_id');
 
-  if (!result.error && Array.isArray(result.data) && result.data.length > 0) {
-    return { updated: true };
+  if (!result.error) {
+    return { updated: Array.isArray(result.data) && result.data.length > 0 };
   }
+  if (result.error.code !== '42703') return { error: result.error };
 
   // Fallback for legacy schema.
   result = await supabaseAdmin
@@ -38,9 +39,10 @@ async function deleteByAnyId(userId, notificationId) {
     .eq('user_id', userId)
     .select('notification_id');
 
-  if (!result.error && Array.isArray(result.data) && result.data.length > 0) {
-    return { deleted: true };
+  if (!result.error) {
+    return { deleted: Array.isArray(result.data) && result.data.length > 0 };
   }
+  if (result.error.code !== '42703') return { error: result.error };
 
   // Fallback for legacy schema.
   result = await supabaseAdmin
@@ -53,6 +55,25 @@ async function deleteByAnyId(userId, notificationId) {
   if (result.error) return { error: result.error };
   return { deleted: Array.isArray(result.data) && result.data.length > 0 };
 }
+
+/**
+ * GET /api/notifications/unread
+ */
+router.get('/unread', authMiddleware, async (req, res) => {
+  try {
+    const { count, error } = await supabaseAdmin
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.user.id)
+      .eq('is_read', false);
+
+    if (error) return res.status(500).json(response.error('ดึงจำนวนแจ้งเตือนไม่อ่านไม่สำเร็จ', error.message));
+
+    res.json(response.success('', { unreadCount: count || 0 }));
+  } catch (e) {
+    res.status(500).json(response.error(e.message));
+  }
+});
 
 /**
  * GET /api/notifications
@@ -68,7 +89,16 @@ router.get('/', authMiddleware, async (req, res) => {
       .limit(Number(limit));
 
     if (error) return res.status(500).json(response.error('โหลดแจ้งเตือนไม่สำเร็จ', error.message));
-    res.json(response.success('', data || []));
+
+    const mapped = (data || []).map(n => ({
+      ...n,
+      id: n.notification_id || n.id,
+      message: n.message || n.content || n.description || '',
+      content: n.content || n.message || n.description || '',
+      description: n.description || n.message || n.content || ''
+    }));
+
+    res.json(response.success('', mapped));
   } catch (e) {
     res.status(500).json(response.error('โหลดแจ้งเตือนไม่สำเร็จ', e.message));
   }
@@ -134,7 +164,7 @@ router.patch('/settings', authMiddleware, async (req, res) => {
 
     res.json(response.success('บันทึกการตั้งค่าสำเร็จ', settings));
   } catch (e) {
-    res.json(response.success('บันทึกการตั้งค่าสำเร็จ', req.body.settings));
+    res.status(500).json(response.error('บันทึกการตั้งค่าไม่สำเร็จ', e.message));
   }
 });
 
@@ -146,14 +176,52 @@ router.post('/push-token', authMiddleware, async (req, res) => {
     const { token, platform } = req.body;
     if (!token) return res.status(400).json(response.error('กรุณาระบุ token'));
 
-    await supabaseAdmin
+    const payload = {
+      user_id: req.user.id,
+      push_token: token,
+      platform: platform || 'web',
+      last_seen: new Date().toISOString()
+    };
+
+    const { data: existing, error: findError } = await supabaseAdmin
       .from('device_sessions')
-      .upsert({
-        user_id: req.user.id,
-        push_token: token,
-        platform: platform || 'web',
-        last_seen: new Date().toISOString()
-      }, { onConflict: 'user_id,push_token' });
+      .select('session_id')
+      .eq('user_id', req.user.id)
+      .eq('push_token', token)
+      .limit(1)
+      .maybeSingle();
+
+    if (findError) throw findError;
+
+    if (existing?.session_id) {
+      const { error: updateError } = await supabaseAdmin
+        .from('device_sessions')
+        .update({
+          platform: payload.platform,
+          last_seen: payload.last_seen
+        })
+        .eq('session_id', existing.session_id);
+
+      if (updateError) throw updateError;
+    } else {
+      const { error: insertError } = await supabaseAdmin
+        .from('device_sessions')
+        .insert(payload);
+
+      if (insertError && insertError.code === '23505') {
+        const { error: retryError } = await supabaseAdmin
+          .from('device_sessions')
+          .update({
+            platform: payload.platform,
+            last_seen: payload.last_seen
+          })
+          .eq('user_id', req.user.id)
+          .eq('push_token', token);
+        if (retryError) throw retryError;
+      } else if (insertError) {
+        throw insertError;
+      }
+    }
 
     res.json(response.success('ลงทะเบียน Device Token สำเร็จ'));
   } catch (e) {

@@ -1,64 +1,74 @@
-# 🌾 AgriPrice - แพลตฟอร์มซื้อขายผลผลิตการเกษตร
+# AgriPrice
 
-แพลตฟอร์มสำหรับเชื่อมต่อระหว่างเกษตรกร (Farmer) และผู้รับซื้อ (Buyer) เพื่อจัดการการจองคิวรับซื้อผลผลิตอย่างมีประสิทธิผล ลดระยะเวลาการรอคอย และเพิ่มความโปร่งใสในด้านราคา
+AgriPrice is an agricultural buy-offer and queue-booking platform. It connects farmers with buying centers, supports offer discovery, booking slots, queue tracking, chat, notifications, government price lookup, favorites, and app reviews.
 
-## 🚀 โครงสร้างโปรเจกต์ (Project Structure)
+## Project Structure
 
-โปรเจกต์นี้แบ่งออกเป็น 2 ส่วนหลัก:
+- `frontend/` - HTML, CSS, and vanilla JavaScript client used by Capacitor.
+- `server/` - Node.js and Express API server.
+- `infrastructure/database/` - Supabase schema references, migrations, and maintenance SQL.
 
-### 1. [Frontend (Client)](./frontend/)
-- **เทคโนโลยี**: HTML5, Vanilla CSS, Javascript (ES6+)
-- **ฟีเจอร์**: ระบบจองคิว, แชท, ค้นหาสินค้าพร้อมตัวกรอง, ระบบแจ้งเตือน และโปรไฟล์ผู้ใช้
-* **Mobile Support**: รองรับการทำแอป Android ผ่าน Capacitor/Cordova
+## Backend
 
-### 2. [Backend (Server)](./server/)
-- **เทคโนโลยี**: Node.js, Express, PostgreSQL (บน Supabase)
-- **ฟีเจอร์**: API Auth (OTP Development Mode), Database Connection Pool, ระบบคำนวณคิวอัตโนมัติ และ File Upload
-- **ความปลอดภัย**: รองรับ JWT Authentication และมาตรฐาน CORS
-
-## 🛠️ วิธีการรันโปรเจกต์ (Getting Started)
-
-### การเตรียมการ
-1. ติดตั้ง [Node.js](https://nodejs.org/)
-2. ปรับปรุงไฟล์ `.env` ในโฟลเดอร์ `server` โดยระบุ `DATABASE_URL` ของคุณ
-
-### การรัน Backend
 ```bash
 cd server
 npm install
 npm run dev
 ```
 
-### การรัน Frontend
-- สามารถใช้ **Live Server** (VS Code) เปิดจากโฟลเดอร์ `frontend/index.html`
-- ตัวแอปจะเชื่อมต่อกับ API ที่ `http://localhost:5000` โดยอัตโนมัติ
+Required environment values are configured in `server/.env`.
 
-### 3. [Infrastructure & Setup](./infrastructure/)
-- **Database Scripts**: รวมสคริปต์ SQL สำหรับสร้างและปรับปรุงฐานข้อมูลบน Supabase
-- **Optimization**: มีระบบ Indexing และ RLS Security ให้พร้อมใช้งาน
+Common values:
 
-## 🛠️ วิธีการรันโปรเจกต์ (Getting Started)
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `JWT_SECRET`
+- Optional Firebase values for push notifications.
 
-### 1. การเตรียมฐานข้อมูล (Database)
-- เข้าไปที่โฟลเดอร์ `infrastructure/database/`
-- นำคำสั่งใน `SUPABASE_OPTIMIZE.sql` ไปรันใน SQL Editor ของ Supabase
+## Frontend
 
-### 2. การรัน Backend
+The mobile app uses Capacitor. The generated web bundle lives in `frontend/www`.
+
 ```bash
-cd server
+cd frontend
 npm install
-# คัดลอก .env.example เป็น .env และตั้งค่า DATABASE_URL
-npm run dev
+npm run cap:sync
 ```
 
-### 3. การรัน Frontend
-- ใช้ **Live Server** เปิด `frontend/index.html`
-- ตัวแอปจะเชื่อมต่อกับ API อัตโนมัติ
+The frontend source is written with vanilla JavaScript and reusable components. The shared API client is in `frontend/js/api-client.js`.
 
-## 📱 การพัฒนาแอปมือถือ (Mobile Development)
-- โปรเจกต์นี้รองรับ Capacitor สำหรับการ Build เป็น Android/iOS App
-- สามารถรัน `npm run cap:copy` ในโฟลเดอร์ frontend เพื่อซิงค์ไฟล์
+## Database Setup
 
+For an existing Supabase project, run these files in Supabase SQL Editor:
 
----
-*โปรเจกต์นี้ได้รับการพัฒนาเพื่อยกระดับสินค้าเกษตรไทย* 🍎🍍🍇
+1. `infrastructure/database/migrations/final_teacher_normalization_migration.sql`
+2. `infrastructure/database/migrations/create-reviews-and-notification-link.sql`
+3. `infrastructure/database/migrations/zz-fix-chat-device-unique-constraints.sql`
+4. `infrastructure/database/maintenance/SUPABASE_OPTIMIZE.sql`
+5. `infrastructure/database/maintenance/verify_submission_constraints.sql`
+
+Reference documentation:
+
+- `infrastructure/database/schemas/schema_v3.sql`
+
+## Final Normalization Notes
+
+- `offer_slots.booked_count` is derived from `bookings`; it is not stored.
+- `bookings` stores `slot_id`; offer and product details are derived through `offer_slots.offer_id`.
+- Vehicle plates are stored in `booking_vehicles`.
+- Profile links and services are stored in `profile_links` and `profile_services`.
+- Product catalog data is stored in `products` and `varieties`; `buy_offers` references `variety_id`.
+- Offer grade prices are stored in `offer_grades`.
+
+## Verification
+
+```bash
+cd server
+npm run lint
+```
+
+Expected output:
+
+```text
+Syntax check passed (43 files).
+```

@@ -37,6 +37,9 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
   if (window.AGRIPRICE_DEBUG) console.log("[Components] Already loaded, skipping re-init");
 } else {
   window.__AGRIPRICE_COMPONENTS_READY = true;
+  const IS_EMBEDDED_FRAME = (() => {
+    try { return window.self !== window.top; } catch (_) { return true; }
+  })();
 
   // ===== Shared business rules =====
   window.AgriPriceRules = window.AgriPriceRules || {
@@ -156,13 +159,15 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
     const LEAVE_MS = 180;
 
-    window.navigateWithTransition = function navigateWithTransition(url, options = {}) {
-      if (window.AgriPriceRouter && window.AgriPriceRouter.navigate) {
-        window.AgriPriceRouter.navigate(url, options);
-      } else {
-        window.location.href = url;
-      }
-    };
+    if (!window.navigateWithTransition) {
+      window.navigateWithTransition = function navigateWithTransition(url, options = {}) {
+        if (window.AgriPriceRouter && window.AgriPriceRouter.navigate) {
+          window.AgriPriceRouter.navigate(url, options);
+        } else {
+          window.location.href = url;
+        }
+      };
+    }
 
     // 🚀 View Transitions API handles page animations natively.
     // We only intercept bottom-nav clicks for auth guard purposes.
@@ -394,6 +399,26 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       return getCurrentRole() === "buyer";
     }
 
+    function getGradePrice(card, grade) {
+      const bound = card.querySelector(`[data-bind="price${grade}"]`)?.textContent?.trim();
+      if (bound) return bound;
+
+      const boxes = card.querySelectorAll(".price-box, .pc-grade-box, .grade-item-box");
+      for (const box of boxes) {
+        const label =
+          box.querySelector(".grade, .pc-grade-letter, .grade-item-letter")?.textContent?.trim() ||
+          "";
+        if (label.toUpperCase() !== grade) continue;
+
+        return (
+          box.querySelector(".price, .pc-grade-price, .grade-item-price")?.textContent?.trim() ||
+          ""
+        );
+      }
+
+      return "";
+    }
+
     document.addEventListener("click", async function (e) {
       // Allowed areas for global delegation
       if (e.__agripriceHandled) return;
@@ -409,9 +434,15 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
         e.__agripriceHandled = true;
         const card = favBtn.closest(".product-card");
-        const productId = card?.dataset?.productId || card?.getAttribute("data-product-id") || "";
+        const offerId =
+          card?.dataset?.offerId ||
+          card?.getAttribute("data-offer-id") ||
+          card?.dataset?.productId ||
+          card?.getAttribute("data-product-id") ||
+          "";
+        const productId = card?.dataset?.productId || card?.getAttribute("data-product-id") || offerId;
         const sellerId = card?.dataset?.sellerId || card?.getAttribute("data-seller-id") || "";
-        const favoriteKind = productId ? "product" : "seller";
+        const favoriteKind = offerId ? "product" : "seller";
         if (window.AGRIPRICE_DEBUG) {
           // removed click log
         }
@@ -422,7 +453,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         if (!card) return;
 
         const id =
-          (favoriteKind === "product" ? (productId || card.dataset.sellerId || card.getAttribute("data-seller-id") || "") : (sellerId || card.getAttribute("data-seller-id") || "")) ||
+          (favoriteKind === "product" ? (offerId || productId || card.dataset.sellerId || card.getAttribute("data-seller-id") || "") : (sellerId || card.getAttribute("data-seller-id") || "")) ||
           "";
 
         const name =
@@ -437,9 +468,9 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           card.querySelector(".seller-sub")?.textContent?.trim() ||
           "";
 
-        const priceA = card.querySelector('[data-bind="priceA"]')?.textContent?.trim() || "";
-        const priceB = card.querySelector('[data-bind="priceB"]')?.textContent?.trim() || "";
-        const priceC = card.querySelector('[data-bind="priceC"]')?.textContent?.trim() || "";
+        const priceA = getGradePrice(card, "A");
+        const priceB = getGradePrice(card, "B");
+        const priceC = getGradePrice(card, "C");
         const distance = card.querySelector('[data-bind="distance"]')?.textContent?.trim() || "";
         const updateTime = card.querySelector('[data-bind="updateTime"]')?.textContent?.trim() || "";
 
@@ -456,6 +487,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           id,
           kind: favoriteKind,
           sellerId,
+          offerId,
           productId,
           productName: sub,
           priceA,
@@ -547,10 +579,18 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           const sid = bookCard.dataset.sellerId || bookCard.getAttribute("data-seller-id") || "";
           const sname = bookCard.dataset.sellerName || bookCard.getAttribute("data-seller-name") ||
             bookCard.querySelector('[data-bind="sellerName"]')?.textContent?.trim() || "";
-          const spid = bookCard.dataset.productId || bookCard.getAttribute("data-product-id") || "";
+          const spid =
+            bookCard.dataset.offerId ||
+            bookCard.getAttribute("data-offer-id") ||
+            bookCard.dataset.productId ||
+            bookCard.getAttribute("data-product-id") ||
+            "";
           if (sid) localStorage.setItem("bookingFarmerId", sid);
           if (sname) localStorage.setItem("bookingFarmerName", sname);
-          if (spid) localStorage.setItem("bookingProductId", spid);
+          if (spid) {
+            localStorage.setItem("bookingOfferId", spid);
+            localStorage.setItem("bookingProductId", spid);
+          }
         }
 
         const pagesPrefix = getRelativePrefixToPages();
@@ -634,10 +674,11 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       }
 
       document.querySelectorAll(".product-card").forEach((card) => {
-        const productId = card.dataset.productId || card.getAttribute("data-product-id") || "";
+        const offerId = card.dataset.offerId || card.getAttribute("data-offer-id") || card.dataset.productId || card.getAttribute("data-product-id") || "";
+        const productId = card.dataset.productId || card.getAttribute("data-product-id") || offerId;
         const sellerId = card.dataset.sellerId || card.getAttribute("data-seller-id") || "";
-        const kind = productId ? "product" : "seller";
-        const id = kind === "product" ? productId : sellerId;
+        const kind = offerId ? "product" : "seller";
+        const id = kind === "product" ? offerId : sellerId;
         const cardKey = `${kind}:${id}`;
         if (skipId && String(cardKey) === String(skipId)) return;
         const isFav = id ? window.FavoritesStore.has(id, kind) : false;
@@ -719,6 +760,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
      Auto inject components
   ---------------------------- */
   window.autoLoadBottomNav = async function autoLoadBottomNav() {
+    if (IS_EMBEDDED_FRAME) return;
+
     const mount =
       document.getElementById("bottomNavMount") ||
       document.getElementById("bottomNavPlaceholder");
@@ -811,7 +854,10 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     })();
 
     // Global unread chat badge.
+    let updateChatBadgeInFlight = false;
     async function updateChatBadgeGlobal() {
+      if (updateChatBadgeInFlight || document.hidden) return;
+      updateChatBadgeInFlight = true;
       if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
       const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
       const TOKEN_KEY = window.AUTH_TOKEN_KEY || 'token';
@@ -825,6 +871,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
       if (!currentBase || !token) {
         clearBadge();
+        updateChatBadgeInFlight = false;
         return;
       }
       fetch(currentBase + '/api/chats/unread', {
@@ -841,10 +888,14 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         });
       }).catch(() => {
         clearBadge();
+      }).finally(() => {
+        updateChatBadgeInFlight = false;
       });
     }
-    setTimeout(updateChatBadgeGlobal, 1500);
-    setInterval(updateChatBadgeGlobal, 10000);
+    if (!IS_EMBEDDED_FRAME) {
+      setTimeout(updateChatBadgeGlobal, 5000);
+      setInterval(updateChatBadgeGlobal, 30000);
+    }
 
     fixBottomNavPaths();
     applyRoleBasedNav();

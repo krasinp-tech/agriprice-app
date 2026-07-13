@@ -2,9 +2,32 @@
 (function() {
   "use strict";
 
-  const api = window.api || {};
   let ALL_NOTIFICATIONS = [];
   let CURRENT_TAB = 'all';
+
+  function getRelativePrefixToRoot() {
+    const path = (window.location.pathname || "").replace(/\\/g, "/");
+    const dir = path.endsWith("/") ? path : path.substring(0, path.lastIndexOf("/") + 1);
+
+    const idx = dir.lastIndexOf("/pages/");
+    if (idx === -1) return "";
+    const afterPages = dir.substring(idx + "/pages/".length);
+    const depth = afterPages.split("/").filter(Boolean).length;
+    return "../" + "../".repeat(depth);
+  }
+
+  const prefixRoot = getRelativePrefixToRoot();
+
+  function resolveToRootUrl(p) {
+    if (!p) return "";
+    if (/^(https?:\/\/|data:|blob:|#|tel:|mailto:)/i.test(p)) return p;
+    const normalized = String(p).replace(/^\/+/g, "").replace(/^(\.\/)+/g, "").replace(/^(\.\.\/)+/g, "");
+    return prefixRoot + normalized;
+  }
+
+  function getApi() {
+    return window.api || {};
+  }
 
   function t(key, fallback) {
     if (window.i18nT) return window.i18nT(key, fallback);
@@ -60,8 +83,15 @@
         <div class="skeleton-card"><div class="skeleton skeleton-avatar"></div><div class="skeleton-card-content"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div></div>
       `;
 
+      const api = getApi();
+      if (!api.getNotifications) throw new Error('Notification API is not ready');
+
       const res = await api.getNotifications();
-      ALL_NOTIFICATIONS = Array.isArray(res) ? res : (res.data || []);
+      const rows = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+      ALL_NOTIFICATIONS = rows.map((n) => ({
+        ...n,
+        id: n.id || n.notification_id,
+      }));
       
       refreshUI();
     } catch (err) {
@@ -88,12 +118,12 @@
     }
 
     if (filtered.length === 0) {
-      emptyState.hidden = false;
+      if (emptyState) emptyState.hidden = false;
       listMount.innerHTML = '';
       return;
     }
 
-    emptyState.hidden = true;
+    if (emptyState) emptyState.hidden = true;
     renderNotifications(filtered, listMount);
   }
 
@@ -101,14 +131,15 @@
     mount.innerHTML = items.map((n, index) => {
       const type = n.type || 'system';
       const isUnread = !n.is_read;
+      const id = n.id || n.notification_id;
       const html = `
-        <div class="noti-item ${isUnread ? 'is-unread' : ''}" data-id="${n.id}" style="cursor:pointer; ${isUnread ? 'background: rgba(30,158,108,0.04);' : ''}">
+        <div class="noti-item ${isUnread ? 'is-unread' : ''}" data-id="${escapeHtml(id)}" style="cursor:pointer; ${isUnread ? 'background: rgba(30,158,108,0.04);' : ''}">
           <div class="noti-item-icon ${getIconClass(type)}">
             <span class="material-icons-outlined">${getIconName(type)}</span>
           </div>
           <div class="noti-item-body">
             <div class="noti-item-title">${escapeHtml(n.title)}</div>
-            <div class="noti-item-desc">${escapeHtml(n.message || n.content)}</div>
+            <div class="noti-item-desc">${escapeHtml(n.message || n.content || n.description)}</div>
             <div class="noti-item-time">${formatRelativeTime(n.created_at)}</div>
           </div>
           ${isUnread ? `<div class="noti-unread-dot" style="width:8px; height:8px; background:var(--brand); border-radius:50%; margin-left:8px;"></div>` : ''}
@@ -122,11 +153,13 @@
     mount.querySelectorAll('.noti-item').forEach(el => {
       el.addEventListener('click', async () => {
         const id = el.dataset.id;
-        const noti = ALL_NOTIFICATIONS.find(x => String(x.id) === String(id));
+        const noti = ALL_NOTIFICATIONS.find(x => String(x.id || x.notification_id) === String(id));
         
         if (noti && !noti.is_read) {
           try {
-            await api.call('PATCH', `/api/notifications/${id}/read`);
+            const api = getApi();
+            if (api.markRead) await api.markRead(id);
+            else await api.call('PATCH', `/api/notifications/${id}/read`);
             noti.is_read = true;
             refreshUI();
           } catch (err) {
@@ -136,7 +169,12 @@
         
         // Handle deep linking if available
         if (noti && noti.link) {
-           window.location.href = noti.link;
+          const resolvedLink = resolveToRootUrl(noti.link);
+          if (window.navigateWithTransition) {
+            window.navigateWithTransition(resolvedLink);
+          } else {
+            window.location.href = resolvedLink;
+          }
         }
       });
     });
@@ -147,7 +185,10 @@
       const hasUnread = ALL_NOTIFICATIONS.some(n => !n.is_read);
       if (!hasUnread) return;
 
-      await api.call('POST', '/api/notifications/read-all');
+      const api = getApi();
+      if (!api.markAllRead) throw new Error('Notification API is not ready');
+
+      await api.markAllRead();
       ALL_NOTIFICATIONS.forEach(n => n.is_read = true);
       refreshUI();
       if (window.showToast) window.showToast(t('all_marked_read', 'อ่านทั้งหมดแล้ว'), 'success');
@@ -176,6 +217,9 @@
 
     loadNotifications();
   }
+
+  window.loadNotifications = loadNotifications;
+  window.addEventListener('agriprice:notifications-refresh', loadNotifications);
 
   document.addEventListener('DOMContentLoaded', init);
 })();

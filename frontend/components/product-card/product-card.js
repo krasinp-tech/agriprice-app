@@ -261,8 +261,12 @@
     }
 
     // IDs
-    if (data.id !== undefined) card.dataset.productId = data.id;
-    if (data.user_id !== undefined) card.dataset.sellerId = data.user_id;
+    const offerId = data.offer_id ?? data.offerId ?? data.id ?? data.productId ?? data.product_id;
+    const productId = data.product_id ?? data.productId ?? offerId;
+    const sellerId = data.user_id ?? data.sellerId ?? data.seller_id ?? data.profile_id ?? data.profileId;
+    if (offerId !== undefined && offerId !== null) card.dataset.offerId = offerId;
+    if (productId !== undefined && productId !== null) card.dataset.productId = productId;
+    if (sellerId !== undefined && sellerId !== null) card.dataset.sellerId = sellerId;
 
     // Stale Handling
     if (data.isStale) {

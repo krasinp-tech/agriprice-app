@@ -68,14 +68,14 @@ class AuthService {
 
     // 1. Verify token with firebase-admin
     const admin = require('firebase-admin');
+    const { getApps } = require('firebase-admin/app');
     
     // โหลดและ Initialize Firebase Admin แบบ On-demand หากมี PROJECT_ID แต่ยังไม่ถูกสร้าง
-    if (admin.apps.length === 0 && process.env.FIREBASE_PROJECT_ID) {
+    if (getApps().length === 0 && process.env.FIREBASE_PROJECT_ID) {
       try {
         admin.initializeApp({
           projectId: process.env.FIREBASE_PROJECT_ID
         });
-        console.log('[AuthService] Initialized Firebase Admin on-demand using Project ID:', process.env.FIREBASE_PROJECT_ID);
       } catch (err) {
         console.error('[AuthService] Failed to initialize Firebase Admin on-demand:', err.message);
       }
@@ -83,29 +83,61 @@ class AuthService {
     
     // Check if firebase admin has been initialized
     let firebaseVerified = false;
-    if (admin.apps.length > 0) {
+    let decodedPhone = null;
+
+    if (getApps().length > 0) {
       try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const firebasePhone = toE164(decodedToken.phone_number);
-        
-        if (firebasePhone !== cleanPhone) {
-          throw new Error(`เบอร์โทรศัพท์ไม่ตรงกับในระบบ Firebase (${firebasePhone} vs ${cleanPhone})`);
-        }
-        verifiedPhone = firebasePhone;
+        decodedPhone = decodedToken.phone_number;
         firebaseVerified = true;
       } catch (err) {
-        console.error('[AuthService] Firebase ID Token verification failed:', err.message);
-        throw new Error('การยืนยันตัวตนกับ Firebase ล้มเหลว: ' + err.message);
+        console.warn('[AuthService] Firebase ID Token verification via Admin SDK failed, trying manual fallback...', err.message);
       }
-    } else {
-      // Fallback/Mock mode if Firebase Admin is not configured but client sent some token
-      console.warn('[AuthService] Firebase Admin not initialized, verifying mock-style');
-      firebaseVerified = true;
     }
 
+    // Manual verification fallback (useful for local dev without service account JSON)
     if (!firebaseVerified) {
+      try {
+        const projectId = process.env.FIREBASE_PROJECT_ID || 'agriprice-otp';
+        const decodedHeader = jwt.decode(idToken, { complete: true });
+        if (!decodedHeader || !decodedHeader.header || !decodedHeader.header.kid) {
+          throw new Error('Invalid token structure');
+        }
+
+        const kid = decodedHeader.header.kid;
+        const resPublicKeys = await fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com');
+        if (!resPublicKeys.ok) {
+          throw new Error('Failed to fetch Firebase public keys');
+        }
+        const keys = await resPublicKeys.json();
+        const cert = keys[kid];
+        if (!cert) {
+          throw new Error('Public key not found for kid: ' + kid);
+        }
+
+        const decoded = jwt.verify(idToken, cert, {
+          audience: projectId,
+          issuer: `https://securetoken.google.com/${projectId}`,
+          algorithms: ['RS256']
+        });
+
+        decodedPhone = decoded.phone_number;
+        firebaseVerified = true;
+      } catch (manualErr) {
+        console.error('[AuthService] Manual Firebase verification failed:', manualErr.message);
+        throw new Error('การยืนยันตัวตนกับ Firebase ล้มเหลว: ' + manualErr.message);
+      }
+    }
+
+    if (!firebaseVerified || !decodedPhone) {
       throw new Error('ไม่สามารถตรวจสอบสิทธิ์กับ Firebase ได้');
     }
+
+    const firebasePhone = toE164(decodedPhone);
+    if (firebasePhone !== cleanPhone) {
+      throw new Error(`เบอร์โทรศัพท์ไม่ตรงกับในระบบ Firebase (${firebasePhone} vs ${cleanPhone})`);
+    }
+    verifiedPhone = firebasePhone;
 
     const profileResult = await supabaseAdmin
       .from('profiles')
@@ -134,7 +166,6 @@ class AuthService {
     let verifiedPhone;
     try {
       const decoded = jwt.verify(temp_token, process.env.JWT_SECRET);
-      console.log('[AuthService] Decoded temp_token:', { phone: decoded.phone, verified: decoded.otp_verified });
 
       if (!decoded.phone || !decoded.otp_verified) throw new Error('Invalid token payload (missing phone or verified status)');
       verifiedPhone = decoded.phone;
@@ -182,6 +213,8 @@ class AuthService {
         avatar: defaultAvatar,
         tier: 'free',
         email: profile.email || null,
+        lat: profile.lat !== undefined ? profile.lat : null,
+        lng: profile.lng !== undefined ? profile.lng : null,
       }, { onConflict: 'profile_id' });
 
     if (upsertErr) {
@@ -198,30 +231,130 @@ class AuthService {
     };
   }
 
+  async passwordReset(tempToken, password) {
+    if (!tempToken) throw new Error('ไม่พบ Token ยืนยัน OTP');
+
+    let verifiedPhone;
+    try {
+      const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+      if (!decoded.phone || !decoded.otp_verified) {
+        throw new Error('Invalid token payload');
+      }
+      verifiedPhone = decoded.phone;
+    } catch (err) {
+      console.error('[AuthService] Token Verification Failed:', err.message);
+      throw new Error('Token ยืนยัน OTP หมดอายุหรือไมถูกต้อง');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const { data: profile, error: fetchErr } = await supabaseAdmin
+      .from('profiles')
+      .select('profile_id')
+      .eq('phone', verifiedPhone)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!profile) throw new Error('ไม่พบข้อมูลบัญชีผู้ใช้งาน');
+
+    const userId = profile.profile_id;
+
+    const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      password: password
+    });
+    if (authErr) {
+      console.warn('[AuthService] Failed to update Supabase Auth password:', authErr.message);
+    }
+
+    const { error: updateErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ password_hash: passwordHash })
+      .eq('profile_id', userId);
+
+    if (updateErr) throw updateErr;
+
+    return { success: true, message: 'เปลี่ยนรหัสผ่านสำเร็จ' };
+  }
+
+  async changePassword(userId, currentPassword, newPassword) {
+    const { data: profile, error: fetchErr } = await supabaseAdmin
+      .from('profiles')
+      .select('password_hash')
+      .eq('profile_id', userId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!profile) throw new Error('ไม่พบข้อมูลบัญชีผู้ใช้งาน');
+
+    if (!profile.password_hash) {
+      throw new Error('บัญชีนี้ยังไม่ได้ตั้งค่ารหัสผ่าน');
+    }
+
+    const valid = await bcrypt.compare(currentPassword, profile.password_hash);
+    if (!valid) {
+      throw new Error('รหัสผ่านเดิมไม่ถูกต้อง');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password in Supabase Auth
+    const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      password: newPassword
+    });
+    if (authErr) {
+      console.warn('[AuthService] Failed to update Supabase Auth password during changePassword:', authErr.message);
+    }
+
+    // Update in profiles table
+    const { error: updateErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ password_hash: passwordHash })
+      .eq('profile_id', userId);
+
+    if (updateErr) throw updateErr;
+
+    return { success: true, message: 'เปลี่ยนรหัสผ่านสำเร็จ' };
+  }
+
   async login(identifier, password) {
     const cleanId = (identifier || '').trim();
-    console.log('[AuthService] Login attempt for:', cleanId);
 
     const isEmail = cleanId.includes('@');
-    const searchPhone = isEmail ? null : toE164(cleanId);
     const rawDigits = cleanId.replace(/\D/g, '');
 
     let profile = null;
-    if (searchPhone) {
-      console.log('[AuthService] Searching for phone variations:', searchPhone, rawDigits);
+    if (!isEmail) {
+      if (rawDigits.length < 6) {
+        throw new Error('Account not found');
+      }
 
-      const { data, error } = await supabaseAdmin
+      const phoneCandidates = [...new Set([toE164(rawDigits), rawDigits].filter(Boolean))];
+      const { data: exactRows, error: exactError } = await supabaseAdmin
         .from('profiles')
         .select('*')
-        .or(`phone.eq."${searchPhone}",phone.eq."${rawDigits}",phone.ilike."%${rawDigits}%"`)
-        .maybeSingle();
+        .in('phone', phoneCandidates)
+        .limit(2);
 
-      if (error) console.error('[AuthService] DB Error:', error);
-      profile = data;
+      if (exactError) console.error('[AuthService] DB Error:', exactError);
+      if (Array.isArray(exactRows) && exactRows.length === 1) {
+        profile = exactRows[0];
+      }
+
+      if (!profile && rawDigits.length >= 8) {
+        const { data: partialRows, error: partialError } = await supabaseAdmin
+          .from('profiles')
+          .select('*')
+          .ilike('phone', `%${rawDigits}%`)
+          .limit(2);
+
+        if (partialError) console.error('[AuthService] DB Error:', partialError);
+        if (Array.isArray(partialRows) && partialRows.length === 1) {
+          profile = partialRows[0];
+        }
+      }
     }
 
     if (!profile && isEmail) {
-      console.log('[AuthService] Searching for email:', cleanId);
       const { data } = await supabaseAdmin
         .from('profiles')
         .select('*')
@@ -231,25 +364,20 @@ class AuthService {
     }
 
     if (!profile) {
-      console.log('[AuthService] Profile not found');
       throw new Error('ไม่พบบัญชีนี้ กรุณาสมัครสมาชิกก่อน');
     }
 
     if (!profile.password_hash) {
-      console.log('[AuthService] Profile has no password_hash (null or empty)');
       throw new Error('ไม่พบบัญชีนี้ กรุณาสมัครสมาชิกก่อน');
-    }
-
-    console.log('[AuthService] Found profile, hash length:', profile.password_hash.length);
-    const valid = await bcrypt.compare(password, profile.password_hash);
-    if (!valid) {
-      console.log('[AuthService] Invalid password');
-      throw new Error('เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง');
     }
 
     if (profile.account_status === 'disabled') throw new Error('บัญชีนี้ถูกปิดใช้งานอยู่');
 
-    console.log('[AuthService] Login successful for:', profile.profile_id);
+    const valid = await bcrypt.compare(password, profile.password_hash);
+    if (!valid) {
+      throw new Error('เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง');
+    }
+
     const token = signToken({ id: profile.profile_id, phone: profile.phone, role: profile.role, tier: profile.tier || 'free' });
     return {
       token,

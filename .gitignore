@@ -2,6 +2,7 @@
 .env
 .env.*
 server/.env
+server/firebase-service-account.json
 node_modules/
 *.zip
 server_deploy.zip
@@ -10,15 +11,18 @@ server_deploy.zip
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/
+frontend/android/.idea/
 
 # Logs
 *.log
+*.apk
 
 # Generated mobile/web artifacts
 frontend/www/
 frontend/android/app/capacitor.build.gradle
 frontend/android/capacitor.settings.gradle
+frontend/android/local.properties
 
 # Local node runtime
 .node/
-

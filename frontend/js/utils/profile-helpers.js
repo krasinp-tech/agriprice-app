@@ -134,8 +134,13 @@
       updatedStr = `${updatedLabel} ${updatedStr}`;
     }
 
+    const offerId = p.offer_id || p.offerId || p.product_id || p.productId || p.id;
+
     return {
-      id: p.product_id || p.id,
+      id: offerId,
+      offerId,
+      productId: offerId,
+      sellerId: p.user_id || p.sellerId || p.seller_id || p.profile_id || '',
       title: t(p.name, p.name) || '',
       subtitle: t(p.variety, p.variety) || '',
       priceA: prices.priceA || '',

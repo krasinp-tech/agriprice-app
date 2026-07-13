@@ -176,11 +176,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       if (window.i18nInit) window.i18nInit();
     });
-    window.addEventListener('storage', function (e) {
-      if (e.key === 'lang') {
-        if (window.i18nInit) window.i18nInit();
-      }
-    });
+
   </script>
 </body>
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+<meta charset="UTF-8">
    
     <script src="../../../js/api-client.js"></script>
    
@@ -10,7 +11,6 @@
       <!-- Language Switcher (top-right) -->
      
     <script src="../../../js/components/ui-common.js"></script>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="booking_step2_title">จองคิว - ข้อมูลยานพาหนะ | AGRIPRICE</title>
   <script>
@@ -26,7 +26,7 @@
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <!-- CSS -->
@@ -233,29 +233,7 @@
   </div>
 
   <!-- Bottom Navigation -->
-  <div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
-    <a href="index.html" class="bottom-nav-item" data-page="home">
-        <span class="material-icons-outlined">home</span>
-        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
-    </a>
-    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
-        <span class="material-icons-outlined">chat_bubble_outline</span>
-        <span class="nav-label" data-i18n="nav_chat">แชท</span>
-        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
-    </a>
-    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
-        <span class="material-icons-outlined">local_mall</span>
-        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
-    </a>
-    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
-        <span class="material-icons-outlined">notifications_none</span>
-        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
-    </a>
-    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
-        <span class="material-icons-outlined">person_outline</span>
-        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
-    </a>
-</nav></div>
+  <div id="bottomNavMount"></div>
 
   <!-- Core Scripts -->
  
@@ -282,12 +260,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.i18nInit) window.i18nInit();
-  });
-  // sync ภาษาอัตโนมัติข้ามแท็บ/ข้ามหน้า
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'lang') {
-      if (window.i18nInit) window.i18nInit();
-    }
   });
 </script>
 </body>

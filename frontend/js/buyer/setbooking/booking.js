@@ -22,19 +22,73 @@
     return String(input ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
+  function normalizeStatusGroup(status) {
+    const s = String(status || '').toLowerCase();
+    if (s === "completed" || s === "success") return "success";
+    if (s === "rejected" || s === "cancel" || s === "cancelled" || s === "canceled") return "cancel";
+    return "waiting";
+  }
+
+  function normalizeFilter(value) {
+    const raw = String(value || '').toLowerCase();
+    if (raw === "all" || raw === "waiting" || raw === "success" || raw === "cancel") return raw;
+    if (!raw) return "all";
+    return normalizeStatusGroup(raw);
+  }
+
   function mapStatusText(status) {
-    switch (status) {
-      case "waiting": return t('waiting', 'รอคิว');
-      case "success": return t('success', 'สำเร็จ');
-      case "cancel": return t('cancel', 'ยกเลิก');
-      default: return t('unknown', 'ไม่ทราบสถานะ');
+    const s = String(status || '').toLowerCase();
+    if (s === "waiting") return t('waiting', 'รอคิว');
+    if (s === "confirmed") return t('confirmed', 'ยืนยันแล้ว');
+    if (s === "completed" || s === "success") return t('success', 'สำเร็จ');
+    if (s === "rejected") return t('rejected', 'ปฏิเสธ');
+    if (s === "cancel" || s === "cancelled" || s === "canceled") return t('cancel', 'ยกเลิก');
+    return t('booking_unknown_status', 'ไม่ทราบสถานะ');
+  }
+
+  function mapStatusClass(status) {
+    return normalizeStatusGroup(status);
+  }
+
+  function parseVehicles(source) {
+    let vehicles = [];
+
+    if (Array.isArray(source.booking_vehicles)) {
+      vehicles = source.booking_vehicles.map(v => ({
+        plate: v.plate || v.plate_no || '',
+        type: v.type || t('truck', 'รถบรรทุก')
+      }));
+    } else if (Array.isArray(source.vehicle_info)) {
+      vehicles = source.vehicle_info;
+    } else if (typeof source.vehicle_info === 'string' && source.vehicle_info.trim()) {
+      try {
+        const parsed = JSON.parse(source.vehicle_info);
+        vehicles = Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        vehicles = source.vehicle_info.split(/[,;\n]+/).map(plate => ({ plate: plate.trim() }));
+      }
+    } else if (source.vehicle_plates) {
+      vehicles = String(source.vehicle_plates).split(/[,;\n]+/).map(plate => ({ plate: plate.trim() }));
     }
+
+    return vehicles
+      .map(v => ({
+        plate: String(v.plate || v.plate_no || '').trim(),
+        type: String(v.typeName || v.type || t('truck', 'รถบรรทุก')).trim()
+      }))
+      .filter(v => v.plate);
+  }
+
+  function includesText(value, keyword) {
+    return String(value || '').toLowerCase().includes(keyword);
   }
 
   /* =========================
      Data Mapping
-   ========================= */
+  ========================= */
   const mapApiItemToUi = (b) => {
+    const dbId = b.booking_id || b.id || null;
+    const publicId = b.booking_no || (dbId ? String(dbId) : "");
     const shopName = b.farmer
       ? `${b.farmer.first_name || ''} ${b.farmer.last_name || ''}`.trim()
       : t('booking_unknown_name', 'เกษตรกรทั่วไป');
@@ -57,15 +111,12 @@
         : b.scheduled_time;
     }
 
-    let vehicles = [];
-    try {
-      vehicles = typeof b.vehicle_info === 'string' ? JSON.parse(b.vehicle_info) : (b.vehicle_info || []);
-      if (!Array.isArray(vehicles)) vehicles = [];
-    } catch (_) {}
+    const vehicles = parseVehicles(b);
+    const productName = b.offer?.title || b.product?.name || b.product?.variety || b.product?.description || "";
 
     return {
-      id: b.id,
-      bookingId: b.booking_no || String(b.id),
+      id: dbId,
+      bookingId: publicId,
       status: b.status || "waiting",
       shopName: shopName,
       phone: b.farmer?.phone || "",
@@ -73,8 +124,8 @@
       queueNo: b.queue_no || "-",
       time: timeStr,
       createdAt: createdAt,
-      productName: b.offer?.title || b.product?.name || "",
-      quantityKg: b.expected_qty || b.product_amount || 0,
+      productName,
+      quantityKg: b.expected_qty || b.product_amount || b.quantity || 0,
       vehicles: vehicles,
       notes: b.note || ""
     };
@@ -112,11 +163,12 @@
 
     const k = KEYWORD.trim().toLowerCase();
     const filtered = BOOKINGS.filter(b => {
-      const passFilter = FILTER === "all" ? true : (b.status === FILTER);
+      const passFilter = FILTER === "all" ? true : (normalizeStatusGroup(b.status) === FILTER);
       const passSearch = !k || 
-        b.bookingId.toLowerCase().includes(k) || 
-        b.shopName.toLowerCase().includes(k) || 
-        b.queueNo.toLowerCase().includes(k);
+        includesText(b.bookingId, k) ||
+        includesText(b.shopName, k) ||
+        includesText(b.queueNo, k) ||
+        includesText(b.productName, k);
       return passFilter && passSearch;
     });
 
@@ -126,10 +178,10 @@
 
   function renderList(list, container) {
     container.innerHTML = list.map(b => `
-      <article class="booking-card" data-id="${esc(b.bookingId)}" data-dbid="${b.id}">
+      <article class="booking-card" data-id="${esc(b.bookingId)}" data-dbid="${esc(b.id || '')}">
         <div class="row">
           <div class="shop">${esc(b.shopName)}</div>
-          <div class="badge ${b.status}">${mapStatusText(b.status)}</div>
+          <div class="badge ${mapStatusClass(b.status)}">${mapStatusText(b.status)}</div>
         </div>
 
         <div class="meta">
@@ -173,6 +225,7 @@
     container.querySelectorAll(".booking-card").forEach(card => {
       card.onclick = (e) => {
         const id = card.dataset.dbid || card.dataset.id;
+        if (!id || id === "undefined") return;
         window.location.href = `booking-information.html?bookingId=${encodeURIComponent(id)}`;
       };
     });
@@ -191,9 +244,16 @@
 
     let stream = null;
     let scanInterval = null;
+    let nativeListeners = [];
     let torchActive = false;
 
-    const isNative = () => !!(window.Capacitor && window.Capacitor.isNative);
+    const isNative = () => {
+      const cap = window.Capacitor;
+      if (!cap) return false;
+      if (typeof cap.isNativePlatform === "function") return cap.isNativePlatform();
+      const platform = typeof cap.getPlatform === "function" ? cap.getPlatform() : "";
+      return platform === "android" || platform === "ios" || !!cap.isNative;
+    };
 
     async function start() {
       if (window.AgriPermission && window.AgriPermission.requestCamera) {
@@ -213,15 +273,23 @@
         const { BarcodeScanner } = window.Capacitor.Plugins;
         if (!BarcodeScanner) throw new Error("Scanner plugin not found");
 
-        // Hide app background to see camera
         document.body.classList.add("scanner-active");
         modal.classList.add("show");
         modal.setAttribute("aria-hidden", "false");
 
-        const result = await BarcodeScanner.startScan({ formats: ['QR_CODE'] });
-        if (result.hasContent) {
-          handleDetected(result.content);
-        }
+        nativeListeners = [
+          await BarcodeScanner.addListener("barcodesScanned", (event) => {
+            const barcode = event?.barcodes?.[0];
+            const value = barcode?.rawValue || barcode?.displayValue;
+            if (value) handleDetected(value);
+          }),
+          await BarcodeScanner.addListener("scanError", (event) => {
+            console.error("[Native Scan] Scan error:", event?.message || event);
+            stop();
+          })
+        ];
+
+        await BarcodeScanner.startScan({ formats: ["QR_CODE"] });
       } catch (err) {
         console.error("[Native Scan] Error:", err);
         stop();
@@ -247,7 +315,6 @@
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         video.srcObject = stream;
 
-        // Use MLKit BarcodeDetector if available in browser, else just wait (it's a demo)
         if (window.BarcodeDetector) {
           const detector = new BarcodeDetector({ formats: ["qr_code"] });
           scanInterval = setInterval(async () => {
@@ -280,9 +347,21 @@
       }
       
       const { BarcodeScanner } = window.Capacitor.Plugins;
-      torchActive = !torchActive;
-      await BarcodeScanner.enableTorch(); // Simplify for MLKit
-      torchBtn.classList.toggle("active", torchActive);
+      if (!BarcodeScanner) return;
+      try {
+        if (BarcodeScanner.toggleTorch) {
+          await BarcodeScanner.toggleTorch();
+          const state = BarcodeScanner.isTorchEnabled ? await BarcodeScanner.isTorchEnabled() : null;
+          torchActive = state ? !!state.enabled : !torchActive;
+        } else {
+          torchActive = !torchActive;
+          if (torchActive) await BarcodeScanner.enableTorch();
+          else await BarcodeScanner.disableTorch();
+        }
+        torchBtn.classList.toggle("active", torchActive);
+      } catch (err) {
+        console.warn("[Native Scan] Torch not available:", err.message);
+      }
     }
 
     function stop() {
@@ -291,6 +370,8 @@
         BarcodeScanner?.stopScan();
         document.body.classList.remove("scanner-active");
       }
+      nativeListeners.forEach(listener => listener?.remove?.());
+      nativeListeners = [];
 
       if (scanInterval) clearInterval(scanInterval);
       if (stream) stream.getTracks().forEach(t => t.stop());
@@ -315,7 +396,7 @@
       try {
         if (val.startsWith("http")) {
           const url = new URL(val);
-          bid = url.searchParams.get("bid") || url.searchParams.get("bookingId") || val;
+          bid = url.searchParams.get("bid") || url.searchParams.get("bookingId") || url.searchParams.get("id") || val;
         }
       } catch (_) {}
 
@@ -343,11 +424,14 @@
   function init() {
     if (typeof setActiveBottomNav === "function") setActiveBottomNav("booking");
 
+    FILTER = normalizeFilter(new URLSearchParams(window.location.search).get("filter") || FILTER);
+
     document.querySelectorAll(".seg-btn").forEach(btn => {
+      btn.classList.toggle("active", (btn.dataset.filter || "all") === FILTER);
       btn.onclick = () => {
         document.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-        FILTER = btn.dataset.filter || "all";
+        FILTER = normalizeFilter(btn.dataset.filter || "all");
         applyFilters();
       };
     });

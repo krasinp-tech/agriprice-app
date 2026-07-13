@@ -8,5 +8,8 @@ router.post('/otp/verify', authController.verifyOtp);
 router.post('/firebase/verify-phone', authController.verifyFirebaseOtp);
 router.post('/register/finish', authController.registerFinish);
 router.post('/login', authController.login);
+router.post('/logout', authController.logout);
+router.post('/password/reset', authController.passwordReset);
+router.post('/change-password', authMiddleware, authController.changePassword);
 
 module.exports = router;

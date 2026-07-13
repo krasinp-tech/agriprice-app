@@ -204,6 +204,18 @@
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const currentBase = getApiBase();
 
+    function readStoredLocation() {
+      try {
+        const rawLoc = localStorage.getItem("location");
+        if (!rawLoc) return null;
+        const loc = JSON.parse(rawLoc);
+        const lat = parseFloat(loc?.lat || loc?.latitude);
+        const lng = parseFloat(loc?.lng || loc?.longitude);
+        if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+      } catch (_) {}
+      return null;
+    }
+
     // [NEW] Reusable location fetching
     async function fetchUserLocation() {
       try {
@@ -233,30 +245,22 @@
           }
         }
         
-        // 3. Try GPS (Browser/Device location)
-        if (window.LocationHelper?.getUserLocation) {
-          const loc = await window.LocationHelper.getUserLocation();
-          if (loc) return loc;
-        }
+        // 3. Try coordinates from location key
+        const storedLoc = readStoredLocation();
+        if (storedLoc) return storedLoc;
 
-        // 4. Try coordinates from location key
-        const rawLoc = localStorage.getItem("location");
-        if (rawLoc) {
-          const loc = JSON.parse(rawLoc);
-          const lat = parseFloat(loc?.lat || loc?.latitude);
-          const lng = parseFloat(loc?.lng || loc?.longitude);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            return { lat, lng };
-          }
+        // 4. Try already-granted GPS only. Home should not block first render or trigger permission prompts.
+        if (window.LocationHelper?.getUserLocation) {
+          const loc = await window.LocationHelper.getUserLocation({ prompt: false, timeoutMs: 3000 });
+          if (loc) return loc;
         }
       } catch (e) { console.warn("[Home] fetchUserLocation failed:", e); }
       return null;
     }
 
     window.refreshDistances = async () => {
-      // Re-run product cards with fresh location (clears cache first)
-      sessionStorage.removeItem(PRODUCTS_CACHE_KEY);
-      await initProductCards();
+      const userLoc = await fetchUserLocation();
+      renderProducts(ALL_PRODUCTS, userLoc || readStoredLocation(), mount);
     };
 
     window.filterProductsBySeller = async (sellerId, sellerName) => {
@@ -305,9 +309,13 @@
       if (cachedRows) {
         if (DEBUG_HOME) console.log('[ProductCards] Serving from cache, rows:', cachedRows.length);
         ALL_PRODUCTS = cachedRows; // Update global state
-        // Render immediately from cache, fetch location quietly for sorting
-        const locTask = fetchUserLocation();
-        renderProducts(cachedRows, await locTask, mount);
+        renderProducts(cachedRows, readStoredLocation(), mount);
+        fetchUserLocation().then((userLoc) => {
+          if (userLoc) {
+            window._loc_found = true;
+            renderProducts(ALL_PRODUCTS, userLoc, mount);
+          }
+        }).catch(() => {});
 
         // Background-refresh silently after 1s (no skeleton shown)
         setTimeout(async () => {
@@ -317,25 +325,28 @@
             const rows = json.data || [];
             ALL_PRODUCTS = rows; // Update global state
             setCachedProducts(rows);
-            const userLoc = await fetchUserLocation();
-            renderProducts(rows, userLoc, mount);
+            renderProducts(rows, readStoredLocation(), mount);
           }
-        }, 1000);
+        }, 1500);
         return;
       }
 
       // ── No cache: fetch ทั้งคู่พร้อมกัน ──
-      const locTask = fetchUserLocation();
       const apiRes = await fetch(currentBase + '/api/products?limit=50', { headers: getAuthHeaders() }).catch(() => null);
-      const userLoc = await locTask;
 
       if (apiRes?.ok) {
         const json = await apiRes.json();
         const rows = json.data || [];
         ALL_PRODUCTS = rows; // Save to global
-        if (userLoc) window._loc_found = true;
+        window._loc_found = !!readStoredLocation();
         setCachedProducts(rows); // บันทึก cache
-        renderProducts(rows, userLoc, mount);
+        renderProducts(rows, readStoredLocation(), mount);
+        fetchUserLocation().then((userLoc) => {
+          if (userLoc) {
+            window._loc_found = true;
+            renderProducts(ALL_PRODUCTS, userLoc, mount);
+          }
+        }).catch(() => {});
       }
     } catch (err) { if (DEBUG_HOME) console.error("[ProductCards] Error:", err); }
   }
@@ -361,7 +372,6 @@
     }
 
     const products = filteredRows
-      .filter(p => !isStaleProduct(p))
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
         let prices = { priceA: null, priceB: null, priceC: null };
@@ -395,8 +405,10 @@
 
         // Pass stale status to card for button disabling
         const isStale = isStaleProduct(p);
+        const offerId = p.offer_id || p.offerId || p.product_id || p.productId || p.id;
 
         return {
+          offerId,
           sellerId: p.user_id,
           sellerName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
           sellerSub: p.variety ? `${p.name} (${p.variety})` : p.name,
@@ -405,7 +417,7 @@
           updateTime: formatTime(p.created_at),
           distance: (distKm !== null) ? (window.LocationHelper.formatDistance?.(distKm) || '') : '',
           _distKm: distKm,
-          productId: p.product_id,
+          productId: offerId,
           isStale
         };
       });
@@ -440,7 +452,8 @@
         if (window.ProductCard && templateHtml) {
           const data = {
             ...item,
-            id: item.productId,
+            id: item.offerId || item.productId,
+            offer_id: item.offerId || item.productId,
             user_id: item.sellerId,
             title: item.sellerName,
             subtitle: item.sellerSub,
@@ -459,8 +472,9 @@
           const isBuyer = user?.role?.toLowerCase() === "buyer";
 
           if (!isBuyer) {
-            const favId = item.productId || item.sellerId;
-            if (window.FavoritesStore?.has(favId, item.productId ? 'product' : 'seller')) {
+            const favId = item.offerId || item.productId || item.sellerId;
+            const favKind = (item.offerId || item.productId) ? 'product' : 'seller';
+            if (window.FavoritesStore?.has(favId, favKind)) {
               node.querySelector('[data-action="toggle-favorite"]')?.classList.add('active');
             }
           }

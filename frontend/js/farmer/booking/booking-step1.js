@@ -26,6 +26,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let availableTimeSlots = []; // Fetched from API for selected day
   let monthSlots = []; // Fetched from API for entire month indicator dots
 
+  function getStoredOfferId() {
+    return localStorage.getItem('bookingOfferId') || localStorage.getItem('bookingProductId') || '';
+  }
+
+  function setStoredOfferId(id) {
+    if (!id) return;
+    localStorage.setItem('bookingOfferId', id);
+    localStorage.setItem('bookingProductId', id);
+  }
+
+  function firstRelation(value) {
+    return Array.isArray(value) ? value[0] : value;
+  }
+
+  function profileName(profile) {
+    return profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '';
+  }
+
   // ================================
   // API Functions
   // ================================
@@ -40,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // uses global resolveUserId / resolveProfileId from utils/id-resolver.js
 
-    const productId = localStorage.getItem('bookingProductId') || '';
+    const offerId = getStoredOfferId();
     const farmerId = localStorage.getItem('bookingFarmerId') || '';
     
     try {
@@ -50,7 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const dateStr = `${year}-${month}-${day}`;
 
       const params = { date: dateStr };
-      if (productId) params.product_id = productId;
+      if (offerId) {
+        params.offer_id = offerId;
+        params.product_id = offerId;
+      }
       else if (farmerId) params.farmer_id = farmerId;
 
       const json = await window.api.getAllSlots(params);
@@ -63,22 +84,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const d = new Date(date);
         const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         return dStr >= slot.start_date && dStr <= slot.end_date;
-      }).map((slot) => ({
-        id:          slot.slot_id || slot.id,
-        time:        `${(slot.time_start||'').slice(0,5)}-${(slot.time_end||'').slice(0,5)}`,
-        available:   (slot.capacity || 0) - (slot.booked_count || 0),
-        capacity:    slot.capacity || 0,
-        product_id:  slot.product_id,
-        slot_name:   slot.slot_name || '',
-        start_date:  slot.start_date,
-        end_date:    slot.end_date,
-        farmerName:  (slot.buy_offers?.profiles || slot.product?.profiles)
-          ? `${(slot.buy_offers?.profiles || slot.product?.profiles).first_name||''} ${(slot.buy_offers?.profiles || slot.product?.profiles).last_name||''}`.trim()
-          : '',
-        productName: slot.buy_offers?.name || slot.product?.name || '',
-        buyer_id:    slot.buy_offers?.user_id || slot.product?.user_id || '',
-        farmer_id:   farmerId,
-      }));
+      }).map((slot) => {
+        const slotOfferId = slot.offer_id || slot.product_id;
+        return {
+          id:          slot.slot_id || slot.id,
+          time:        `${(slot.time_start||'').slice(0,5)}-${(slot.time_end||'').slice(0,5)}`,
+          available:   (slot.capacity || 0) - (slot.booked_count || 0),
+          capacity:    slot.capacity || 0,
+          offer_id:    slotOfferId,
+          product_id:  slotOfferId,
+          slot_name:   slot.slot_name || '',
+          start_date:  slot.start_date,
+          end_date:    slot.end_date,
+          farmerName:  profileName(firstRelation(slot.buy_offers?.profiles) || firstRelation(slot.product?.profiles)),
+          productName: slot.buy_offers?.name || slot.product?.name || '',
+          buyer_id:    slot.buy_offers?.user_id || slot.product?.user_id || '',
+          farmer_id:   farmerId,
+        };
+      });
     } catch (e) {
       if (DEBUG_BOOKING) console.error('[booking-step1] fetchTimeSlots failed:', e.message);
       return [];
@@ -88,13 +111,16 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fetchMonthSlots() {
     if (!window.api) return;
     
-    const productId = localStorage.getItem('bookingProductId') || '';
+    const offerId = getStoredOfferId();
     const farmerId = localStorage.getItem('bookingFarmerId') || '';
     
     try {
       // Fetch a wider range or just everything for this product/farmer to show dots
       const params = {};
-      if (productId) params.product_id = productId;
+      if (offerId) {
+        params.offer_id = offerId;
+        params.product_id = offerId;
+      }
       else if (farmerId) params.farmer_id = farmerId;
 
       const json = await window.api.getAllSlots(params);
@@ -130,6 +156,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
   }
 
+  function formatLocalDateValue(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   function isSameDay(date1, date2) {
     return (
       date1.getDate() === date2.getDate() &&
@@ -159,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isToday) return true; 
 
     try {
-      // สำหรับ Demo/ส่งงาน: ให้จองได้ทันที แม้จะเริ่มไปแล้ว 
       // หรือเปลี่ยนกฎเป็น: ถ้ายังไม่เลยเวลา "สิ้นสุด" ของรอบนั้น ก็ให้จองได้
       const startTimeStr = timeRangeStr.split('-')[0];
       const [hours, minutes] = startTimeStr.split(':').map(Number);
@@ -322,18 +355,14 @@ document.addEventListener("DOMContentLoaded", () => {
     timeSlotsContainer.innerHTML = "";
     
     if (availableTimeSlots.length === 0) {
-      if (DEBUG_BOOKING) console.log('[booking-step1] No slots from API, injecting fallback slot');
-      availableTimeSlots = [{
-        id: 'fallback_any_time',
-        time: 'ตลอดวัน (ไม่ระบุเวลา)',
-        available: 99,
-        capacity: 99,
-        product_id: localStorage.getItem('bookingProductId') || null,
-        slot_name: 'คิวทั่วไป',
-        farmerName: localStorage.getItem('bookingFarmerName') || '',
-        productName: localStorage.getItem('bookingProductName') || '',
-        buyer_id: localStorage.getItem('bookingBuyerId') || localStorage.getItem('bookingFarmerId') || null
-      }];
+      selectedTimeSlot = null;
+      checkSubmitButton();
+      timeSlotsContainer.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #999;">
+          ${t('no_time_slots', 'No time slots available for the selected date')}
+        </div>
+      `;
+      return;
     }
 
     availableTimeSlots.forEach((slot) => {
@@ -437,11 +466,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // บันทึกข้อมูลลง localStorage
     const bookingData = {
-      date:          selectedDate.toISOString(),
+      date:          formatLocalDateValue(selectedDate),
       dateFormatted: formatDateLocale(selectedDate),
       timeSlot:      selectedTimeSlot,
       slot_id:       selectedTimeSlot.id,
-      product_id:    selectedTimeSlot.product_id || null,
+      offer_id:      selectedTimeSlot.offer_id || selectedTimeSlot.product_id || null,
+      product_id:    selectedTimeSlot.offer_id || selectedTimeSlot.product_id || null,
       farmerName:    selectedTimeSlot.farmerName || localStorage.getItem('bookingFarmerName') || '',
       productName:   selectedTimeSlot.productName || '',
       step: 1,
@@ -491,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Restore selected time slot
-        if (data.timeSlot) {
+        if (data.timeSlot && data.timeSlot.id !== 'fallback_any_time') {
           selectedTimeSlot = data.timeSlot;
         }
 
@@ -570,13 +600,13 @@ document.addEventListener("DOMContentLoaded", () => {
   async function init() {
     // Parse query params first to sync URL state with localStorage
     const params = new URLSearchParams(window.location.search);
-    const urlProductId = params.get("product_id") || params.get("productId");
+    const urlOfferId = params.get("offer_id") || params.get("offerId") || params.get("product_id") || params.get("productId");
     const urlFarmerId = params.get("farmer_id") || params.get("farmerId") || params.get("uid") || params.get("seller_id");
     const urlFarmerName = params.get("seller") || params.get("farmerName");
     const urlProductName = params.get("product") || params.get("productName");
 
-    if (urlProductId) {
-      localStorage.setItem('bookingProductId', urlProductId);
+    if (urlOfferId) {
+      setStoredOfferId(urlOfferId);
     }
     if (urlFarmerId) {
       localStorage.setItem('bookingFarmerId', urlFarmerId);
@@ -588,21 +618,19 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem('bookingProductName', urlProductName);
     }
 
-    // If product_id is specified in URL, fetch additional info from database
-    if (urlProductId && window.api) {
+    // If offer_id is specified in URL, fetch additional info from database
+    if (urlOfferId && window.api) {
       try {
-        const res = await window.api.getProduct(urlProductId);
+        const res = await window.api.getProduct(urlOfferId);
         const product = res.data || res;
         if (product) {
           localStorage.setItem('bookingProductName', product.name || '');
           if (product.user_id) {
             localStorage.setItem('bookingFarmerId', product.user_id);
           }
-          if (product.profiles) {
-            const name = `${product.profiles.first_name || ''} ${product.profiles.last_name || ''}`.trim();
-            localStorage.setItem('bookingFarmerName', name);
-          } else if (product.user?.profiles) {
-            const name = `${product.user.profiles.first_name || ''} ${product.user.profiles.last_name || ''}`.trim();
+          const ownerProfile = firstRelation(product.profiles) || firstRelation(product.user?.profiles);
+          if (ownerProfile) {
+            const name = profileName(ownerProfile);
             localStorage.setItem('bookingFarmerName', name);
           }
         }

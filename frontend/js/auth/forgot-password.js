@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
       recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
         size: 'normal',
         callback: (response) => {
-          console.log('[ForgotPwd] reCAPTCHA verified');
+          if (window.AGRIPRICE_DEBUG) console.log('[ForgotPwd] reCAPTCHA verified');
         }
       });
     }
@@ -74,38 +74,13 @@ document.addEventListener('DOMContentLoaded', function () {
     setLoading(btnSendOTP, true);
     hideError(1);
 
-    try {
-      const res = await window.api.otpSend(phone);
-      if (res.success) {
-        currentPhone = phone;
-        displayPhone.textContent = formatPhone(phone);
-        goToStep(2);
-        
-        // Show mock OTP info or start Firebase Phone Auth
-        const isMock = res.isMock || (res.data && res.data.isMock) || (res.message && res.message.includes('Mock'));
-        if (isMock) {
-          showError(2, 'โหมดทดสอบ: กรุณากรอกรหัส 123456');
-          confirmationResult = { isFallback: true };
-        } else {
-          hideError(2);
-          showError(2, 'กำลังส่งรหัส OTP ผ่าน Firebase...');
-          await initFirebaseOtp();
-          const cleanPhone = toE164(phone);
-          confirmationResult = await firebase.auth().signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
-          showError(2, 'ส่ง OTP เข้ามือถือของคุณแล้ว');
-        }
-        
-        startTimer(120);
-        console.log('[ForgotPwd] OTP setup completed');
-      } else {
-        showError(1, res.message || 'เกิดข้อผิดพลาดในการส่ง OTP');
-      }
-    } catch (err) {
-      console.error('[ForgotPwd] Step 1 Error:', err);
-      showError(1, err.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-    } finally {
-      setLoading(btnSendOTP, false);
-    }
+    // Save phone and flow, then redirect to register3.html
+    sessionStorage.setItem('otp_flow', 'forgot_password');
+    sessionStorage.setItem('forgot_phone', phone);
+
+    setTimeout(() => {
+      window.location.href = './register3.html';
+    }, 150);
   });
 
   // --- Step 2: Verify OTP ---
@@ -143,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Firebase verification
         const firebaseUserCredential = await confirmationResult.confirm(otp);
         const idToken = await firebaseUserCredential.user.getIdToken();
-        
+
         // Post to backend verify-phone endpoint to get our temp_token!
         const currentBase = window.api.getBase();
         const verifyRes = await fetch(currentBase + '/api/auth/firebase/verify-phone', {
@@ -153,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const json = await verifyRes.json().catch(() => ({}));
         if (!verifyRes.ok) throw new Error(json.message || 'ยืนยัน OTP กับระบบไม่สำเร็จ');
-        
+
         tempToken = json.temp_token || (json.data && json.data.temp_token);
         goToStep(3);
       } else {
@@ -212,14 +187,25 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Helper Functions ---
 
   function goToStep(step) {
-    [step1, step2, step3, stepSuccess].forEach(s => s.classList.remove('active'));
+    [step1, step2, step3, stepSuccess].forEach(s => {
+      if (s) {
+        s.classList.remove('active');
+        s.setAttribute('hidden', '');
+      }
+    });
 
     if (step === 1) {
-      step1.classList.add('active');
+      if (step1) {
+        step1.classList.add('active');
+        step1.removeAttribute('hidden');
+      }
       stepTitle.textContent = 'ลืมรหัสผ่าน?';
       stepSub.textContent = 'ไม่ต้องกังวล เราจะช่วยคุณกู้คืนบัญชี';
     } else if (step === 2) {
-      step2.classList.add('active');
+      if (step2) {
+        step2.classList.add('active');
+        step2.removeAttribute('hidden');
+      }
       stepTitle.textContent = 'ยืนยันตัวตน';
       stepSub.textContent = 'กรอกรหัส 6 หลักที่ส่งไปทาง SMS';
       if (otpInputs && otpInputs[0]) {
@@ -229,11 +215,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (singleOtpInput) singleOtpInput.focus();
       }
     } else if (step === 3) {
-      step3.classList.add('active');
+      if (step3) {
+        step3.classList.add('active');
+        step3.removeAttribute('hidden');
+      }
       stepTitle.textContent = 'ตั้งรหัสผ่านใหม่';
       stepSub.textContent = 'เลือกใช้รหัสผ่านที่คุณจำได้ง่ายและปลอดภัย';
     } else if (step === 'success') {
-      stepSuccess.classList.add('active');
+      if (stepSuccess) {
+        stepSuccess.classList.add('active');
+        stepSuccess.removeAttribute('hidden');
+      }
       stepTitle.textContent = '';
       stepSub.textContent = '';
     }
@@ -334,13 +326,45 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Navigation
-  btnBackToLogin.addEventListener('click', () => {
-    window.location.href = './login2.html';
-  });
+  // --- Video Setup ---
+  const video = document.getElementById('loginVideo');
+  const fallback = document.getElementById('mediaFallback');
 
-  btnBackToLoginSuccess.addEventListener('click', () => {
-    window.location.href = './login2.html';
-  });
+  function setupVideo() {
+    if (!video) return;
+    video.muted = true;
+    video.playsInline = true;
+    video.addEventListener('error', () => {
+      if (fallback) fallback.classList.add('is-show');
+    });
+    video.play().catch(() => {
+      if (fallback) fallback.classList.add('is-show');
+    });
+  }
+
+  setupVideo();
+
+  // Handle steps from query parameters (redirected from register3.html)
+  const urlParams = new URLSearchParams(window.location.search);
+  const stepParam = urlParams.get('step');
+  if (stepParam === '3') {
+    tempToken = sessionStorage.getItem('reset_temp_token') || '';
+    goToStep(3);
+  } else {
+    goToStep(1);
+  }
+
+  // Navigation
+  if (btnBackToLogin) {
+    btnBackToLogin.addEventListener('click', () => {
+      window.location.href = './login2.html';
+    });
+  }
+
+  if (btnBackToLoginSuccess) {
+    btnBackToLoginSuccess.addEventListener('click', () => {
+      window.location.href = './login2.html';
+    });
+  }
 
 });

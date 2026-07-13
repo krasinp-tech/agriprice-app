@@ -50,7 +50,7 @@
     if (typeof window.getRelativePrefixToRoot === 'function') {
       root = window.getRelativePrefixToRoot();
     }
-    
+
     if (role === 'buyer') return root + 'assets/images/avatar-buyer.svg';
     if (role === 'farmer') return root + 'assets/images/avatar-farmer.svg';
     return root + 'assets/images/avatar-guest.svg';
@@ -126,19 +126,42 @@
 
     // buyer-only menu
     if (buyerProfileLink) {
-      buyerProfileLink.style.display = role === "buyer" ? "flex" : "none";
+      buyerProfileLink.style.display = role !== "guest" ? "flex" : "none";
     }
 
     const tier = String(u.tier || "free").toLowerCase();
     const buyerUpgradeLink = document.getElementById("buyerUpgradeLink");
 
     if (role === "buyer") {
+      if (buyerUpgradeLink) {
+        buyerUpgradeLink.style.display = "flex";
+        const title = buyerUpgradeLink.querySelector(".menu-title");
+        const sub = buyerUpgradeLink.querySelector(".menu-sub");
+        if (tier === "pro") {
+          if (title) {
+            title.textContent = window.i18nT ? window.i18nT('manage_package', 'จัดการแพ็กเกจ') : 'จัดการแพ็กเกจ';
+            title.setAttribute('data-i18n', 'manage_package');
+          }
+          if (sub) {
+            sub.textContent = window.i18nT ? window.i18nT('manage_package_desc', 'ดูรายละเอียดการสมัครสมาชิก หรือยกเลิก') : 'ดูรายละเอียดการสมัครสมาชิก หรือยกเลิก';
+            sub.setAttribute('data-i18n', 'manage_package_desc');
+          }
+        } else {
+          if (title) {
+            title.textContent = window.i18nT ? window.i18nT('upgrade_pro', 'อัปเกรดเป็นโปร') : 'อัปเกรดเป็นโปร';
+            title.setAttribute('data-i18n', 'upgrade_pro');
+          }
+          if (sub) {
+            sub.textContent = window.i18nT ? window.i18nT('upgrade_pro_desc', 'ปลดล็อกฟีเจอร์พรีเมียม') : 'ปลดล็อกฟีเจอร์พรีเมียม';
+            sub.setAttribute('data-i18n', 'upgrade_pro_desc');
+          }
+        }
+      }
+
       if (tier === "pro") {
         if (buyerDashboardLink) buyerDashboardLink.style.display = "flex";
-        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "none";
       } else {
         if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
-        if (buyerUpgradeLink) buyerUpgradeLink.style.display = "flex";
       }
     } else {
       if (buyerDashboardLink) buyerDashboardLink.style.display = "none";
@@ -317,10 +340,18 @@
     if (e.key === KEYS.THEME) {
       const dmCheck = document.getElementById('darkModeCheck');
       const dmStatus = document.getElementById('darkModeStatus');
+      const dmToggle = document.getElementById('darkModeToggle');
       const isDark = e.newValue === 'dark';
       if (dmCheck) dmCheck.checked = isDark;
+      const track = dmToggle ? dmToggle.querySelector('.toggle-track') : null;
+      if (track) track.classList.toggle('on', isDark);
       if (dmStatus) dmStatus.textContent = isDark ? (window.i18nT ? window.i18nT('on', 'เปิดอยู่') : 'เปิดอยู่') : (window.i18nT ? window.i18nT('off', 'ปิดอยู่') : 'ปิดอยู่');
-      document.documentElement.setAttribute('data-theme', e.newValue || 'light');
+      if (window.__AGRIPRICE_APPLY_THEME) {
+        window.__AGRIPRICE_APPLY_THEME(e.newValue || 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', e.newValue || 'light');
+        if (document.body) document.body.setAttribute('data-theme', e.newValue || 'light');
+      }
     }
   });
 
@@ -457,29 +488,28 @@
 
       const applyTheme = (isDark) => {
         const theme = isDark ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(KEYS.THEME, theme);
+        if (window.__AGRIPRICE_APPLY_THEME) {
+          window.__AGRIPRICE_APPLY_THEME(theme, { persist: true, broadcast: true });
+        } else {
+          document.documentElement.setAttribute('data-theme', theme);
+          if (document.body) document.body.setAttribute('data-theme', theme);
+          localStorage.setItem(KEYS.THEME, theme);
 
-        const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if (metaTheme) {
-          metaTheme.setAttribute('content', isDark ? '#000000' : '#0B853C');
+          const metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (metaTheme) {
+            metaTheme.setAttribute('content', isDark ? '#000000' : '#0B853C');
+          }
+
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'agriprice:theme', theme }, '*');
+          }
         }
-
-        if (window.__AGRIPRICE_LOAD_THEME) window.__AGRIPRICE_LOAD_THEME();
       };
 
       const currentTheme = localStorage.getItem(KEYS.THEME);
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDarkNow = currentTheme ? currentTheme === 'dark' : systemDark;
+      const isDarkNow = currentTheme ? currentTheme === 'dark' : false;
 
       updateUI(isDarkNow);
-
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem(KEYS.THEME)) {
-          updateUI(e.matches);
-          applyTheme(e.matches);
-        }
-      });
 
       dmToggle.addEventListener('click', (e) => {
         if (e.target === dmCheck) return;

@@ -109,8 +109,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!productAmount && d.expected_qty) productAmount = d.expected_qty;
         if (!productAmount && d.quantity) productAmount = d.quantity;
 
-        const resolvedAddress = d.address || (d.buyer?.address) || "";
-        const shopLabel = d.buyer ? `${d.buyer.first_name} ${d.buyer.last_name}`.trim() : "";
+        const firstRelation = (value) => Array.isArray(value) ? value[0] : value;
+        const offerOwner = d.offer_owner
+          || d.buyer_profile
+          || firstRelation(d.product?.profiles)
+          || firstRelation(d.products?.profiles)
+          || firstRelation(d.buy_offers?.profiles)
+          || firstRelation(d.slot?.product?.profiles)
+          || null;
+        const requester = d.requester || d.farmer || d.buyer || null;
+        const ownerAddress = offerOwner
+          ? [offerOwner.address_line1, offerOwner.address_line2].filter(Boolean).join(" ")
+          : "";
+        const resolvedAddress = ownerAddress || offerOwner?.address || d.address || "";
+        const shopLabel = offerOwner
+          ? (offerOwner.shop_name || `${offerOwner.first_name || ""} ${offerOwner.last_name || ""}`.trim())
+          : "";
+        const requesterName = requester
+          ? `${requester.first_name || ""} ${requester.last_name || ""}`.trim()
+          : "";
+        const ownerMapLink = (offerOwner?.lat && offerOwner?.lng)
+          ? `${offerOwner.lat},${offerOwner.lng}`
+          : (offerOwner?.map_link || "");
 
         return {
           bookingId:    String(d.booking_no || d.booking_id || fallbackId || ''),
@@ -118,10 +138,10 @@ document.addEventListener("DOMContentLoaded", () => {
           booking_no:   d.booking_no || null,
           status:       d.status || 'waiting',
           shopName:     shopLabel,
-          fullName:     d.farmer ? `${d.farmer.first_name} ${d.farmer.last_name}`.trim() : '',
-          phone:        d.buyer?.phone || d.farmer?.phone || '',
+          fullName:     requesterName,
+          phone:        offerOwner?.phone || requester?.phone || '',
           address:      resolvedAddress,
-          mapLink:      (d.buyer?.lat && d.buyer?.lng) ? `${d.buyer.lat},${d.buyer.lng}` : (d.buyer?.map_link || ''),
+          mapLink:      ownerMapLink,
           queueNo:      d.queue_no || '',
           queue_no:     d.queue_no || '',
           slot_id:      d.slot_id || null,
@@ -246,19 +266,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // QR Code
   // ================================
   function buildQrPayload(bookingId) {
-    const origin = (window.location.origin || "").replace(/\/$/, '');
-    let prefix = "/pages/";
-    if (typeof window.getRelativePrefixToPages === 'function') {
-        const rel = window.getRelativePrefixToPages();
-        // Determine the absolute path by removing the relative dots
-        const path = window.location.pathname;
-        const pagesIdx = path.lastIndexOf("/pages/");
-        if (pagesIdx !== -1) {
-            prefix = path.substring(0, pagesIdx + 1) + "pages/";
-        }
+    let baseUrl = window.FRONTEND_URL || window.location.origin;
+    if (baseUrl.startsWith('capacitor://') || baseUrl.startsWith('ionic://')) {
+      const apiBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : '';
+      if (apiBase && !apiBase.startsWith('capacitor://') && !apiBase.startsWith('ionic://')) {
+        baseUrl = apiBase;
+      } else {
+        baseUrl = 'https://agriprice-otp.web.app';
+      }
     }
-    const base = origin + prefix + "scan-checkin.html";
-    return `${base}?bid=${encodeURIComponent(bookingId)}`;
+    const url = new URL("pages/scan-checkin.html", baseUrl);
+    url.searchParams.set("bid", bookingId);
+    return url.href;
   }
 
   function drawFallbackQR() {
@@ -268,10 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateQRCode(text) {
     if (!qrCanvas) return;
-    if (text.startsWith('capacitor://') || text.startsWith('ionic://')) {
-        drawFallbackQR();
-        return;
-    }
     try {
       qrCanvas.innerHTML = "";
       new QRCode(qrCanvas, {

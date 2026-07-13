@@ -10,9 +10,9 @@
   "android": {
     "allowMixedContent": true,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true,
+    "webContentsDebuggingEnabled": false,
     "useLegacyBridge": false,
-    "loggingBehavior": "debug"
+    "loggingBehavior": "production"
   },
   "plugins": {
     "Geolocation": {

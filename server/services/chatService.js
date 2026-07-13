@@ -1,10 +1,60 @@
 const { supabaseAdmin } = require('../utils/supabase');
 
+function createHttpError(message, statusCode = 400) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+async function assertRoomMembership(roomId, userId) {
+  const { data: room, error } = await supabaseAdmin
+    .from('chat_rooms')
+    .select('room_id, user1_id, user2_id')
+    .eq('room_id', roomId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!room) throw createHttpError('Chat room not found', 404);
+  if (String(room.user1_id) !== String(userId) && String(room.user2_id) !== String(userId)) {
+    throw createHttpError('Forbidden', 403);
+  }
+  return room;
+}
+
+function normalizeRoomParticipants(user1Id, user2Id) {
+  return String(user1Id) < String(user2Id) ? [user1Id, user2Id] : [user2Id, user1Id];
+}
+
+async function findRoomBetween(user1Id, user2Id) {
+  const [firstRes, secondRes] = await Promise.all([
+    supabaseAdmin
+      .from('chat_rooms')
+      .select('*')
+      .eq('user1_id', user1Id)
+      .eq('user2_id', user2Id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabaseAdmin
+      .from('chat_rooms')
+      .select('*')
+      .eq('user1_id', user2Id)
+      .eq('user2_id', user1Id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+  ]);
+
+  if (firstRes.error) throw firstRes.error;
+  if (secondRes.error) throw secondRes.error;
+
+  const rooms = [firstRes.data, secondRes.data].filter(Boolean);
+  return rooms.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0))[0] || null;
+}
+
 class ChatService {
   async listRooms(userId) {
-    console.log('[ChatService] listRooms for userId:', userId);
     try {
-      // 1. Get rooms first
       const { data: rooms, error: roomErr } = await supabaseAdmin
         .from('chat_rooms')
         .select(`
@@ -14,21 +64,15 @@ class ChatService {
         `)
         .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
-      if (roomErr) {
-        console.error('[ChatService] listRooms Error (Querying rooms):', roomErr);
-        throw roomErr;
-      }
-
+      if (roomErr) throw roomErr;
       if (!rooms || rooms.length === 0) return [];
 
-      // 2. Map rooms and get last messages (to avoid complex joins that trigger "id not found" errors)
       const results = await Promise.all(rooms.map(async (room) => {
-        // Detect primary key name (id or room_id)
         const roomId = room.room_id || room.id;
-        
-        const otherUser = room.user1.profile_id === userId ? room.user2 : room.user1;
-        
-        // Get last message and unread count for this room
+        const user1 = room.user1 || {};
+        const user2 = room.user2 || {};
+        const otherUser = String(user1.profile_id) === String(userId) ? user2 : user1;
+
         const { data: msgs, error: msgErr } = await supabaseAdmin
           .from('chat_messages')
           .select('*')
@@ -40,7 +84,7 @@ class ChatService {
         }
 
         const lastMsg = (msgs && msgs[0]) || {};
-        const unreadCount = msgs ? msgs.filter(m => !m.is_read && m.sender_id !== userId).length : 0;
+        const unreadCount = msgs ? msgs.filter((m) => !m.is_read && String(m.sender_id) !== String(userId)).length : 0;
 
         return {
           room_id: roomId,
@@ -57,13 +101,11 @@ class ChatService {
         };
       }));
 
-      // Sort by last message date
       return results.sort((a, b) => {
         const dateA = new Date(a.last_message_at || 0);
         const dateB = new Date(b.last_message_at || 0);
         return dateB - dateA;
       });
-
     } catch (err) {
       console.error('[ChatService] listRooms Fatal Error:', err.message);
       throw err;
@@ -71,36 +113,35 @@ class ChatService {
   }
 
   async getMessages(roomId, userId) {
-    console.log('[ChatService] getMessages for room:', roomId);
-    // Security check: user must be in the room
-    const { data: rooms, error: checkErr } = await supabaseAdmin
-      .from('chat_rooms')
-      .select('*')
-      .eq('room_id', roomId);
-
-    const room = rooms && rooms[0];
-    if (checkErr || !room || (room.user1_id !== userId && room.user2_id !== userId)) {
-      throw new Error('ไม่ได้รับอนุญาตให้เข้าถึงห้องแชทนี้');
-    }
+    await assertRoomMembership(roomId, userId);
 
     const { data, error } = await supabaseAdmin
       .from('chat_messages')
       .select('*')
       .eq('room_id', roomId)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: true })
+      .limit(200);
 
     if (error) throw error;
     return data;
   }
 
   async sendMessage(roomId, senderId, message, imageUrl) {
+    await assertRoomMembership(roomId, senderId);
+
+    const hasText = String(message || '').trim().length > 0;
+    const hasImage = String(imageUrl || '').trim().length > 0;
+    if (!hasText && !hasImage) {
+      throw createHttpError('Message or image is required');
+    }
+
     const { data, error } = await supabaseAdmin
       .from('chat_messages')
       .insert({
         room_id: roomId,
         sender_id: senderId,
         message,
-        image_url: imageUrl,
+        image_url: imageUrl || null,
         is_read: false
       })
       .select()
@@ -111,29 +152,42 @@ class ChatService {
   }
 
   async startChat(user1Id, user2Id) {
-    const [u1, u2] = user1Id < user2Id ? [user1Id, user2Id] : [user2Id, user1Id];
+    if (!user2Id) {
+      throw createHttpError('target_user_id is required');
+    }
+    if (String(user1Id) === String(user2Id)) {
+      throw createHttpError('Cannot start chat with yourself');
+    }
+
+    const [u1, u2] = normalizeRoomParticipants(user1Id, user2Id);
+    const existing = await findRoomBetween(u1, u2);
+    if (existing) return existing;
 
     const { data, error } = await supabaseAdmin
       .from('chat_rooms')
-      .upsert({ user1_id: u1, user2_id: u2 }, { onConflict: 'user1_id, user2_id' })
+      .insert({ user1_id: u1, user2_id: u2 })
       .select()
       .single();
+
+    if (error && error.code === '23505') {
+      const racedRoom = await findRoomBetween(u1, u2);
+      if (racedRoom) return racedRoom;
+    }
 
     if (error) throw error;
     return data;
   }
 
   async getUnreadCount(userId) {
-    console.log('[ChatService] getUnreadCount for userId:', userId);
     try {
       const { data: rooms, error: roomErr } = await supabaseAdmin
         .from('chat_rooms')
         .select('room_id')
         .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
-      
+
       if (roomErr) throw roomErr;
 
-      const roomIds = rooms?.map(r => r.room_id).filter(Boolean) || [];
+      const roomIds = rooms?.map((r) => r.room_id).filter(Boolean) || [];
       if (roomIds.length === 0) return 0;
 
       const { count: unreadCount, error: countErr } = await supabaseAdmin
@@ -147,12 +201,13 @@ class ChatService {
       return unreadCount || 0;
     } catch (err) {
       console.error('[ChatService] getUnreadCount Error:', err.message);
-      return 0; // Return 0 instead of crashing for badge count
+      return 0;
     }
   }
 
   async markAsRead(roomId, userId) {
-    console.log('[ChatService] markAsRead for room:', roomId, 'by user:', userId);
+    await assertRoomMembership(roomId, userId);
+
     const { data, error } = await supabaseAdmin
       .from('chat_messages')
       .update({ is_read: true })

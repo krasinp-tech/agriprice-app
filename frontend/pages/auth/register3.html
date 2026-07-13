@@ -29,11 +29,11 @@
 </head>
 
 <body>
-  <main class="screen" role="main" aria-label="Agriprice Register Step 3 OTP">
+  <main class="screen" role="main" aria-label="Agriprice Register Step 3 OTP" data-i18n-aria-label="auth_register_step3_otp_label">
     <section class="card">
 
       <!-- TOP MEDIA AREA -->
-      <div class="media" aria-label="OTP media">
+      <div class="media" aria-label="OTP media" data-i18n-aria-label="auth_otp_media_label">
         <video
           id="registerVideo"
           class="media-video"
@@ -66,13 +66,13 @@
 
         <!-- OTP BOXES -->
         <form class="otp-form" id="otpForm" novalidate>
-          <div class="otp" role="group" aria-label="กรอกรหัส OTP 6 หลัก">
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="หลักที่ 1" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 2" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 3" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 4" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 5" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 6" required />
+          <div class="otp" role="group" aria-label="กรอกรหัส OTP 6 หลัก" data-i18n-aria-label="otp_code_group_label">
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="หลักที่ 1" data-i18n-aria-label="otp_digit_label" data-i18n-n="1" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 2" data-i18n-aria-label="otp_digit_label" data-i18n-n="2" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 3" data-i18n-aria-label="otp_digit_label" data-i18n-n="3" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 4" data-i18n-aria-label="otp_digit_label" data-i18n-n="4" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 5" data-i18n-aria-label="otp_digit_label" data-i18n-n="5" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 6" data-i18n-aria-label="otp_digit_label" data-i18n-n="6" required />
           </div>
 
           <button class="link" id="resendBtn" type="button" disabled data-i18n="resend_otp">ขอรหัสใหม่</button>

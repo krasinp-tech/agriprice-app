@@ -1,11 +1,18 @@
 (function initFavoritesHelpers() {
   // uses global resolveUserId / resolveProfileId from utils/id-resolver.js
+  function resolveId(...ids) {
+    if (typeof window.resolveUserId === "function") return window.resolveUserId(...ids);
+    for (const id of ids) {
+      if (id !== undefined && id !== null && String(id).trim() !== "") return String(id);
+    }
+    return "";
+  }
 
   function getCurrentUserId() {
     try {
       const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
       const user = raw ? JSON.parse(raw) : null;
-      return resolveUserId(user?.profile_id, user?.id);
+      return resolveId(user?.profile_id, user?.id);
     } catch (_) {
       return "";
     }
@@ -45,13 +52,14 @@
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({
-          id: resolveUserId(item?.user_id, item?.profile_id, item?.id),
+          id: resolveId(item?.user_id, item?.profile_id, item?.id),
           kind: "seller",
           title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
           subtitle: item?.tagline || "",
           avatar: item?.avatar || "",
           source: "favorite",
-          profileId: resolveUserId(item?.user_id, item?.profile_id, item?.id),
+          sellerId: resolveId(item?.user_id, item?.profile_id, item?.id),
+          profileId: resolveId(item?.user_id, item?.profile_id, item?.id),
         }))
         .filter((x) => x.id);
     } catch (_) {
@@ -75,13 +83,14 @@
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({
-          id: resolveUserId(item?.profile_id, item?.id),
+          id: resolveId(item?.profile_id, item?.id),
           kind: "seller",
           title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
           subtitle: item?.tagline || "",
           avatar: item?.avatar || "",
           source: "follow",
-          profileId: resolveUserId(item?.profile_id, item?.id),
+          sellerId: resolveId(item?.profile_id, item?.id),
+          profileId: resolveId(item?.profile_id, item?.id),
         }))
         .filter((x) => x.id);
     } catch (_) {
@@ -94,24 +103,36 @@
     const arr = store?.read?.() || [];
     return Array.isArray(arr)
       ? arr
-          .map((item) => ({
-            id: String(item?.id || ""),
-            kind: String(item?.kind || "seller"),
-            title: item?.name || item?.sellerName || item?.title || "ไม่ทราบชื่อ",
-            subtitle: item?.sub || item?.sellerSub || item?.subtitle || "",
-            sellerName: item?.name || item?.sellerName || item?.title || "",
-            productName: item?.productName || item?.sub || item?.sellerSub || item?.subtitle || "",
-            avatar: item?.avatar || "",
-            source: item?.source || (String(item?.kind || "seller") === "product" ? "product-favorite" : "favorite"),
-            profileId: resolveUserId(item?.sellerId, item?.profileId),
-            productId: String(item?.productId || ""),
-            priceA: item?.priceA || "",
-            priceB: item?.priceB || "",
-            priceC: item?.priceC || "",
-            distance: item?.distance || "",
-            updateTime: item?.updateTime || "",
-            updatedAt: Number(item?.updatedAt || 0),
-          }))
+          .map((item) => {
+            const kind = String(item?.kind || "seller");
+            const offerId = String(item?.offerId || item?.offer_id || item?.productId || (kind === "product" ? item?.id : "") || "");
+            const productId = offerId;
+            const sellerId = resolveId(item?.sellerId, item?.profileId, item?.user_id, item?.seller_id);
+            const id = kind === "product"
+              ? (productId || String(item?.id || ""))
+              : (sellerId || String(item?.id || ""));
+
+            return {
+              id,
+              kind,
+              title: item?.name || item?.sellerName || item?.title || "ไม่ทราบชื่อ",
+              subtitle: item?.sub || item?.sellerSub || item?.subtitle || "",
+              sellerName: item?.name || item?.sellerName || item?.title || "",
+              productName: item?.productName || item?.sub || item?.sellerSub || item?.subtitle || "",
+              avatar: item?.avatar || "",
+              source: item?.source || (kind === "product" ? "product-favorite" : "favorite"),
+              sellerId,
+              profileId: sellerId,
+              offerId,
+              productId,
+              priceA: item?.priceA || "",
+              priceB: item?.priceB || "",
+              priceC: item?.priceC || "",
+              distance: item?.distance || "",
+              updateTime: item?.updateTime || "",
+              updatedAt: Number(item?.updatedAt || 0),
+            };
+          })
           .filter((x) => x.id)
           .sort((a, b) => b.updatedAt - a.updatedAt)
       : [];

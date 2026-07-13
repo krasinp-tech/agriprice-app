@@ -90,7 +90,19 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelSubLink.style.pointerEvents = 'none';
             cancelSubLink.textContent = t('processing', 'กำลังดำเนินการ...');
             try {
-              const res = await api.call('POST', '/api/payments/cancel');
+              let res;
+              if (api.call) {
+                res = await api.call('POST', '/api/payments/cancel');
+              } else {
+                const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+                const token = localStorage.getItem('token');
+                const response = await fetch(currentBase + '/api/payments/cancel', {
+                  method: 'POST',
+                  headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                });
+                res = await response.json();
+              }
+
               if (res && res.success) {
                 if (res.data && res.data.token) {
                   localStorage.setItem('token', res.data.token);
@@ -103,6 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 alert(t('cancel_success', 'ยกเลิกการสมัครเรียบร้อยแล้ว แพ็กเกจของคุณเป็น FREE'));
                 window.location.reload();
+              } else {
+                throw new Error(res?.error || res?.message || 'Cancel rejected');
               }
             } catch (err) {
               console.error('[Subscription] Cancel failed:', err);

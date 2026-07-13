@@ -11,6 +11,7 @@
   let ACTIVE_ROOM_ID = null;
   let ACTIVE_TARGET_ID = null;
   let MESSAGES = [];
+  let LAST_RENDER_KEY = '';
   let POLLING_INTERVAL = null;
 
   function t(key, fallback) {
@@ -20,7 +21,18 @@
 
   function esc(s) {
     if (window.AgriPriceUI) return window.AgriPriceUI.escapeHtml(s);
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function safeUrl(value, fallback = '') {
+    const raw = String(value || '').trim();
+    if (!raw || /^(javascript|data):/i.test(raw)) return fallback;
+    return raw;
   }
 
   // DOM Elements
@@ -89,7 +101,7 @@
       const other = r.other_user || {};
       const name = `${other.first_name || ''} ${other.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
       const lastMsg = r.last_message || (r.last_message_type === 'image' ? '🖼️ [ส่งรูปภาพ]' : '');
-      const avatar = other.avatar || '../../assets/images/avatar-guest.svg';
+      const avatar = safeUrl(other.avatar, '../../assets/images/avatar-guest.svg');
       const isUnread = r.unread_count > 0;
       const isActive = String(r.room_id) === String(ACTIVE_ROOM_ID);
 
@@ -106,15 +118,15 @@
 
       return `
         <div class="chat-item ${isActive ? 'active' : ''} ${isUnread ? 'is-unread' : ''}" data-id="${r.room_id}" data-target-id="${other.id || other.profile_id}">
-          <div class="chat-item-avatar"><img src="${avatar}" onerror="this.src='../../assets/images/avatar-guest.svg'"></div>
+          <div class="chat-item-avatar"><img src="${esc(avatar)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt=""></div>
           <div class="chat-item-body">
             <div class="chat-item-top">
               <div class="chat-item-name">${esc(name)}</div>
-              <div class="chat-item-time">${timeStr}</div>
+              <div class="chat-item-time">${esc(timeStr)}</div>
             </div>
             <div class="chat-item-meta">
               <div class="chat-item-snippet">${esc(lastMsg)}</div>
-              ${isUnread ? `<div class="chat-item-unread">${r.unread_count}</div>` : ''}
+              ${isUnread ? `<div class="chat-item-unread">${esc(r.unread_count)}</div>` : ''}
             </div>
           </div>
         </div>
@@ -152,8 +164,8 @@
     const other = roomInfo?.other_user || {};
     if (roomName) roomName.textContent = `${other.first_name || ''} ${other.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
     if (roomAvatarContainer) {
-      const avatarUrl = other.avatar || '../../assets/images/avatar-guest.svg';
-      roomAvatarContainer.innerHTML = `<img src="${avatarUrl}" onerror="this.src='../../assets/images/avatar-guest.svg'">`;
+      const avatarUrl = safeUrl(other.avatar, '../../assets/images/avatar-guest.svg');
+      roomAvatarContainer.innerHTML = `<img src="${esc(avatarUrl)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt="">`;
     }
 
     // Load Messages
@@ -171,13 +183,24 @@
     try {
       const res = await api.getChatMessages(chatId);
       const items = res.data || res || [];
+      const renderKey = [
+        String(chatId),
+        ...items.map((m) => [
+          m.message_id || m.id || '',
+          m.sender_id || '',
+          m.created_at || '',
+          m.message || '',
+          m.image_url || ''
+        ].join('~'))
+      ].join('|');
       
-      // Only re-render if message count changed or first load
-      if (items.length !== MESSAGES.length) {
+      // Re-render when switching rooms or when message content changes.
+      if (renderKey !== LAST_RENDER_KEY) {
         MESSAGES = items;
+        LAST_RENDER_KEY = renderKey;
         renderMessages(MESSAGES);
-        if (api.markChatRead) await api.markChatRead(chatId);
       }
+      if (api.markChatRead) await api.markChatRead(chatId);
     } catch (err) {
       console.error('[Chat] Messages failed:', err);
     }
@@ -193,7 +216,10 @@
       
       let contentHtml = '';
       if (m.message_type === 'image' || m.image_url) {
-        contentHtml = `<img src="${m.image_url}" class="bubble-image" onclick="window.open('${m.image_url}', '_blank')">`;
+        const imageUrl = safeUrl(m.image_url);
+        contentHtml = imageUrl
+          ? `<img src="${esc(imageUrl)}" class="bubble-image" data-image-url="${esc(imageUrl)}" alt="">`
+          : `<div class="bubble">${esc(t('image_unavailable', 'Image unavailable'))}</div>`;
       } else {
         contentHtml = `<div class="bubble">${esc(m.message)}</div>`;
       }
@@ -202,11 +228,15 @@
         <div class="msg ${isMe ? 'me' : 'them'}">
           <div>
             ${contentHtml}
-            <div class="msg-time">${time}</div>
+            <div class="msg-time">${esc(time)}</div>
           </div>
         </div>
       `;
     }).join('');
+
+    roomMessages.querySelectorAll('.bubble-image[data-image-url]').forEach((img) => {
+      img.addEventListener('click', () => window.open(img.dataset.imageUrl, '_blank', 'noopener'));
+    });
     
     roomMessages.scrollTop = roomMessages.scrollHeight;
   }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>??????????????????? | AGRIPRICE</title>
+  <title data-i18n="edit_birthdate_title">แก้ไขวันเกิด | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
@@ -21,9 +21,13 @@
 
   <link rel="stylesheet" href="../../../css/global.css" />
   <link rel="stylesheet" href="../../../css/account/manage-accounts/account-detail.css" />
- 
+
+    <script src="../../../js/config.js"></script>
+
+    <script src="../../../js/api-client.js"></script>
+
     <script src="../../../js/global-anim.js"></script>
- 
+
     <script src="../../../js/permission-manager.js"></script>
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
 </head>
@@ -31,22 +35,22 @@
   <main class="detail-page">
     <section class="detail-shell">
       <header class="detail-header">
-        <a class="detail-back" href="my-account.html" aria-label="???????????????????????">
+        <a class="detail-back" href="my-account.html" aria-label="กลับไปบัญชีของฉัน" data-i18n-aria-label="back_to_account">
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title">??????????????</h1>
-          <p class="detail-subtitle">?????????????????????????????????????????????</p>
+          <h1 class="detail-title" data-i18n="edit_birthdate_title">แก้ไขวันเกิด</h1>
+          <p class="detail-subtitle" data-i18n="edit_birthdate_subtitle">อัปเดตวันเดือนปีเกิดที่ใช้ในบัญชีของคุณ</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title">????????????</h2>
-        <p class="detail-note">??????????????: <strong id="currentBirthDate">1 ?.?. ?.?. 2004</strong></p>
+        <h2 class="detail-section-title" data-i18n="birth_date">วันเดือนปีเกิด</h2>
+        <p class="detail-note"><span data-i18n="current_birthdate">วันเกิดปัจจุบัน</span>: <strong id="currentBirthDate">1 ม.ค. 2004</strong></p>
 
         <form id="birthDateForm" class="detail-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="birthDateInput">??????????????</label>
+            <label class="field-label" for="birthDateInput" data-i18n="birth_date">วันเดือนปีเกิด</label>
             <input
               class="field-input"
               id="birthDateInput"
@@ -54,12 +58,12 @@
               type="date"
               required
             />
-            <p class="field-hint" id="birthDatePreview">?????????????????: -</p>
+            <p class="field-hint" id="birthDatePreview"><span data-i18n="selected_birthdate">วันที่เลือก</span>: -</p>
           </div>
 
           <div class="detail-actions">
-            <button type="submit" class="btn btn-primary">????????????????????</button>
-            <a class="btn btn-ghost" href="my-account.html">??????</a>
+            <button type="submit" class="btn btn-primary" data-i18n="save_birthdate_btn">บันทึกวันเกิด</button>
+            <a class="btn btn-ghost" href="my-account.html" data-i18n="cancel_btn">ยกเลิก</a>
           </div>
         </form>
 
@@ -68,12 +72,14 @@
     </section>
   </main>
 
- 
+
     <script src="../../../js/account/manage-accounts/account-store.js"></script>
- 
+
+    <script src="../../../js/components/i18n.js"></script>
+
     <script src="../../../js/account/manage-accounts/edit-birthdate.js"></script>
 
- 
+
     <script src="../../../js/auth/guard.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 </body>

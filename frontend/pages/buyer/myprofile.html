@@ -1,50 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <script>
-        if (localStorage.getItem('agriprice_mock') === 'true') {
-            window.APP_CONFIG_READY = Promise.resolve();
-            window.addEventListener('DOMContentLoaded', () => {
-                if (window.api) {
-                    window.api.getProfile = async () => ({
-                        first_name: 'กนก',
-                        last_name: 'หกก',
-                        tagline: 'เงาะ (สีชมพู)',
-                        about: 'รับซื้อผลไม้สดทุกวัน',
-                        phone: '0812345678',
-                        email: 'kanok@test.com',
-                        address_line1: '123/45 จันทบุรี',
-                        address_line2: 'ต.ตลาด อ.เมือง',
-                        lat: 12.608,
-                        lng: 102.112,
-                        services: ['รับซื้อถึงสวน', 'จ่ายเงินสด'],
-                        profile_id: 'buyer1',
-                        followers_count: 120
-                    });
-                    window.api.getProducts = async () => ([
-                        {
-                            product_id: 'prod1',
-                            name: 'เงาะ',
-                            variety: 'สีชมพู',
-                            is_active: true,
-                            lat: 12.650,
-                            lng: 102.150,
-                            grades: [
-                                { grade: 'A', price: 140 },
-                                { grade: 'B', price: 120 },
-                                { grade: 'C', price: 100 }
-                            ]
-                        }
-                    ]);
-                    window.api.updateProduct = async (id, data) => ({ success: true });
-                }
-            });
-        }
-    </script>
+<meta charset="UTF-8">
+    <script src="../../js/config.js"></script>
     <script src="../../js/api-client.js"></script>
     <script src="../../js/auth/guard.js"></script>
     <script src="../../js/components/i18n.js"></script>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-i18n="profile_title">โปรไฟล์ของฉัน - AGRIPRICE</title>
     <script>
@@ -69,7 +30,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <script src="../../js/config.js"></script>
     <script src="../../js/global-anim.js"></script>
     <script src="../../js/permission-manager.js"></script>
 </head>
@@ -109,10 +69,7 @@
             <div id="followingCount" class="stat-value">-</div>
             <div class="stat-label" data-i18n="profile_following">กำลังติดตาม</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-value">0</div>
-            <div class="stat-label" data-i18n="profile_score">คะแนน</div>
-        </div>
+
     </div>
 
     <!-- Actions (Owner view: Edit Profile + Add Purchase) -->
@@ -181,29 +138,7 @@
 </div>
 
 <!-- Bottom Nav -->
-<div id="bottomNavMount"><nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
-    <a href="index.html" class="bottom-nav-item" data-page="home">
-        <span class="material-icons-outlined">home</span>
-        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
-    </a>
-    <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
-        <span class="material-icons-outlined">chat_bubble_outline</span>
-        <span class="nav-label" data-i18n="nav_chat">แชท</span>
-        <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
-    </a>
-    <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
-        <span class="material-icons-outlined">local_mall</span>
-        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
-    </a>
-    <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
-        <span class="material-icons-outlined">notifications_none</span>
-        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
-    </a>
-    <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
-        <span class="material-icons-outlined">person_outline</span>
-        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
-    </a>
-</nav></div>
+<div id="bottomNavMount"></div>
 
 <!-- Hidden file inputs -->
 <input type="file" id="coverInput" accept="image/*" hidden>
@@ -229,6 +164,9 @@
 
         <label data-i18n="email_label">อีเมล</label>
         <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
+
+        <label data-i18n="profile_link_label">ลิงก์ติดต่อ</label>
+        <input id="linkEditor" type="url" placeholder="เว็บไซต์, Facebook หรือ LINE OA" data-i18n-placeholder="profile_link_placeholder">
 
         <label data-i18n="address_label">ที่อยู่</label>
         <input id="addr1Editor" type="text" placeholder="ที่อยู่" data-i18n-placeholder="address_label">
@@ -347,28 +285,63 @@ document.addEventListener('DOMContentLoaded', function() {
     if (profileAvatarBox && avatarInput) profileAvatarBox.addEventListener('click', () => avatarInput.click());
 });
 
+function escapeContactHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function normalizeProfileLink(value) {
+    const rawValue = value && typeof value === 'object'
+        ? (value.url || value.href || '')
+        : value;
+    const raw = String(rawValue || '').trim();
+    if (!raw) return '';
+    try {
+        const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+        return /^https?:$/i.test(url.protocol) ? url.href : '';
+    } catch (_) {
+        return '';
+    }
+}
+
+function getProfileLinkLabel(value, href) {
+    if (value && typeof value === 'object') {
+        return value.label || value.title || value.link_type || value.type || value.url || value.href || href;
+    }
+    return value || href;
+}
+
 // Called by myprofile.js after profile data is loaded
 window.onProfileDataReady = function(profileData) {
     // --- Render contact tab (Frame 15) ---
     const contactList = document.getElementById('contactList');
     if (contactList) {
         const items = [];
+        const safePhone = String(profileData.phone || '').trim();
+        const safeEmail = String(profileData.email || '').trim();
         if (profileData.phone) items.push(`
             <div class="contact-item-row">
                 <span class="material-icons-outlined">phone</span>
-                <a href="tel:${profileData.phone}">${profileData.phone}</a>
+                <a href="tel:${escapeContactHtml(safePhone.replace(/[^\d+]/g, ''))}">${escapeContactHtml(safePhone)}</a>
             </div>`);
         if (profileData.email) items.push(`
             <div class="contact-item-row">
                 <span class="material-icons-outlined">email</span>
-                <a href="mailto:${profileData.email}">${profileData.email}</a>
+                <a href="mailto:${escapeContactHtml(safeEmail)}">${escapeContactHtml(safeEmail)}</a>
             </div>`);
         if (profileData.links && profileData.links.length) {
             profileData.links.forEach(l => {
+                const safeHref = normalizeProfileLink(l);
+                if (!safeHref) return;
+                const linkLabel = getProfileLinkLabel(l, safeHref);
                 items.push(`
                     <div class="contact-item-row">
                         <span class="material-icons-outlined">language</span>
-                        <a href="${l}" target="_blank" rel="noopener">${l}</a>
+                        <a href="${escapeContactHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${escapeContactHtml(linkLabel)}</a>
                     </div>`);
             });
         }
@@ -392,7 +365,7 @@ window.onProfileDataReady = function(profileData) {
                 return `
                 <div class="service-row">
                     <span class="material-icons-outlined">${iconMap[sName] || 'check_circle'}</span>
-                    <span>${sName}</span>
+                    <span>${escapeContactHtml(sName)}</span>
                 </div>`;
             }).join('');
         }
@@ -401,9 +374,4 @@ window.onProfileDataReady = function(profileData) {
 </script>
 </body>
 </html>
-
-
-
-
-
 

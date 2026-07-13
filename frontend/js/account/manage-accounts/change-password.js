@@ -9,6 +9,7 @@
   const newPasswordInput = document.getElementById("newPasswordInput");
   const confirmPasswordInput = document.getElementById("confirmPasswordInput");
   const pageMessage = document.getElementById("pageMessage");
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
 
   function showMessage(text, type) {
     if (!pageMessage) return;
@@ -28,24 +29,24 @@
     const confirmPassword = confirmPasswordInput.value.trim();
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      showMessage("กรุณากรอกข้อมูลให้ครบทุกช่อง", "error");
+      showMessage(t("fill_all_fields", "กรุณากรอกข้อมูลให้ครบทุกช่อง"), "error");
       return;
     }
 
     if (newPassword.length < 8) {
-      showMessage("รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร", "error");
+      showMessage(t("password_min_length_error", "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร"), "error");
       newPasswordInput.focus();
       return;
     }
 
     if (newPassword === currentPassword) {
-      showMessage("รหัสผ่านใหม่ต้องไม่ซ้ำรหัสผ่านเดิม", "error");
+      showMessage(t("password_same_error", "รหัสผ่านใหม่ต้องไม่ซ้ำรหัสผ่านเดิม"), "error");
       newPasswordInput.focus();
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showMessage("ยืนยันรหัสผ่านใหม่ไม่ตรงกัน", "error");
+      showMessage(t("password_confirm_mismatch", "ยืนยันรหัสผ่านใหม่ไม่ตรงกัน"), "error");
       confirmPasswordInput.focus();
       return;
     }
@@ -53,9 +54,9 @@
     try {
       await store.changePassword(currentPassword, newPassword);
       passwordForm.reset();
-      showMessage("บันทึกรหัสผ่านใหม่เรียบร้อย", "success");
+      showMessage(t("password_save_success", "บันทึกรหัสผ่านใหม่เรียบร้อย"), "success");
     } catch (err) {
-      showMessage(err.message || "บันทึกรหัสผ่านใหม่ไม่สำเร็จ", "error");
+      showMessage(err.message || t("password_save_error", "บันทึกรหัสผ่านใหม่ไม่สำเร็จ"), "error");
       return;
     }
 
@@ -64,4 +65,3 @@
     }, 700);
   });
 })();
-

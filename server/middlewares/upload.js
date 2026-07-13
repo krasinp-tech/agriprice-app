@@ -24,7 +24,7 @@ function fileFilter(_req, file, cb) {
   if (ALLOWED_MIME.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', `ไม่รองรับไฟล์ประเภท ${file.mimetype}`));
+    cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'));
   }
 }
 

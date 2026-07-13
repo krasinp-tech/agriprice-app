@@ -5,7 +5,7 @@
  * Handles GPS requests, Haversine distance calculation, and formatting.
  */
 
-(function() {
+(function () {
     'use strict';
 
     /**
@@ -14,13 +14,13 @@
     function calculateDistance(lat1, lon1, lat2, lon2) {
         if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
         if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
-        
+
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = 
+        const a =
             Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
@@ -43,27 +43,29 @@
     /**
      * Robustly get user location using AgriPermission or Geolocation API.
      */
-    async function getUserLocation() {
+    async function getUserLocation(options = {}) {
         const DEBUG = !!window.AGRIPRICE_DEBUG;
-        
+        const prompt = options.prompt !== false;
+        const timeoutMs = Number(options.timeoutMs || 5000);
+
         const saveLoc = (loc) => {
             if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
                 try {
                     localStorage.setItem('location', JSON.stringify(loc));
-                } catch (_) {}
+                } catch (_) { }
             }
             return loc;
         };
-        
+
         try {
             // 1. Try AgriPermission (standard for the app)
-            if (window.AgriPermission) {
+            if (window.AgriPermission && prompt) {
                 const res = await window.AgriPermission.requestLocation();
                 if (res.granted && res.position) {
                     const coords = res.position.coords || res.position;
                     return saveLoc({ lat: coords.latitude, lng: coords.longitude });
                 }
-                
+
                 if (res.granted && !res.position) {
                     const Geo = window.Capacitor?.Plugins?.Geolocation;
                     if (Geo) {
@@ -73,33 +75,56 @@
                 }
             }
 
+            // Non-blocking callers can ask for location only when already granted.
+            if (!prompt) {
+                const Geo = window.Capacitor?.Plugins?.Geolocation;
+                if (Geo?.checkPermissions) {
+                    try {
+                        const perm = await Geo.checkPermissions();
+                        if (perm.location === 'granted') {
+                            const pos = await Geo.getCurrentPosition({ enableHighAccuracy: false, timeout: timeoutMs });
+                            return saveLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                        }
+                    } catch (_) {}
+                }
+
+                if (navigator.permissions?.query && navigator.geolocation) {
+                    try {
+                        const status = await navigator.permissions.query({ name: 'geolocation' });
+                        if (status.state === 'granted') {
+                            const loc = await new Promise((resolve) => {
+                                navigator.geolocation.getCurrentPosition(
+                                    (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+                                    () => resolve(null),
+                                    { timeout: timeoutMs, maximumAge: 300000 }
+                                );
+                            });
+                            if (loc) return saveLoc(loc);
+                        }
+                    } catch (_) {}
+                }
+
+                return null;
+            }
+
             // 2. Fallback to browser Geolocation
             if (navigator.geolocation) {
                 const loc = await new Promise((resolve) => {
                     navigator.geolocation.getCurrentPosition(
                         (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
                         () => resolve(null),
-                        { timeout: 10000, maximumAge: 300000 }
+                        { timeout: timeoutMs, maximumAge: 300000 }
                     );
                 });
                 if (loc) return saveLoc(loc);
             }
 
-            // 3. ULTIMATE FALLBACK: IP Geolocation (No permission required)
-            try {
-                const ipRes = await fetch('https://ipapi.co/json/').catch(() => null);
-                if (ipRes && ipRes.ok) {
-                    const ipData = await ipRes.json();
-                    if (ipData.latitude && ipData.longitude) {
-                        return saveLoc({ lat: ipData.latitude, lng: ipData.longitude });
-                    }
-                }
-            } catch (e) {}
+            // 3. DEFAULT FALLBACK: Bangkok, Thailand (guarantees coordinates without another network request)
+            return saveLoc({ lat: 13.7563, lng: 100.5018 });
         } catch (err) {
             if (DEBUG) console.warn("[LocationHelper] Error:", err);
+            return prompt ? saveLoc({ lat: 13.7563, lng: 100.5018 }) : null;
         }
-        
-        return null;
     }
 
     // Export to window

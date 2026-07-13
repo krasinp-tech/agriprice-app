@@ -1,5 +1,8 @@
 // UI Common Components: alert, loading, empty, confirm
 
+if (!window.__AGRIPRICE_UI_COMMON_READY) {
+  window.__AGRIPRICE_UI_COMMON_READY = true;
+
 // Alert
 window.appNotify = window.appNotify || function (message, type = 'info') {
   let host = document.getElementById('globalAppNotifyHost');
@@ -150,3 +153,4 @@ window.showConfirm = function(msg, onConfirm) {
   style.textContent = css;
   document.head.appendChild(style);
 })();
+}

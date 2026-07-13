@@ -4,8 +4,22 @@
  * รวมฟังก์ชันการดึงข้อมูลทั้งหมดไว้ที่เดียว เพื่อให้ง่ายต่อการดูแลและเรียกใช้งานซ้ำ (Reusable)
  */
 (function () {
+  if (window.__AGRIPRICE_API_READY) return;
+  window.__AGRIPRICE_API_READY = true;
+  const IS_EMBEDDED_FRAME = (() => {
+    try { return window.self !== window.top; } catch (_) { return true; }
+  })();
+
   // ใช้ helper function เพื่อให้ได้ค่า BASE ล่าสุดเสมอ (เผื่อมีการสลับไป Render fallback)
-  const getBase = () => window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+  const getBase = () => {
+    const rawBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+    if (sessionStorage.getItem('agriprice_local_failed') === 'true') {
+      if (rawBase.includes('localhost') || rawBase.includes('127.0.0.1')) {
+        return 'https://agriprice-app.onrender.com';
+      }
+    }
+    return rawBase;
+  };
   const KEYS = window.STORAGE_KEYS || { TOKEN: 'token', ROLE: 'role', USER_DATA: 'user_data' };
 
   // --- 1. Helpers (ตัวช่วยจัดการ Authentication & Token) ---
@@ -177,6 +191,11 @@
     const q = params ? '?' + new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))).toString() : '';
     return call('GET', '/api/products' + q);
   }
+  function getOfferId(item) {
+    if (item == null) return '';
+    if (typeof item === 'string' || typeof item === 'number') return item;
+    return item.offer_id ?? item.offerId ?? item.product_id ?? item.productId ?? item.id ?? '';
+  }
   const getProduct = id => call('GET', '/api/products/' + id);
   const createProduct = form => call('POST', '/api/products', form, form instanceof FormData);
   const updateProduct = (id, form) => call('PATCH', '/api/products/' + id, form, form instanceof FormData);
@@ -185,13 +204,13 @@
   const getProductTypes = () => call('GET', '/api/product-types');
 
   const getFavorites = () => call('GET', '/api/favorites');
-  const addFavorite = id => call('POST', '/api/favorites', { product_id: id });
+  const addFavorite = userId => call('POST', '/api/favorites', { user_id: userId });
   const removeFavorite = id => call('DELETE', '/api/favorites/' + id);
 
   // --- 5. Product Slots ---
-  const getProductSlots = (productId, p) => call('GET', `/api/products/${productId}/slots` + (p ? '?' + new URLSearchParams(p).toString() : ''));
+  const getProductSlots = (offerId, p) => call('GET', `/api/products/${offerId}/slots` + (p ? '?' + new URLSearchParams(p).toString() : ''));
   const getAllSlots = p => call('GET', '/api/product-slots' + (p ? '?' + new URLSearchParams(p).toString() : ''));
-  const createProductSlot = (productId, data) => call('POST', `/api/products/${productId}/slots`, data);
+  const createProductSlot = (offerId, data) => call('POST', `/api/products/${offerId}/slots`, data);
   const createSlotsBatch = data => call('POST', '/api/product-slots/batch', data);
   const updateProductSlot = (id, data) => call('PATCH', `/api/product-slots/${id}`, data);
   const deleteProductSlot = id => call('DELETE', `/api/product-slots/${id}`);
@@ -232,10 +251,10 @@
   const deleteNotification = id => call('DELETE', '/api/notifications/' + id);
   const getNotificationSettings = () => call('GET', '/api/notification-settings');
   const saveNotificationSettings = (settings, role) => call('PATCH', '/api/notification-settings', { settings, role });
-  const updatePushToken = token => call('POST', '/api/notifications/push-token', { token });
+  const updatePushToken = (token, platform = 'native') => call('POST', '/api/notifications/push-token', { token, platform });
 
   const getDeviceSessions = () => call('GET', '/api/device-sessions');
-  const logoutDevice = id => call('POST', `/api/device-sessions/${id}/logout`, {});
+  const logoutDevice = (id, password) => call('POST', `/api/device-sessions/${id}/logout`, { password });
 
   // --- 10. Logout ---
   async function logout() {
@@ -251,6 +270,7 @@
   const getDashboard = () => call('GET', '/api/dashboard');
   const getAnnouncements = p => call('GET', '/api/announcements' + (p ? '?' + new URLSearchParams(p).toString() : ''));
   const checkoutPayment = body => call('POST', '/api/payments/checkout', body);
+  const submitAppReview = body => call('POST', '/api/reviews/app', body);
 
   // --- Export ออกไปให้ทุกหน้าเรียกใช้ผ่านคำสั่ง window.api.xxx() ได้ ---
   window.api = {
@@ -259,7 +279,7 @@
     otpSend, otpVerify, registerFinish, passwordReset, changePassword, login, logout,
     getProfile, updateProfile, getProfileById, deleteProfile,
     getAddresses, createAddress, updateAddress, deleteAddress,
-    getProducts, getProduct, createProduct, updateProduct, deleteProduct, getVarieties, getProductTypes,
+    getProducts, getOfferId, getProduct, createProduct, updateProduct, deleteProduct, getVarieties, getProductTypes,
     getFavorites, addFavorite, removeFavorite,
     getProductSlots, getAllSlots, createProductSlot, createSlotsBatch, updateProductSlot, deleteProductSlot,
     getUsers, getFollowingCount,
@@ -268,7 +288,101 @@
     pingPresence, getUserPresence,
     getNotifications, markRead, markAllRead, deleteNotification, getNotificationSettings, saveNotificationSettings, updatePushToken,
     getDeviceSessions, logoutDevice,
-    search, getDashboard, getAnnouncements, checkoutPayment
+    search, getDashboard, getAnnouncements, checkoutPayment, submitAppReview
   };
+
+  // --- 12. Background Notification Polling & Triggering ---
+  let lastSeenNotificationId = null;
+  let notiPollInterval = null;
+  let notiPollInFlight = false;
+
+  async function checkNotificationsBackground() {
+    if (notiPollInFlight || document.hidden) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    notiPollInFlight = true;
+
+    try {
+      const currentBase = getBase();
+      const response = await fetch(currentBase + '/api/notifications?limit=5', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!response.ok) return;
+      const res = await response.json();
+      if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const unread = res.data.filter(n => !n.is_read);
+        if (unread.length === 0) return;
+
+        const latest = unread[0];
+        const latestId = String(latest.id || latest.notification_id);
+
+        if (lastSeenNotificationId === null) {
+          lastSeenNotificationId = latestId;
+          return;
+        }
+
+        if (latestId !== lastSeenNotificationId) {
+          lastSeenNotificationId = latestId;
+          showBackgroundNotification(latest.title, latest.message || latest.content || latest.description);
+          window.dispatchEvent(new CustomEvent('agriprice:notifications-refresh', { detail: { latest } }));
+          if (typeof window.loadNotifications === 'function') {
+            window.loadNotifications();
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[API Background] Notification check failed:', err.message);
+    } finally {
+      notiPollInFlight = false;
+    }
+  }
+
+  function showBackgroundNotification(title, body) {
+    const isLocalNotifSupported = window.Capacitor && window.Capacitor.isPluginAvailable('LocalNotifications');
+    if (isLocalNotifSupported) {
+      try {
+        const { LocalNotifications } = window.Capacitor.Plugins;
+        LocalNotifications.schedule({
+          notifications: [
+            {
+              title: title,
+              body: body,
+              id: Math.floor(Math.random() * 100000),
+              schedule: { at: new Date(Date.now() + 100) }
+            }
+          ]
+        });
+        return;
+      } catch (e) {
+        console.error('[API Background] Native local notification failed:', e);
+      }
+    }
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body });
+      return;
+    }
+
+    if (window.showToast) {
+      window.showToast(`${title}: ${body}`, 'success');
+    } else {
+      if (window.AGRIPRICE_DEBUG) console.log(`[Background Notification] ${title}: ${body}`);
+    }
+  }
+
+  function startNotificationPolling() {
+    if (notiPollInterval) clearInterval(notiPollInterval);
+    notiPollInterval = setInterval(checkNotificationsBackground, 30000);
+    setTimeout(checkNotificationsBackground, 12000);
+  }
+
+  if (!IS_EMBEDDED_FRAME && localStorage.getItem('token')) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startNotificationPolling);
+    } else {
+      startNotificationPolling();
+    }
+  }
+
   if (window.AGRIPRICE_DEBUG) console.log('[API] ✅ Connected to:', getBase());
 })();

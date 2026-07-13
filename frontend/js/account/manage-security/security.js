@@ -1,3 +1,2 @@
-(function(){
-  // placeholder page
+(function() {
 })();

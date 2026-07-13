@@ -75,7 +75,7 @@ router.post('/:userId', authMiddleware, async (req, res) => {
   try {
     const followerId = req.user.id;
     const followingId = req.params.userId;
-    if (followerId === followingId)
+    if (String(followerId) === String(followingId))
       return res.status(400).json(response.error('ไม่สามารถ Follow ตัวเองได้'));
 
     const { error } = await supabaseAdmin
@@ -88,9 +88,8 @@ router.post('/:userId', authMiddleware, async (req, res) => {
       if (error.message.includes('duplicate')) {
         return res.json(response.success('Follow สำเร็จ'));
       }
-      // Graceful fallback สำหรับการส่งงาน
-      console.warn('[FollowAPI] Silent Fallback:', error.message);
-      return res.json(response.success('Follow สำเร็จ'));
+      console.warn('[FollowAPI] Follow insert error:', error.message);
+      return res.status(500).json(response.error('Follow ไม่สำเร็จ: ' + error.message));
     }
 
     // อัปเดตตัวเลข followers_count และ following_count
@@ -101,7 +100,7 @@ router.post('/:userId', authMiddleware, async (req, res) => {
 
     res.json(response.success('Follow สำเร็จ'));
   } catch (e) {
-    res.json(response.success('Follow สำเร็จ'));
+    res.status(500).json(response.error('Follow ไม่สำเร็จ: ' + e.message));
   }
 });
 

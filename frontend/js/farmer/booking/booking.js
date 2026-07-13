@@ -13,6 +13,79 @@ function currentLocale() {
   return 'th-TH';
 }
 
+function normalizeStatusGroup(status) {
+  const s = String(status || '').toLowerCase();
+  if (s === 'completed' || s === 'success') return 'success';
+  if (s === 'rejected' || s === 'cancel' || s === 'cancelled' || s === 'canceled') return 'cancel';
+  return 'waiting';
+}
+
+function normalizeFilter(value) {
+  const raw = String(value || '').toLowerCase();
+  if (raw === 'all' || raw === 'waiting' || raw === 'success' || raw === 'cancel') return raw;
+  if (!raw) return 'all';
+  return normalizeStatusGroup(raw);
+}
+
+function includesText(value, keyword) {
+  return String(value || '').toLowerCase().includes(keyword);
+}
+
+function firstRelation(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function displayName(profile, fallback) {
+  const name = profile
+    ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+    : '';
+  return name || fallback;
+}
+
+function getOfferOwner(booking) {
+  return firstRelation(booking.product?.profiles)
+    || firstRelation(booking.products?.profiles)
+    || firstRelation(booking.buy_offers?.profiles)
+    || firstRelation(booking.slot?.product?.profiles)
+    || null;
+}
+
+function parseVehicles(source) {
+  let vehicles = [];
+
+  if (Array.isArray(source.booking_vehicles)) {
+    vehicles = source.booking_vehicles.map(v => ({
+      plate: v.plate || v.plate_no || '',
+      type: v.type || t('truck', 'Truck')
+    }));
+  } else if (Array.isArray(source.vehicle_info)) {
+    vehicles = source.vehicle_info;
+  } else if (typeof source.vehicle_info === 'string' && source.vehicle_info.trim()) {
+    try {
+      const parsed = JSON.parse(source.vehicle_info);
+      vehicles = Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      vehicles = source.vehicle_info.split(/[,;\n]+/).map(plate => ({ plate: plate.trim() }));
+    }
+  } else if (source.vehicle_plates) {
+    vehicles = String(source.vehicle_plates).split(/[,;\n]+/).map(plate => ({ plate: plate.trim() }));
+  } else if (source.note) {
+    try {
+      const note = typeof source.note === 'string' ? JSON.parse(source.note) : source.note;
+      vehicles = Array.isArray(note?.vehicles) ? note.vehicles : [];
+    } catch (_) {
+      vehicles = [];
+    }
+  }
+
+  return vehicles
+    .map(v => ({
+      plate: String(v.plate || v.plate_no || '').trim(),
+      type: String(v.typeName || v.type || t('truck', 'Truck')).trim()
+    }))
+    .filter(v => v.plate);
+}
+
 // ===== API Data Fetching =====
 async function fetchBookings() {
   const DEBUG_BOOKING = !!window.AGRIPRICE_DEBUG;
@@ -45,6 +118,17 @@ async function fetchBookings() {
           return Array.isArray(n.vehicles) ? n.vehicles : [];
         } catch (_) { return []; }
       })(),
+      ...(() => {
+        const owner = getOfferOwner(b);
+        const requester = b.farmer || b.buyer || null;
+        const unknownName = t('booking_unknown_name', 'Unknown');
+        return {
+          buyerName: displayName(requester, unknownName),
+          shopName: displayName(owner, displayName(requester, unknownName)),
+          phone: owner?.phone || requester?.phone || '',
+          vehicles: parseVehicles(b),
+        };
+      })(),
     }));
   } catch (e) {
     console.error('[Booking] fetch error:', e);
@@ -56,14 +140,21 @@ async function fetchBookings() {
 }
 
 function mapStatusText(status) {
-  if (status === "waiting") return t('waiting', 'รอคิว');
-  if (status === "success") return t('success', 'สำเร็จ');
-  if (status === "cancel") return t('cancel', 'ยกเลิก');
+  const s = String(status || '').toLowerCase();
+  if (s === "waiting") return t('waiting', 'รอคิว');
+  if (s === "confirmed") return t('confirmed', 'ยืนยันแล้ว');
+  if (s === "completed" || s === "success") return t('success', 'สำเร็จ');
+  if (s === "rejected") return t('rejected', 'ปฏิเสธ');
+  if (s === "cancel" || s === "cancelled" || s === "canceled") return t('cancel', 'ยกเลิก');
   return t('booking_unknown_status', 'ไม่ทราบสถานะ');
 }
 
+function mapStatusClass(status) {
+  return normalizeStatusGroup(status);
+}
+
 function renderCard(b) {
-  const badgeClass = b.status;
+  const badgeClass = mapStatusClass(b.status);
   const statusText = mapStatusText(b.status);
   const esc = window.escapeHtml || ((s) => s);
     if (window.AGRIPRICE_DEBUG) console.log('[renderCard] booking:', b);
@@ -110,7 +201,7 @@ function init() {
 
   let all = [];
   const urlParams = new URLSearchParams(window.location.search);
-  let filter = urlParams.get("filter") || "all";
+  let filter = normalizeFilter(urlParams.get("filter") || "all");
   
   if (filter) {
     document.querySelectorAll(".seg-btn").forEach((b) => {
@@ -122,12 +213,13 @@ function init() {
   function apply() {
     const k = keyword.trim().toLowerCase();
     const filtered = all.filter((b) => {
-      const passFilter = filter === "all" ? true : b.status === filter;
+      const passFilter = filter === "all" ? true : normalizeStatusGroup(b.status) === filter;
       const passSearch =
         !k ||
-        b.bookingId.toLowerCase().includes(k) ||
-        b.shopName.toLowerCase().includes(k) ||
-        b.queueNo.toLowerCase().includes(k);
+        includesText(b.bookingId, k) ||
+        includesText(b.shopName, k) ||
+        includesText(b.queueNo, k) ||
+        includesText(b.productName, k);
       return passFilter && passSearch;
     });
 
@@ -169,7 +261,7 @@ function init() {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      filter = btn.dataset.filter;
+      filter = normalizeFilter(btn.dataset.filter);
       apply();
     });
   });

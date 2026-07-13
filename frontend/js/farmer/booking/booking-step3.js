@@ -1,7 +1,7 @@
 /**
  * AGRIPRICE - Booking Step 3 JavaScript
- * เธเธตเน€เธเธญเธฃเน: เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ, เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธฒเธ step 1-2, เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธ
- * เธฃเธญเธเธฃเธฑเธ: Desktop, Tablet, Mobile
+ * ฟีเจอร์: สรุปการจอง, โหลดข้อมูลจาก step 1-2, ยืนยันการจอง
+ * รองรับ: Desktop, Tablet, Mobile
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,6 +22,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatDateLocale(date) {
     const locale = getCurrentLocale();
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date));
+  }
+
+  function toLocalDateValue(dateLike) {
+    if (typeof dateLike === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateLike)) {
+      return dateLike;
+    }
+    const parsed = new Date(dateLike);
+    if (Number.isNaN(parsed.getTime())) return '';
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   // ================================
   // Elements
@@ -45,8 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryAddress = document.getElementById("summaryAddress");
 
   // ================================
-  // ๐”ต DATABASE-READY API LAYER
-  // 🔘 DATABASE-READY API LAYER
+  // DATABASE-READY API LAYER
   // ================================
   const BookingAPI = {
     /**
@@ -74,10 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let scheduled_time;
         try {
           if (bookingData.date && typeof bookingData.date === 'string') {
-            let dateOnly = bookingData.date.includes('T') ? bookingData.date.split('T')[0] : bookingData.date;
+            let dateOnly = toLocalDateValue(bookingData.date);
             const rawTime = bookingData.timeSlot?.time || '08:00';
             const timeStart = rawTime.split('-')[0].trim();
-            scheduled_time = new Date(dateOnly + 'T' + timeStart + ':00').toISOString();
+            scheduled_time = new Date(dateOnly + 'T' + timeStart + ':00+07:00').toISOString();
           } else {
             scheduled_time = new Date().toISOString();
           }
@@ -86,12 +97,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const rawSlotId = bookingData.slot_id ? String(bookingData.slot_id) : null;
-        const finalSlotId = (rawSlotId && rawSlotId.includes('fallback')) ? null : rawSlotId;
+        const finalSlotId = rawSlotId && !Number.isNaN(Number(rawSlotId)) ? Number(rawSlotId) : null;
+        const offerId = bookingData.offer_id || bookingData.product_id || bookingData.timeSlot?.offer_id || bookingData.timeSlot?.product_id || null;
 
         const payload = {
           buyer_id,
           farmer_id: bookingData.farmer_id || null,
-          product_id: bookingData.product_id ? String(bookingData.product_id) : null,
+          offer_id: offerId ? String(offerId) : null,
+          product_id: offerId ? String(offerId) : null,
           slot_id: finalSlotId,
           scheduled_time,
           note: bookingData.note || null,
@@ -232,9 +245,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // ================================
       // Fetch real product details from API
       let productDetails = null;
-      if (step1Data.product_id && window.api) {
+      const stepOfferId = step1Data.offer_id || step1Data.product_id;
+      if (stepOfferId && window.api) {
         try {
-          productDetails = await window.api.getProduct(step1Data.product_id);
+          const productRes = await window.api.getProduct(stepOfferId);
+          productDetails = productRes?.data || productRes;
         } catch (e) {
           if (DEBUG_BOOKING) console.warn('[step3] Failed to fetch product details:', e.message);
         }
@@ -323,7 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
         dateFormatted: step1Data.dateFormatted,
         timeSlot:      step1Data.timeSlot,
         slot_id:       step1Data.slot_id    || null,
-        product_id:    step1Data.product_id || null,
+        offer_id:      step1Data.offer_id   || step1Data.product_id || null,
+        product_id:    step1Data.offer_id   || step1Data.product_id || null,
         buyer_id:      step1Data.buyer_id   || null,
         farmer_id:     step1Data.farmer_id  || (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY||'user')||'null')?.id||null; } catch(_){return null;} })(),
         farmerName:    step1Data.farmerName || localStorage.getItem('bookingFarmerName') || '',
@@ -346,14 +362,15 @@ document.addEventListener("DOMContentLoaded", () => {
         step: 3
       };
 
-      // ๐”ต เธเธฑเธเธ—เธถเธเธเนเธฒเธ API Layer (เธฃเธญเธเธฃเธฑเธ Database)
+      // บันทึกผ่าน API Layer (รองรับ Database)
       const result = await BookingAPI.confirmBooking(finalBookingData);
 
-      if (DEBUG_BOOKING) console.log("โ… เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ:", result);
+      if (DEBUG_BOOKING) console.log("ยืนยันการจองสำเร็จ:", result);
 
-      // เนเธเธซเธเนเธฒเธชเธณเน€เธฃเนเธ (step 4)
+      // ไปหน้าสำเร็จ (step 4)
       const bookingId = result.bookingId || result.booking?.id || "";
-      if (window.navigateWithTransition) window.navigateWithTransition("booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "")); else window.location.href = "booking-step4.html" + (bookingId ? `?bid=${bookingId}` : "");
+      const bookingQuery = bookingId ? `?bid=${encodeURIComponent(bookingId)}` : "";
+      if (window.navigateWithTransition) window.navigateWithTransition("booking-step4.html" + bookingQuery); else window.location.href = "booking-step4.html" + bookingQuery;
     } catch (error) {
       console.error("Error confirming booking:", error);
       window.appNotify(error.message || t('error_occurred', "เกิดข้อผิดพลาดในการยืนยันการจอง"), "error");
@@ -373,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize
   // ================================
   async function init() {
-    // เธ•เธฃเธงเธเธชเธญเธเธงเนเธฒเธกเธตเธเนเธญเธกเธนเธฅเธเธฒเธ step เธเนเธญเธเธซเธเนเธฒเธซเธฃเธทเธญเนเธกเน
+    // ตรวจสอบว่ามีข้อมูลจาก step ก่อนหน้าหรือไม่
     const step1Data = localStorage.getItem("bookingStep1");
     const step2Data = localStorage.getItem("bookingStep2");
 
@@ -384,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     await loadSummaryData();
-    if (DEBUG_BOOKING) console.log("๐€ Booking Step 3 initialized");
+    if (DEBUG_BOOKING) console.log("Booking Step 3 initialized");
   }
 
   init();

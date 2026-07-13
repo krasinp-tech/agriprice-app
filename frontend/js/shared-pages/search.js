@@ -7,6 +7,14 @@
     return fallback || key;
   }
 
+  function firstRelation(value) {
+    return Array.isArray(value) ? value[0] : value;
+  }
+
+  function profileName(profile) {
+    return profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '';
+  }
+
   // Elements
   const input = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
@@ -158,14 +166,19 @@
         }
 
         // Distance calculation
-        const sLat = p.profiles?.lat ?? p.lat ?? null;
-        const sLng = p.profiles?.lng ?? p.lng ?? null;
+        const profile = firstRelation(p.profiles);
+        const sLat = profile?.lat ?? p.lat ?? null;
+        const sLng = profile?.lng ?? p.lng ?? null;
         const distKm = (userLat !== null && sLat !== null && sLng !== null && window.LocationHelper?.calculateDistance)
           ? window.LocationHelper.calculateDistance(userLat, userLng, sLat, sLng)
           : null;
 
+        const offerId = p.offer_id || p.offerId || p.product_id || p.productId || p.id;
+
         return {
-          id: p.product_id || p.id,
+          id: offerId,
+          offerId,
+          productId: offerId,
           type: 'product',
           sellerId: p.user_id,
           sellerName: p.profiles ? `${p.profiles.first_name} ${p.profiles.last_name}`.trim() : t('booking_unknown_name', 'ไม่ทราบชื่อ'),
@@ -178,9 +191,14 @@
           createdAtMonth: p.created_at ? (new Date(p.created_at).getMonth() + 1).toString() : null,
           updateTime: window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(p.created_at) : p.created_at,
           updatedMinutesAgo: p.created_at ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 60000) : 0,
-          _productId: p.product_id || p.id,
+          _offerId: offerId,
+          _productId: offerId,
           _distKm: distKm,
-          distanceText: window.LocationHelper?.formatDistance ? window.LocationHelper.formatDistance(distKm) : ''
+          distanceText: window.LocationHelper?.formatDistance ? window.LocationHelper.formatDistance(distKm) : '',
+          ...(() => ({
+            sellerName: profile ? profileName(profile) : t('booking_unknown_name', 'Unknown'),
+            avatar: profile?.avatar || resolveToRootUrl('assets/images/avatar-guest.svg'),
+          }))()
         };
       });
 

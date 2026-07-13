@@ -2,10 +2,10 @@
 <html lang="th">
 
 <head>
+<meta charset="UTF-8">
   <script src="../../../js/api-client.js"></script>
   <script src="../../../js/auth/guard.js"></script>
   <script src="../../../js/components/i18n.js"></script>
-  <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="address_book_title">สมุดที่อยู่ | AGRIPRICE</title>
@@ -22,7 +22,7 @@
   <!-- Google Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <!-- CSS -->
@@ -131,11 +131,6 @@
     window.AuthGuard.requireLogin();
     document.addEventListener('DOMContentLoaded', function () {
       if (window.i18nInit) window.i18nInit();
-    });
-    window.addEventListener('storage', function (e) {
-      if (e.key === 'lang') {
-        if (window.i18nInit) window.i18nInit();
-      }
     });
   </script>
 </body>

@@ -12,7 +12,7 @@
   function toast(msg, type = 'success') {
     if (window.showToast) {
       window.showToast(msg, type);
-    } else {
+    } else if (window.AGRIPRICE_DEBUG) {
       console.log(`[Payment ${type}]`, msg);
     }
   }

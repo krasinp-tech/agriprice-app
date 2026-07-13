@@ -56,7 +56,7 @@
     outline: none;
     background: var(--bg-card, #fff);
     color: var(--text-main, #474646);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Sarabun', sans-serif;
 }
 
 .search-input-header::placeholder { color: var(--text-dim, #cfcfcf); }
@@ -99,7 +99,7 @@
     color: var(--text-muted, #666);
     white-space: nowrap;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Sarabun', sans-serif;
     transition: all 0.2s;
 }
 

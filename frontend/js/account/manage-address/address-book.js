@@ -21,7 +21,7 @@
   // ── Toast helper ──────────────────────────────────────
   function toast(msg, type = 'success') {
     if (window.showToast) return window.showToast(msg, type);
-    console.log('[AddressBook]', msg);
+    if (window.AGRIPRICE_DEBUG) console.log('[AddressBook]', msg);
   }
 
   // ── Modal helpers ─────────────────────────────────────

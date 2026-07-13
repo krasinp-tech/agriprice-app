@@ -18,21 +18,32 @@
 		} catch (_) {}
 
 		// 2. Environment detection
+		const cap = window.Capacitor;
+		const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
 		const isNative = (
 			window.location.protocol === 'capacitor:' || 
 			window.location.protocol === 'ionic:' ||
-			(window.Capacitor && window.Capacitor.isNative)
+			(window.Capacitor && window.Capacitor.isNative) ||
+			capPlatform === 'android' ||
+			capPlatform === 'ios' ||
+			!!cap?.isNative
 		);
+		const useLocalApi = localStorage.getItem('agriprice_use_local') === '1';
+
+		if (isNative && !useLocalApi) {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Native app detected: Using Production API');
+			return 'https://agriprice-app.onrender.com';
+		}
 
 		// Auto-detect local development (localhost, 127.0.0.1, file protocol, or local network IP)
 		const isLocal = (
-			hostname === 'localhost' || 
-			hostname === '127.0.0.1' || 
+			(hostname === 'localhost' || hostname === '127.0.0.1') && 
+			(window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443') ||
 			hostname.startsWith('192.168.') || 
 			protocol === 'file:'
 		);
 
-		if (isLocal || localStorage.getItem('agriprice_use_local') === '1') {
+		if (isLocal || useLocalApi) {
 			if (window.AGRIPRICE_DEBUG) console.log('[config] Local environment detected: Using http://localhost:5000');
 			return 'http://localhost:5000';
 		}

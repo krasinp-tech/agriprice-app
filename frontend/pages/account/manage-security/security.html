@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>??????????? | AGRIPRICE</title>
+  <title data-i18n="security_title">ความปลอดภัย | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
@@ -16,7 +16,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <link rel="stylesheet" href="../../../css/global.css" />
@@ -26,22 +26,24 @@
 <body>
   <main class="ud-page fade-slide">
     <header class="ud-header fade-slide">
-      <a class="ud-back" href="../account.html" aria-label="????????">
+      <a class="ud-back" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="back">
         <span class="material-icons-outlined">chevron_left</span>
       </a>
-      <h1 class="ud-title">???????????</h1>
+      <h1 class="ud-title" data-i18n="security_title">ความปลอดภัย</h1>
     </header>
 
     <section class="ud-card fade-slide">
-      <div class="ud-icon">??</div>
-      <div class="ud-text">?????????????????</div>
-      <div class="ud-sub">????????????????????</div>
+      <div class="ud-icon"><span class="material-icons-outlined">security</span></div>
+      <div class="ud-text" data-i18n="security_coming_soon">ฟีเจอร์ความปลอดภัยกำลังจะมา</div>
+      <div class="ud-sub" data-i18n="security_coming_soon_desc">คุณจะสามารถจัดการความปลอดภัยของบัญชีได้ที่นี่</div>
     </section>
   </main>
 
- 
+
     <script src="../../../js/global-anim.js"></script>
- 
+
+    <script src="../../../js/components/i18n.js"></script>
+
     <script src="../../../js/account/manage-security/security.js"></script>
 </body>
 </html>

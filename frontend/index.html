@@ -1,170 +1,316 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-    <script src="js/components/i18n.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="home_title">AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
-
-    <!-- PWA & Mobile Meta Tags -->
-    <meta name="theme-color" content="#0B853C">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AGRIPRICE">
-    <link rel="apple-touch-icon" href="assets/icon.png">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AGRIPRICE</title>
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="components/bottom-nav/bottom-nav.css">
-    <link rel="stylesheet" href="components/product-card/product-card.css">
-    <link rel="stylesheet" href="components/favorites/favorites.css">
     <link rel="stylesheet" href="css/dark-mode-patch.css">
 
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--html-bg, #F7F9FA);
+        }
+        #appContentFrame {
+            display: block;
+            width: 100%;
+            height: calc(100% - 65px);
+            border: none;
+            background-color: var(--html-bg, #F7F9FA);
+            transition: opacity 0.15s ease-in-out;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            z-index: 9999;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
     <script>
+        // Recursive loop prevention: if we are loaded inside an iframe, load home.html instead of the shell!
+        if (window.self !== window.top) {
+            window.location.replace('home.html');
+        }
+
         (function () {
+            localStorage.removeItem('agriprice_mock');
+            localStorage.removeItem('agriprice_dashboard_demo');
             const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
+            const bg = savedTheme === 'dark' ? '#121212' : '#F7F9FA';
+            document.documentElement.style.backgroundColor = bg;
         })();
     </script>
-
-    <script src="js/global-anim.js"></script>
-    <script src="js/permission-manager.js"></script>
 </head>
-
 <body data-active="home">
-    <div class="app-container">
-        <!-- ── Hero Carousel ──────────────────────────────────── -->
-        <section class="hero-background">
-            <div class="hero-carousel" id="heroCarousel">
-                <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกร"
-                        data-i18n-alt="slider_farmer"></div>
-                <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลผลิตสดใหม่"
-                        data-i18n-alt="slider_fresh_produce"></div>
-                <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="โปรโมชัน"
-                        data-i18n-alt="slider_promotion"></div>
-            </div>
-            <div class="hero-indicator" id="heroIndicator"></div>
-        </section>
+    <iframe id="appContentFrame" src="home.html"></iframe>
 
-        <!-- ── Search & Overlap ────────────────────────────────── -->
-        <section class="search-section">
-            <div class="search-box">
-                <input type="text" placeholder="ค้นหาผู้รับซื้อ หรือผลผลิต..." class="search-input" id="searchInput"
-                    data-i18n-placeholder="search_buyer">
-                <button class="search-button" id="searchBtn">
-                    <span class="material-icons-outlined" style="color: #fff; font-size: 24px;">search</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- ── Categories ────────────────────────────────────── -->
-        <section class="product-tabs-section">
-            <div class="section-header">
-                <h2 class="section-title" data-i18n="categories_title">หมวดหมู่สินค้า</h2>
-            </div>
-            <div class="product-grid">
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=fruit">
-                    <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="fruit">ผลไม้</span>
-                </a>
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=vegetable">
-                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="vegetable">ผักสด</span>
-                </a>
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=rice">
-                    <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="rice_crops">ข้าว/พืชไร่</span>
-                </a>
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=oil">
-                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="oil">น้ำมัน</span>
-                </a>
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=organic">
-                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="organic">อินทรีย์</span>
-                </a>
-                <a class="product-item" href="pages/shared/gov-price-lookup.html?category=seedlings">
-                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์"
-                            style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="seedlings">พืชพันธุ์</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- ── Favorites (Farmer only - injected via JS) ────────── -->
-        <div id="favoritesPlaceholder"></div>
-
-        <!-- ── Recommendations ────────────────────────────────── -->
-        <section class="products-section">
-            <div class="container">
-                <div class="section-header" style="padding-left: 0; padding-right: 0;">
-                    <h2 class="section-title" data-i18n="recommend">รายการแนะนำ</h2>
-                </div>
-                <div id="productCardsMount">
-                    <!-- Skeleton Loading -->
-                    <div class="shimmer" style="height: 120px; border-radius: 16px; margin-bottom: 12px;"></div>
-                    <div class="shimmer" style="height: 120px; border-radius: 16px;"></div>
-                </div>
-                <button class="btn-load-more" id="loadMoreBtn" style="display: none;"
-                    data-i18n="load_more">ดูเพิ่มเติม</button>
-            </div>
-        </section>
-
-        <!-- ── Announcements / Banners ────────────────────────── -->
-        <section class="banner-section">
-            <div class="section-header">
-                <h2 class="section-title" data-i18n="announcements_title">ข่าวสารและประชาสัมพันธ์</h2>
-            </div>
-            <div class="banner-carousel" id="bannerCarousel">
-                <!-- Skeleton Loading -->
-                <div style="padding: 0 16px; width: 100%; display: flex; gap: 12px;">
-                    <div class="shimmer" style="flex: 1; height: 120px; border-radius: 12px;"></div>
-                    <div class="shimmer" style="flex: 1; height: 120px; border-radius: 12px;"></div>
-                </div>
-            </div>
-        </section>
-
+    <div id="bottomNavMount">
+        <nav class="bottom-nav" id="bottomNav">
+            <a href="home.html" class="bottom-nav-item active" data-page="home">
+                <span class="material-icons-outlined">home</span>
+                <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+            </a>
+            <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
+                <span class="material-icons-outlined">chat_bubble_outline</span>
+                <span class="nav-badge" id="shellChatBadge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+                <span class="nav-label" data-i18n="nav_chat">แชท</span>
+            </a>
+            <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking" id="shellBookingBtn">
+                <span class="material-icons-outlined">local_mall</span>
+                <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+            </a>
+            <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
+                <span class="material-icons-outlined">notifications_none</span>
+                <span class="nav-badge" id="shellNotiBadge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+                <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+            </a>
+            <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
+                <span class="material-icons-outlined">person_outline</span>
+                <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+            </a>
+        </nav>
     </div>
 
-    <!-- ── Bottom Nav ────────────────────────────────────── -->
-    <div id="bottomNavMount"></div>
-
-    <script src="js/config.js" defer></script>
-    <script src="js/api-client.js" defer></script>
-    <script src="js/auth/guard.js" defer></script>
-    <script src="js/utils/location-helper.js" defer></script>
-    <script src="js/utils/ui-helpers.js" defer></script>
-    <script src="components/product-grade/product-grade.js" defer></script>
-    <script src="components/product-card/product-card.js" defer></script>
-    <script src="js/home-sliders.js" defer></script>
-    <script src="js/components.js" defer></script>
-    <script src="js/gov-prices.js" defer></script>
-    <script src="js/push-manager.js" defer></script>
-
+    <script src="js/config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/components/i18n.js"></script>
     <script>
-        // Check permissions and notify user
-        document.addEventListener('deviceready', function () {
-            // JIT: Automatic requestAll() removed to improve UX
-            // Permissions will be requested when specific features are used
-            if (window.AGRIPRICE_DEBUG) console.log("[Home] App Ready (JIT Permissions Mode)");
+        const iframe = document.getElementById('appContentFrame');
+
+        function isNativeShell() {
+            const cap = window.Capacitor;
+            if (!cap) return false;
+            if (typeof cap.isNativePlatform === 'function') return cap.isNativePlatform();
+            const platform = typeof cap.getPlatform === 'function' ? cap.getPlatform() : '';
+            return platform === 'android' || platform === 'ios' || !!cap.isNative;
+        }
+
+        function navigateShellFrame(href, pageKey) {
+            if (pageKey) {
+                document.querySelectorAll('.bottom-nav-item').forEach(a => a.classList.remove('active'));
+                document.querySelector(`.bottom-nav-item[data-page="${pageKey}"]`)?.classList.add('active');
+            }
+
+            iframe.style.opacity = '0';
+            setTimeout(() => {
+                iframe.src = href;
+            }, 100);
+        }
+
+        // Theme sync for the app shell. The account page runs inside the iframe,
+        // so the shell navbar needs its own theme update.
+        function normalizeShellTheme(theme) {
+            return theme === 'dark' ? 'dark' : 'light';
+        }
+
+        function applyShellTheme(theme, options = {}) {
+            const nextTheme = normalizeShellTheme(theme);
+            const bg = nextTheme === 'dark' ? '#121212' : '#F7F9FA';
+
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            document.body.setAttribute('data-theme', nextTheme);
+            document.documentElement.style.setProperty('--html-bg', bg);
+            document.documentElement.style.backgroundColor = bg;
+            document.body.style.backgroundColor = bg;
+
+            if (options.persist) {
+                localStorage.setItem('agriprice_theme', nextTheme);
+            }
+        }
+
+        applyShellTheme(localStorage.getItem('agriprice_theme') || 'light');
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'agriprice_theme') applyShellTheme(e.newValue || 'light');
+            if (e.key === 'lang' && window.i18nInit) window.i18nInit();
         });
+
+        window.addEventListener('message', function(e) {
+            if (e.source !== iframe.contentWindow) return;
+            const data = e.data || {};
+            if (data.type === 'agriprice:theme') {
+                applyShellTheme(data.theme, { persist: true });
+            } else if (data.type === 'agriprice:language') {
+                localStorage.setItem('lang', data.lang || 'th');
+                if (window.i18nInit) window.i18nInit();
+            }
+        });
+
+        // Handle clicks on bottom nav items in the Shell
+        document.querySelectorAll('.bottom-nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const targetPage = this.dataset.page;
+                const href = this.getAttribute('href');
+
+                // Auth check
+                const protectedPages = ['chat', 'booking', 'notifications', 'account'];
+                if (protectedPages.includes(targetPage)) {
+                    const isLoggedIn = !!localStorage.getItem('token');
+                    if (!isLoggedIn) {
+                        iframe.src = 'pages/auth/login1.html';
+                        return;
+                    }
+                }
+
+                navigateShellFrame(href, targetPage);
+            });
+        });
+
+        // Restore opacity on load
+        iframe.addEventListener('load', function() {
+            iframe.style.opacity = '1';
+
+            // Hide bottom nav on Login / Register / Auth pages
+            let isAuthPage = false;
+            try {
+                const childUrl = iframe.contentWindow.location.pathname.replace(/\\/g, '/');
+                isAuthPage = childUrl.includes('/auth/');
+            } catch(e) {
+                try {
+                    isAuthPage = iframe.src.replace(/\\/g, '/').includes('/auth/');
+                } catch(_) {}
+            }
+
+            const bottomNavMount = document.getElementById('bottomNavMount');
+            if (isAuthPage) {
+                if (bottomNavMount) bottomNavMount.style.display = 'none';
+                iframe.style.height = '100%';
+            } else {
+                if (bottomNavMount) bottomNavMount.style.display = 'block';
+                iframe.style.height = 'calc(100% - 65px)';
+            }
+
+            // Sync bottom nav active state based on child URL
+            try {
+                const childUrl = iframe.contentWindow.location.pathname;
+                document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                    let href = item.getAttribute('href');
+                    // Strip folders to match child location
+                    const cleanHref = href.replace('../../', '').replace('./', '');
+                    if (childUrl.endsWith(cleanHref)) {
+                        document.querySelectorAll('.bottom-nav-item').forEach(a => a.classList.remove('active'));
+                        item.classList.add('active');
+                    }
+                });
+            } catch(e) {}
+
+            // Set role based booking tab URL dynamically on load
+            try {
+                const u = JSON.parse(localStorage.getItem('user_data') || '{}');
+                const bookingBtn = document.getElementById('shellBookingBtn');
+                if (bookingBtn) {
+                    if (u.role === 'buyer') {
+                        bookingBtn.setAttribute('href', 'pages/buyer/setbooking/booking.html');
+                    } else {
+                        bookingBtn.setAttribute('href', 'pages/farmer/booking/booking.html');
+                    }
+                }
+            } catch(e) {}
+        });
+
+        (function setupCapacitorBackButton() {
+            const App = window.Capacitor?.Plugins?.App;
+            if (!isNativeShell() || !App?.addListener) return;
+
+            App.addListener('backButton', () => {
+                const currentSrc = (iframe.getAttribute('src') || 'home.html').replace(/\\/g, '/');
+                const isHome = currentSrc.endsWith('home.html') || currentSrc.endsWith('index.html') || currentSrc === '/';
+
+                if (!isHome) {
+                    const bottomNavMount = document.getElementById('bottomNavMount');
+                    if (bottomNavMount) bottomNavMount.style.display = 'block';
+                    iframe.style.height = 'calc(100% - 65px)';
+                    navigateShellFrame('home.html', 'home');
+                    return;
+                }
+
+                if (App.exitApp) App.exitApp();
+            });
+        })();
+
+        // Background check for notifications and unread badges
+        if (window.api && window.api.getUnreadChats) {
+            let checkUnreadInFlight = false;
+            const checkUnread = async () => {
+                if (checkUnreadInFlight || document.hidden) return;
+                checkUnreadInFlight = true;
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        const badge = document.getElementById('shellChatBadge');
+                        if (badge) badge.style.display = 'none';
+                        const notiBadge = document.getElementById('shellNotiBadge');
+                        if (notiBadge) notiBadge.style.display = 'none';
+                        return;
+                    }
+
+                    // Update Chat Badge
+                    const res = await window.api.getUnreadChats();
+                    const count = (res && res.data && typeof res.data.unread_count !== 'undefined') ? res.data.unread_count : (res.data || res || 0);
+                    const badge = document.getElementById('shellChatBadge');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    // Update Notification Badge
+                    const apiBase = window.getAgriPriceApiUrl
+                        ? window.getAgriPriceApiUrl()
+                        : (window.API_BASE_URL || '').replace(/\/$/, '');
+
+                    if (!apiBase) return;
+
+                    const notiRes = await fetch(apiBase + '/api/notifications/unread', {
+                        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                    });
+                    if (notiRes.ok) {
+                        const json = await notiRes.json();
+                        const notiCount = json.data?.unreadCount || json.unreadCount || 0;
+                        const notiBadge = document.getElementById('shellNotiBadge');
+                        if (notiBadge) {
+                            if (notiCount > 0) {
+                                notiBadge.textContent = notiCount;
+                                notiBadge.style.display = 'flex';
+                            } else {
+                                notiBadge.style.display = 'none';
+                            }
+                        }
+                    }
+                } catch(e) {
+                } finally {
+                    checkUnreadInFlight = false;
+                }
+            };
+            setTimeout(checkUnread, 5000);
+            setInterval(checkUnread, 30000);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) checkUnread();
+            });
+        }
     </script>
 </body>
-
 </html>

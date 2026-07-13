@@ -1,4 +1,5 @@
-const admin = require('firebase-admin');
+const { cert, applicationDefault, getApps, initializeApp } = require('firebase-admin/app');
+const { getMessaging } = require('firebase-admin/messaging');
 const logger = require('../utils/logger');
 const { supabaseAdmin } = require('../utils/supabase');
 
@@ -6,6 +7,7 @@ let fcmInitialized = false;
 
 try {
   let serviceAccount = null;
+  let credential = null;
 
   // 1. Try environment variable (JSON string)
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
@@ -32,12 +34,30 @@ try {
     }
   }
 
+  // 3. Try Application Default Credentials for hosted environments
+  if (!serviceAccount) {
+    try {
+      credential = applicationDefault();
+      logger.info('🔑 FCM: Using Application Default Credentials');
+    } catch (adcErr) {
+      logger.warn('⚠️  FCM: Application Default Credentials unavailable:', adcErr.message);
+    }
+  }
+
   if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
+    if (getApps().length === 0) {
+      initializeApp({
+        credential: cert(serviceAccount)
+      });
+    }
     fcmInitialized = true;
     logger.info('🚀 FCM: Firebase Admin initialized successfully');
+  } else if (credential) {
+    if (getApps().length === 0) {
+      initializeApp({ credential });
+    }
+    fcmInitialized = true;
+    logger.info('🚀 FCM: Firebase Admin initialized successfully via ADC');
   } else {
     logger.warn('⚠️  FCM: Firebase Service Account Key not found. Push notifications will be mocked.');
   }
@@ -103,7 +123,7 @@ async function sendPushNotification(userId, title, body, data = {}) {
       tokens: tokens
     };
 
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const response = await getMessaging().sendEachForMulticast(message);
     logger.info(`[FCM] Multicast results: ${response.successCount} succeeded, ${response.failureCount} failed.`);
     
     // ตรวจสอบ tokens ที่หมดอายุ หรือไม่ได้ใช้งานแล้วเพื่อลบออกจาก DB
@@ -134,6 +154,5 @@ async function sendPushNotification(userId, title, body, data = {}) {
 }
 
 module.exports = {
-  sendPushNotification,
-  isFcmReady: () => fcmInitialized
+  sendPushNotification
 };

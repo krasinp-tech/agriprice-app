@@ -57,7 +57,7 @@
       const nextParam = params.get('next');
       if (nextParam && nextParam !== 'undefined' && nextParam !== 'null') {
         sessionStorage.setItem('redirectAfterAuth', nextParam);
-        console.log('[Login1] Persisted redirect target:', nextParam);
+        if (window.AGRIPRICE_DEBUG) console.log('[Login1] Persisted redirect target:', nextParam);
       }
 
       const checkLoggedIn = () => {
@@ -67,7 +67,7 @@
         const isLoggedIn = !!token && role !== 'guest' && role !== 'null' && role !== 'undefined';
 
         if (isLoggedIn) {
-           console.log('[Login1] User is already logged in, redirecting...');
+           if (window.AGRIPRICE_DEBUG) console.log('[Login1] User is already logged in, redirecting...');
            const params = new URLSearchParams(window.location.search);
            const next = params.get('next') || sessionStorage.getItem('redirectAfterAuth');
            sessionStorage.removeItem('redirectAfterAuth');
@@ -90,11 +90,11 @@
     })();
   </script>
 
-  <main class="screen" role="main" aria-label="Agriprice Welcome Screen">
+  <main class="screen" role="main" aria-label="Agriprice Welcome Screen" data-i18n-aria-label="auth_welcome_screen_label">
     <section class="card">
 
       <!-- TOP MEDIA AREA -->
-      <div class="media" aria-label="Welcome media">
+      <div class="media" aria-label="Welcome media" data-i18n-aria-label="auth_welcome_media_label">
         <video
           id="welcomeVideo"
           class="media-video"
@@ -124,7 +124,7 @@
         </p>
 
         <div class="segmented-wrap">
-          <div class="segmented" role="group" aria-label="Welcome actions">
+          <div class="segmented" role="group" aria-label="Welcome actions" data-i18n-aria-label="auth_welcome_actions_label">
             <button class="seg-btn seg-primary" id="goLogin" type="button" data-i18n="login_btn">
               เข้าสู่ระบบ
             </button>

@@ -7,7 +7,13 @@
 
   if (window.AgriPermission) return; 
 
-  const isNative = () => !!(window.Capacitor && window.Capacitor.isNative);
+  const isNative = () => {
+    const cap = window.Capacitor;
+    if (!cap) return false;
+    if (typeof cap.isNativePlatform === 'function') return cap.isNativePlatform();
+    const platform = typeof cap.getPlatform === 'function' ? cap.getPlatform() : '';
+    return platform === 'android' || platform === 'ios' || !!cap.isNative;
+  };
   const getPlugin = (name) => window.Capacitor?.Plugins?.[name] || null;
 
   const PREF_KEY = 'agri_perm_v3';

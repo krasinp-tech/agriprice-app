@@ -1,88 +1,55 @@
-/**
- * routes/deviceSessions.js
- * GET  /api/device-sessions          → รายการ session อุปกรณ์ของ user
- * POST /api/device-sessions/:id/logout → ลบ session อุปกรณ์นั้น (ต้องใส่รหัสผ่าน)
- *
- * วิธีใช้ใน server.js:
- *   const deviceSessionsRouter = require('./routes/deviceSessions');
- *   app.use('/api/device-sessions', auth, deviceSessionsRouter);
- *
- * วิธีบันทึก session ตอน login — เพิ่มใน route POST /api/auth/login หลัง signToken():
- *   await recordDeviceSession(supabaseAdmin, profile.profile_id, req);
- */
-
 const express = require('express');
-const bcrypt  = require('bcryptjs');
-const router  = express.Router();
+const bcrypt = require('bcryptjs');
+const router = express.Router();
 const { supabaseAdmin } = require('../utils/supabase');
+const { getRequestIp } = require('../services/deviceSessionService');
 
-// ─── Helper: แปลง User-Agent → ชื่ออุปกรณ์ + icon ──────────────────────────
-function parseUserAgent(ua) {
-  const s = String(ua || '').toLowerCase();
-
-  if (s.includes('ipad'))                              return { name: 'iPad',          icon: 'tablet_mac'    };
-  if (s.includes('iphone') || s.includes('ipod'))     return { name: 'iPhone',         icon: 'phone_iphone'  };
-  if (s.includes('android') && s.includes('mobile'))  return { name: 'Android Phone',  icon: 'smartphone'    };
-  if (s.includes('android'))                           return { name: 'Android Tablet', icon: 'tablet_android'};
-  if (s.includes('windows'))                           return { name: 'Windows PC',     icon: 'computer'      };
-  if (s.includes('macintosh') || s.includes('mac os')) return { name: 'Mac',           icon: 'laptop_mac'    };
-  if (s.includes('linux'))                             return { name: 'Linux',          icon: 'computer'      };
-  return { name: 'Unknown Device', icon: 'devices_other' };
-}
-
-// ─── Helper: แปลง last_active → ข้อความภาษาไทย ─────────────────────────────
 function formatLastActive(dateStr) {
-  if (!dateStr) return 'ไม่ระบุเวลา';
-  const diff = Date.now() - new Date(dateStr).getTime();
+  if (!dateStr) return 'Unknown time';
+  const timestamp = new Date(dateStr).getTime();
+  if (Number.isNaN(timestamp)) return 'Unknown time';
+
+  const diff = Date.now() - timestamp;
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1)   return 'เมื่อกี้';
-  if (minutes < 60)  return `${minutes} นาทีที่แล้ว`;
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} minutes ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24)    return `${hours} ชั่วโมงที่แล้ว`;
+  if (hours < 24) return `${hours} hours ago`;
   const days = Math.floor(hours / 24);
-  return `${days} วันที่แล้ว`;
+  return `${days} days ago`;
 }
 
-// ─── Exported helper: เรียกจาก login route ──────────────────────────────────
-async function recordDeviceSession(supabase, userId, req) {
-  try {
-    const ua       = req.headers['user-agent'] || '';
-    const ip       = req.ip || req.connection?.remoteAddress || '';
-    const { name, icon } = parseUserAgent(ua);
+function pickCurrentSession(rows, req) {
+  const ua = req.headers['user-agent'] || '';
+  const ip = getRequestIp(req);
 
-    await supabase.from('device_sessions').insert({
-      user_id:     userId,
-      device_name: name,
-      device_type: icon,
-      ip_address:  ip,
-      user_agent:  ua,
-      last_active: new Date().toISOString(),
-    });
-  } catch (_) {
-    // ไม่ให้ error นี้ทำให้ login ล้มเหลว
-  }
+  return rows.find((d) => d.user_agent === ua && d.ip_address === ip)
+    || rows.find((d) => d.user_agent === ua)
+    || rows[0]
+    || null;
 }
 
-// ─── GET /api/device-sessions ────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('device_sessions')
-      .select('session_id, device_name, device_type, ip_address, last_active, created_at')
+      .select('session_id, device_name, device_type, ip_address, user_agent, last_active, created_at')
       .eq('user_id', req.user.id)
       .order('last_active', { ascending: false })
       .limit(20);
 
     if (error) return res.status(500).json({ success: false, message: error.message });
 
-    const result = (data || []).map(d => ({
-      id:               d.session_id,
-      name:             d.device_name || 'Unknown Device',
-      icon:             d.device_type || 'devices_other',
-      location:         d.ip_address  || 'Unknown location',
+    const rows = data || [];
+    const currentSession = pickCurrentSession(rows, req);
+    const result = rows.map((d) => ({
+      id: d.session_id,
+      name: d.device_name || 'Unknown Device',
+      icon: d.device_type || 'devices_other',
+      location: d.ip_address || 'Unknown location',
       last_active_text: formatLastActive(d.last_active),
-      created_at:       d.created_at,
-      current:          false, // frontend จัดการ current device เองอยู่แล้ว
+      created_at: d.created_at,
+      current: currentSession ? d.session_id === currentSession.session_id : false,
     }));
 
     res.json({ success: true, data: result });
@@ -91,17 +58,18 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ─── POST /api/device-sessions/:id/logout ────────────────────────────────────
 router.post('/:id/logout', async (req, res) => {
   try {
     const sessionId = Number(req.params.id);
     const { password } = req.body;
 
+    if (!Number.isInteger(sessionId) || sessionId <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid session id' });
+    }
     if (!password) {
-      return res.status(400).json({ success: false, message: 'กรุณาใส่รหัสผ่าน' });
+      return res.status(400).json({ success: false, message: 'Password is required' });
     }
 
-    // ตรวจสอบว่า session นั้นเป็นของ user คนนี้จริง
     const { data: session, error: sessionErr } = await supabaseAdmin
       .from('device_sessions')
       .select('session_id')
@@ -109,37 +77,37 @@ router.post('/:id/logout', async (req, res) => {
       .eq('user_id', req.user.id)
       .maybeSingle();
 
-    if (sessionErr || !session) {
-      return res.status(404).json({ success: false, message: 'ไม่พบ session นี้' });
-    }
+    if (sessionErr) return res.status(500).json({ success: false, message: sessionErr.message });
+    if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
 
-    // ตรวจสอบรหัสผ่าน
-    const { data: profile } = await supabaseAdmin
+    const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
       .select('password_hash')
       .eq('profile_id', req.user.id)
-      .single();
+      .maybeSingle();
 
+    if (profileErr) return res.status(500).json({ success: false, message: profileErr.message });
     if (!profile?.password_hash) {
-      return res.status(404).json({ success: false, message: 'ไม่พบบัญชี' });
+      return res.status(404).json({ success: false, message: 'Account not found' });
     }
 
     const valid = await bcrypt.compare(password, profile.password_hash);
     if (!valid) {
-      return res.status(401).json({ success: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+      return res.status(401).json({ success: false, message: 'Incorrect password' });
     }
 
-    // ลบ session
-    await supabaseAdmin
+    const { error: deleteError } = await supabaseAdmin
       .from('device_sessions')
       .delete()
       .eq('session_id', sessionId)
       .eq('user_id', req.user.id);
 
-    res.json({ success: true, message: 'ออกจากระบบอุปกรณ์นั้นแล้ว' });
+    if (deleteError) return res.status(500).json({ success: false, message: deleteError.message });
+
+    res.json({ success: true, message: 'Device session logged out' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-module.exports = { router, recordDeviceSession };
+module.exports = { router };

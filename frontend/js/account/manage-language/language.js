@@ -6,7 +6,7 @@
     // setupLanguageSelector() in i18n.js handles the #langSelector if it exists.
     
     // Add any page-specific logic here (e.g. animation or specific tracking)
-    console.log('[LanguagePage] UI Initialized');
+    if (window.AGRIPRICE_DEBUG) console.log('[LanguagePage] UI Initialized');
   }
 
   document.addEventListener('DOMContentLoaded', init);

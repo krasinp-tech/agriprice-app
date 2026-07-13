@@ -113,6 +113,9 @@ document.addEventListener("DOMContentLoaded", function () {
             
             const listTitle = document.querySelector('.products-list-title');
             if (listTitle) listTitle.style.display = 'none';
+
+            const productsContainer = document.getElementById('productListContainer');
+            if (productsContainer) productsContainer.style.display = 'none';
             
             const servicesTab = document.querySelector('.profile-tab[data-tab="services"]');
             if (servicesTab) servicesTab.style.display = 'none';
@@ -158,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function toggleStatus(p, card) {
-        const productId = p.id || p.productId;
+        const productId = p.offerId || p.offer_id || p.id || p.productId;
         const currentStatus = p.is_active;
         const newStatus = !currentStatus;
         
@@ -194,16 +197,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function editPurchase(product) {
-        const productId = product.id || product.productId;
+        const productId = product.offerId || product.offer_id || product.id || product.productId;
+        const productName = product.productName || product.offerName || product.rawTitle || product.name || product.title;
+        const varietyName = product.varietyName || product.rawSubtitle || product.variety || '';
         const payload = {
-            product: { id: productId, name: product.title },
-            variety: product.subtitle ? { name: product.subtitle } : null,
+            product: { id: productId, offer_id: productId, name: productName },
+            variety: varietyName ? { name: varietyName } : null,
             grades: [
                 { grade: 'A', price: product.priceA },
                 { grade: 'B', price: product.priceB },
                 { grade: 'C', price: product.priceC }
             ].filter(g => g.price),
-            editSource: { page: "myprofile" }
+            editSource: { page: "myprofile", isEdit: true, offer_id: productId, product_id: productId }
         };
         sessionStorage.setItem("setbooking_step1", JSON.stringify(payload));
         window.location.href = "setbooking/setbooking-step1.html";
@@ -221,6 +226,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const items = profileData.products.map(p => ({
             ...p,
             isOwner: true,
+            productName: p.title,
+            varietyName: p.subtitle,
+            rawTitle: p.title,
+            rawSubtitle: p.subtitle,
             title: profileData.name,
             subtitle: p.subtitle ? `${p.title} (${p.subtitle})` : p.title,
             avatar: profileData.avatar
@@ -247,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const aboutEditor = document.getElementById('aboutEditor');
     const phoneEditor = document.getElementById('phoneEditor');
     const emailEditor = document.getElementById('emailEditor');
+    const linkEditor = document.getElementById('linkEditor');
     const addr1Editor = document.getElementById('addr1Editor');
     const addr2Editor = document.getElementById('addr2Editor');
     const mapLatEditor = document.getElementById('mapLatEditor');
@@ -259,6 +269,10 @@ document.addEventListener("DOMContentLoaded", function () {
         aboutEditor.value = profileData.about || '';
         phoneEditor.value = profileData.phone || '';
         emailEditor.value = profileData.email || '';
+        if (linkEditor) {
+            const firstLink = Array.isArray(profileData.links) ? profileData.links[0] : null;
+            linkEditor.value = firstLink ? (firstLink.url || firstLink.href || firstLink) : '';
+        }
         addr1Editor.value = profileData.location?.line1 || '';
         addr2Editor.value = profileData.location?.line2 || '';
         mapLatEditor.value = profileData.location?.lat || '';
@@ -294,6 +308,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 address_line2: addr2Editor.value || '',
                 phone: phoneEditor.value || '',
                 email: emailEditor.value || '',
+                links: JSON.stringify((linkEditor && linkEditor.value.trim())
+                    ? [{ link_type: 'website', url: linkEditor.value.trim() }]
+                    : []),
                 lat: mapLatEditor.value ? parseFloat(mapLatEditor.value) : null,
                 lng: mapLngEditor.value ? parseFloat(mapLngEditor.value) : null,
                 services: JSON.stringify(selectedServices)

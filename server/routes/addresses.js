@@ -17,7 +17,6 @@ const response = require('../utils/response');
  * ดึงที่อยู่จาก profiles ห่อเป็น array (max 1 item)
  */
 router.get('/', authMiddleware, async (req, res) => {
-  console.log('[DEBUG] GET /api/addresses called for user:', req.user.id);
   try {
     const { data, error } = await supabaseAdmin
       .from('profiles')
@@ -26,7 +25,6 @@ router.get('/', authMiddleware, async (req, res) => {
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('[DEBUG] Supabase error in GET /api/addresses:', error);
       throw error;
     }
 

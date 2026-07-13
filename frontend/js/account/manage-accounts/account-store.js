@@ -10,9 +10,8 @@
     passwordUpdatedAt: "",
   };
 
-  const api = window.api || {};
-
-  async function apiFetch(path, options) {
+  async function apiFetch(path, options = {}) {
+    const api = window.api || {};
     if (api.call) {
       return await api.call(options.method || 'GET', path, options.body ? JSON.parse(options.body) : null);
     }
