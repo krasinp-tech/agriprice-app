@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
   <title>Dashboard | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -42,12 +42,12 @@
 
   <!-- Header with Blue Background -->
   <header class="dashboard-header-bg">
-    <button class="back-btn-light" id="backBtn" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+    <button class="back-btn-light" id="backBtn" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
       <span class="material-icons-outlined">chevron_left</span>
     </button>
     <div class="header-titles">
-      <h1 data-i18n="dashboard">แดชบอร์ด</h1>
-      <p id="welcomeMsg" data-i18n="welcome_back">ยินดีต้อนรับกลับมา, ผู้ใช้งาน</p>
+      <h1 data-i18n="dashboard">เนเธ”เธเธเธญเธฃเนเธ”</h1>
+      <p id="welcomeMsg" data-i18n="welcome_back">เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเธเธฅเธฑเธเธกเธฒ, เธเธนเนเนเธเนเธเธฒเธ</p>
     </div>
   </header>
 
@@ -56,9 +56,9 @@
 
     <!-- Period Filter (Today, Week, Month) -->
     <section class="period-selector-pro">
-      <button class="period-tab active" data-period="today" data-i18n="today">วันนี้</button>
-      <button class="period-tab" data-period="week" data-i18n="week">สัปดาห์</button>
-      <button class="period-tab" data-period="month" data-i18n="month">เดือน</button>
+      <button class="period-tab active" data-period="today" data-i18n="today">เธงเธฑเธเธเธตเน</button>
+      <button class="period-tab" data-period="week" data-i18n="week">เธชเธฑเธเธ”เธฒเธซเน</button>
+      <button class="period-tab" data-period="month" data-i18n="month">เน€เธ”เธทเธญเธ</button>
     </section>
 
     <!-- KPI Grid (2x2 Cards) -->
@@ -68,7 +68,7 @@
         <div class="icon-circle icon-blue">
           <span class="material-icons-outlined">shopping_bag</span>
         </div>
-        <div class="kpi-label" data-i18n="total_bookings_label">จำนวนยอดจองรวม</div>
+        <div class="kpi-label" data-i18n="total_bookings_label">เธเธณเธเธงเธเธขเธญเธ”เธเธญเธเธฃเธงเธก</div>
         <div class="kpi-value" id="bookingsVal">0</div>
         <div class="kpi-trend trend-blue" id="bookingsTrend">-</div>
       </div>
@@ -78,7 +78,7 @@
         <div class="icon-circle icon-green">
           <span class="material-icons-outlined">check_circle</span>
         </div>
-        <div class="kpi-label" data-i18n="success_rate">อัตราการจองสำเร็จ</div>
+        <div class="kpi-label" data-i18n="success_rate">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ</div>
         <div class="kpi-value" id="successRateVal">0%</div>
         <div class="kpi-trend trend-up" id="successRateTrend">-</div>
       </div>
@@ -88,7 +88,7 @@
         <div class="icon-circle icon-orange">
           <span class="material-icons-outlined">visibility</span>
         </div>
-        <div class="kpi-label" data-i18n="impressions_feed">จำนวนประกาศที่ถูกแสดงบน Feed</div>
+        <div class="kpi-label" data-i18n="impressions_feed">เธเธณเธเธงเธเธเธฃเธฐเธเธฒเธจเธ—เธตเนเธ–เธนเธเนเธชเธ”เธเธเธ Feed</div>
         <div class="kpi-value" id="viewsVal">0</div>
         <div class="kpi-trend trend-orange" id="viewsTrend">-</div>
       </div>
@@ -98,7 +98,7 @@
         <div class="icon-circle icon-teal">
           <span class="material-icons-outlined">people</span>
         </div>
-        <div class="kpi-label" data-i18n="new_followers">ผู้ติดตามทั้งหมด</div>
+        <div class="kpi-label" data-i18n="new_followers">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเธ—เธฑเนเธเธซเธกเธ”</div>
         <div class="kpi-value" id="followersVal">0</div>
         <div class="kpi-trend trend-teal" id="followersTrend">-</div>
       </div>
@@ -107,11 +107,11 @@
     <!-- Booking Summary (Progress Bars) -->
     <section class="summary-section">
       <div class="section-header">
-        <h2 data-i18n="booking_summary">สรุปการจอง</h2>
+        <h2 data-i18n="booking_summary">เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ</h2>
         <div class="total-bookings-badge">
-          <span data-i18n="total">รวม</span>
+          <span data-i18n="total">เธฃเธงเธก</span>
           <strong id="centerValue">0</strong>
-          <span data-i18n="bookings">ยอดจอง</span>
+          <span data-i18n="bookings">เธขเธญเธ”เธเธญเธ</span>
         </div>
       </div>
 
@@ -121,7 +121,7 @@
           <div class="progress-bar-info">
             <div class="progress-bar-label">
               <span class="legend-color" style="background: var(--primary, #0B853C);"></span>
-              <span data-i18n="completed">สำเร็จแล้ว</span>
+              <span data-i18n="completed">เธชเธณเน€เธฃเนเธเนเธฅเนเธง</span>
             </div>
             <div class="progress-bar-values">
               <span class="progress-count" id="completedVal">0</span>
@@ -138,7 +138,7 @@
           <div class="progress-bar-info">
             <div class="progress-bar-label">
               <span class="legend-color" style="background: #F59E0B;"></span>
-              <span data-i18n="waiting">รอดำเนินการ</span>
+              <span data-i18n="waiting">เธฃเธญเธ”เธณเน€เธเธดเธเธเธฒเธฃ</span>
             </div>
             <div class="progress-bar-values">
               <span class="progress-count" id="waitingVal">0</span>
@@ -155,7 +155,7 @@
           <div class="progress-bar-info">
             <div class="progress-bar-label">
               <span class="legend-color" style="background: #EF4444;"></span>
-              <span data-i18n="cancel">ยกเลิก</span>
+              <span data-i18n="cancel">เธขเธเน€เธฅเธดเธ</span>
             </div>
             <div class="progress-bar-values">
               <span class="progress-count" id="cancelVal">0</span>
@@ -173,27 +173,27 @@
     <section class="detail-card" id="bookingAnalyticsCard">
       <div class="detail-card-header">
         <span class="material-icons-outlined text-blue">bar_chart</span>
-        <h3 data-i18n="booking_analytics">วิเคราะห์การจอง</h3>
+        <h3 data-i18n="booking_analytics">เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธฒเธฃเธเธญเธ</h3>
       </div>
       <div class="detail-rows">
         <div class="detail-row">
-          <span class="detail-label" data-i18n="peak_time">ช่วงที่มีการจองมากที่สุด</span>
+          <span class="detail-label" data-i18n="peak_time">เธเนเธงเธเธ—เธตเนเธกเธตเธเธฒเธฃเธเธญเธเธกเธฒเธเธ—เธตเนเธชเธธเธ”</span>
           <span class="detail-value" id="peakTimeVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label" data-i18n="most_booked">ประกาศที่จองมากสุด</span>
+          <span class="detail-label" data-i18n="most_booked">เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธเธญเธเธกเธฒเธเธชเธธเธ”</span>
           <span class="detail-value text-green" id="mostBookedVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label" data-i18n="least_booked">ประกาศที่จองน้อยสุด</span>
+          <span class="detail-label" data-i18n="least_booked">เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธเธญเธเธเนเธญเธขเธชเธธเธ”</span>
           <span class="detail-value text-orange" id="leastBookedVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">เฉลี่ยต่อวัน (ช่วงเวลานี้)</span>
+          <span class="detail-label">เน€เธเธฅเธตเนเธขเธ•เนเธญเธงเธฑเธ (เธเนเธงเธเน€เธงเธฅเธฒเธเธตเน)</span>
           <span class="detail-value" id="dailyAvgVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">เฉลี่ยต่อเดือน (ช่วงเวลานี้)</span>
+          <span class="detail-label">เน€เธเธฅเธตเนเธขเธ•เนเธญเน€เธ”เธทเธญเธ (เธเนเธงเธเน€เธงเธฅเธฒเธเธตเน)</span>
           <span class="detail-value" id="monthlyAvgVal">-</span>
         </div>
       </div>
@@ -203,19 +203,19 @@
     <section class="detail-card" id="followerGrowthCard">
       <div class="detail-card-header">
         <span class="material-icons-outlined text-teal">trending_up</span>
-        <h3 data-i18n="follower_growth">อัตราการเติบโตของผู้ติดตาม</h3>
+        <h3 data-i18n="follower_growth">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเน€เธ•เธดเธเนเธ•เธเธญเธเธเธนเนเธ•เธดเธ”เธ•เธฒเธก</h3>
       </div>
       <div class="detail-rows">
         <div class="detail-row">
-          <span class="detail-label">ผู้ติดตามทั้งหมด</span>
+          <span class="detail-label">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเธ—เธฑเนเธเธซเธกเธ”</span>
           <span class="detail-value" id="totalFollowersVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">ผู้ติดตามเพิ่มขึ้น (30 วัน)</span>
+          <span class="detail-label">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเน€เธเธดเนเธกเธเธถเนเธ (30 เธงเธฑเธ)</span>
           <span class="detail-value text-green" id="newFollowers30dVal">-</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">อัตราการเติบโต (%)</span>
+          <span class="detail-label">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเน€เธ•เธดเธเนเธ• (%)</span>
           <span class="detail-value text-green" id="growthRateVal">-</span>
         </div>
       </div>
@@ -225,15 +225,15 @@
     <section class="detail-card" id="competitorAnalyticsCard">
       <div class="detail-card-header">
         <span class="material-icons-outlined text-purple">storefront</span>
-        <h3 id="competitorsHeaderTitle" data-i18n="competitor_count_label">ล้งคู่แข่งในพื้นที่</h3>
+        <h3 id="competitorsHeaderTitle" data-i18n="competitor_count_label">เธฅเนเธเธเธนเนเนเธเนเธเนเธเธเธทเนเธเธ—เธตเน</h3>
       </div>
       <div class="competitor-summary-box">
         <div class="comp-icon-box">
           <span class="material-icons-outlined">storefront</span>
         </div>
         <div class="comp-meta">
-          <div class="comp-count" id="competitorTotalVal">0 ราย</div>
-          <div class="comp-desc">ในพื้นที่ของท่าน</div>
+          <div class="comp-count" id="competitorTotalVal">0 เธฃเธฒเธข</div>
+          <div class="comp-desc">เนเธเธเธทเนเธเธ—เธตเนเธเธญเธเธ—เนเธฒเธ</div>
         </div>
       </div>
       <div class="competitor-list" id="competitorList">
@@ -245,7 +245,7 @@
     <section class="detail-card" id="priceRankingsCard">
       <div class="detail-card-header">
         <span class="material-icons-outlined text-orange">payments</span>
-        <h3 data-i18n="price_comparison">อันดับราคารับซื้อของเราเทียบกับตลาด</h3>
+        <h3 data-i18n="price_comparison">เธญเธฑเธเธ”เธฑเธเธฃเธฒเธเธฒเธฃเธฑเธเธเธทเนเธญเธเธญเธเน€เธฃเธฒเน€เธ—เธตเธขเธเธเธฑเธเธ•เธฅเธฒเธ”</h3>
       </div>
       <div class="price-compare-list" id="priceCompareList">
         <!-- Dyn rendered listings price rankings -->
@@ -260,15 +260,15 @@
       <div class="pro-lock-icon">
         <span class="material-icons-outlined">lock</span>
       </div>
-      <h2 class="pro-lock-title" data-i18n="pro_feature_locked">ฟีเจอร์สำหรับ PRO</h2>
-      <p class="pro-lock-desc" data-i18n="pro_lock_desc">แดชบอร์ดวิเคราะห์ข้อมูลให้บริการเฉพาะสมาชิก PRO เท่านั้น อัปเกรดเพื่อดูสถิติยอดจอง รายได้ และประสิทธิภาพสินค้าของคุณ</p>
+      <h2 class="pro-lock-title" data-i18n="pro_feature_locked">เธเธตเน€เธเธญเธฃเนเธชเธณเธซเธฃเธฑเธ PRO</h2>
+      <p class="pro-lock-desc" data-i18n="pro_lock_desc">เนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅเนเธซเนเธเธฃเธดเธเธฒเธฃเน€เธเธเธฒเธฐเธชเธกเธฒเธเธดเธ PRO เน€เธ—เนเธฒเธเธฑเนเธ เธญเธฑเธเน€เธเธฃเธ”เน€เธเธทเนเธญเธ”เธนเธชเธ–เธดเธ•เธดเธขเธญเธ”เธเธญเธ เธฃเธฒเธขเนเธ”เน เนเธฅเธฐเธเธฃเธฐเธชเธดเธ—เธเธดเธ เธฒเธเธชเธดเธเธเนเธฒเธเธญเธเธเธธเธ“</p>
       <ul class="pro-lock-features">
-        <li><span class="material-icons-outlined">bar_chart</span><span data-i18n="dashboard_analytics">แดชบอร์ดวิเคราะห์ข้อมูล</span></li>
-        <li><span class="material-icons-outlined">attach_money</span><span data-i18n="monthly_revenue_summary">สรุปรายได้รายเดือน</span></li>
-        <li><span class="material-icons-outlined">trending_up</span><span data-i18n="top_booked_ranking">อันดับสินค้าที่ถูกจองสูงสุด</span></li>
+        <li><span class="material-icons-outlined">bar_chart</span><span data-i18n="dashboard_analytics">เนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅ</span></li>
+        <li><span class="material-icons-outlined">attach_money</span><span data-i18n="monthly_revenue_summary">เธชเธฃเธธเธเธฃเธฒเธขเนเธ”เนเธฃเธฒเธขเน€เธ”เธทเธญเธ</span></li>
+        <li><span class="material-icons-outlined">trending_up</span><span data-i18n="top_booked_ranking">เธญเธฑเธเธ”เธฑเธเธชเธดเธเธเนเธฒเธ—เธตเนเธ–เธนเธเธเธญเธเธชเธนเธเธชเธธเธ”</span></li>
       </ul>
-      <button class="pro-lock-btn" id="goUpgradeBtn" data-i18n="upgrade_pro_btn">อัปเกรดเป็น PRO</button>
-      <button class="pro-lock-back" id="lockBackBtn" data-i18n="back">ย้อนกลับ</button>
+      <button class="pro-lock-btn" id="goUpgradeBtn" data-i18n="upgrade_pro_btn">เธญเธฑเธเน€เธเธฃเธ”เน€เธเนเธ PRO</button>
+      <button class="pro-lock-back" id="lockBackBtn" data-i18n="back">เธขเนเธญเธเธเธฅเธฑเธ</button>
     </div>
   </div>
 
@@ -290,7 +290,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (window.i18nInit) window.i18nInit();
 
-        // 📱 Native Permissions handled Just-in-Time (JIT)
+        // ๐“ฑ Native Permissions handled Just-in-Time (JIT)
     });
 
 

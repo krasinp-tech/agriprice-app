@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="scan_checkin_title">ตรวจสอบการเช็คอิน | AGRIPRICE</title>
+  <title data-i18n="scan_checkin_title">เธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเน€เธเนเธเธญเธดเธ | AGRIPRICE</title>
   <meta name="theme-color" content="#0B853C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -189,7 +189,7 @@
     <!-- ========== Phase 1: Loading ========== -->
     <div id="loadingSec">
       <div class="loading-spinner"></div>
-      <p class="loading-text" id="loadingMsg">กำลังดึงข้อมูลการจอง...</p>
+      <p class="loading-text" id="loadingMsg">เธเธณเธฅเธฑเธเธ”เธถเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธ...</p>
     </div>
 
     <!-- ========== Phase 2: CONFIRM CHECK-IN (waiting) ========== -->
@@ -199,30 +199,30 @@
       </div>
       <div class="status-badge badge-waiting">
         <span class="material-icons-outlined" style="font-size:15px;">hourglass_empty</span>
-        รอการเช็คอิน
+        เธฃเธญเธเธฒเธฃเน€เธเนเธเธญเธดเธ
       </div>
-      <h2 class="card-title">ยืนยันการเช็คอิน</h2>
-      <p class="card-sub">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
+      <h2 class="card-title">เธขเธทเธเธขเธฑเธเธเธฒเธฃเน€เธเนเธเธญเธดเธ</h2>
+      <p class="card-sub">เธเธฃเธธเธ“เธฒเธ•เธฃเธงเธเธชเธญเธเธเนเธญเธกเธนเธฅเน€เธเธฉเธ•เธฃเธเธฃเนเธฅเธฐเธเธดเธง<br>เธเนเธญเธเธเธ”เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฃเธฑเธเน€เธเนเธฒ</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธง</span>
           <span class="info-value queue-big" id="prevQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label">เธเธทเนเธญเน€เธเธฉเธ•เธฃเธเธฃ</span>
           <span class="info-value" id="prevFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label">เธชเธดเธเธเนเธฒ</span>
           <span class="info-value" id="prevProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">จำนวน</span>
+          <span class="info-label">เธเธณเธเธงเธ</span>
           <span class="info-value" id="prevAmount">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">วันที่จอง</span>
+          <span class="info-label">เธงเธฑเธเธ—เธตเนเธเธญเธ</span>
           <span class="info-value" id="prevDate">-</span>
         </div>
       </div>
@@ -230,11 +230,11 @@
       <div class="action-group">
         <button id="btnConfirm" class="btn btn-primary">
           <span class="material-icons-outlined">check_circle</span>
-          <span>ยืนยันการรับเข้า</span>
+          <span>เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฃเธฑเธเน€เธเนเธฒ</span>
         </button>
         <button id="btnCancel" class="btn btn-secondary">
           <span class="material-icons-outlined">close</span>
-          <span>ยกเลิก</span>
+          <span>เธขเธเน€เธฅเธดเธ</span>
         </button>
       </div>
     </div>
@@ -244,32 +244,32 @@
       <div class="status-icon-wrap icon-success">
         <span class="material-icons-outlined">verified</span>
       </div>
-      <h2 class="card-title">เช็คอินสำเร็จ!</h2>
-      <p class="card-sub">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
+      <h2 class="card-title">เน€เธเนเธเธญเธดเธเธชเธณเน€เธฃเนเธ!</h2>
+      <p class="card-sub">เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธฃเธฑเธเน€เธเนเธฒเธเธดเธงเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง<br>เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ</p>
 
       <div class="success-queue-box">
-        <div class="success-queue-label">หมายเลขคิวของคุณ</div>
+        <div class="success-queue-label">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธงเธเธญเธเธเธธเธ“</div>
         <div class="success-queue-number" id="resQueue">-</div>
       </div>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label">เธเธทเนเธญเน€เธเธฉเธ•เธฃเธเธฃ</span>
           <span class="info-value" id="resFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label">เธชเธดเธเธเนเธฒ</span>
           <span class="info-value" id="resProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สถานะ</span>
-          <span class="info-value" style="color:#0B853C;">✅ เช็คอินสำเร็จ</span>
+          <span class="info-label">เธชเธ–เธฒเธเธฐ</span>
+          <span class="info-value" style="color:#0B853C;">โ… เน€เธเนเธเธญเธดเธเธชเธณเน€เธฃเนเธ</span>
         </div>
       </div>
 
       <button id="btnDone" class="btn btn-primary">
         <span class="material-icons-outlined">home</span>
-        <span>กลับหน้าหลัก</span>
+        <span>เธเธฅเธฑเธเธซเธเนเธฒเธซเธฅเธฑเธ</span>
       </button>
     </div>
 
@@ -280,33 +280,33 @@
       </div>
       <div class="status-badge badge-already">
         <span class="material-icons-outlined" style="font-size:15px;">info</span>
-        เช็คอินแล้ว
+        เน€เธเนเธเธญเธดเธเนเธฅเนเธง
       </div>
-      <h2 class="card-title">คิวนี้เช็คอินแล้ว</h2>
-      <p class="card-sub">การเช็คอินคิวนี้ถูกบันทึกไปแล้ว<br>ไม่สามารถสแกนซ้ำได้</p>
+      <h2 class="card-title">เธเธดเธงเธเธตเนเน€เธเนเธเธญเธดเธเนเธฅเนเธง</h2>
+      <p class="card-sub">เธเธฒเธฃเน€เธเนเธเธญเธดเธเธเธดเธงเธเธตเนเธ–เธนเธเธเธฑเธเธ—เธถเธเนเธเนเธฅเนเธง<br>เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธชเนเธเธเธเนเธณเนเธ”เน</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธง</span>
           <span class="info-value queue-big" id="alreadyQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label">เธเธทเนเธญเน€เธเธฉเธ•เธฃเธเธฃ</span>
           <span class="info-value" id="alreadyFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label">เธชเธดเธเธเนเธฒ</span>
           <span class="info-value" id="alreadyProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สถานะ</span>
-          <span class="info-value" style="color:#2D9CDB;">✔ เสร็จสิ้นแล้ว</span>
+          <span class="info-label">เธชเธ–เธฒเธเธฐ</span>
+          <span class="info-value" style="color:#2D9CDB;">โ” เน€เธชเธฃเนเธเธชเธดเนเธเนเธฅเนเธง</span>
         </div>
       </div>
 
       <button data-back class="btn btn-secondary">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span>เธเธฅเธฑเธ</span>
       </button>
     </div>
 
@@ -317,26 +317,26 @@
       </div>
       <div class="status-badge badge-cancel">
         <span class="material-icons-outlined" style="font-size:15px;">block</span>
-        ยกเลิกแล้ว
+        เธขเธเน€เธฅเธดเธเนเธฅเนเธง
       </div>
-      <h2 class="card-title">คิวนี้ถูกยกเลิกแล้ว</h2>
-      <p class="card-sub">ไม่สามารถเช็คอินคิวที่ถูกยกเลิกได้</p>
+      <h2 class="card-title">เธเธดเธงเธเธตเนเธ–เธนเธเธขเธเน€เธฅเธดเธเนเธฅเนเธง</h2>
+      <p class="card-sub">เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเนเธเธญเธดเธเธเธดเธงเธ—เธตเนเธ–เธนเธเธขเธเน€เธฅเธดเธเนเธ”เน</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธง</span>
           <span class="info-value queue-big" style="color:#E53935;" id="cancelQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label">เธเธทเนเธญเน€เธเธฉเธ•เธฃเธเธฃ</span>
           <span class="info-value" id="cancelFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label">เธชเธดเธเธเนเธฒ</span>
           <span class="info-value" id="cancelProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">วันที่จอง</span>
+          <span class="info-label">เธงเธฑเธเธ—เธตเนเธเธญเธ</span>
           <span class="info-value" id="cancelDate">-</span>
         </div>
       </div>
@@ -345,9 +345,9 @@
       <div class="cancel-reason-box" id="cancelReasonBox">
         <div class="cancel-reason-label">
           <span class="material-icons-outlined">info</span>
-          สาเหตุการยกเลิก
+          เธชเธฒเน€เธซเธ•เธธเธเธฒเธฃเธขเธเน€เธฅเธดเธ
         </div>
-        <div class="cancel-reason-text" id="cancelReasonText">ไม่ระบุสาเหตุ</div>
+        <div class="cancel-reason-text" id="cancelReasonText">เนเธกเนเธฃเธฐเธเธธเธชเธฒเน€เธซเธ•เธธ</div>
         <div class="cancel-who-badge" id="cancelWhoBadge">
           <span class="material-icons-outlined">person</span>
           <span id="cancelWhoText">-</span>
@@ -356,7 +356,7 @@
 
       <button data-back class="btn btn-danger">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span>เธเธฅเธฑเธ</span>
       </button>
     </div>
 
@@ -365,13 +365,13 @@
       <div class="status-icon-wrap icon-error">
         <span class="material-icons-outlined">warning_amber</span>
       </div>
-      <h2 class="card-title" id="errorTitle">เกิดข้อผิดพลาด</h2>
-      <p class="card-sub" id="errorMsg">ไม่สามารถดำเนินการได้ในขณะนี้</p>
+      <h2 class="card-title" id="errorTitle">เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”</h2>
+      <p class="card-sub" id="errorMsg">เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธณเน€เธเธดเธเธเธฒเธฃเนเธ”เนเนเธเธเธ“เธฐเธเธตเน</p>
 
       <div class="action-group">
         <button data-back class="btn btn-primary">
           <span class="material-icons-outlined">refresh</span>
-          <span>ลองสแกนใหม่</span>
+          <span>เธฅเธญเธเธชเนเธเธเนเธซเธกเน</span>
         </button>
       </div>
     </div>
@@ -381,11 +381,11 @@
       <div class="status-icon-wrap icon-forbidden">
         <span class="material-icons-outlined">lock</span>
       </div>
-      <h2 class="card-title">ไม่มีสิทธิ์</h2>
-      <p class="card-sub">คิวนี้ไม่ได้อยู่ในรายการของคุณ<br>กรุณาสแกน QR ที่ถูกต้อง</p>
+      <h2 class="card-title">เนเธกเนเธกเธตเธชเธดเธ—เธเธดเน</h2>
+      <p class="card-sub">เธเธดเธงเธเธตเนเนเธกเนเนเธ”เนเธญเธขเธนเนเนเธเธฃเธฒเธขเธเธฒเธฃเธเธญเธเธเธธเธ“<br>เธเธฃเธธเธ“เธฒเธชเนเธเธ QR เธ—เธตเนเธ–เธนเธเธ•เนเธญเธ</p>
       <button data-back class="btn btn-secondary">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span>เธเธฅเธฑเธ</span>
       </button>
     </div>
 
@@ -416,8 +416,8 @@
 
       function farmerName(b) {
         const f = b.farmer || b.buyer || b.requester;
-        if (!f) return t('booking_unknown_name', 'ไม่ทราบชื่อ');
-        return (`${f.first_name || ''} ${f.last_name || ''}`).trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
+        if (!f) return t('booking_unknown_name', 'เนเธกเนเธ—เธฃเธฒเธเธเธทเนเธญ');
+        return (`${f.first_name || ''} ${f.last_name || ''}`).trim() || t('booking_unknown_name', 'เนเธกเนเธ—เธฃเธฒเธเธเธทเนเธญ');
       }
 
       function productName(b) {
@@ -429,25 +429,25 @@
 
       function amountStr(b) {
         const qty = Number(b.quantity || b.product_amount || b.expected_qty || 0);
-        return Number.isFinite(qty) && qty > 0 ? `${qty.toLocaleString()} ${t('kg_unit','กก.')}` : '-';
+        return Number.isFinite(qty) && qty > 0 ? `${qty.toLocaleString()} ${t('kg_unit','เธเธ.')}` : '-';
       }
 
       // Determine cancel reason & who cancelled
       function getCancelInfo(b) {
         // The notification text stored in bookingService helps us guess:
-        // If cancelled by farmer → notification goes to buyer (offer_owner_id)
-        // If cancelled by buyer  → notification goes to farmer (buyer_id)
+        // If cancelled by farmer โ’ notification goes to buyer (offer_owner_id)
+        // If cancelled by buyer  โ’ notification goes to farmer (buyer_id)
         // We approximate from the cancel_note or just show generic reason
         const note = b.cancel_note || b.cancel_reason || b.note || null;
         const cancelledByFarmer = b.cancelled_by === 'farmer' || b.cancel_by === 'farmer';
         const cancelledByBuyer  = b.cancelled_by === 'buyer'  || b.cancel_by === 'buyer';
 
         let who = '';
-        if (cancelledByFarmer)      who = `ยกเลิกโดย: เกษตรกร (${farmerName(b)})`;
-        else if (cancelledByBuyer)  who = `ยกเลิกโดย: ผู้รับซื้อ`;
-        else                        who = `ยกเลิกโดย: ไม่ทราบฝ่าย`;
+        if (cancelledByFarmer)      who = `เธขเธเน€เธฅเธดเธเนเธ”เธข: เน€เธเธฉเธ•เธฃเธเธฃ (${farmerName(b)})`;
+        else if (cancelledByBuyer)  who = `เธขเธเน€เธฅเธดเธเนเธ”เธข: เธเธนเนเธฃเธฑเธเธเธทเนเธญ`;
+        else                        who = `เธขเธเน€เธฅเธดเธเนเธ”เธข: เนเธกเนเธ—เธฃเธฒเธเธเนเธฒเธข`;
 
-        const reason = note || 'ไม่ได้ระบุสาเหตุ';
+        const reason = note || 'เนเธกเนเนเธ”เนเธฃเธฐเธเธธเธชเธฒเน€เธซเธ•เธธ';
         return { reason, who };
       }
 
@@ -460,13 +460,13 @@
 
       if (!bid || !TOKEN || !API_BASE) {
         showSection('errorSec');
-        setText('errorTitle', 'ข้อมูลไม่ครบถ้วน');
-        setText('errorMsg', t('invalid_info_rescan', 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง'));
+        setText('errorTitle', 'เธเนเธญเธกเธนเธฅเนเธกเนเธเธฃเธเธ–เนเธงเธ');
+        setText('errorMsg', t('invalid_info_rescan', 'เธเนเธญเธกเธนเธฅเนเธกเนเธเธฃเธเธ–เนเธงเธ เธเธฃเธธเธ“เธฒเธชเนเธเธเนเธซเธกเนเธญเธตเธเธเธฃเธฑเนเธ'));
         return;
       }
 
       showSection('loadingSec');
-      $('loadingMsg').textContent = t('fetching_booking_data', 'กำลังดึงข้อมูลการจอง...');
+      $('loadingMsg').textContent = t('fetching_booking_data', 'เธเธณเธฅเธฑเธเธ”เธถเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธ...');
 
       // =====================
       // 1. FETCH BOOKING DETAIL
@@ -483,16 +483,16 @@
         }
         if (!res.ok || !json.data) {
           showSection('errorSec');
-          setText('errorTitle', t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
-          setText('errorMsg', json.message || t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
+          setText('errorTitle', t('booking_not_found', 'เนเธกเนเธเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธ'));
+          setText('errorMsg', json.message || t('booking_not_found', 'เนเธกเนเธเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธ'));
           return;
         }
 
         booking = json.data;
       } catch (e) {
         showSection('errorSec');
-        setText('errorTitle', 'เชื่อมต่อไม่ได้');
-        setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาลองใหม่'));
+        setText('errorTitle', 'เน€เธเธทเนเธญเธกเธ•เนเธญเนเธกเนเนเธ”เน');
+        setText('errorMsg', t('server_connection_failed', 'เน€เธเธทเนเธญเธกเธ•เนเธญเน€เธเธดเธฃเนเธเน€เธงเธญเธฃเนเนเธกเนเธชเธณเน€เธฃเนเธ เธเธฃเธธเธ“เธฒเธฅเธญเธเนเธซเธกเน'));
         return;
       }
 
@@ -526,7 +526,7 @@
         return;
       }
 
-      // --- WAITING → SHOW PREVIEW ---
+      // --- WAITING โ’ SHOW PREVIEW ---
       setText('prevQueue',   booking.queue_no);
       setText('prevFarmer',  farmerName(booking));
       setText('prevProduct', productName(booking));
@@ -539,7 +539,7 @@
       // =====================
       $('btnConfirm').addEventListener('click', async () => {
         showSection('loadingSec');
-        $('loadingMsg').textContent = t('saving_checkin', 'กำลังบันทึกการเช็คอิน...');
+        $('loadingMsg').textContent = t('saving_checkin', 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธเธเธฒเธฃเน€เธเนเธเธญเธดเธ...');
 
         try {
           const res = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(bid)}/checkin`, {
@@ -558,13 +558,13 @@
             showSection('forbiddenSec');
           } else {
             showSection('errorSec');
-            setText('errorTitle', t('checkin_failed', 'เช็คอินไม่สำเร็จ'));
-            setText('errorMsg', json.message || t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน'));
+            setText('errorTitle', t('checkin_failed', 'เน€เธเนเธเธญเธดเธเนเธกเนเธชเธณเน€เธฃเนเธ'));
+            setText('errorMsg', json.message || t('checkin_error', 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเน€เธเนเธเธญเธดเธ'));
           }
         } catch (e) {
           showSection('errorSec');
-          setText('errorTitle', 'เชื่อมต่อไม่ได้');
-          setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'));
+          setText('errorTitle', 'เน€เธเธทเนเธญเธกเธ•เนเธญเนเธกเนเนเธ”เน');
+          setText('errorMsg', t('server_connection_failed', 'เน€เธเธทเนเธญเธกเธ•เนเธญเน€เธเธดเธฃเนเธเน€เธงเธญเธฃเนเนเธกเนเธชเธณเน€เธฃเนเธ'));
         }
       });
 

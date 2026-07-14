@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="gov_price">ราคากลางสินค้าเกษตร | AGRIPRICE</title>
+  <title data-i18n="gov_price">เธฃเธฒเธเธฒเธเธฅเธฒเธเธชเธดเธเธเนเธฒเน€เธเธฉเธ•เธฃ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -65,7 +65,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* ── Header ─────────────────────────────────────────────── */
+    /* โ”€โ”€ Header โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .gov-header {
       background: var(--primary-grad);
       padding: calc(24px + env(safe-area-inset-top)) 24px 36px;
@@ -122,7 +122,7 @@
       overflow-wrap: break-word;
     }
 
-    /* ── Category Tabs ───────────────────────────────────────── */
+    /* โ”€โ”€ Category Tabs โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .category-tabs-container {
       margin: 20px 16px 0;
       position: relative;
@@ -169,7 +169,7 @@
       box-shadow: 0 6px 16px var(--primary-glow);
     }
 
-    /* ── Lookup Card ──────────────────────────────────── */
+    /* โ”€โ”€ Lookup Card โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .lookup-container {
       margin: 12px 16px 20px;
       position: relative; z-index: 10;
@@ -234,7 +234,7 @@
       color: #ffffff;
     }
 
-    /* ── Variety Chips ─────────────────────────────────────── */
+    /* โ”€โ”€ Variety Chips โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .variety-group {
       display: flex; gap: 8px; flex-wrap: wrap;
       margin-top: 4px;
@@ -278,7 +278,7 @@
       box-shadow: 0 4px 10px rgba(34, 197, 94, 0.15);
     }
 
-    /* ── Date Picker ───────────────────────────────────────── */
+    /* โ”€โ”€ Date Picker โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .date-range-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -298,7 +298,7 @@
       filter: invert(1);
     }
 
-    /* ── Premium Price Card ────────────────────────────────── */
+    /* โ”€โ”€ Premium Price Card โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .result-view {
       padding: 0 16px 100px;
     }
@@ -446,7 +446,7 @@
       color: var(--text-muted);
     }
 
-    /* ── Shimmer & Animation ───────────────────────────────── */
+    /* โ”€โ”€ Shimmer & Animation โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ */
     .shimmer-card {
       background: var(--card-bg);
       border-radius: var(--radius-lg);
@@ -499,7 +499,7 @@
       color: #4ade80;
     }
 
-    /* ── Responsive Safeguards ── */
+    /* โ”€โ”€ Responsive Safeguards โ”€โ”€ */
     @media (max-width: 375px) {
       .price-amount {
         font-size: 32px;
@@ -528,8 +528,8 @@
         <span class="material-icons-outlined">chevron_left</span>
       </button>
       <div class="header-titles">
-        <h1 data-i18n="gov_price_search">ค้นหาราคากลาง</h1>
-        <p data-i18n="gov_price_subtitle">ข้อมูลราคากลางอ้างอิงกระทรวงพาณิชย์</p>
+        <h1 data-i18n="gov_price_search">เธเนเธเธซเธฒเธฃเธฒเธเธฒเธเธฅเธฒเธ</h1>
+        <p data-i18n="gov_price_subtitle">เธเนเธญเธกเธนเธฅเธฃเธฒเธเธฒเธเธฅเธฒเธเธญเนเธฒเธเธญเธดเธเธเธฃเธฐเธ—เธฃเธงเธเธเธฒเธ“เธดเธเธขเน</p>
       </div>
     </div>
   </header>
@@ -539,28 +539,28 @@
   <div class="lookup-container">
     <div class="lookup-card">
       <div class="field-wrap">
-        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">category</span> <span data-i18n="select_product_type">เลือกชนิดสินค้า</span></label>
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">category</span> <span data-i18n="select_product_type">เน€เธฅเธทเธญเธเธเธเธดเธ”เธชเธดเธเธเนเธฒ</span></label>
         <select id="productSelect" class="select-field" onchange="onProductChange()">
-          <option value="" data-i18n="please_select">-- กรุณาเลือก --</option>
+          <option value="" data-i18n="please_select">-- เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธ --</option>
         </select>
       </div>
 
       <div class="field-wrap" id="varietySection" style="display:none;">
-        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">eco</span> <span data-i18n="select_variety">เลือกสายพันธุ์</span></label>
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">eco</span> <span data-i18n="select_variety">เน€เธฅเธทเธญเธเธชเธฒเธขเธเธฑเธเธเธธเน</span></label>
         <div class="variety-group" id="varietyGroup">
           <!-- Varieties chips here -->
         </div>
       </div>
 
       <div class="field-wrap">
-        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">date_range</span> <span data-i18n="date_range_label">ช่วงวันที่</span></label>
+        <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">date_range</span> <span data-i18n="date_range_label">เธเนเธงเธเธงเธฑเธเธ—เธตเน</span></label>
         <div class="date-range-row">
           <div class="field-inner">
-            <span class="sub-label" data-i18n="start_date_label">ตั้งแต่วันที่</span>
+            <span class="sub-label" data-i18n="start_date_label">เธ•เธฑเนเธเนเธ•เนเธงเธฑเธเธ—เธตเน</span>
             <input type="date" id="dateFrom" class="select-field" onchange="onDateChange()">
           </div>
           <div class="field-inner">
-            <span class="sub-label" data-i18n="end_date_label">ถึงวันที่</span>
+            <span class="sub-label" data-i18n="end_date_label">เธ–เธถเธเธงเธฑเธเธ—เธตเน</span>
             <input type="date" id="dateTo" class="select-field" onchange="onDateChange()">
           </div>
         </div>
@@ -571,7 +571,7 @@
   <main class="result-view" id="resultView">
     <div class="search-hint-container">
       <span class="material-icons-outlined search-hint-icon">search</span>
-      <p data-i18n="select_to_see_price">เลือกสินค้าและสายพันธุ์เพื่อดูราคา</p>
+      <p data-i18n="select_to_see_price">เน€เธฅเธทเธญเธเธชเธดเธเธเนเธฒเนเธฅเธฐเธชเธฒเธขเธเธฑเธเธเธธเนเน€เธเธทเนเธญเธ”เธนเธฃเธฒเธเธฒ</p>
     </div>
   </main>
 
@@ -611,19 +611,19 @@
       if (catParam) {
         // Map English category strings from home page to matching Thai tabs
         const catMap = {
-          'fruit': 'ผลไม้',
-          'vegetable': 'ผักสด',
-          'rice': 'ข้าว',
-          'rice_crops': 'ข้าว',
-          'crops': 'พืชไร่',
-          'economic': 'พืชไร่',
-          'oil': 'พืชไร่',
-          'livestock': 'ปศุสัตว์',
-          'aquatic': 'สัตว์น้ำ',
-          'organic': 'อินทรีย์',
-          'seedlings': 'สมุนไพร',
-          'herb': 'สมุนไพร',
-          'herbs': 'สมุนไพร'
+          'fruit': 'เธเธฅเนเธกเน',
+          'vegetable': 'เธเธฑเธเธชเธ”',
+          'rice': 'เธเนเธฒเธง',
+          'rice_crops': 'เธเนเธฒเธง',
+          'crops': 'เธเธทเธเนเธฃเน',
+          'economic': 'เธเธทเธเนเธฃเน',
+          'oil': 'เธเธทเธเนเธฃเน',
+          'livestock': 'เธเธจเธธเธชเธฑเธ•เธงเน',
+          'aquatic': 'เธชเธฑเธ•เธงเนเธเนเธณ',
+          'organic': 'เธญเธดเธเธ—เธฃเธตเธขเน',
+          'seedlings': 'เธชเธกเธธเธเนเธเธฃ',
+          'herb': 'เธชเธกเธธเธเนเธเธฃ',
+          'herbs': 'เธชเธกเธธเธเนเธเธฃ'
         };
         currentCat = catMap[catParam.toLowerCase()] || catParam;
       }
@@ -670,7 +670,7 @@
 
     function updateProductDropdown() {
       const ps = document.getElementById('productSelect');
-      const pleaseSelect = window.i18nT ? window.i18nT('please_select', '-- กรุณาเลือก --') : '-- กรุณาเลือก --';
+      const pleaseSelect = window.i18nT ? window.i18nT('please_select', '-- เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธ --') : '-- เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธ --';
       ps.innerHTML = `<option value="">${pleaseSelect}</option>`;
 
       const filtered = currentCat === 'all'
@@ -759,7 +759,7 @@
           rawDetails = null;
           selectedVarietyName = '';
           if (vGroup) {
-            vGroup.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--red, #ef4444); font-weight:600;">ไม่มีข้อมูลราคากลางสำหรับช่วงวันที่คุณเลือก</div>`;
+            vGroup.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--red, #ef4444); font-weight:600;">เนเธกเนเธกเธตเธเนเธญเธกเธนเธฅเธฃเธฒเธเธฒเธเธฅเธฒเธเธชเธณเธซเธฃเธฑเธเธเนเธงเธเธงเธฑเธเธ—เธตเนเธเธธเธ“เน€เธฅเธทเธญเธ</div>`;
           }
           renderNoDataResult();
         }
@@ -799,7 +799,7 @@
         view.innerHTML = `
           <div class="search-hint-container">
             <span class="material-icons-outlined search-hint-icon">search</span>
-            <p>${t('select_to_see_price', 'เลือกสินค้าและสายพันธุ์เพื่อดูราคา')}</p>
+            <p>${t('select_to_see_price', 'เน€เธฅเธทเธญเธเธชเธดเธเธเนเธฒเนเธฅเธฐเธชเธฒเธขเธเธฑเธเธเธธเนเน€เธเธทเนเธญเธ”เธนเธฃเธฒเธเธฒ')}</p>
           </div>
         `;
         return;
@@ -835,7 +835,7 @@
       }
 
       const regItem = commodityRegistry.find(item => item.commodity === selectedProduct);
-      const productCategory = regItem ? regItem.category : 'สินค้าเกษตร';
+      const productCategory = regItem ? regItem.category : 'เธชเธดเธเธเนเธฒเน€เธเธฉเธ•เธฃ';
 
       // Build daily trend rows
       let tableRowsHtml = '';
@@ -850,9 +850,9 @@
           const formattedPct = diffPct.toFixed(1);
 
           if (diff > 0) {
-            changeHtml = `<span style="color: #22c55e; font-weight:700;">▲ +${formattedPct}%</span>`;
+            changeHtml = `<span style="color: #22c55e; font-weight:700;">โ–ฒ +${formattedPct}%</span>`;
           } else if (diff < 0) {
-            changeHtml = `<span style="color: #ef4444; font-weight:700;">▼ ${formattedPct}%</span>`;
+            changeHtml = `<span style="color: #ef4444; font-weight:700;">โ–ผ ${formattedPct}%</span>`;
           } else {
             changeHtml = `<span style="color: var(--text-muted);">0.0%</span>`;
           }
@@ -863,9 +863,9 @@
         tableRowsHtml += `
           <tr style="border-bottom: 1px solid var(--card-border);">
             <td style="padding: 8px 4px; font-weight: 500;">${rowDateFormatted}</td>
-            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">฿${row.min.toFixed(2)}</td>
-            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">฿${row.max.toFixed(2)}</td>
-            <td style="padding: 8px 4px; text-align: right; font-weight: 700; color: var(--primary);">฿${row.avg.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">เธฟ${row.min.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: right; color: var(--text-muted);">เธฟ${row.max.toFixed(2)}</td>
+            <td style="padding: 8px 4px; text-align: right; font-weight: 700; color: var(--primary);">เธฟ${row.avg.toFixed(2)}</td>
             <td style="padding: 8px 4px; text-align: center;">${changeHtml}</td>
           </tr>
         `;
@@ -875,7 +875,7 @@
         <div class="price-premium-card" style="margin-bottom: 20px;">
           <div class="price-card-header">
             <span class="category-badge">${productCategory}</span>
-            <span class="price-date-badge">ข้อมูลล่าสุด: ${dateStr}</span>
+            <span class="price-date-badge">เธเนเธญเธกเธนเธฅเธฅเนเธฒเธชเธธเธ”: ${dateStr}</span>
           </div>
           <div class="price-commodity-info">
             <h3 class="commodity-title">${productLabel}</h3>
@@ -883,16 +883,16 @@
           </div>
           <div class="price-divider"></div>
           <div class="price-value-container">
-            <div class="price-label">ราคาเฉลี่ยล่าสุด (Latest Average Price)</div>
+            <div class="price-label">เธฃเธฒเธเธฒเน€เธเธฅเธตเนเธขเธฅเนเธฒเธชเธธเธ” (Latest Average Price)</div>
             <div class="price-value-row">
-              <span class="currency-symbol">฿</span>
+              <span class="currency-symbol">เธฟ</span>
               <span class="price-amount">${latestRow.avg.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              <span class="price-unit">/ ${rawDetails.unit || 'กก.'}</span>
+              <span class="price-unit">/ ${rawDetails.unit || 'เธเธ.'}</span>
             </div>
           </div>
           <div class="price-footer">
             <span class="material-icons-outlined footer-icon">info</span>
-            <span class="footer-text">${t('reference_only', 'ราคากลางเพื่อการอ้างอิงเท่านั้น')}</span>
+            <span class="footer-text">${t('reference_only', 'เธฃเธฒเธเธฒเธเธฅเธฒเธเน€เธเธทเนเธญเธเธฒเธฃเธญเนเธฒเธเธญเธดเธเน€เธ—เนเธฒเธเธฑเนเธ')}</span>
           </div>
         </div>
 
@@ -900,17 +900,17 @@
         <div class="price-premium-card" style="padding: 18px;">
           <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
             <span class="material-icons-outlined" style="font-size: 18px; color: var(--primary);">trending_up</span>
-            <span>ประวัติราคาและแนวโน้มในช่วงวันที่เลือก</span>
+            <span>เธเธฃเธฐเธงเธฑเธ•เธดเธฃเธฒเธเธฒเนเธฅเธฐเนเธเธงเนเธเนเธกเนเธเธเนเธงเธเธงเธฑเธเธ—เธตเนเน€เธฅเธทเธญเธ</span>
           </h4>
           <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
               <thead>
                 <tr style="border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700;">
-                  <th style="padding: 6px 4px;">วันที่</th>
-                  <th style="padding: 6px 4px; text-align: right;">ต่ำสุด</th>
-                  <th style="padding: 6px 4px; text-align: right;">สูงสุด</th>
-                  <th style="padding: 6px 4px; text-align: right;">เฉลี่ย</th>
-                  <th style="padding: 6px 4px; text-align: center;">เปลี่ยนแปลง</th>
+                  <th style="padding: 6px 4px;">เธงเธฑเธเธ—เธตเน</th>
+                  <th style="padding: 6px 4px; text-align: right;">เธ•เนเธณเธชเธธเธ”</th>
+                  <th style="padding: 6px 4px; text-align: right;">เธชเธนเธเธชเธธเธ”</th>
+                  <th style="padding: 6px 4px; text-align: right;">เน€เธเธฅเธตเนเธข</th>
+                  <th style="padding: 6px 4px; text-align: center;">เน€เธเธฅเธตเนเธขเธเนเธเธฅเธ</th>
                 </tr>
               </thead>
               <tbody>
@@ -925,18 +925,18 @@
     function renderNoDataResult() {
       const view = document.getElementById('resultView');
       const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
-      const productLabel = selectedProduct ? t(selectedProduct, selectedProduct) : 'สินค้า';
+      const productLabel = selectedProduct ? t(selectedProduct, selectedProduct) : 'เธชเธดเธเธเนเธฒ';
 
       view.innerHTML = `
         <div class="price-premium-card">
           <div class="price-card-header">
-            <span class="category-badge" style="background: var(--card-border); color: var(--text-muted);">ไม่มีข้อมูล</span>
+            <span class="category-badge" style="background: var(--card-border); color: var(--text-muted);">เนเธกเนเธกเธตเธเนเธญเธกเธนเธฅ</span>
           </div>
           <div class="price-commodity-info" style="text-align: center; padding: 20px 0;">
             <h3 class="commodity-title" style="color: var(--text-muted);">${productLabel}</h3>
             <p style="margin-top: 10px; color: #ef4444; font-size: 13px; font-weight: 700;">
               <span class="material-icons-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">error_outline</span>
-              ไม่มีข้อมูลราคากลางในช่วงเวลาที่เลือก
+              เนเธกเนเธกเธตเธเนเธญเธกเธนเธฅเธฃเธฒเธเธฒเธเธฅเธฒเธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธ—เธตเนเน€เธฅเธทเธญเธ
             </p>
           </div>
         </div>
@@ -950,7 +950,7 @@
     document.addEventListener('DOMContentLoaded', init);
 
     function applyTheme() {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
     applyTheme();

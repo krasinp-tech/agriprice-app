@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <script src="../../js/global-anim.js"></script>
     <script src="../../js/auth/guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="favorites_page_title">รายการที่บันทึกไว้ | AGRIPRICE</title>
+  <title data-i18n="favorites_page_title">เธฃเธฒเธขเธเธฒเธฃเธ—เธตเนเธเธฑเธเธ—เธถเธเนเธงเน | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,7 +21,7 @@
   
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -141,7 +141,7 @@
     <a href="javascript:history.back()" class="back-btn">
       <span class="material-icons-outlined">arrow_back</span>
     </a>
-    <h1 class="page-title" data-i18n="favorites_title">รายการที่บันทึกไว้</h1>
+    <h1 class="page-title" data-i18n="favorites_title">เธฃเธฒเธขเธเธฒเธฃเธ—เธตเนเธเธฑเธเธ—เธถเธเนเธงเน</h1>
   </header>
 
   <main class="content-area">
@@ -153,8 +153,8 @@
 
     <div id="emptyState" class="empty-state">
       <span class="material-icons-outlined">bookmark_border</span>
-      <h3 data-i18n="no_favorites_yet">ยังไม่มีรายการที่บันทึก</h3>
-      <p data-i18n="no_favorites_desc">คุณสามารถกดติดตามร้านค้าหรือถูกใจสินค้าได้จากหน้าหลัก</p>
+      <h3 data-i18n="no_favorites_yet">เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธฒเธฃเธ—เธตเนเธเธฑเธเธ—เธถเธ</h3>
+      <p data-i18n="no_favorites_desc">เธเธธเธ“เธชเธฒเธกเธฒเธฃเธ–เธเธ”เธ•เธดเธ”เธ•เธฒเธกเธฃเนเธฒเธเธเนเธฒเธซเธฃเธทเธญเธ–เธนเธเนเธเธชเธดเธเธเนเธฒเนเธ”เนเธเธฒเธเธซเธเนเธฒเธซเธฅเธฑเธ</p>
     </div>
   </main>
 

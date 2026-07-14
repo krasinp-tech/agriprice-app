@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -12,10 +12,10 @@
      
     <script src="../../../js/components/ui-common.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_step2_title">จองคิว - ข้อมูลยานพาหนะ | AGRIPRICE</title>
+  <title data-i18n="booking_step2_title">เธเธญเธเธเธดเธง - เธเนเธญเธกเธนเธฅเธขเธฒเธเธเธฒเธซเธเธฐ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -48,7 +48,7 @@
 
     <!-- Header Card -->
     <section class="header-card">
-      <button class="btn-back" id="btnBack" aria-label="ย้อนกลับ">
+      <button class="btn-back" id="btnBack" aria-label="เธขเนเธญเธเธเธฅเธฑเธ">
         <span class="material-icons-outlined">arrow_back_ios</span>
       </button>
 
@@ -61,11 +61,11 @@
 
       <div class="header-content">
         <div class="product-icon">
-          <img src="../../../assets/images/durian.png" alt="ทุเรียน" id="productIcon">
+          <img src="../../../assets/images/durian.png" alt="เธ—เธธเน€เธฃเธตเธขเธ" id="productIcon">
         </div>
         <h1 class="header-title" id="headerTitle"></h1>
-        <p class="header-subtitle" data-i18n="booking_step1_subtitle">จองคิว</p>
-        <p class="header-description" data-i18n="fill_all_info">กรอกข้อมูลการจองทั้งหมด</p>
+        <p class="header-subtitle" data-i18n="booking_step1_subtitle">เธเธญเธเธเธดเธง</p>
+        <p class="header-description" data-i18n="fill_all_info">เธเธฃเธญเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธเธ—เธฑเนเธเธซเธกเธ”</p>
       </div>
     </section>
 
@@ -73,56 +73,56 @@
     <section class="form-content">
       <div class="container-form">
 
-        <!-- ข้อมูลยานพาหนะ -->
+        <!-- เธเนเธญเธกเธนเธฅเธขเธฒเธเธเธฒเธซเธเธฐ -->
         <div class="section-block">
-          <h2 class="section-title" data-i18n="vehicle_info">ข้อมูลยานพาหนะ</h2>
-          <p class="section-subtitle" data-i18n="vehicle_details">รายละเอียดรถที่จะเข้าส่งสินค้า</p>
+          <h2 class="section-title" data-i18n="vehicle_info">เธเนเธญเธกเธนเธฅเธขเธฒเธเธเธฒเธซเธเธฐ</h2>
+          <p class="section-subtitle" data-i18n="vehicle_details">เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธฃเธ–เธ—เธตเนเธเธฐเน€เธเนเธฒเธชเนเธเธชเธดเธเธเนเธฒ</p>
 
-          <!-- รถคันที่ 1 -->
+          <!-- เธฃเธ–เธเธฑเธเธ—เธตเน 1 -->
           <div class="vehicle-card" id="vehicle1">
             <div class="vehicle-header">
-              <h3 class="vehicle-title" data-i18n="vehicle_no" data-i18n-n="1">รถคันที่ 1</h3>
+              <h3 class="vehicle-title" data-i18n="vehicle_no" data-i18n-n="1">เธฃเธ–เธเธฑเธเธ—เธตเน 1</h3>
             </div>
 
             <div class="form-group">
-              <label class="form-label" data-i18n="vehicle_type">ประเภทรถ</label>
+              <label class="form-label" data-i18n="vehicle_type">เธเธฃเธฐเน€เธ เธ—เธฃเธ–</label>
               <div class="select-wrapper">
                 <select class="form-select" name="vehicleType1" required>
-                  <option value="" data-i18n="select_vehicle_type">เลือกประเภทรถ</option>
-                  <option value="pickup-4" data-weight="9.5" data-i18n="pickup_4">รถกระบะทั่วไป (4 ล้อ)</option>
-                  <option value="pickup-cage-4" data-weight="9.5" data-i18n="pickup_cage_4">รถพ่วง/เทรลเลอร์</option>
-                  <option value="truck-6" data-weight="15" data-i18n="truck_6">รถ 6 ล้อ</option>
-                  <option value="truck-10" data-weight="25" data-i18n="truck_10">รถ 10 ล้อ</option>
-                  <option value="trailer" data-weight="50.5" data-i18n="trailer_large">รถพ่วง/เทรลเลอร์ (6 เพลา 22 ล้อ)</option>
-                  <option value="motorcycle" data-weight="0.5" data-i18n="motorcycle_sidecar">มอเตอร์ไซค์พ่วงข้าง</option>
-                  <option value="other" data-weight="" data-i18n="other_vehicle">อื่นๆ</option>
+                  <option value="" data-i18n="select_vehicle_type">เน€เธฅเธทเธญเธเธเธฃเธฐเน€เธ เธ—เธฃเธ–</option>
+                  <option value="pickup-4" data-weight="9.5" data-i18n="pickup_4">เธฃเธ–เธเธฃเธฐเธเธฐเธ—เธฑเนเธงเนเธ (4 เธฅเนเธญ)</option>
+                  <option value="pickup-cage-4" data-weight="9.5" data-i18n="pickup_cage_4">เธฃเธ–เธเนเธงเธ/เน€เธ—เธฃเธฅเน€เธฅเธญเธฃเน</option>
+                  <option value="truck-6" data-weight="15" data-i18n="truck_6">เธฃเธ– 6 เธฅเนเธญ</option>
+                  <option value="truck-10" data-weight="25" data-i18n="truck_10">เธฃเธ– 10 เธฅเนเธญ</option>
+                  <option value="trailer" data-weight="50.5" data-i18n="trailer_large">เธฃเธ–เธเนเธงเธ/เน€เธ—เธฃเธฅเน€เธฅเธญเธฃเน (6 เน€เธเธฅเธฒ 22 เธฅเนเธญ)</option>
+                  <option value="motorcycle" data-weight="0.5" data-i18n="motorcycle_sidecar">เธกเธญเน€เธ•เธญเธฃเนเนเธเธเนเธเนเธงเธเธเนเธฒเธ</option>
+                  <option value="other" data-weight="" data-i18n="other_vehicle">เธญเธทเนเธเน</option>
                 </select>
                 <span class="select-arrow material-icons-outlined">expand_more</span>
               </div>
-              <div class="weight-limit" id="weightLimit1" data-i18n="not_exceed_n_tons" data-i18n-n="9.5">ไม่เกิน 9.5 ตัน</div>
+              <div class="weight-limit" id="weightLimit1" data-i18n="not_exceed_n_tons" data-i18n-n="9.5">เนเธกเนเน€เธเธดเธ 9.5 เธ•เธฑเธ</div>
             </div>
 
             <div class="form-group">
-              <label class="form-label" data-i18n="license_plate_info">ข้อมูลป้ายทะเบียน</label>
+              <label class="form-label" data-i18n="license_plate_info">เธเนเธญเธกเธนเธฅเธเนเธฒเธขเธ—เธฐเน€เธเธตเธขเธ</label>
               <div class="plate-inputs">
                 <div class="plate-group no">
-                  <label class="plate-sub-label" data-i18n="license_plate_no">เลขทะเบียน</label>
+                  <label class="plate-sub-label" data-i18n="license_plate_no">เน€เธฅเธเธ—เธฐเน€เธเธตเธขเธ</label>
                   <input 
                     type="text" 
                     class="form-input plate-no" 
                     name="plateNo1" 
-                    placeholder="1กข 1234"
+                    placeholder="1เธเธ 1234"
                     data-i18n-placeholder="plate_placeholder"
                     required
                   >
                 </div>
                 <div class="plate-group prov">
-                  <label class="plate-sub-label" data-i18n="province">จังหวัด</label>
+                  <label class="plate-sub-label" data-i18n="province">เธเธฑเธเธซเธงเธฑเธ”</label>
                   <input 
                     type="text" 
                     class="form-input plate-prov" 
                     name="plateProv1" 
-                    placeholder="จังหวัด"
+                    placeholder="เธเธฑเธเธซเธงเธฑเธ”"
                     data-i18n-placeholder="province_placeholder"
                     required
                   >
@@ -131,47 +131,47 @@
             </div>
           </div>
 
-          <!-- ปุ่มเพิ่มรถ -->
+          <!-- เธเธธเนเธกเน€เธเธดเนเธกเธฃเธ– -->
           <button class="btn-add-vehicle" id="btnAddVehicle">
             <span class="material-icons-outlined">add_circle</span>
-            <span data-i18n="add_vehicle_2">เพิ่มข้อมูลรถคันที่ 2</span>
+            <span data-i18n="add_vehicle_2">เน€เธเธดเนเธกเธเนเธญเธกเธนเธฅเธฃเธ–เธเธฑเธเธ—เธตเน 2</span>
           </button>
 
           <!-- Container for additional vehicles -->
           <div id="additionalVehicles"></div>
         </div>
 
-        <!-- ปริมาณผลผลิต -->
+        <!-- เธเธฃเธดเธกเธฒเธ“เธเธฅเธเธฅเธดเธ• -->
         <div class="section-block">
-          <h2 class="section-title" data-i18n="crop_volume_estimated">ปริมาณผลผลิตโดยประมาณ (กิโลกรัม)</h2>
+          <h2 class="section-title" data-i18n="crop_volume_estimated">เธเธฃเธดเธกเธฒเธ“เธเธฅเธเธฅเธดเธ•เนเธ”เธขเธเธฃเธฐเธกเธฒเธ“ (เธเธดเนเธฅเธเธฃเธฑเธก)</h2>
           <input 
             type="number" 
             class="form-input" 
             id="productAmount" 
-            placeholder="เช่น 1,200"
+            placeholder="เน€เธเนเธ 1,200"
             data-i18n-placeholder="volume_placeholder"
             required
           >
-          <p class="help-text" data-i18n="specify_estimated_weight">ระบุน้ำหนักโดยประมาณของผลผลิตทั้งหมด </p>
+          <p class="help-text" data-i18n="specify_estimated_weight">เธฃเธฐเธเธธเธเนเธณเธซเธเธฑเธเนเธ”เธขเธเธฃเธฐเธกเธฒเธ“เธเธญเธเธเธฅเธเธฅเธดเธ•เธ—เธฑเนเธเธซเธกเธ” </p>
         </div>
 
-        <!-- ข้อมูลติดต่อ -->
+        <!-- เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ -->
         <div class="section-block">
           <div class="section-header-with-action">
-            <h2 class="section-title" data-i18n="tab_contact">ข้อมูลติดต่อ</h2>
-            <button class="btn-edit-profile" id="btnEditProfile" data-i18n="edit_personal_info">แก้ไขข้อมูลส่วนตัว</button>
+            <h2 class="section-title" data-i18n="tab_contact">เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ</h2>
+            <button class="btn-edit-profile" id="btnEditProfile" data-i18n="edit_personal_info">เนเธเนเนเธเธเนเธญเธกเธนเธฅเธชเนเธงเธเธ•เธฑเธง</button>
           </div>
 
           <div class="contact-card">
             <div class="contact-item">
-              <div class="contact-label" data-i18n="full_name">ชื่อ-นามสกุล</div>
-              <div class="contact-value" id="contactName">สมชาย เกษตรกร</div>
+              <div class="contact-label" data-i18n="full_name">เธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ</div>
+              <div class="contact-value" id="contactName">เธชเธกเธเธฒเธข เน€เธเธฉเธ•เธฃเธเธฃ</div>
             </div>
             <div class="contact-item">
-              <div class="contact-label" data-i18n="phone_number">เบอร์โทรศัพท์</div>
+              <div class="contact-label" data-i18n="phone_number">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</div>
               <div class="contact-value" id="contactPhone">081-234-5678</div>
             </div>
-            <div class="contact-note" data-i18n="contact_note">ข้อมูลติดต่อจะถูกใช้ในการรับผลการจอง</div>
+            <div class="contact-note" data-i18n="contact_note">เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญเธเธฐเธ–เธนเธเนเธเนเนเธเธเธฒเธฃเธฃเธฑเธเธเธฅเธเธฒเธฃเธเธญเธ</div>
           </div>
         </div>
 
@@ -181,7 +181,7 @@
     <!-- Submit Button -->
     <div class="submit-container">
       <button class="btn-submit" id="btnSubmit">
-        <span data-i18n="next">ถัดไป</span>
+        <span data-i18n="next">เธ–เธฑเธ”เนเธ</span>
         <span class="material-icons-outlined">arrow_forward</span>
       </button>
     </div>
@@ -194,7 +194,7 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" data-i18n="edit_personal_info">แก้ไขข้อมูลส่วนตัว</h3>
+        <h3 class="modal-title" data-i18n="edit_personal_info">เนเธเนเนเธเธเนเธญเธกเธนเธฅเธชเนเธงเธเธ•เธฑเธง</h3>
         <button class="btn-close-modal" id="btnCloseModal">
           <span class="material-icons-outlined">close</span>
         </button>
@@ -202,18 +202,18 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label" data-i18n="full_name">ชื่อ-นามสกุล</label>
+          <label class="form-label" data-i18n="full_name">เธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ</label>
           <input 
             type="text" 
             class="form-input" 
             id="editName" 
-            placeholder="กรอกชื่อ-นามสกุล"
+            placeholder="เธเธฃเธญเธเธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ"
             data-i18n-placeholder="full_name"
           >
         </div>
 
         <div class="form-group">
-          <label class="form-label" data-i18n="phone_number">เบอร์โทรศัพท์</label>
+          <label class="form-label" data-i18n="phone_number">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</label>
           <input 
             type="tel" 
             class="form-input" 
@@ -226,8 +226,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-modal-cancel" id="btnCancelModal" data-i18n="cancel">ยกเลิก</button>
-        <button class="btn-modal-save" id="btnSaveModal" data-i18n="save">บันทึก</button>
+        <button class="btn-modal-cancel" id="btnCancelModal" data-i18n="cancel">เธขเธเน€เธฅเธดเธ</button>
+        <button class="btn-modal-save" id="btnSaveModal" data-i18n="save">เธเธฑเธเธ—เธถเธ</button>
       </div>
     </div>
   </div>

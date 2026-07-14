@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="payment_title">ชำระเงิน | AGRIPRICE</title>
+  <title data-i18n="payment_title">เธเธณเธฃเธฐเน€เธเธดเธ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -32,32 +32,32 @@
     <button class="back-btn" data-back>
       <span class="material-icons-outlined">chevron_left</span>
     </button>
-    <h1 data-i18n="payment_title">ชำระเงิน</h1>
+    <h1 data-i18n="payment_title">เธเธณเธฃเธฐเน€เธเธดเธ</h1>
   </header>
 
   <main class="payment-container fade-slide">
     <section class="plan-summary">
-      <h2 class="section-title" data-i18n="subscription_plans">แผนการสมัคร</h2>
+      <h2 class="section-title" data-i18n="subscription_plans">เนเธเธเธเธฒเธฃเธชเธกเธฑเธเธฃ</h2>
       <div class="plan-card">
         <div class="plan-info">
           <span class="plan-name">AgriPrice Premium (Pro)</span>
-          <span class="plan-desc" data-i18n="upgrade_pro_desc">การเข้าถึงฟีเจอร์ทั้งหมด</span>
+          <span class="plan-desc" data-i18n="upgrade_pro_desc">เธเธฒเธฃเน€เธเนเธฒเธ–เธถเธเธเธตเน€เธเธญเธฃเนเธ—เธฑเนเธเธซเธกเธ”</span>
         </div>
         <div class="plan-price">
-          <span class="currency">฿</span><span class="amount">499</span><span class="period"
-            data-i18n="month_period">/เดือน</span>
+          <span class="currency">เธฟ</span><span class="amount">499</span><span class="period"
+            data-i18n="month_period">/เน€เธ”เธทเธญเธ</span>
         </div>
       </div>
     </section>
 
     <section class="payment-methods">
-      <h2 class="section-title" data-i18n="select_payment_method">วิธีการชำระเงิน</h2>
+      <h2 class="section-title" data-i18n="select_payment_method">เธงเธดเธเธตเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธ</h2>
 
       <!-- Tab Controls -->
       <div class="method-tabs">
         <button type="button" class="tab-btn active" data-tab="card">
           <span class="material-icons-outlined">credit_card</span>
-          <span data-i18n="credit_card_tab">บัตรเครดิต</span>
+          <span data-i18n="credit_card_tab">เธเธฑเธ•เธฃเน€เธเธฃเธ”เธดเธ•</span>
         </button>
         <button type="button" class="tab-btn" data-tab="qr">
           <span class="material-icons-outlined">qr_code</span>
@@ -68,18 +68,18 @@
       <!-- Tab Content: Credit Card -->
       <div class="tab-content active" id="cardTabContent">
         <div class="form-group">
-          <label class="label" data-i18n="card_number">หมายเลขบัตร</label>
+          <label class="label" data-i18n="card_number">เธซเธกเธฒเธขเน€เธฅเธเธเธฑเธ•เธฃ</label>
           <input type="tel" class="input" placeholder="0000 0000 0000 0000" maxlength="19">
         </div>
 
         <div class="form-group">
-          <label class="label" data-i18n="card_name">ชื่อบนบัตร</label>
+          <label class="label" data-i18n="card_name">เธเธทเนเธญเธเธเธเธฑเธ•เธฃ</label>
           <input type="text" class="input" placeholder="JOHN DOE">
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label class="label" data-i18n="expiry_date">วันหมดอายุ</label>
+            <label class="label" data-i18n="expiry_date">เธงเธฑเธเธซเธกเธ”เธญเธฒเธขเธธ</label>
             <input type="text" class="input" placeholder="MM/YY" maxlength="5">
           </div>
           <div class="form-group">
@@ -97,7 +97,7 @@
               <div class="pp-logo-wrap">
                 <span class="pp-title">Prompt Pay</span>
               </div>
-              <span class="pp-sub">พร้อมเพย์</span>
+              <span class="pp-sub">เธเธฃเนเธญเธกเน€เธเธขเน</span>
             </div>
             <div class="pp-body">
               <svg class="qr-code-svg" viewBox="0 0 100 100" width="200" height="200">
@@ -143,26 +143,26 @@
               </svg>
             </div>
             <div class="pp-footer">
-              <span class="pp-amount-label" data-i18n="pp_amount_label">ยอดชำระเงิน</span>
-              <span class="pp-amount-val">฿499.00</span>
+              <span class="pp-amount-label" data-i18n="pp_amount_label">เธขเธญเธ”เธเธณเธฃเธฐเน€เธเธดเธ</span>
+              <span class="pp-amount-val">เธฟ499.00</span>
             </div>
           </div>
         </div>
 
         <div class="countdown-timer">
-          <span data-i18n="qr_countdown_prefix">กรุณาชำระเงินภายใน</span>
+          <span data-i18n="qr_countdown_prefix">เธเธฃเธธเธ“เธฒเธเธณเธฃเธฐเน€เธเธดเธเธ เธฒเธขเนเธ</span>
           <span class="timer-digits" id="timerDigits">15:00</span>
-          <span data-i18n="qr_countdown_suffix">นาที</span>
+          <span data-i18n="qr_countdown_suffix">เธเธฒเธ—เธต</span>
         </div>
       </div>
 
       <div class="secure-info">
         <span class="material-icons-outlined">lock</span>
-        <span data-i18n="secure_payment_info">ข้อมูลบัตรของคุณจะถูกเข้ารหัสอย่างปลอดภัย</span>
+        <span data-i18n="secure_payment_info">เธเนเธญเธกเธนเธฅเธเธฑเธ•เธฃเธเธญเธเธเธธเธ“เธเธฐเธ–เธนเธเน€เธเนเธฒเธฃเธซเธฑเธชเธญเธขเนเธฒเธเธเธฅเธญเธ”เธ เธฑเธข</span>
       </div>
 
       <button class="btn btn-primary" id="checkoutBtn">
-        <span class="btn-text" data-i18n="payment_confirm">ยืนยันการชำระเงิน</span>
+        <span class="btn-text" data-i18n="payment_confirm">เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธ</span>
       </button>
     </section>
   </main>

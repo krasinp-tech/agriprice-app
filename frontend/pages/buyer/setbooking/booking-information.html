@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -7,10 +7,10 @@
 
     <script src="../../../js/auth/guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_confirmed_title">จองคิว - การจองสำเร็จ | AGRIPRICE</title>
+  <title data-i18n="booking_confirmed_title">เธเธญเธเธเธดเธง - เธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -53,20 +53,20 @@
         <!-- Status Icon + Message -->
         <div class="hero-status-row">
           <span class="material-icons-outlined hero-status-icon" id="heroStatusIcon">check_circle</span>
-          <div class="hero-sub" id="heroSub">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+          <div class="hero-sub" id="heroSub">เธเธฒเธฃเธเธญเธเธเธดเธงเธเธญเธเธเธธเธ“เนเธ”เนเธฃเธฑเธเธเธฒเธฃเธขเธทเธเธขเธฑเธเนเธฅเนเธง</div>
         </div>
         <!-- Status Pill -->
         <div class="status-pill-wrap">
-          <span class="status-pill" id="statusPill">ยืนยันแล้ว</span>
+          <span class="status-pill" id="statusPill">เธขเธทเธเธขเธฑเธเนเธฅเนเธง</span>
         </div>
 
         <div class="big-card">
-          <div class="label" data-i18n="queue_number">หมายเลขคิว</div>
+          <div class="label" data-i18n="queue_number">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธง</div>
           <div class="queue" id="queueNo">-</div>
 
           <div class="subRow">
-            <div class="subLabel" data-i18n="queue_time_label">เวลาเข้าคิว</div>
-            <div class="subValue"><b id="timeText">-</b> น.</div>
+            <div class="subLabel" data-i18n="queue_time_label">เน€เธงเธฅเธฒเน€เธเนเธฒเธเธดเธง</div>
+            <div class="subValue"><b id="timeText">-</b> เธ.</div>
           </div>
 
           <div class="qrWrap">
@@ -74,12 +74,12 @@
           </div>
 
           <div class="idRow">
-            <div class="subLabel" data-i18n="booking_id_label">ID การจอง</div>
+            <div class="subLabel" data-i18n="booking_id_label">ID เธเธฒเธฃเธเธญเธ</div>
             <div class="subValue" id="bookingIdText">-</div>
           </div>
 
           <button class="btn-outline" type="button" id="toggleDetailBtn" data-i18n="show_booking_details">
-            แสดงรายละเอียดการจอง
+            เนเธชเธ”เธเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธฒเธฃเธเธญเธ
           </button>
 
           <div class="detailPanel" id="detailPanel" hidden></div>
@@ -91,26 +91,26 @@
     <section class="card">
       <div class="card-title" data-i18n="current_queue_status">
         <span class="material-icons-outlined">groups</span>
-        สถานะคิวปัจจุบัน
+        เธชเธ–เธฒเธเธฐเธเธดเธงเธเธฑเธเธเธธเธเธฑเธ
       </div>
 
       <div class="statusGrid">
         <div class="statusItem">
-          <div class="statusLabel" data-i18n="current_queue_label">คิวปัจจุบัน</div>
+          <div class="statusLabel" data-i18n="current_queue_label">เธเธดเธงเธเธฑเธเธเธธเธเธฑเธ</div>
           <div class="statusValue" id="currentQueue">-</div>
         </div>
         <div class="statusItem right">
-          <div class="statusLabel" data-i18n="my_queue_label">คิวของฉัน</div>
+          <div class="statusLabel" data-i18n="my_queue_label">เธเธดเธงเธเธญเธเธเธฑเธ</div>
           <div class="statusValue green" id="myQueue">-</div>
         </div>
 
         <div class="statusFoot">
           <div class="statusMini">
-            <div class="statusMiniLabel" data-i18n="queues_ahead">จำนวนคิวก่อนหน้า</div>
+            <div class="statusMiniLabel" data-i18n="queues_ahead">เธเธณเธเธงเธเธเธดเธงเธเนเธญเธเธซเธเนเธฒ</div>
             <div class="statusMiniValue" id="aheadCount">-</div>
           </div>
           <div class="statusMini">
-            <div class="statusMiniLabel" data-i18n="estimated_arrival_time">เวลาประมาณที่จะถึงคิว</div>
+            <div class="statusMiniLabel" data-i18n="estimated_arrival_time">เน€เธงเธฅเธฒเธเธฃเธฐเธกเธฒเธ“เธ—เธตเนเธเธฐเธ–เธถเธเธเธดเธง</div>
             <div class="statusMiniValue" id="eta">-</div>
           </div>
         </div>
@@ -121,14 +121,14 @@
     <section class="card">
       <div class="card-title" data-i18n="truck_info_title">
         <span class="material-icons-outlined">directions_car</span>
-        ข้อมูลรถบรรทุก
+        เธเนเธญเธกเธนเธฅเธฃเธ–เธเธฃเธฃเธ—เธธเธ
       </div>
 
       <div class="vehicleDetail" id="vehicleDetail">
         <div class="vehicleCount">
-          <span data-i18n="vehicle_count_label">จำนวนรถ:</span>
+          <span data-i18n="vehicle_count_label">เธเธณเธเธงเธเธฃเธ–:</span>
           <b id="vehicleCountTotal">-</b>
-          <span data-i18n="vehicle_unit">คัน</span>
+          <span data-i18n="vehicle_unit">เธเธฑเธ</span>
         </div>
         <div class="vehiclesList" id="vehiclesList"></div>
       </div>
@@ -138,7 +138,7 @@
     <section class="card farmer-card">
       <div class="card-title">
         <span class="material-icons-outlined">person</span>
-        <span data-i18n="farmer_info_title">ข้อมูลส่วนตัวของเกษตรกร</span>
+        <span data-i18n="farmer_info_title">เธเนเธญเธกเธนเธฅเธชเนเธงเธเธ•เธฑเธงเธเธญเธเน€เธเธฉเธ•เธฃเธเธฃ</span>
       </div>
 
       <div class="farmer-profile-box">
@@ -156,7 +156,7 @@
         <!-- Phone Row -->
         <div class="farmer-phone-row">
           <span class="material-icons-outlined">phone</span>
-          <span class="farmer-phone-label" data-i18n="farmer_phone">เบอร์โทรศัพท์:</span>
+          <span class="farmer-phone-label" data-i18n="farmer_phone">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน:</span>
           <span class="farmer-phone-value" id="farmerPhone">-</span>
         </div>
 
@@ -164,11 +164,11 @@
         <div class="farmer-action-row">
           <button class="btn-farmer-action call" id="btnCall">
             <span class="material-icons-outlined">call</span>
-            <span data-i18n="call_now">โทรออก</span>
+            <span data-i18n="call_now">เนเธ—เธฃเธญเธญเธ</span>
           </button>
           <button class="btn-farmer-action chat" id="btnChat">
             <span class="material-icons-outlined">chat_bubble_outline</span>
-            <span data-i18n="chat_now">แชท</span>
+            <span data-i18n="chat_now">เนเธเธ—</span>
           </button>
         </div>
       </div>
@@ -176,7 +176,7 @@
 
     <!-- Cancel Button -->
     <button class="btn-cancel" id="btnCancelBooking" data-i18n="cancel_booking_btn">
-      ยกเลิกการจอง
+      เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธ
     </button>
 
     </div>

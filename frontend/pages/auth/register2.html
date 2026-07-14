@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <script src="../../js/config.js"></script>
@@ -6,7 +6,7 @@
   <script src="../../js/auth/guard.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="register_now">สมัครสมาชิก | Agriprice</title>
+  <title data-i18n="register_now">เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ | Agriprice</title>
   <meta name="theme-color" content="#0B853C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,7 +22,7 @@
   
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -53,38 +53,38 @@
       <!-- CONTENT SHEET -->
       <div class="content">
         <header class="head">
-          <h1 class="h1" data-i18n="register_now">สมัครสมาชิก</h1>
-          <p class="subtitle" data-i18n="register_subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งาน</p>
+          <h1 class="h1" data-i18n="register_now">เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ</h1>
+          <p class="subtitle" data-i18n="register_subtitle">เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเนเธญเธกเธนเธฅเน€เธเธทเนเธญเธชเธฃเนเธฒเธเธเธฑเธเธเธตเธเธนเนเนเธเนเธเธฒเธ</p>
         </header>
 
         <form class="form" id="registerForm" novalidate>
           <div class="field">
-            <label class="label" for="firstName" data-i18n="first_name_label">ชื่อ</label>
-            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" placeholder="ชื่อ" data-i18n-placeholder="first_name_label" required />
+            <label class="label" for="firstName" data-i18n="first_name_label">เธเธทเนเธญ</label>
+            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" placeholder="เธเธทเนเธญ" data-i18n-placeholder="first_name_label" required />
             <p class="help" id="firstNameHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="lastName" data-i18n="last_name_label">นามสกุล</label>
-            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" placeholder="นามสกุล" data-i18n-placeholder="last_name_label" required />
+            <label class="label" for="lastName" data-i18n="last_name_label">เธเธฒเธกเธชเธเธธเธฅ</label>
+            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" placeholder="เธเธฒเธกเธชเธเธธเธฅ" data-i18n-placeholder="last_name_label" required />
             <p class="help" id="lastNameHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="email" data-i18n="email_optional">อีเมล (ถ้ามี)</label>
+            <label class="label" for="email" data-i18n="email_optional">เธญเธตเน€เธกเธฅ (เธ–เนเธฒเธกเธต)</label>
             <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="email@example.com" />
             <p class="help" id="emailHelp"></p>
           </div>
 
           <div class="field">
-            <label class="label" for="phone" data-i18n="phone_label">เบอร์โทรศัพท์</label>
+            <label class="label" for="phone" data-i18n="phone_label">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</label>
             <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0XXXXXXXXX" maxlength="10" required />
             <p class="help" id="phoneHelp"></p>
           </div>
 
           <div class="error" id="formError" role="alert" aria-live="polite"></div>
 
-          <button class="btn" id="nextBtn" type="submit" data-i18n="next_btn">ถัดไป</button>
+          <button class="btn" id="nextBtn" type="submit" data-i18n="next_btn">เธ–เธฑเธ”เนเธ</button>
           <p class="hint" id="hintText" aria-live="polite"></p>
         </form>
 

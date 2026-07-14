@@ -9,6 +9,14 @@
     return theme === 'dark' ? 'dark' : 'light';
   }
 
+  function getSystemTheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function getPreferredTheme() {
+    return localStorage.getItem('agriprice_theme') || getSystemTheme();
+  }
+
   function applyTheme(theme, options = {}) {
     const nextTheme = normalizeTheme(theme);
     const isDark = nextTheme === 'dark';
@@ -43,13 +51,19 @@
   }
 
   window.__AGRIPRICE_APPLY_THEME = applyTheme;
-  applyTheme(localStorage.getItem('agriprice_theme') || 'light');
+  applyTheme(getPreferredTheme());
 
   window.addEventListener('storage', (event) => {
     if (event.key === 'agriprice_theme') {
-      applyTheme(event.newValue || 'light');
+      applyTheme(event.newValue || getSystemTheme());
     }
   });
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (!localStorage.getItem('agriprice_theme')) applyTheme(getSystemTheme());
+    });
+  }
 
   // Hide bottom nav inside iframe to avoid duplicate bars
   if (window.self !== window.top) {

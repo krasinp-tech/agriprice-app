@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -12,10 +12,10 @@
 
     <script src="../../../js/components/ui-common.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_summary_title">จองคิว - สรุปการจอง | AGRIPRICE</title>
+  <title data-i18n="booking_summary_title">เธเธญเธเธเธดเธง - เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -48,7 +48,7 @@
 
     <!-- Header Card -->
     <section class="header-card">
-      <button class="btn-back" id="btnBack" aria-label="ย้อนกลับ">
+      <button class="btn-back" id="btnBack" aria-label="เธขเนเธญเธเธเธฅเธฑเธ">
         <span class="material-icons-outlined">arrow_back_ios</span>
       </button>
 
@@ -60,8 +60,8 @@
       </div>
 
       <div class="header-content">
-        <h1 class="header-title" data-i18n="booking_step1_subtitle">จองคิว</h1>
-        <p class="header-subtitle" data-i18n="booking_summary">สรุปข้อมูลการจองทั้งหมด</p>
+        <h1 class="header-title" data-i18n="booking_step1_subtitle">เธเธญเธเธเธดเธง</h1>
+        <p class="header-subtitle" data-i18n="booking_summary">เธชเธฃเธธเธเธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเธเธ—เธฑเนเธเธซเธกเธ”</p>
       </div>
     </section>
 
@@ -69,48 +69,48 @@
     <section class="summary-content">
       <div class="container-summary">
 
-        <!-- รายละเอียดคิว -->
+        <!-- เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธดเธง -->
         <div class="summary-card">
           <div class="card-header">
             <span class="material-icons-outlined card-icon">event_note</span>
-            <h2 class="card-title" data-i18n="queue_details">รายละเอียดคิว</h2>
+            <h2 class="card-title" data-i18n="queue_details">เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธดเธง</h2>
           </div>
           <div class="card-body">
             <div class="info-row">
-              <div class="info-label" data-i18n="date">วันที่</div>
+              <div class="info-label" data-i18n="date">เธงเธฑเธเธ—เธตเน</div>
               <div class="info-value" id="summaryDate">-</div>
             </div>
             <div class="info-row">
-              <div class="info-label" data-i18n="time">เวลา</div>
+              <div class="info-label" data-i18n="time">เน€เธงเธฅเธฒ</div>
               <div class="info-value" id="summaryTime">-</div>
             </div>
             <div class="info-row">
-              <div class="info-label" data-i18n="booking_for">สิ่งที่จองรับ</div>
+              <div class="info-label" data-i18n="booking_for">เธชเธดเนเธเธ—เธตเนเธเธญเธเธฃเธฑเธ</div>
               <div class="info-value" id="summaryProduct">-</div>
             </div>
             <div class="info-row">
-              <div class="info-label" data-i18n="slot_number">หมายเลขสลอท (Slot)</div>
+              <div class="info-label" data-i18n="slot_number">เธซเธกเธฒเธขเน€เธฅเธเธชเธฅเธญเธ— (Slot)</div>
               <div class="info-value info-highlight" id="summarySlot">-</div>
             </div>
           </div>
         </div>
 
-        <!-- ผลผลิต -->
+        <!-- เธเธฅเธเธฅเธดเธ• -->
         <div class="summary-card">
           <div class="card-header">
             <span class="material-icons-outlined card-icon">inventory_2</span>
-            <h2 class="card-title" data-i18n="product">ผลผลิต</h2>
+            <h2 class="card-title" data-i18n="product">เธเธฅเธเธฅเธดเธ•</h2>
           </div>
           <div class="card-body">
             <div class="product-summary">
               <div class="product-icon-wrapper">
-                <img src="../../../assets/images/durian.png" alt="ทุเรียน" class="product-img" id="productImg">
+                <img src="../../../assets/images/durian.png" alt="เธ—เธธเน€เธฃเธตเธขเธ" class="product-img" id="productImg">
               </div>
               <div class="product-details">
                 <div class="product-name" id="productName">-</div>
                 <div class="product-info">
-                  <span id="summaryWeight">-</span> <span data-i18n="kg">กก.</span>
-                  <span class="dot">•</span>
+                  <span id="summaryWeight">-</span> <span data-i18n="kg">เธเธ.</span>
+                  <span class="dot">โ€ข</span>
                   <span id="productType">-</span>
                 </div>
               </div>
@@ -118,54 +118,54 @@
           </div>
         </div>
 
-        <!-- ยานพาหนะ -->
+        <!-- เธขเธฒเธเธเธฒเธซเธเธฐ -->
         <div class="summary-card">
           <div class="card-header">
             <span class="material-icons-outlined card-icon">local_shipping</span>
-            <h2 class="card-title" data-i18n="vehicle">ยานพาหนะ</h2>
+            <h2 class="card-title" data-i18n="vehicle">เธขเธฒเธเธเธฒเธซเธเธฐ</h2>
             <div class="vehicle-count" id="vehicleCount">-</div>
           </div>
           <div class="card-body">
             <div id="vehicleList">
-              <p style="color: #999; text-align: center;" data-i18n="loading">กำลังโหลด...</p>
+              <p style="color: #999; text-align: center;" data-i18n="loading">เธเธณเธฅเธฑเธเนเธซเธฅเธ”...</p>
             </div>
           </div>
         </div>
 
-        <!-- ข้อมูลติดต่อ -->
+        <!-- เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ -->
         <div class="summary-card">
           <div class="card-header">
             <span class="material-icons-outlined card-icon">person</span>
-            <h2 class="card-title" data-i18n="tab_contact">ข้อมูลติดต่อ</h2>
+            <h2 class="card-title" data-i18n="tab_contact">เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ</h2>
           </div>
           <div class="card-body">
             <div class="info-row">
-              <div class="info-label" data-i18n="full_name">ชื่อ-นามสกุล</div>
+              <div class="info-label" data-i18n="full_name">เธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ</div>
               <div class="info-value" id="summaryContactName">-</div>
             </div>
             <div class="info-row">
-              <div class="info-label" data-i18n="phone_number">เบอร์โทรศัพท์</div>
+              <div class="info-label" data-i18n="phone_number">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</div>
               <div class="info-value" id="summaryContactPhone">-</div>
             </div>
             <div class="info-row">
-              <div class="info-label" data-i18n="delivery_address">ที่อยู่รับสินค้า</div>
+              <div class="info-label" data-i18n="delivery_address">เธ—เธตเนเธญเธขเธนเนเธฃเธฑเธเธชเธดเธเธเนเธฒ</div>
               <div class="info-value" id="summaryAddress">-</div>
             </div>
           </div>
         </div>
 
-        <!-- ข้อมูลสำคัญ -->
+        <!-- เธเนเธญเธกเธนเธฅเธชเธณเธเธฑเธ -->
         <div class="summary-card warning-card">
           <div class="card-header">
             <span class="material-icons-outlined card-icon warning-icon">info</span>
-            <h2 class="card-title" data-i18n="important_info">ข้อมูลสำคัญ</h2>
+            <h2 class="card-title" data-i18n="important_info">เธเนเธญเธกเธนเธฅเธชเธณเธเธฑเธ</h2>
           </div>
           <div class="card-body">
             <ul class="warning-list">
-              <li data-i18n="arrive_30_mins_early">กรุณามาถึงล่วงหน้าอย่างน้อย 30 นาที</li>
-              <li data-i18n="bring_id_card">นำบัตรประชาชนหรือบัตรประจำตัวมาด้วย</li>
-              <li data-i18n="check_vehicle_weight">ตรวจสอบน้ำหนักรถก่อนทำการเข้าส่งในจำนวนที่หัก</li>
-              <li data-i18n="contact_for_changes">ติดต่อสั่งหาบุกกรมเปลี่ยนแปลงนัดหมาย</li>
+              <li data-i18n="arrive_30_mins_early">เธเธฃเธธเธ“เธฒเธกเธฒเธ–เธถเธเธฅเนเธงเธเธซเธเนเธฒเธญเธขเนเธฒเธเธเนเธญเธข 30 เธเธฒเธ—เธต</li>
+              <li data-i18n="bring_id_card">เธเธณเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธเธซเธฃเธทเธญเธเธฑเธ•เธฃเธเธฃเธฐเธเธณเธ•เธฑเธงเธกเธฒเธ”เนเธงเธข</li>
+              <li data-i18n="check_vehicle_weight">เธ•เธฃเธงเธเธชเธญเธเธเนเธณเธซเธเธฑเธเธฃเธ–เธเนเธญเธเธ—เธณเธเธฒเธฃเน€เธเนเธฒเธชเนเธเนเธเธเธณเธเธงเธเธ—เธตเนเธซเธฑเธ</li>
+              <li data-i18n="contact_for_changes">เธ•เธดเธ”เธ•เนเธญเธชเธฑเนเธเธซเธฒเธเธธเธเธเธฃเธกเน€เธเธฅเธตเนเธขเธเนเธเธฅเธเธเธฑเธ”เธซเธกเธฒเธข</li>
             </ul>
           </div>
         </div>
@@ -176,7 +176,7 @@
     <!-- Submit Button -->
     <div class="submit-container">
       <button class="btn-submit" id="btnSubmit">
-        <span data-i18n="confirm_booking_btn">ยืนยันการจองคิว</span>
+        <span data-i18n="confirm_booking_btn">เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธเธเธดเธง</span>
         <span class="material-icons-outlined">check_circle</span>
       </button>
     </div>

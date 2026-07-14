@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 
 <head>
@@ -8,10 +8,10 @@
   <script src="../../../js/components/i18n.js"></script>
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="address_book_title">สมุดที่อยู่ | AGRIPRICE</title>
+  <title data-i18n="address_book_title">เธชเธกเธธเธ”เธ—เธตเนเธญเธขเธนเน | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -33,50 +33,50 @@
 
 <body>
   <main class="address-page">
-    <!-- ── Header ───────────────────────────────────────── -->
+    <!-- โ”€โ”€ Header โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
     <header class="address-header fade-slide">
-      <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+      <a class="back-btn" href="../account.html" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
         <span class="material-icons-outlined">chevron_left</span>
       </a>
-      <h1 class="page-title" data-i18n="address">สมุดที่อยู่</h1>
+      <h1 class="page-title" data-i18n="address">เธชเธกเธธเธ”เธ—เธตเนเธญเธขเธนเน</h1>
     </header>
 
-    <!-- ── Address List (Skeleton Loading) ── -->
+    <!-- โ”€โ”€ Address List (Skeleton Loading) โ”€โ”€ -->
     <div class="address-list" id="addressList">
       <div class="shimmer" style="height: 130px; border-radius: 20px; margin-bottom: 12px;"></div>
       <div class="shimmer" style="height: 130px; border-radius: 20px; margin-bottom: 12px;"></div>
     </div>
 
-    <!-- ── Empty State ── -->
+    <!-- โ”€โ”€ Empty State โ”€โ”€ -->
     <div class="empty-state" id="emptyState" style="display: none;">
       <span class="material-icons-outlined empty-icon">location_off</span>
-      <h2 class="empty-title" data-i18n="no_address_saved">ยังไม่มีที่อยู่ถูกบันทึกไว้</h2>
-      <p class="empty-sub" data-i18n="add_address_hint">เพิ่มที่อยู่ของคุณเพื่อความสะดวกในการจองและจัดส่ง</p>
+      <h2 class="empty-title" data-i18n="no_address_saved">เธขเธฑเธเนเธกเนเธกเธตเธ—เธตเนเธญเธขเธนเนเธ–เธนเธเธเธฑเธเธ—เธถเธเนเธงเน</h2>
+      <p class="empty-sub" data-i18n="add_address_hint">เน€เธเธดเนเธกเธ—เธตเนเธญเธขเธนเนเธเธญเธเธเธธเธ“เน€เธเธทเนเธญเธเธงเธฒเธกเธชเธฐเธ”เธงเธเนเธเธเธฒเธฃเธเธญเธเนเธฅเธฐเธเธฑเธ”เธชเนเธ</p>
     </div>
 
-    <!-- ── Action Button ────────────────────────────────── -->
+    <!-- โ”€โ”€ Action Button โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
     <button class="btn-add-address fade-slide" id="addAddressBtn">
       <span class="material-icons-outlined">add_location_alt</span>
-      <span data-i18n="add_new_address">เพิ่มที่อยู่ใหม่</span>
+      <span data-i18n="add_new_address">เน€เธเธดเนเธกเธ—เธตเนเธญเธขเธนเนเนเธซเธกเน</span>
     </button>
   </main>
 
-  <!-- ── Address Modal (Bottom Sheet) ────────────────────── -->
+  <!-- โ”€โ”€ Address Modal (Bottom Sheet) โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
   <div class="addr-modal-backdrop" id="addrModalBackdrop">
     <div class="addr-modal" id="addrModal" role="dialog" aria-modal="true" aria-labelledby="addrModalTitle">
       <div class="addr-modal-drag"></div>
-      <h2 class="addr-modal-title" id="addrModalTitle">เพิ่มที่อยู่ใหม่</h2>
+      <h2 class="addr-modal-title" id="addrModalTitle">เน€เธเธดเนเธกเธ—เธตเนเธญเธขเธนเนเนเธซเธกเน</h2>
 
       <!-- Tag Selector -->
       <div class="tag-selector" id="tagSelector">
         <button type="button" class="tag-btn active" data-tag="Home" id="tagHome">
-          <span class="material-icons-outlined" style="font-size:18px;">home</span> บ้าน
+          <span class="material-icons-outlined" style="font-size:18px;">home</span> เธเนเธฒเธ
         </button>
         <button type="button" class="tag-btn" data-tag="Work" id="tagWork">
-          <span class="material-icons-outlined" style="font-size:18px;">work</span> ที่ทำงาน
+          <span class="material-icons-outlined" style="font-size:18px;">work</span> เธ—เธตเนเธ—เธณเธเธฒเธ
         </button>
         <button type="button" class="tag-btn" data-tag="Other" id="tagOther">
-          <span class="material-icons-outlined" style="font-size:18px;">place</span> อื่นๆ
+          <span class="material-icons-outlined" style="font-size:18px;">place</span> เธญเธทเนเธเน
         </button>
       </div>
 
@@ -84,31 +84,31 @@
       <div class="addr-field-group">
         <div class="addr-field-row">
           <div class="addr-field">
-            <label for="addrFirstName">ชื่อ</label>
-            <input type="text" id="addrFirstName" placeholder="ชื่อ" autocomplete="given-name">
+            <label for="addrFirstName">เธเธทเนเธญ</label>
+            <input type="text" id="addrFirstName" placeholder="เธเธทเนเธญ" autocomplete="given-name">
           </div>
           <div class="addr-field">
-            <label for="addrLastName">นามสกุล</label>
-            <input type="text" id="addrLastName" placeholder="นามสกุล" autocomplete="family-name">
+            <label for="addrLastName">เธเธฒเธกเธชเธเธธเธฅ</label>
+            <input type="text" id="addrLastName" placeholder="เธเธฒเธกเธชเธเธธเธฅ" autocomplete="family-name">
           </div>
         </div>
         <div class="addr-field">
-          <label for="addrPhone">เบอร์โทรศัพท์</label>
+          <label for="addrPhone">เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</label>
           <input type="tel" id="addrPhone" placeholder="0812345678" autocomplete="tel">
         </div>
         <div class="addr-field">
-          <label for="addrLine1">ที่อยู่</label>
-          <input type="text" id="addrLine1" placeholder="บ้านเลขที่ ถนน ซอย" autocomplete="address-line1">
+          <label for="addrLine1">เธ—เธตเนเธญเธขเธนเน</label>
+          <input type="text" id="addrLine1" placeholder="เธเนเธฒเธเน€เธฅเธเธ—เธตเน เธ–เธเธ เธเธญเธข" autocomplete="address-line1">
         </div>
         <div class="addr-field">
-          <label for="addrLine2">ตำบล / อำเภอ / จังหวัด</label>
-          <input type="text" id="addrLine2" placeholder="ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" autocomplete="address-line2">
+          <label for="addrLine2">เธ•เธณเธเธฅ / เธญเธณเน€เธ เธญ / เธเธฑเธเธซเธงเธฑเธ”</label>
+          <input type="text" id="addrLine2" placeholder="เธ•เธณเธเธฅ เธญเธณเน€เธ เธญ เธเธฑเธเธซเธงเธฑเธ” เธฃเธซเธฑเธชเนเธเธฃเธฉเธ“เธตเธขเน" autocomplete="address-line2">
         </div>
       </div>
 
       <!-- Default Toggle -->
       <div class="addr-default-row">
-        <span class="addr-default-label">ตั้งเป็นที่อยู่เริ่มต้น</span>
+        <span class="addr-default-label">เธ•เธฑเนเธเน€เธเนเธเธ—เธตเนเธญเธขเธนเนเน€เธฃเธดเนเธกเธ•เนเธ</span>
         <label class="notify-switch">
           <input type="checkbox" id="addrIsDefault">
           <span class="notify-slider"></span>
@@ -117,8 +117,8 @@
 
       <!-- Action Buttons -->
       <div class="addr-modal-actions">
-        <button type="button" class="addr-btn-cancel" id="addrCancelBtn">ยกเลิก</button>
-        <button type="button" class="addr-btn-save" id="addrSaveBtn">บันทึก</button>
+        <button type="button" class="addr-btn-cancel" id="addrCancelBtn">เธขเธเน€เธฅเธดเธ</button>
+        <button type="button" class="addr-btn-save" id="addrSaveBtn">เธเธฑเธเธ—เธถเธ</button>
       </div>
     </div>
   </div>

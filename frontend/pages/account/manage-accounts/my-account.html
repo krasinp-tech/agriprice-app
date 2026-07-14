@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
 
     <script src="../../../js/auth/guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="my_account">บัญชีของฉัน | AGRIPRICE</title>
+  <title data-i18n="my_account">เธเธฑเธเธเธตเธเธญเธเธเธฑเธ | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -32,22 +32,22 @@
   <main class="ma-page">
     <section class="ma-shell">
       <header class="ma-header">
-      <a class="ma-back" href="../account.html" aria-label="ย้อนกลับไปหน้าจัดการบัญชี" data-i18n-aria-label="back_to_manage_account">
+      <a class="ma-back" href="../account.html" aria-label="เธขเนเธญเธเธเธฅเธฑเธเนเธเธซเธเนเธฒเธเธฑเธ”เธเธฒเธฃเธเธฑเธเธเธต" data-i18n-aria-label="back_to_manage_account">
         <span class="material-icons-outlined">chevron_left</span>
       </a>
       <div>
-        <h1 class="ma-title" data-i18n="my_account">บัญชีของฉัน</h1>
-        <p class="ma-subtitle" data-i18n="manage_profile_desc">จัดการข้อมูลส่วนตัว ความปลอดภัย และสถานะบัญชีของคุณ</p>
+        <h1 class="ma-title" data-i18n="my_account">เธเธฑเธเธเธตเธเธญเธเธเธฑเธ</h1>
+        <p class="ma-subtitle" data-i18n="manage_profile_desc">เธเธฑเธ”เธเธฒเธฃเธเนเธญเธกเธนเธฅเธชเนเธงเธเธ•เธฑเธง เธเธงเธฒเธกเธเธฅเธญเธ”เธ เธฑเธข เนเธฅเธฐเธชเธ–เธฒเธเธฐเธเธฑเธเธเธตเธเธญเธเธเธธเธ“</p>
       </div>
       </header>
 
-      <section class="ma-card" aria-label="ข้อมูลบัญชี">
+      <section class="ma-card" aria-label="เธเนเธญเธกเธนเธฅเธเธฑเธเธเธต">
 
-        <h2 class="ma-card-title" data-i18n="account_info">ข้อมูลบัญชี</h2>
+        <h2 class="ma-card-title" data-i18n="account_info">เธเนเธญเธกเธนเธฅเธเธฑเธเธเธต</h2>
 
         <a class="ma-row" href="edit-phone.html">
           <div class="ma-row-copy">
-            <div class="ma-label" data-i18n="phone_number">หมายเลขโทรศัพท์</div>
+            <div class="ma-label" data-i18n="phone_number">เธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เน</div>
             <div class="ma-value" id="phoneValue">+66*******361</div>
           </div>
           <span class="material-icons-outlined ma-chevron">chevron_right</span>
@@ -55,24 +55,24 @@
 
         <a class="ma-row" href="edit-email.html">
           <div class="ma-row-copy">
-            <div class="ma-label" data-i18n="email">อีเมล</div>
-            <div class="ma-value" id="emailValue" data-i18n="no_email">ยังไม่ได้เพิ่มอีเมล</div>
+            <div class="ma-label" data-i18n="email">เธญเธตเน€เธกเธฅ</div>
+            <div class="ma-value" id="emailValue" data-i18n="no_email">เธขเธฑเธเนเธกเนเนเธ”เนเน€เธเธดเนเธกเธญเธตเน€เธกเธฅ</div>
           </div>
           <span class="material-icons-outlined ma-chevron">chevron_right</span>
         </a>
 
         <a class="ma-row" href="edit-birthdate.html">
           <div class="ma-row-copy">
-            <div class="ma-label" data-i18n="birth_date">วันเดือนปีเกิด</div>
-            <div class="ma-value" id="birthDateValue">1 ม.ค. ค.ศ. 2004</div>
+            <div class="ma-label" data-i18n="birth_date">เธงเธฑเธเน€เธ”เธทเธญเธเธเธตเน€เธเธดเธ”</div>
+            <div class="ma-value" id="birthDateValue">1 เธก.เธ. เธ.เธจ. 2004</div>
           </div>
           <span class="material-icons-outlined ma-chevron">chevron_right</span>
         </a>
 
         <a class="ma-row" href="change-password.html">
           <div class="ma-row-copy">
-            <div class="ma-label" data-i18n="password">รหัสผ่าน</div>
-            <div class="ma-value" data-i18n="change_password">เปลี่ยนรหัสผ่าน</div>
+            <div class="ma-label" data-i18n="password">เธฃเธซเธฑเธชเธเนเธฒเธ</div>
+            <div class="ma-value" data-i18n="change_password">เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธ</div>
           </div>
           <span class="material-icons-outlined ma-chevron">chevron_right</span>
         </a>
@@ -81,8 +81,8 @@
 
         <a class="ma-row ma-row-danger" href="deactivate-account.html">
           <div class="ma-row-copy">
-            <div class="ma-label" data-i18n="delete_account">ปิดใช้งานหรือลบบัญชี</div>
-            <div class="ma-value" id="accountStateValue" data-i18n="active_status">ใช้งานปกติ</div>
+            <div class="ma-label" data-i18n="delete_account">เธเธดเธ”เนเธเนเธเธฒเธเธซเธฃเธทเธญเธฅเธเธเธฑเธเธเธต</div>
+            <div class="ma-value" id="accountStateValue" data-i18n="active_status">เนเธเนเธเธฒเธเธเธเธ•เธด</div>
           </div>
           <span class="material-icons-outlined ma-chevron">chevron_right</span>
         </a>

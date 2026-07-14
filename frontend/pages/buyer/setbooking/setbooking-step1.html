@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
@@ -8,10 +8,10 @@
     <script src="../../../js/auth/guard.js"></script>
     <script src="../../../js/components/i18n.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="add_purchase_title">เพิ่มการรับซื้อผลผลิต | AGRIPRICE</title>
+  <title data-i18n="add_purchase_title">เน€เธเธดเนเธกเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญเธเธฅเธเธฅเธดเธ• | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -31,7 +31,7 @@
 
   <script>
     window.AuthGuard.requireLogin();
-    // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
+    // เธ•เธฃเธงเธเธชเธญเธ role โ€” เน€เธเธเธฒเธฐ buyer เน€เธ—เนเธฒเธเธฑเนเธ
     (function() {
       try {
         var u = JSON.parse(localStorage.getItem('user') || 'null');
@@ -50,13 +50,13 @@
 
     <!-- Header -->
     <header class="topbar">
-      <button class="back-btn" type="button" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../myprofile.html'); else window.location.href='../myprofile.html';">
+      <button class="back-btn" type="button" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../myprofile.html'); else window.location.href='../myprofile.html';">
         <span class="material-icons-outlined">chevron_left</span>
       </button>
 
       <div class="topbar-center">
-        <h1 class="title" data-i18n="add_purchase_title">เพิ่มการรับซื้อผลผลิต</h1>
-        <div class="step-indicator" aria-label="ขั้นตอน 1 จาก 2" data-i18n-aria-label="step_1_of_2">
+        <h1 class="title" data-i18n="add_purchase_title">เน€เธเธดเนเธกเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญเธเธฅเธเธฅเธดเธ•</h1>
+        <div class="step-indicator" aria-label="เธเธฑเนเธเธ•เธญเธ 1 เธเธฒเธ 2" data-i18n-aria-label="step_1_of_2">
           <span class="dot active" aria-hidden="true"></span>
           <span class="line" aria-hidden="true"></span>
           <span class="dot" aria-hidden="true"></span>
@@ -69,39 +69,39 @@
       <section class="card">
         <!-- Product Search -->
         <div class="field">
-          <label class="label" for="productInput" data-i18n="search_product_label">ค้นหาผลผลิต</label>
+          <label class="label" for="productInput" data-i18n="search_product_label">เธเนเธเธซเธฒเธเธฅเธเธฅเธดเธ•</label>
 
           <div class="combo" data-combo="product">
-            <input id="productInput" class="combo-input" type="text" placeholder="เช่น ทุเรียน หมอนทอง" data-i18n-placeholder="product_placeholder" autocomplete="off" />
-            <button class="combo-btn" type="button" aria-label="เปิดรายการผลผลิต" data-i18n-aria-label="open_product_list">
+            <input id="productInput" class="combo-input" type="text" placeholder="เน€เธเนเธ เธ—เธธเน€เธฃเธตเธขเธ เธซเธกเธญเธเธ—เธญเธ" data-i18n-placeholder="product_placeholder" autocomplete="off" />
+            <button class="combo-btn" type="button" aria-label="เน€เธเธดเธ”เธฃเธฒเธขเธเธฒเธฃเธเธฅเธเธฅเธดเธ•" data-i18n-aria-label="open_product_list">
               <span class="material-icons-outlined">expand_more</span>
             </button>
 
-            <div class="combo-menu" role="listbox" aria-label="รายการผลผลิต" data-i18n-aria-label="product_list_label"></div>
+            <div class="combo-menu" role="listbox" aria-label="เธฃเธฒเธขเธเธฒเธฃเธเธฅเธเธฅเธดเธ•" data-i18n-aria-label="product_list_label"></div>
           </div>
 
-          <p class="hint" id="productHint" data-i18n="product_hint">พิมพ์เพื่อค้นหา หรือกดลูกศรเพื่อเลือก</p>
+          <p class="hint" id="productHint" data-i18n="product_hint">เธเธดเธกเธเนเน€เธเธทเนเธญเธเนเธเธซเธฒ เธซเธฃเธทเธญเธเธ”เธฅเธนเธเธจเธฃเน€เธเธทเนเธญเน€เธฅเธทเธญเธ</p>
         </div>
 
         <!-- Variety Search -->
         <div class="field">
-          <label class="label" for="varietyInput" data-i18n="search_variety_label">ค้นหาผลผลิตสายพันธุ์</label>
+          <label class="label" for="varietyInput" data-i18n="search_variety_label">เธเนเธเธซเธฒเธเธฅเธเธฅเธดเธ•เธชเธฒเธขเธเธฑเธเธเธธเน</label>
 
           <div class="combo disabled" data-combo="variety" aria-disabled="true">
-            <input id="varietyInput" class="combo-input" type="text" placeholder="ค้นหาหรือกรอกสายพันธุ์" data-i18n-placeholder="variety_placeholder" autocomplete="off" disabled />
-            <button class="combo-btn" type="button" aria-label="เปิดรายการสายพันธุ์" data-i18n-aria-label="open_variety_list" disabled>
+            <input id="varietyInput" class="combo-input" type="text" placeholder="เธเนเธเธซเธฒเธซเธฃเธทเธญเธเธฃเธญเธเธชเธฒเธขเธเธฑเธเธเธธเน" data-i18n-placeholder="variety_placeholder" autocomplete="off" disabled />
+            <button class="combo-btn" type="button" aria-label="เน€เธเธดเธ”เธฃเธฒเธขเธเธฒเธฃเธชเธฒเธขเธเธฑเธเธเธธเน" data-i18n-aria-label="open_variety_list" disabled>
               <span class="material-icons-outlined">expand_more</span>
             </button>
 
-            <div class="combo-menu" role="listbox" aria-label="รายการสายพันธุ์" data-i18n-aria-label="variety_list_label"></div>
+            <div class="combo-menu" role="listbox" aria-label="เธฃเธฒเธขเธเธฒเธฃเธชเธฒเธขเธเธฑเธเธเธธเน" data-i18n-aria-label="variety_list_label"></div>
           </div>
 
-          <p class="hint" data-i18n="variety_hint">เลือก “ผลผลิต” ก่อน เพื่อเปิดการค้นหาสายพันธุ์</p>
+          <p class="hint" data-i18n="variety_hint">เน€เธฅเธทเธญเธ โ€เธเธฅเธเธฅเธดเธ•โ€ เธเนเธญเธ เน€เธเธทเนเธญเน€เธเธดเธ”เธเธฒเธฃเธเนเธเธซเธฒเธชเธฒเธขเธเธฑเธเธเธธเน</p>
         </div>
 
         <!-- Details -->
         <div class="field">
-          <label class="label" for="details" data-i18n="more_details_label">รายละเอียดเพิ่มเติม</label>
+          <label class="label" for="details" data-i18n="more_details_label">เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เน€เธเธดเนเธกเน€เธ•เธดเธก</label>
           <div class="textarea-wrap">
             <textarea id="details" class="textarea" rows="5" placeholder=""></textarea>
           </div>
@@ -109,7 +109,7 @@
 
         <!-- Grade & Price -->
         <div class="field">
-          <label class="label" data-i18n="grade_and_price_label">เกรดและราคา</label>
+          <label class="label" data-i18n="grade_and_price_label">เน€เธเธฃเธ”เนเธฅเธฐเธฃเธฒเธเธฒ</label>
 
           <div class="grade-row" id="gradeRow">
             <!-- cards injected by JS -->
@@ -117,7 +117,7 @@
         </div>
       </section>
 
-      <button class="primary-btn" id="nextBtn" type="button" data-i18n="next">ถัดไป</button>
+      <button class="primary-btn" id="nextBtn" type="button" data-i18n="next">เธ–เธฑเธ”เนเธ</button>
 
       <!-- debug (optional) -->
       <pre class="debug" id="debugBox" hidden></pre>
@@ -126,37 +126,37 @@
 
   <!-- Modal: Add Grade -->
   <div class="modal-overlay" id="gradeModal" inert>
-    <div class="modal" role="dialog" aria-modal="true" aria-label="เพิ่มเกรดใหม่" data-i18n-aria-label="add_new_grade_title">
-      <button class="modal-title-btn" type="button" id="modalTitleBtn" aria-label="เพิ่มเกรดใหม่" data-i18n-aria-label="add_new_grade_title" data-i18n="add_new_grade_title">
-        เพิ่มเกรดใหม่
+    <div class="modal" role="dialog" aria-modal="true" aria-label="เน€เธเธดเนเธกเน€เธเธฃเธ”เนเธซเธกเน" data-i18n-aria-label="add_new_grade_title">
+      <button class="modal-title-btn" type="button" id="modalTitleBtn" aria-label="เน€เธเธดเนเธกเน€เธเธฃเธ”เนเธซเธกเน" data-i18n-aria-label="add_new_grade_title" data-i18n="add_new_grade_title">
+        เน€เธเธดเนเธกเน€เธเธฃเธ”เนเธซเธกเน
       </button>
 
       <div class="modal-body">
         <div class="field">
-          <label class="label" data-i18n="grade_type_label">ประเภทเกรด</label>
+          <label class="label" data-i18n="grade_type_label">เธเธฃเธฐเน€เธ เธ—เน€เธเธฃเธ”</label>
           <div class="grade-grid" id="gradeGrid">
             <!-- buttons injected by JS -->
           </div>
         </div>
 
         <div class="field">
-          <label class="label" for="customGrade" data-i18n="other_grade_label">อื่นๆ (กรอกเอง)</label>
-          <input id="customGrade" class="text-input" type="text" placeholder="ตัวอย่างเช่น คาโต้" data-i18n-placeholder="custom_grade_placeholder" />
-          <p class="hint" data-i18n="custom_grade_hint">ถ้ากรอกช่องนี้ จะใช้ค่านี้แทนการกดปุ่มประเภทเกรด</p>
+          <label class="label" for="customGrade" data-i18n="other_grade_label">เธญเธทเนเธเน (เธเธฃเธญเธเน€เธญเธ)</label>
+          <input id="customGrade" class="text-input" type="text" placeholder="เธ•เธฑเธงเธญเธขเนเธฒเธเน€เธเนเธ เธเธฒเนเธ•เน" data-i18n-placeholder="custom_grade_placeholder" />
+          <p class="hint" data-i18n="custom_grade_hint">เธ–เนเธฒเธเธฃเธญเธเธเนเธญเธเธเธตเน เธเธฐเนเธเนเธเนเธฒเธเธตเนเนเธ—เธเธเธฒเธฃเธเธ”เธเธธเนเธกเธเธฃเธฐเน€เธ เธ—เน€เธเธฃเธ”</p>
         </div>
 
         <div class="field">
-          <label class="label" for="unitPrice" data-i18n="unit_price_label">ราคาต่อหน่วย</label>
+          <label class="label" for="unitPrice" data-i18n="unit_price_label">เธฃเธฒเธเธฒเธ•เนเธญเธซเธเนเธงเธข</label>
           <div class="price-input">
             <input id="unitPrice" class="price-number" type="number" inputmode="numeric" min="0" step="1" placeholder="0" />
-            <span class="price-suffix" data-i18n="baht_per_kg">บาท/กก.</span>
+            <span class="price-suffix" data-i18n="baht_per_kg">เธเธฒเธ—/เธเธ.</span>
           </div>
         </div>
       </div>
 
       <div class="modal-actions">
-        <button class="btn ghost" id="cancelModalBtn" type="button" data-i18n="cancel_btn">ยกเลิก</button>
-        <button class="btn solid" id="saveModalBtn" type="button" data-i18n="save_btn">บันทึก</button>
+        <button class="btn ghost" id="cancelModalBtn" type="button" data-i18n="cancel_btn">เธขเธเน€เธฅเธดเธ</button>
+        <button class="btn solid" id="saveModalBtn" type="button" data-i18n="save_btn">เธเธฑเธเธ—เธถเธ</button>
       </div>
     </div>
   </div>

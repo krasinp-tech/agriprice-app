@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 
 <head>
@@ -9,7 +9,7 @@
     <script src="../../js/auth/guard.js"></script>
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="manage_account">จัดการบัญชี</title>
+  <title data-i18n="manage_account">เธเธฑเธ”เธเธฒเธฃเธเธฑเธเธเธต</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="../../css/dark-mode-patch.css" />
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -41,12 +41,12 @@
     <div class="acc-hero" aria-hidden="true"></div>
 
     <section class="acc-content">
-      <h1 class="acc-title" data-i18n="manage_account">จัดการบัญชี</h1>
+      <h1 class="acc-title" data-i18n="manage_account">เธเธฑเธ”เธเธฒเธฃเธเธฑเธเธเธต</h1>
 
-      <section class="profile-card" aria-label="โปรไฟล์" data-i18n-aria-label="tab_about">
+      <section class="profile-card" aria-label="เนเธเธฃเนเธเธฅเน" data-i18n-aria-label="tab_about">
         <div class="avatar-wrap">
-          <img id="avatarImg" class="avatar" src="../../assets/images/default.png" alt="รูปโปรไฟล์" data-i18n-alt="profile_title" />
-          <button class="avatar-edit" id="avatarEditBtn" type="button" aria-label="แก้ไขรูปโปรไฟล์"
+          <img id="avatarImg" class="avatar" src="../../assets/images/default.png" alt="เธฃเธนเธเนเธเธฃเนเธเธฅเน" data-i18n-alt="profile_title" />
+          <button class="avatar-edit" id="avatarEditBtn" type="button" aria-label="เนเธเนเนเธเธฃเธนเธเนเธเธฃเนเธเธฅเน"
             data-i18n-aria-label="edit_profile_title">
             <span class="material-icons-outlined">edit</span>
           </button>
@@ -68,33 +68,33 @@
             <div class="stat-num" id="statFollowing">
               <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
             </div>
-            <div class="stat-label" data-i18n="following">กำลังติดตาม</div>
+            <div class="stat-label" data-i18n="following">เธเธณเธฅเธฑเธเธ•เธดเธ”เธ•เธฒเธก</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat">
             <div class="stat-num" id="statFollowers">
               <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
             </div>
-            <div class="stat-label" data-i18n="followers">ผู้ติดตาม</div>
+            <div class="stat-label" data-i18n="followers">เธเธนเนเธ•เธดเธ”เธ•เธฒเธก</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat">
             <div class="stat-num" id="statPros">
               <div class="shimmer" style="width: 24px; height: 18px; border-radius: 4px; margin: 0 auto;"></div>
             </div>
-            <div class="stat-label" data-i18n="pros">รายการโปรด</div>
+            <div class="stat-label" data-i18n="pros">เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”</div>
           </div>
         </div>
       </section>
 
-      <section class="menu-card" aria-label="เมนูบัญชี">
+      <section class="menu-card" aria-label="เน€เธกเธเธนเธเธฑเธเธเธต">
         <a class="menu-item" href="manage-accounts/my-account.html">
           <span class="menu-icon-wrap">
             <span class="material-icons-outlined mi">person_outline</span>
           </span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="my_account">บัญชีของฉัน</div>
-            <div class="menu-sub" data-i18n="manage_profile">จัดการข้อมูลส่วนตัว</div>
+            <div class="menu-title" data-i18n="my_account">เธเธฑเธเธเธตเธเธญเธเธเธฑเธ</div>
+            <div class="menu-sub" data-i18n="manage_profile">เธเธฑเธ”เธเธฒเธฃเธเนเธญเธกเธนเธฅเธชเนเธงเธเธ•เธฑเธง</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -106,8 +106,8 @@
             <span class="material-icons-outlined mi">dark_mode</span>
           </span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="dark_mode">โหมดมืด</div>
-            <div class="menu-sub" id="darkModeStatus" data-i18n="off">ปิดอยู่</div>
+            <div class="menu-title" data-i18n="dark_mode">เนเธซเธกเธ”เธกเธทเธ”</div>
+            <div class="menu-sub" id="darkModeStatus" data-i18n="off">เธเธดเธ”เธญเธขเธนเน</div>
           </div>
           <div class="toggle-switch">
             <input type="checkbox" id="darkModeCheck" style="display:none;">
@@ -121,8 +121,8 @@
         <a class="menu-item" id="buyerUpgradeLink" href="../account/subscription.html" style="display:none;">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">workspace_premium</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="upgrade_pro">อัปเกรดเป็นโปร</div>
-            <div class="menu-sub" data-i18n="upgrade_pro_desc">ปลดล็อกฟีเจอร์พรีเมียม</div>
+            <div class="menu-title" data-i18n="upgrade_pro">เธญเธฑเธเน€เธเธฃเธ”เน€เธเนเธเนเธเธฃ</div>
+            <div class="menu-sub" data-i18n="upgrade_pro_desc">เธเธฅเธ”เธฅเนเธญเธเธเธตเน€เธเธญเธฃเนเธเธฃเธตเน€เธกเธตเธขเธก</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -130,8 +130,8 @@
         <a class="menu-item" id="buyerDashboardLink" href="../buyer/Dashboard/Dashboard1.html" style="display:none;">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">dashboard</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="dashboard">แดชบอร์ด</div>
-            <div class="menu-sub" data-i18n="dashboard_desc">ดูข้อมูลวิเคราะห์และการจอง</div>
+            <div class="menu-title" data-i18n="dashboard">เนเธ”เธเธเธญเธฃเนเธ”</div>
+            <div class="menu-sub" data-i18n="dashboard_desc">เธ”เธนเธเนเธญเธกเธนเธฅเธงเธดเน€เธเธฃเธฒเธฐเธซเนเนเธฅเธฐเธเธฒเธฃเธเธญเธ</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -139,8 +139,8 @@
         <a class="menu-item" id="buyerProfileLink" href="../buyer/myprofile.html" style="display:none;">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">badge</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="manage_myprofile">จัดการโปรไฟล์ของฉัน</div>
-            <div class="menu-sub" data-i18n="edit_myprofile">แก้ไขข้อมูลหน้าโปรไฟล์ของฉัน</div>
+            <div class="menu-title" data-i18n="manage_myprofile">เธเธฑเธ”เธเธฒเธฃเนเธเธฃเนเธเธฅเนเธเธญเธเธเธฑเธ</div>
+            <div class="menu-sub" data-i18n="edit_myprofile">เนเธเนเนเธเธเนเธญเธกเธนเธฅเธซเธเนเธฒเนเธเธฃเนเธเธฅเนเธเธญเธเธเธฑเธ</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -148,8 +148,8 @@
         <a class="menu-item" href="manage-notifications/setup-notifications.html">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">notifications_none</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="notifications">การแจ้งเตือน</div>
-            <div class="menu-sub" data-i18n="notifications_desc">ตั้งค่าการแจ้งเตือน</div>
+            <div class="menu-title" data-i18n="notifications">เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ</div>
+            <div class="menu-sub" data-i18n="notifications_desc">เธ•เธฑเนเธเธเนเธฒเธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -157,7 +157,7 @@
         <a class="menu-item" href="manage-language/language.html">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">language</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="language_title">ภาษา</div>
+            <div class="menu-title" data-i18n="language_title">เธ เธฒเธฉเธฒ</div>
             <div class="menu-sub" id="currentLanguageName"></div>
             <script>
               // Show current language name in menu-sub
@@ -167,8 +167,8 @@
                 } else if (window.i18nT) {
                   // fallback: try to use i18nT
                   const lang = localStorage.getItem('lang') || 'th';
-                  const map = { th: 'ไทย', en: 'English', zh: '中文' };
-                  document.getElementById('currentLanguageName').textContent = map[lang] || 'ไทย';
+                  const map = { th: 'เนเธ—เธข', en: 'English', zh: 'ไธญๆ–' };
+                  document.getElementById('currentLanguageName').textContent = map[lang] || 'เนเธ—เธข';
                 }
                 window.addEventListener('storage', function (e) {
                   if (e.key === 'lang') {
@@ -176,8 +176,8 @@
                     if (window.LANGUAGE_LABELS && window.getCurrentLang) {
                       document.getElementById('currentLanguageName').textContent = LANGUAGE_LABELS[getCurrentLang()];
                     } else {
-                      const map = { th: 'ไทย', en: 'English', zh: '中文' };
-                      document.getElementById('currentLanguageName').textContent = map[lang] || 'ไทย';
+                      const map = { th: 'เนเธ—เธข', en: 'English', zh: 'ไธญๆ–' };
+                      document.getElementById('currentLanguageName').textContent = map[lang] || 'เนเธ—เธข';
                     }
                   }
                 });
@@ -188,12 +188,12 @@
         </a>
       </section>
 
-      <section class="menu-card" aria-label="ข้อมูลเพิ่มเติม">
+      <section class="menu-card" aria-label="เธเนเธญเธกเธนเธฅเน€เธเธดเนเธกเน€เธ•เธดเธก">
         <a class="menu-item" href="manage-address/address-book.html">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">location_on</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="address">สมุดที่อยู่</div>
-            <div class="menu-sub" data-i18n="address_desc">จัดการที่อยู่จัดส่ง</div>
+            <div class="menu-title" data-i18n="address">เธชเธกเธธเธ”เธ—เธตเนเธญเธขเธนเน</div>
+            <div class="menu-sub" data-i18n="address_desc">เธเธฑเธ”เธเธฒเธฃเธ—เธตเนเธญเธขเธนเนเธเธฑเธ”เธชเนเธ</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
@@ -201,17 +201,17 @@
         <a class="menu-item" href="manage-terms/terms.html">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">description</span></span>
           <div class="menu-text">
-            <div class="menu-title" data-i18n="terms">ข้อกำหนดและเงื่อนไข</div>
-            <div class="menu-sub" data-i18n="terms_desc">นโยบายความเป็นส่วนตัว</div>
+            <div class="menu-title" data-i18n="terms">เธเนเธญเธเธณเธซเธเธ”เนเธฅเธฐเน€เธเธทเนเธญเธเนเธ</div>
+            <div class="menu-sub" data-i18n="terms_desc">เธเนเธขเธเธฒเธขเธเธงเธฒเธกเน€เธเนเธเธชเนเธงเธเธ•เธฑเธง</div>
           </div>
           <span class="material-icons-outlined chev">chevron_right</span>
         </a>
       </section>
 
-      <section class="menu-card" aria-label="ออกจากระบบ">
+      <section class="menu-card" aria-label="เธญเธญเธเธเธฒเธเธฃเธฐเธเธ">
 
         <button class="logout-item" id="logoutBtn" type="button">
-          <span class="logout-text" data-i18n="logout">ออกจากระบบ</span>
+          <span class="logout-text" data-i18n="logout">เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</span>
           <span class="material-icons-outlined logout-icon">logout</span>
         </button>
       </section>
@@ -224,24 +224,24 @@
     <nav class="bottom-nav" id="bottomNav" style="view-transition-name: main-navigation;">
       <a href="../../index.html" class="bottom-nav-item" data-page="home">
         <span class="material-icons-outlined">home</span>
-        <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+        <span class="nav-label" data-i18n="nav_home">เธซเธเนเธฒเนเธฃเธ</span>
       </a>
       <a href="../../pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
         <span class="material-icons-outlined">chat_bubble_outline</span>
         <span class="nav-badge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
-        <span class="nav-label" data-i18n="nav_chat">แชท</span>
+        <span class="nav-label" data-i18n="nav_chat">เนเธเธ—</span>
       </a>
       <a href="../../pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking">
         <span class="material-icons-outlined">local_mall</span>
-        <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+        <span class="nav-label" data-i18n="nav_booking_history">เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธเธญเธ</span>
       </a>
       <a href="../../pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
         <span class="material-icons-outlined">notifications_none</span>
-        <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+        <span class="nav-label" data-i18n="nav_notifications">เนเธเนเธเน€เธ•เธทเธญเธ</span>
       </a>
       <a href="../../pages/account/account.html" class="bottom-nav-item" data-page="account">
         <span class="material-icons-outlined">person_outline</span>
-        <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+        <span class="nav-label" data-i18n="nav_account">เธเธฑเธเธเธต</span>
       </a>
     </nav>
   </div>
@@ -250,13 +250,13 @@
     <div class="logout-modal-overlay"></div>
     <div class="logout-modal-content">
       <div class="logout-modal-icon"><span class="material-icons-outlined">logout</span></div>
-      <h2 class="logout-modal-title" data-i18n="logout_title">ออกจากระบบ</h2>
-      <p class="logout-modal-message" data-i18n="logout_msg">ต้องการออกจากระบบใช่หรือไม่?</p>
+      <h2 class="logout-modal-title" data-i18n="logout_title">เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</h2>
+      <p class="logout-modal-message" data-i18n="logout_msg">เธ•เนเธญเธเธเธฒเธฃเธญเธญเธเธเธฒเธเธฃเธฐเธเธเนเธเนเธซเธฃเธทเธญเนเธกเน?</p>
       <div class="logout-modal-actions">
         <button type="button" class="logout-modal-btn logout-modal-btn-cancel" id="logoutCancelBtn"><span
-            data-i18n="logout_no">ไม่ใช่</span></button>
+            data-i18n="logout_no">เนเธกเนเนเธเน</span></button>
         <button type="button" class="logout-modal-btn logout-modal-btn-confirm" id="logoutConfirmBtn"><span
-            data-i18n="logout_yes">ใช่</span></button>
+            data-i18n="logout_yes">เนเธเน</span></button>
       </div>
     </div>
   </div>

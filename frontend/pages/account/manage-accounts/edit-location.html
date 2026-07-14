@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
    
     <script src="../../../js/auth/guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
+  <title>เธฃเธฐเธเธธเธ•เธณเนเธซเธเนเธเธฅเนเธ | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +26,7 @@
   
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -84,23 +84,23 @@
       <button class="back-btn" data-back>
         <span class="material-icons-outlined">chevron_left</span>
       </button>
-      <h1 class="title">ปักหมุดตำแหน่งล้ง</h1>
+      <h1 class="title">เธเธฑเธเธซเธกเธธเธ”เธ•เธณเนเธซเธเนเธเธฅเนเธ</h1>
     </header>
 
     <div id="map"></div>
 
     <div class="info-card">
-      <div class="info-label">พิกัดปัจจุบันที่เลือก</div>
-      <div class="info-val" id="coordsText">กรุณาเลือกตำแหน่งบนแผนที่</div>
+      <div class="info-label">เธเธดเธเธฑเธ”เธเธฑเธเธเธธเธเธฑเธเธ—เธตเนเน€เธฅเธทเธญเธ</div>
+      <div class="info-val" id="coordsText">เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธ•เธณเนเธซเธเนเธเธเธเนเธเธเธ—เธตเน</div>
     </div>
 
     <button class="btn-gps" onclick="useCurrentLocation()">
       <span class="material-icons-outlined">my_location</span>
-      ใช้ตำแหน่งปัจจุบันของฉัน
+      เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธเธเธญเธเธเธฑเธ
     </button>
 
     <button class="btn-save" id="saveBtn" onclick="saveLocation()" disabled>
-      บันทึกตำแหน่งที่ตั้ง
+      เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธ—เธตเนเธ•เธฑเนเธ
     </button>
   </main>
 
@@ -135,10 +135,10 @@
     let selectedLat = null, selectedLng = null;
 
     async function init() {
-      // รอจนกว่า Config จะพร้อม
+      // เธฃเธญเธเธเธเธงเนเธฒ Config เธเธฐเธเธฃเนเธญเธก
       await window.APP_CONFIG_READY;
       
-      // พิกัดเริ่มต้น (กรุงเทพฯ หรือค่าที่เคยบันทึกไว้)
+      // เธเธดเธเธฑเธ”เน€เธฃเธดเนเธกเธ•เนเธ (เธเธฃเธธเธเน€เธ—เธเธฏ เธซเธฃเธทเธญเธเนเธฒเธ—เธตเนเน€เธเธขเธเธฑเธเธ—เธถเธเนเธงเน)
       let initialLat = 13.7563, initialLng = 100.5018;
       
       const store = window.AccountManageStore;
@@ -155,10 +155,10 @@
 
       map = L.map('map').setView([initialLat, initialLng], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: 'ยฉ OpenStreetMap contributors'
       }).addTo(map);
 
-      // สร้าง Marker ถ้ามีตำแหน่งเดิม
+      // เธชเธฃเนเธฒเธ Marker เธ–เนเธฒเธกเธตเธ•เธณเนเธซเธเนเธเน€เธ”เธดเธก
       if (selectedLat) {
         marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
         marker.on('dragend', function(e) {
@@ -169,7 +169,7 @@
         });
       }
 
-      // คลิกเพื่อปักหมุด
+      // เธเธฅเธดเธเน€เธเธทเนเธญเธเธฑเธเธซเธกเธธเธ”
       map.on('click', function(e) {
         const { lat, lng } = e.latlng;
         selectedLat = lat;
@@ -212,7 +212,7 @@
           }
           updateUI();
         }, err => {
-          const msg = 'ไม่สามารถดึงตำแหน่งได้ กรุณาลองเลือกในแผนที่แทน';
+          const msg = 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธฅเธญเธเน€เธฅเธทเธญเธเนเธเนเธเธเธ—เธตเนเนเธ—เธ';
           if (window.appNotify) window.appNotify(msg, 'error');
           else console.warn(msg);
         });
@@ -246,7 +246,7 @@
         }
         updateUI();
       } catch (_) {
-        const msg = 'ไม่สามารถดึงตำแหน่งได้ กรุณาลองเลือกในแผนที่แทน';
+        const msg = 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธฅเธญเธเน€เธฅเธทเธญเธเนเธเนเธเธเธ—เธตเนเนเธ—เธ';
         if (window.appNotify) window.appNotify(msg, 'error');
         else console.warn(msg);
       }
@@ -256,7 +256,7 @@
       if (!selectedLat || !selectedLng) return;
       
       const saveBtn = document.getElementById('saveBtn');
-      saveBtn.innerText = 'กำลังบันทึก...';
+      saveBtn.innerText = 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...';
       saveBtn.disabled = true;
 
       try {
@@ -277,21 +277,21 @@
         });
 
         if (res.ok) {
-          // อัปเดต store ทันที
+          // เธญเธฑเธเน€เธ”เธ• store เธ—เธฑเธเธ—เธต
           if (window.AccountManageStore) {
             await window.AccountManageStore.syncFromServer();
           }
-          const okMsg = 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
+          const okMsg = 'เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธฅเนเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง';
           if (window.appNotify) window.appNotify(okMsg, 'success');
           history.back();
         } else {
-          throw new Error('บันทึกไม่สำเร็จ');
+          throw new Error('เธเธฑเธเธ—เธถเธเนเธกเนเธชเธณเน€เธฃเนเธ');
         }
       } catch (err) {
-        const failMsg = 'เกิดข้อผิดพลาด: ' + err.message;
+        const failMsg = 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”: ' + err.message;
         if (window.appNotify) window.appNotify(failMsg, 'error');
         else console.error(failMsg);
-        saveBtn.innerText = 'บันทึกตำแหน่งที่ตั้ง';
+        saveBtn.innerText = 'เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธ—เธตเนเธ•เธฑเนเธ';
         saveBtn.disabled = false;
       }
     }

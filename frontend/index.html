@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -71,7 +71,7 @@
         (function () {
             localStorage.removeItem('agriprice_mock');
             localStorage.removeItem('agriprice_dashboard_demo');
-            const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+            const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', savedTheme);
             const bg = savedTheme === 'dark' ? '#0f1115' : '#F7F9FA';
             document.documentElement.style.backgroundColor = bg;
@@ -85,25 +85,25 @@
         <nav class="bottom-nav" id="bottomNav">
             <a href="home.html" class="bottom-nav-item active" data-page="home">
                 <span class="material-icons-outlined">home</span>
-                <span class="nav-label" data-i18n="nav_home">หน้าแรก</span>
+                <span class="nav-label" data-i18n="nav_home">เธซเธเนเธฒเนเธฃเธ</span>
             </a>
             <a href="pages/shared/chat.html" class="bottom-nav-item" data-page="chat" style="position:relative;">
                 <span class="material-icons-outlined">chat_bubble_outline</span>
                 <span class="nav-badge" id="shellChatBadge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
-                <span class="nav-label" data-i18n="nav_chat">แชท</span>
+                <span class="nav-label" data-i18n="nav_chat">เนเธเธ—</span>
             </a>
             <a href="pages/farmer/booking/booking.html" class="bottom-nav-item" data-page="booking" id="shellBookingBtn">
                 <span class="material-icons-outlined">local_mall</span>
-                <span class="nav-label" data-i18n="nav_booking_history">ประวัติการจอง</span>
+                <span class="nav-label" data-i18n="nav_booking_history">เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธเธญเธ</span>
             </a>
             <a href="pages/shared/notifications.html" class="bottom-nav-item" data-page="notifications">
                 <span class="material-icons-outlined">notifications_none</span>
                 <span class="nav-badge" id="shellNotiBadge" style="display:none;position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
-                <span class="nav-label" data-i18n="nav_notifications">แจ้งเตือน</span>
+                <span class="nav-label" data-i18n="nav_notifications">เนเธเนเธเน€เธ•เธทเธญเธ</span>
             </a>
             <a href="pages/account/account.html" class="bottom-nav-item" data-page="account">
                 <span class="material-icons-outlined">person_outline</span>
-                <span class="nav-label" data-i18n="nav_account">บัญชี</span>
+                <span class="nav-label" data-i18n="nav_account">เธเธฑเธเธเธต</span>
             </a>
         </nav>
     </div>
@@ -140,6 +140,14 @@
             return theme === 'dark' ? 'dark' : 'light';
         }
 
+        function getSystemShellTheme() {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function getPreferredShellTheme() {
+            return localStorage.getItem('agriprice_theme') || getSystemShellTheme();
+        }
+
         function applyShellTheme(theme, options = {}) {
             const nextTheme = normalizeShellTheme(theme);
             const bg = nextTheme === 'dark' ? '#0f1115' : '#F7F9FA';
@@ -155,12 +163,18 @@
             }
         }
 
-        applyShellTheme(localStorage.getItem('agriprice_theme') || 'light');
+        applyShellTheme(getPreferredShellTheme());
 
         window.addEventListener('storage', function(e) {
-            if (e.key === 'agriprice_theme') applyShellTheme(e.newValue || 'light');
+            if (e.key === 'agriprice_theme') applyShellTheme(e.newValue || getSystemShellTheme());
             if (e.key === 'lang' && window.i18nInit) window.i18nInit();
         });
+
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+                if (!localStorage.getItem('agriprice_theme')) applyShellTheme(getSystemShellTheme());
+            });
+        }
 
         window.addEventListener('message', function(e) {
             if (e.source !== iframe.contentWindow) return;

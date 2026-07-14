@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="edit_birthdate_title">แก้ไขวันเกิด | AGRIPRICE</title>
+  <title data-i18n="edit_birthdate_title">เนเธเนเนเธเธงเธฑเธเน€เธเธดเธ” | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -35,22 +35,22 @@
   <main class="detail-page">
     <section class="detail-shell">
       <header class="detail-header">
-        <a class="detail-back" href="my-account.html" aria-label="กลับไปบัญชีของฉัน" data-i18n-aria-label="back_to_account">
+        <a class="detail-back" href="my-account.html" aria-label="เธเธฅเธฑเธเนเธเธเธฑเธเธเธตเธเธญเธเธเธฑเธ" data-i18n-aria-label="back_to_account">
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title" data-i18n="edit_birthdate_title">แก้ไขวันเกิด</h1>
-          <p class="detail-subtitle" data-i18n="edit_birthdate_subtitle">อัปเดตวันเดือนปีเกิดที่ใช้ในบัญชีของคุณ</p>
+          <h1 class="detail-title" data-i18n="edit_birthdate_title">เนเธเนเนเธเธงเธฑเธเน€เธเธดเธ”</h1>
+          <p class="detail-subtitle" data-i18n="edit_birthdate_subtitle">เธญเธฑเธเน€เธ”เธ•เธงเธฑเธเน€เธ”เธทเธญเธเธเธตเน€เธเธดเธ”เธ—เธตเนเนเธเนเนเธเธเธฑเธเธเธตเธเธญเธเธเธธเธ“</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title" data-i18n="birth_date">วันเดือนปีเกิด</h2>
-        <p class="detail-note"><span data-i18n="current_birthdate">วันเกิดปัจจุบัน</span>: <strong id="currentBirthDate">1 ม.ค. 2004</strong></p>
+        <h2 class="detail-section-title" data-i18n="birth_date">เธงเธฑเธเน€เธ”เธทเธญเธเธเธตเน€เธเธดเธ”</h2>
+        <p class="detail-note"><span data-i18n="current_birthdate">เธงเธฑเธเน€เธเธดเธ”เธเธฑเธเธเธธเธเธฑเธ</span>: <strong id="currentBirthDate">1 เธก.เธ. 2004</strong></p>
 
         <form id="birthDateForm" class="detail-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="birthDateInput" data-i18n="birth_date">วันเดือนปีเกิด</label>
+            <label class="field-label" for="birthDateInput" data-i18n="birth_date">เธงเธฑเธเน€เธ”เธทเธญเธเธเธตเน€เธเธดเธ”</label>
             <input
               class="field-input"
               id="birthDateInput"
@@ -58,12 +58,12 @@
               type="date"
               required
             />
-            <p class="field-hint" id="birthDatePreview"><span data-i18n="selected_birthdate">วันที่เลือก</span>: -</p>
+            <p class="field-hint" id="birthDatePreview"><span data-i18n="selected_birthdate">เธงเธฑเธเธ—เธตเนเน€เธฅเธทเธญเธ</span>: -</p>
           </div>
 
           <div class="detail-actions">
-            <button type="submit" class="btn btn-primary" data-i18n="save_birthdate_btn">บันทึกวันเกิด</button>
-            <a class="btn btn-ghost" href="my-account.html" data-i18n="cancel_btn">ยกเลิก</a>
+            <button type="submit" class="btn btn-primary" data-i18n="save_birthdate_btn">เธเธฑเธเธ—เธถเธเธงเธฑเธเน€เธเธดเธ”</button>
+            <a class="btn btn-ghost" href="my-account.html" data-i18n="cancel_btn">เธขเธเน€เธฅเธดเธ</a>
           </div>
         </form>
 

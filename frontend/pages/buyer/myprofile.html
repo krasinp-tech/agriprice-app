@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -7,10 +7,10 @@
     <script src="../../js/auth/guard.js"></script>
     <script src="../../js/components/i18n.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="profile_title">โปรไฟล์ของฉัน - AGRIPRICE</title>
+    <title data-i18n="profile_title">เนเธเธฃเนเธเธฅเนเธเธญเธเธเธฑเธ - AGRIPRICE</title>
     <script>
         (function () {
-          const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+          const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
           document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
@@ -37,17 +37,17 @@
 <body>
 <!-- HERO -->
 <section class="profile-hero-section">
-    <button class="profile-back-btn" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../account/account.html'); else window.location.href='../account/account.html';" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
+    <button class="profile-back-btn" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../account/account.html'); else window.location.href='../account/account.html';" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
         <span class="material-icons-outlined">arrow_back</span>
     </button>
-    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="ภาพปก" data-i18n-alt="hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนภาพปก">
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="เธ เธฒเธเธเธ" data-i18n-alt="hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';" style="cursor: pointer;" title="เธเธฅเธดเธเน€เธเธทเนเธญเน€เธเธฅเธตเนเธขเธเธ เธฒเธเธเธ">
 </section>
 
 <!-- MAIN CONTENT CARD -->
 <div class="profile-content-card">
     <!-- Avatar (with edit button overlay) -->
-    <div class="profile-avatar-box" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
-        <img id="profileAvatar" src="../../assets/images/avatar-guest.svg" alt="รูปโปรไฟล์" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/avatar-guest.svg';">
+    <div class="profile-avatar-box" style="cursor: pointer;" title="เธเธฅเธดเธเน€เธเธทเนเธญเน€เธเธฅเธตเนเธขเธเธฃเธนเธเนเธเธฃเนเธเธฅเน">
+        <img id="profileAvatar" src="../../assets/images/avatar-guest.svg" alt="เธฃเธนเธเนเธเธฃเนเธเธฅเน" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/avatar-guest.svg';">
     </div>
 
     <!-- Name & Status -->
@@ -55,7 +55,7 @@
         <h2 class="profile-name" id="profileName"></h2>
         <div class="profile-tagline-text" id="profileTagline"></div>
         <div class="profile-status">
-            <span class="status-dot"></span> <span data-i18n="profile_online">ออนไลน์</span>
+            <span class="status-dot"></span> <span data-i18n="profile_online">เธญเธญเธเนเธฅเธเน</span>
         </div>
     </div>
 
@@ -63,11 +63,11 @@
     <div class="profile-stats-row">
         <div class="stat-item">
             <div id="followersCount" class="stat-value">-</div>
-            <div class="stat-label" data-i18n="profile_followers">ผู้ติดตาม</div>
+            <div class="stat-label" data-i18n="profile_followers">เธเธนเนเธ•เธดเธ”เธ•เธฒเธก</div>
         </div>
         <div class="stat-item">
             <div id="followingCount" class="stat-value">-</div>
-            <div class="stat-label" data-i18n="profile_following">กำลังติดตาม</div>
+            <div class="stat-label" data-i18n="profile_following">เธเธณเธฅเธฑเธเธ•เธดเธ”เธ•เธฒเธก</div>
         </div>
 
     </div>
@@ -76,42 +76,42 @@
     <div class="profile-action-row">
         <button class="btn-message" id="editAboutBtn" type="button">
             <span class="material-icons-outlined" style="font-size:20px;">edit</span>
-            <span data-i18n="profile_edit_btn">แก้ไขโปรไฟล์</span>
+            <span data-i18n="profile_edit_btn">เนเธเนเนเธเนเธเธฃเนเธเธฅเน</span>
         </button>
         <button class="btn-follow" id="addPurchaseBtn" type="button">
             <span class="material-icons-outlined" style="font-size:20px;">add_circle</span>
-            <span data-i18n="profile_add_purchase">+ เพิ่มการรับซื้อ</span>
+            <span data-i18n="profile_add_purchase">+ เน€เธเธดเนเธกเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญ</span>
         </button>
     </div>
 
     <!-- Tabs -->
     <div class="profile-tabs-scroll">
-        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เกี่ยวกับ</div>
-        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">ข้อมูลติดต่อ</div>
-        <div class="profile-tab" data-tab="services" data-i18n="tab_services">บริการ</div>
-        <div class="profile-tab" data-tab="location" data-i18n="tab_location">ที่อยู่</div>
+        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เน€เธเธตเนเธขเธงเธเธฑเธ</div>
+        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ</div>
+        <div class="profile-tab" data-tab="services" data-i18n="tab_services">เธเธฃเธดเธเธฒเธฃ</div>
+        <div class="profile-tab" data-tab="location" data-i18n="tab_location">เธ—เธตเนเธญเธขเธนเน</div>
     </div>
 
-    <!-- Tab: เกี่ยวกับ -->
+    <!-- Tab: เน€เธเธตเนเธขเธงเธเธฑเธ -->
     <div class="tab-panel-new active" id="tab-about">
         <p class="profile-about-text" id="aboutDesc"></p>
     </div>
 
-    <!-- Tab: ข้อมูลติดต่อ (Frame 15) -->
+    <!-- Tab: เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ (Frame 15) -->
     <div class="tab-panel-new" id="tab-contact">
         <div class="contact-list" id="contactList">
             <!-- Injected by JS -->
         </div>
     </div>
 
-    <!-- Tab: บริการ (Frame 16) -->
+    <!-- Tab: เธเธฃเธดเธเธฒเธฃ (Frame 16) -->
     <div class="tab-panel-new" id="tab-services">
         <div class="services-list" id="servicesList">
             <!-- Injected by JS -->
         </div>
     </div>
 
-    <!-- Tab: ที่อยู่ (Frame 17) -->
+    <!-- Tab: เธ—เธตเนเธญเธขเธนเน (Frame 17) -->
     <div class="tab-panel-new" id="tab-location">
         <div class="location-card" id="locationCard">
             <div class="location-header">
@@ -123,7 +123,7 @@
                     <div class="location-sub" id="addressLine2"></div>
                 </div>
                 <a id="mapLink" target="_blank" class="location-link" data-i18n="map_show">
-                    แสดงแผนที่
+                    เนเธชเธ”เธเนเธเธเธ—เธตเน
                 </a>
             </div>
             <div class="map-container">
@@ -133,7 +133,7 @@
     </div>
 
     <!-- Shared Purchase List (always visible across tabs) -->
-    <div class="products-list-title" data-i18n="purchase_list_title" style="margin-top: 24px;">รายการการรับซื้อ</div>
+    <div class="products-list-title" data-i18n="purchase_list_title" style="margin-top: 24px;">เธฃเธฒเธขเธเธฒเธฃเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญ</div>
     <div id="productListContainer"></div>
 </div>
 
@@ -149,7 +149,7 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content premium-modal">
         <div class="modal-header-premium">
-            <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
+            <h3 data-i18n="edit_profile_title">เนเธเนเนเธเนเธเธฃเนเธเธฅเน</h3>
             <button type="button" class="modal-close-btn" onclick="document.getElementById('editAboutModal').hidden = true;">
                 <span class="material-icons-outlined">close</span>
             </button>
@@ -159,15 +159,15 @@
         <div class="modal-tab-bar">
             <button type="button" class="modal-tab-btn active" data-modal-tab="general">
                 <span class="material-icons-outlined">storefront</span>
-                <span>ข้อมูลร้าน</span>
+                <span>เธเนเธญเธกเธนเธฅเธฃเนเธฒเธ</span>
             </button>
             <button type="button" class="modal-tab-btn" data-modal-tab="contact">
                 <span class="material-icons-outlined">contact_mail</span>
-                <span>ติดต่อ</span>
+                <span>เธ•เธดเธ”เธ•เนเธญ</span>
             </button>
             <button type="button" class="modal-tab-btn" data-modal-tab="services">
                 <span class="material-icons-outlined">room_service</span>
-                <span>บริการ & ที่อยู่</span>
+                <span>เธเธฃเธดเธเธฒเธฃ & เธ—เธตเนเธญเธขเธนเน</span>
             </button>
         </div>
 
@@ -176,23 +176,23 @@
             <div class="modal-tab-panel active" id="modal-panel-general">
                 <div class="form-group-premium">
                     <label data-i18n="shop_name">
-                        <span class="material-icons-outlined">store</span> ชื่อร้าน
+                        <span class="material-icons-outlined">store</span> เธเธทเนเธญเธฃเนเธฒเธ
                     </label>
-                    <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
+                    <input id="nameEditor" type="text" placeholder="เธเธทเนเธญเนเธเธฃเนเธเธฅเน" data-i18n-placeholder="tagline_placeholder">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="tagline_label">
-                        <span class="material-icons-outlined">subtitles</span> Tagline / คำอธิบายสั้น
+                        <span class="material-icons-outlined">subtitles</span> Tagline / เธเธณเธญเธเธดเธเธฒเธขเธชเธฑเนเธ
                     </label>
-                    <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint">
+                    <input id="taglineEditor" type="text" placeholder="เธฃเธฑเธเธเธทเนเธญเธเธฅเนเธกเนเธชเธ”เธ–เธถเธเธชเธงเธ โ€ข เนเธซเนเธเธฃเธดเธเธฒเธฃ 15 เธเธต" data-i18n-placeholder="tagline_hint">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="about_label">
-                        <span class="material-icons-outlined">info</span> รายละเอียดเกี่ยวกับร้าน
+                        <span class="material-icons-outlined">info</span> เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เน€เธเธตเนเธขเธงเธเธฑเธเธฃเนเธฒเธ
                     </label>
-                    <textarea id="aboutEditor" rows="4" placeholder="ระบุรายละเอียดเพิ่มเติมเกี่ยวกับร้านค้าของคุณ..."></textarea>
+                    <textarea id="aboutEditor" rows="4" placeholder="เธฃเธฐเธเธธเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เน€เธเธดเนเธกเน€เธ•เธดเธกเน€เธเธตเนเธขเธงเธเธฑเธเธฃเนเธฒเธเธเนเธฒเธเธญเธเธเธธเธ“..."></textarea>
                 </div>
             </div>
 
@@ -200,23 +200,23 @@
             <div class="modal-tab-panel" id="modal-panel-contact">
                 <div class="form-group-premium">
                     <label data-i18n="phone_label">
-                        <span class="material-icons-outlined">phone</span> โทรศัพท์
+                        <span class="material-icons-outlined">phone</span> เนเธ—เธฃเธจเธฑเธเธ—เน
                     </label>
-                    <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
+                    <input id="phoneEditor" type="text" placeholder="เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน" data-i18n-placeholder="phone_label">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="email_label">
-                        <span class="material-icons-outlined">email</span> อีเมล
+                        <span class="material-icons-outlined">email</span> เธญเธตเน€เธกเธฅ
                     </label>
-                    <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
+                    <input id="emailEditor" type="email" placeholder="เธญเธตเน€เธกเธฅ" data-i18n-placeholder="email_label">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="profile_link_label">
-                        <span class="material-icons-outlined">link</span> ลิงก์ติดต่ออื่นๆ
+                        <span class="material-icons-outlined">link</span> เธฅเธดเธเธเนเธ•เธดเธ”เธ•เนเธญเธญเธทเนเธเน
                     </label>
-                    <input id="linkEditor" type="url" placeholder="เว็บไซต์, Facebook หรือ LINE OA" data-i18n-placeholder="profile_link_placeholder">
+                    <input id="linkEditor" type="url" placeholder="เน€เธงเนเธเนเธเธ•เน, Facebook เธซเธฃเธทเธญ LINE OA" data-i18n-placeholder="profile_link_placeholder">
                 </div>
             </div>
 
@@ -224,47 +224,47 @@
             <div class="modal-tab-panel" id="modal-panel-services">
                 <div class="form-group-premium">
                     <label data-i18n="address_label">
-                        <span class="material-icons-outlined">location_on</span> ที่อยู่
+                        <span class="material-icons-outlined">location_on</span> เธ—เธตเนเธญเธขเธนเน
                     </label>
-                    <input id="addr1Editor" type="text" placeholder="ที่อยู่" data-i18n-placeholder="address_label">
+                    <input id="addr1Editor" type="text" placeholder="เธ—เธตเนเธญเธขเธนเน" data-i18n-placeholder="address_label">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="address_cont_label">
-                        <span class="material-icons-outlined">map</span> ที่อยู่ (ต่อ)
+                        <span class="material-icons-outlined">map</span> เธ—เธตเนเธญเธขเธนเน (เธ•เนเธญ)
                     </label>
-                    <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder">
+                    <input id="addr2Editor" type="text" placeholder="เธ•เธณเธเธฅ เธญเธณเน€เธ เธญ เธเธฑเธเธซเธงเธฑเธ”" data-i18n-placeholder="address_cont_placeholder">
                 </div>
 
                 <div class="form-group-premium">
-                    <label data-i18n="services_label">บริการของคุณ (เลือกได้หลายข้อ)</label>
+                    <label data-i18n="services_label">เธเธฃเธดเธเธฒเธฃเธเธญเธเธเธธเธ“ (เน€เธฅเธทเธญเธเนเธ”เนเธซเธฅเธฒเธขเธเนเธญ)</label>
                     <div id="servicesEditor" class="services-editor-grid">
                         <label class="service-checkbox-pill">
-                            <input type="checkbox" value="รับซื้อถึงสวน">
+                            <input type="checkbox" value="เธฃเธฑเธเธเธทเนเธญเธ–เธถเธเธชเธงเธ">
                             <span class="pill-box">
                                 <span class="material-icons-outlined icon">local_shipping</span>
-                                <span data-i18n="service_onsite">รับซื้อถึงสวน</span>
+                                <span data-i18n="service_onsite">เธฃเธฑเธเธเธทเนเธญเธ–เธถเธเธชเธงเธ</span>
                             </span>
                         </label>
                         <label class="service-checkbox-pill">
-                            <input type="checkbox" value="จ่ายเงินสด">
+                            <input type="checkbox" value="เธเนเธฒเธขเน€เธเธดเธเธชเธ”">
                             <span class="pill-box">
                                 <span class="material-icons-outlined icon">payments</span>
-                                <span data-i18n="service_cash">จ่ายเงินสด</span>
+                                <span data-i18n="service_cash">เธเนเธฒเธขเน€เธเธดเธเธชเธ”</span>
                             </span>
                         </label>
                         <label class="service-checkbox-pill">
-                            <input type="checkbox" value="จองคิวล่วงหน้า">
+                            <input type="checkbox" value="เธเธญเธเธเธดเธงเธฅเนเธงเธเธซเธเนเธฒ">
                             <span class="pill-box">
                                 <span class="material-icons-outlined icon">schedule</span>
-                                <span data-i18n="service_booking">จองคิวล่วงหน้า</span>
+                                <span data-i18n="service_booking">เธเธญเธเธเธดเธงเธฅเนเธงเธเธซเธเนเธฒ</span>
                             </span>
                         </label>
                         <label class="service-checkbox-pill">
-                            <input type="checkbox" value="มีตาชั่งมาตรฐาน">
+                            <input type="checkbox" value="เธกเธตเธ•เธฒเธเธฑเนเธเธกเธฒเธ•เธฃเธเธฒเธ">
                             <span class="pill-box">
                                 <span class="material-icons-outlined icon">scale</span>
-                                <span data-i18n="service_scale">มีตาชั่งมาตรฐาน</span>
+                                <span data-i18n="service_scale">เธกเธตเธ•เธฒเธเธฑเนเธเธกเธฒเธ•เธฃเธเธฒเธ</span>
                             </span>
                         </label>
                     </div>
@@ -272,17 +272,17 @@
 
                 <div class="form-group-premium">
                     <label data-i18n="map_pin_label">
-                        <span class="material-icons-outlined">pin_drop</span> พิกัดแผนที่
+                        <span class="material-icons-outlined">pin_drop</span> เธเธดเธเธฑเธ”เนเธเธเธ—เธตเน
                     </label>
                     <div id="mapPickerWrapper" style="margin-bottom: 15px;">
                         <button id="openMapPickerBtn" type="button" class="btn-outline map-picker-trigger">
                             <span class="material-icons-outlined">place</span>
-                            <span id="mapPickerStatusText" data-i18n="map_picker_btn">เลือกตำแหน่งบนแผนที่...</span>
+                            <span id="mapPickerStatusText" data-i18n="map_picker_btn">เน€เธฅเธทเธญเธเธ•เธณเนเธซเธเนเธเธเธเนเธเธเธ—เธตเน...</span>
                         </button>
                         <div id="mapPickerContainer" style="display: none; margin-top: 10px;">
                             <button id="getCurrentLocationBtn" type="button" class="btn-outline current-location-btn">
                                 <span class="material-icons-outlined">my_location</span>
-                                <span data-i18n="current_location_btn">ใช้ตำแหน่งปัจจุบันของฉัน</span>
+                                <span data-i18n="current_location_btn">เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธเธเธญเธเธเธฑเธ</span>
                             </button>
                             <div id="leafletMapDiv" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #ddd; z-index: 0;"></div>
                         </div>
@@ -294,8 +294,8 @@
         </div>
 
         <div class="modal-actions-premium">
-            <button id="cancelAboutBtn" class="modal-btn-cancel" data-i18n="cancel_btn">ยกเลิก</button>
-            <button id="saveAboutBtn" class="modal-btn-save" data-i18n="save_btn">บันทึก</button>
+            <button id="cancelAboutBtn" class="modal-btn-cancel" data-i18n="cancel_btn">เธขเธเน€เธฅเธดเธ</button>
+            <button id="saveAboutBtn" class="modal-btn-save" data-i18n="save_btn">เธเธฑเธเธ—เธถเธ</button>
         </div>
     </div>
 </div>
@@ -334,7 +334,7 @@
 .service-row:last-child { border-bottom: none; }
 .service-row .material-icons-outlined { color: #00a651; font-size: 20px; }
 
-/* ── Premium Modal Custom Design ── */
+/* โ”€โ”€ Premium Modal Custom Design โ”€โ”€ */
 .premium-modal {
   display: flex !important;
   flex-direction: column !important;
@@ -815,20 +815,20 @@ window.onProfileDataReady = function(profileData) {
                     </div>`);
             });
         }
-        contactList.innerHTML = items.length ? items.join('') : `<p style="color:#aaa;font-size:14px;padding:16px 0;" data-i18n="no_contact_info">${window.i18nT ? window.i18nT('no_contact_info', 'ยังไม่มีข้อมูลติดต่อ') : 'ยังไม่มีข้อมูลติดต่อ'}</p>`;
+        contactList.innerHTML = items.length ? items.join('') : `<p style="color:#aaa;font-size:14px;padding:16px 0;" data-i18n="no_contact_info">${window.i18nT ? window.i18nT('no_contact_info', 'เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ') : 'เธขเธฑเธเนเธกเนเธกเธตเธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ'}</p>`;
     }
 
     // --- Render services tab (Frame 16) ---
     const servicesList = document.getElementById('servicesList');
     if (servicesList) {
         const iconMap = {
-            'รับซื้อถึงสวน': 'local_shipping',
-            'จ่ายเงินสด':    'payments',
-            'จองคิวล่วงหน้า': 'event_available',
+            'เธฃเธฑเธเธเธทเนเธญเธ–เธถเธเธชเธงเธ': 'local_shipping',
+            'เธเนเธฒเธขเน€เธเธดเธเธชเธ”':    'payments',
+            'เธเธญเธเธเธดเธงเธฅเนเธงเธเธซเธเนเธฒ': 'event_available',
         };
         const svcs = (profileData.services && profileData.services.length) ? profileData.services : [];
         if (svcs.length === 0) {
-            servicesList.innerHTML = `<div style="color:#94a3b8; font-size:13px; padding:10px 0;" data-i18n="no_services_info">${window.i18nT ? window.i18nT('no_services_info', 'ยังไม่ได้ระบุบริการ') : 'ยังไม่ได้ระบุบริการ'}</div>`;
+            servicesList.innerHTML = `<div style="color:#94a3b8; font-size:13px; padding:10px 0;" data-i18n="no_services_info">${window.i18nT ? window.i18nT('no_services_info', 'เธขเธฑเธเนเธกเนเนเธ”เนเธฃเธฐเธเธธเธเธฃเธดเธเธฒเธฃ') : 'เธขเธฑเธเนเธกเนเนเธ”เนเธฃเธฐเธเธธเธเธฃเธดเธเธฒเธฃ'}</div>`;
         } else {
             servicesList.innerHTML = svcs.map(s => {
                 const sName = typeof s === 'string' ? s : (s.name || '');

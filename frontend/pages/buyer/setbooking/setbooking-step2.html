@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
@@ -8,10 +8,10 @@
     <script src="../../../js/auth/guard.js"></script>
     <script src="../../../js/components/i18n.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="set_date_and_rounds_title">กำหนดวันที่และรอบคิวรับซื้อ | AGRIPRICE</title>
+  <title data-i18n="set_date_and_rounds_title">เธเธณเธซเธเธ”เธงเธฑเธเธ—เธตเนเนเธฅเธฐเธฃเธญเธเธเธดเธงเธฃเธฑเธเธเธทเนเธญ | AGRIPRICE</title>
   <script>
     (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
+      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -31,7 +31,7 @@
 
   <script>
     window.AuthGuard.requireLogin();
-    // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
+    // เธ•เธฃเธงเธเธชเธญเธ role โ€” เน€เธเธเธฒเธฐ buyer เน€เธ—เนเธฒเธเธฑเนเธ
     (function() {
       try {
         var u = JSON.parse(localStorage.getItem('user') || 'null');
@@ -53,13 +53,13 @@
 
     <!-- Header -->
     <header class="topbar">
-      <button class="back-btn" type="button" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back" id="btnBack">
+      <button class="back-btn" type="button" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back" id="btnBack">
         <span class="material-icons-outlined">chevron_left</span>
       </button>
 
       <div class="topbar-center">
-        <h1 class="title" data-i18n="set_date_and_rounds_title">กำหนดวันที่และรอบคิวรับซื้อ</h1>
-        <div class="step-indicator" aria-label="ขั้นตอน 2 จาก 2" data-i18n-aria-label="step_2_of_2">
+        <h1 class="title" data-i18n="set_date_and_rounds_title">เธเธณเธซเธเธ”เธงเธฑเธเธ—เธตเนเนเธฅเธฐเธฃเธญเธเธเธดเธงเธฃเธฑเธเธเธทเนเธญ</h1>
+        <div class="step-indicator" aria-label="เธเธฑเนเธเธ•เธญเธ 2 เธเธฒเธ 2" data-i18n-aria-label="step_2_of_2">
           <span class="dot" aria-hidden="true"></span>
           <span class="line" aria-hidden="true"></span>
           <span class="dot active" aria-hidden="true"></span>
@@ -75,12 +75,12 @@
       <!-- Card 1: Date range -->
       <section class="card">
         <div class="section-head">
-          <div class="section-title" data-i18n="date_range_label">ช่วงวันที่รับซื้อ</div>
-          <div class="section-sub" data-i18n="date_range_hint">กำหนดช่วงเวลาที่เปิดรับซื้อผลผลิต</div>
+          <div class="section-title" data-i18n="date_range_label">เธเนเธงเธเธงเธฑเธเธ—เธตเนเธฃเธฑเธเธเธทเนเธญ</div>
+          <div class="section-sub" data-i18n="date_range_hint">เธเธณเธซเธเธ”เธเนเธงเธเน€เธงเธฅเธฒเธ—เธตเนเน€เธเธดเธ”เธฃเธฑเธเธเธทเนเธญเธเธฅเธเธฅเธดเธ•</div>
         </div>
 
         <div class="field">
-          <label class="label" for="dateStart" data-i18n="start_date_label">วันที่เริ่มต้น</label>
+          <label class="label" for="dateStart" data-i18n="start_date_label">เธงเธฑเธเธ—เธตเนเน€เธฃเธดเนเธกเธ•เนเธ</label>
           <div class="icon-input">
             <input id="dateStart" type="date" class="input" />
             <span class="material-icons-outlined">calendar_month</span>
@@ -88,7 +88,7 @@
         </div>
 
         <div class="field">
-          <label class="label" for="dateEnd" data-i18n="end_date_label">วันที่สิ้นสุด</label>
+          <label class="label" for="dateEnd" data-i18n="end_date_label">เธงเธฑเธเธ—เธตเนเธชเธดเนเธเธชเธธเธ”</label>
           <div class="icon-input">
             <input id="dateEnd" type="date" class="input" />
             <span class="material-icons-outlined">calendar_month</span>
@@ -97,7 +97,7 @@
 
         <div class="info-chip">
           <span class="material-icons-outlined">info</span>
-          <span data-i18n="date_info_hint">ช่วงวันที่ที่เลือกจะเป็นช่วงเวลาที่เกษตรกรสามารถจองคิวรับซื้อได้</span>
+          <span data-i18n="date_info_hint">เธเนเธงเธเธงเธฑเธเธ—เธตเนเธ—เธตเนเน€เธฅเธทเธญเธเธเธฐเน€เธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธ—เธตเนเน€เธเธฉเธ•เธฃเธเธฃเธชเธฒเธกเธฒเธฃเธ–เธเธญเธเธเธดเธงเธฃเธฑเธเธเธทเนเธญเนเธ”เน</span>
         </div>
       </section>
 
@@ -105,13 +105,13 @@
       <section class="card">
         <div class="rounds-head">
           <div>
-            <div class="section-title" data-i18n="rounds_title">รอบคิวรับซื้อ</div>
-            <div class="section-sub" data-i18n="rounds_hint">กำหนดรอบเวลาและจำนวนคิวในแต่ละรอบ</div>
+            <div class="section-title" data-i18n="rounds_title">เธฃเธญเธเธเธดเธงเธฃเธฑเธเธเธทเนเธญ</div>
+            <div class="section-sub" data-i18n="rounds_hint">เธเธณเธซเธเธ”เธฃเธญเธเน€เธงเธฅเธฒเนเธฅเธฐเธเธณเธเธงเธเธเธดเธงเนเธเนเธ•เนเธฅเธฐเธฃเธญเธ</div>
           </div>
 
           <button class="add-round-btn" id="addRoundBtn" type="button">
             <span class="material-icons-outlined">add</span>
-            <span data-i18n="add_round_btn">เพิ่มรอบ</span>
+            <span data-i18n="add_round_btn">เน€เธเธดเนเธกเธฃเธญเธ</span>
           </button>
         </div>
 
@@ -120,7 +120,7 @@
         </div>
       </section>
 
-      <button class="primary-btn" id="saveAllBtn" type="button" data-i18n="save_btn">บันทึก</button>
+      <button class="primary-btn" id="saveAllBtn" type="button" data-i18n="save_btn">เธเธฑเธเธ—เธถเธ</button>
 
       <pre class="debug" id="debugBox" hidden></pre>
     </main>
@@ -128,24 +128,24 @@
 
   <!-- Modal: Add Round -->
   <div class="modal-overlay" id="roundModal" inert>
-    <div class="modal bottom-sheet" role="dialog" aria-modal="true" aria-label="เพิ่มรอบคิวใหม่" data-i18n-aria-label="add_new_round_title">
+    <div class="modal bottom-sheet" role="dialog" aria-modal="true" aria-label="เน€เธเธดเนเธกเธฃเธญเธเธเธดเธงเนเธซเธกเน" data-i18n-aria-label="add_new_round_title">
       <div class="modal-drag-handle"></div>
       <div class="modal-top">
-        <div class="modal-title" data-i18n="add_new_round_title">เพิ่มรอบคิวใหม่</div>
-        <button class="modal-close" id="closeModalBtn" type="button" aria-label="ปิด" data-i18n-aria-label="close_label">
+        <div class="modal-title" data-i18n="add_new_round_title">เน€เธเธดเนเธกเธฃเธญเธเธเธดเธงเนเธซเธกเน</div>
+        <button class="modal-close" id="closeModalBtn" type="button" aria-label="เธเธดเธ”" data-i18n-aria-label="close_label">
           <span class="material-icons-outlined">close</span>
         </button>
       </div>
 
       <div class="modal-body">
         <div class="field">
-          <label class="label" for="roundName" data-i18n="round_name_label">ชื่อรอบคิว</label>
-          <input id="roundName" class="input" type="text" placeholder="เช่น รอบที่ 1" data-i18n-placeholder="round_name_placeholder" />
+          <label class="label" for="roundName" data-i18n="round_name_label">เธเธทเนเธญเธฃเธญเธเธเธดเธง</label>
+          <input id="roundName" class="input" type="text" placeholder="เน€เธเนเธ เธฃเธญเธเธ—เธตเน 1" data-i18n-placeholder="round_name_placeholder" />
         </div>
 
         <div class="row-2">
           <div class="field">
-            <label class="label" for="timeStart" data-i18n="start_time_label">เวลาเริ่มต้น</label>
+            <label class="label" for="timeStart" data-i18n="start_time_label">เน€เธงเธฅเธฒเน€เธฃเธดเนเธกเธ•เนเธ</label>
             <div class="icon-input">
               <input id="timeStart" class="input" type="time" />
               <span class="material-icons-outlined">schedule</span>
@@ -153,7 +153,7 @@
           </div>
 
           <div class="field">
-            <label class="label" for="timeEnd" data-i18n="end_time_label">เวลาสิ้นสุด</label>
+            <label class="label" for="timeEnd" data-i18n="end_time_label">เน€เธงเธฅเธฒเธชเธดเนเธเธชเธธเธ”</label>
             <div class="icon-input">
               <input id="timeEnd" class="input" type="time" />
               <span class="material-icons-outlined">schedule</span>
@@ -162,11 +162,11 @@
         </div>
 
         <div class="field">
-          <label class="label" for="capacity" data-i18n="capacity_label">จำนวนคิว</label>
-          <input id="capacity" class="input" type="number" inputmode="numeric" min="1" step="1" placeholder="เช่น 5" data-i18n-placeholder="capacity_placeholder" />
+          <label class="label" for="capacity" data-i18n="capacity_label">เธเธณเธเธงเธเธเธดเธง</label>
+          <input id="capacity" class="input" type="number" inputmode="numeric" min="1" step="1" placeholder="เน€เธเนเธ 5" data-i18n-placeholder="capacity_placeholder" />
         </div>
 
-        <button class="modal-save" id="saveRoundBtn" type="button" data-i18n="save_btn">บันทึก</button>
+        <button class="modal-save" id="saveRoundBtn" type="button" data-i18n="save_btn">เธเธฑเธเธ—เธถเธ</button>
       </div>
     </div>
   </div>

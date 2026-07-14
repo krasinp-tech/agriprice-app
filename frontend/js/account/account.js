@@ -13,6 +13,14 @@
   };
   const Auth = window.Auth || { getRole: () => 'guest', getToken: () => null };
   const api = window.api || {};
+
+  function getSystemTheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function getPreferredTheme() {
+    return localStorage.getItem(KEYS.THEME) || getSystemTheme();
+  }
   const AuthGuard = window.AuthGuard || {};
   const DEBUG = !!window.AGRIPRICE_DEBUG;
 
@@ -341,16 +349,17 @@
       const dmCheck = document.getElementById('darkModeCheck');
       const dmStatus = document.getElementById('darkModeStatus');
       const dmToggle = document.getElementById('darkModeToggle');
-      const isDark = e.newValue === 'dark';
+      const nextTheme = e.newValue || getSystemTheme();
+      const isDark = nextTheme === 'dark';
       if (dmCheck) dmCheck.checked = isDark;
       const track = dmToggle ? dmToggle.querySelector('.toggle-track') : null;
       if (track) track.classList.toggle('on', isDark);
       if (dmStatus) dmStatus.textContent = isDark ? (window.i18nT ? window.i18nT('on', 'เปิดอยู่') : 'เปิดอยู่') : (window.i18nT ? window.i18nT('off', 'ปิดอยู่') : 'ปิดอยู่');
       if (window.__AGRIPRICE_APPLY_THEME) {
-        window.__AGRIPRICE_APPLY_THEME(e.newValue || 'light');
+        window.__AGRIPRICE_APPLY_THEME(nextTheme);
       } else {
-        document.documentElement.setAttribute('data-theme', e.newValue || 'light');
-        if (document.body) document.body.setAttribute('data-theme', e.newValue || 'light');
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        if (document.body) document.body.setAttribute('data-theme', nextTheme);
       }
     }
   });
@@ -506,10 +515,15 @@
         }
       };
 
-      const currentTheme = localStorage.getItem(KEYS.THEME);
-      const isDarkNow = currentTheme ? currentTheme === 'dark' : false;
+      const isDarkNow = getPreferredTheme() === 'dark';
 
       updateUI(isDarkNow);
+
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          if (!localStorage.getItem(KEYS.THEME)) updateUI(getSystemTheme() === 'dark');
+        });
+      }
 
       dmToggle.addEventListener('click', (e) => {
         if (e.target === dmCheck) return;
