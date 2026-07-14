@@ -37,6 +37,7 @@
   let nativeVerificationId = "";
   let nativeOtpListenersReady = false;
   let nativeSendTimeoutId = null;
+  let nativeFallbackInProgress = false;
   let timerId = null;
   let remaining = 120;
 
@@ -193,6 +194,40 @@
     if (recaptchaRenderPromise) await recaptchaRenderPromise;
   }
 
+  function clearNativeSendTimeout() {
+    if (!nativeSendTimeoutId) return;
+    clearTimeout(nativeSendTimeoutId);
+    nativeSendTimeoutId = null;
+  }
+
+  async function sendWebFirebaseOtp(phone, reason) {
+    setHint(reason || "กำลังส่งรหัส OTP ผ่าน Firebase...");
+    await initFirebaseOtp();
+    const cleanPhone = toE164(phone);
+    otpProvider = "firebase";
+    nativeVerificationId = "";
+    logOtp("firebase.send.start", { phone: cleanPhone });
+    confirmationResult = await firebaseAuth.signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
+    logOtp("firebase.send.success");
+    setHint("ส่งรหัส OTP เข้ามือถือของคุณแล้ว");
+    startTimer(120);
+  }
+
+  async function fallbackToWebFirebaseOtp(phone, reason) {
+    if (nativeFallbackInProgress || confirmationResult || nativeVerificationId) return;
+    nativeFallbackInProgress = true;
+    try {
+      logOtp("native.fallback.web.start", { reason: reason || "" });
+      await sendWebFirebaseOtp(phone, "Native OTP ไม่ตอบกลับ กำลังลองส่งผ่าน Firebase Web...");
+      clearErr();
+    } catch (error) {
+      logOtp("native.fallback.web.error", { code: error?.code || "", message: error?.message || "unknown" });
+      showErr(mapFirebaseOtpError(error));
+    } finally {
+      nativeFallbackInProgress = false;
+    }
+  }
+
   function mapFirebaseOtpError(error) {
     const code = String(error?.code || "");
     const rawMessage = String(error?.message || "");
@@ -229,7 +264,7 @@
     nativeOtpListenersReady = true;
 
     await nativeAuth.addListener("phoneCodeSent", (event) => {
-      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
+      clearNativeSendTimeout();
       nativeVerificationId = event?.verificationId || "";
       confirmationResult = { provider: "native-firebase" };
       otpProvider = "native-firebase";
@@ -239,7 +274,7 @@
     });
 
     await nativeAuth.addListener("phoneVerificationCompleted", async () => {
-      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
+      clearNativeSendTimeout();
       logOtp("native.phoneVerificationCompleted");
       try {
         await finishNativeFirebaseVerification();
@@ -249,10 +284,11 @@
       }
     });
 
-    await nativeAuth.addListener("phoneVerificationFailed", (event) => {
-      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
+    await nativeAuth.addListener("phoneVerificationFailed", async (event) => {
+      clearNativeSendTimeout();
       logOtp("native.phoneVerificationFailed", { message: event?.message || "" });
-      showErr(mapFirebaseOtpError({ message: event?.message || "ส่ง OTP ไม่สำเร็จ" }));
+      const phone = getPhone();
+      await fallbackToWebFirebaseOtp(phone, event?.message || "native failed");
     });
   }
 
@@ -316,26 +352,24 @@
         otpProvider = "native-firebase";
         nativeVerificationId = "";
         confirmationResult = null;
-        if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
+        clearNativeSendTimeout();
         nativeSendTimeoutId = setTimeout(() => {
           if (!confirmationResult && !nativeVerificationId) {
-            showErr("Firebase ยังไม่ตอบกลับการส่ง OTP ภายใน 30 วินาที กรุณาตรวจว่าเปิด Phone provider และเพิ่ม SHA-1/SHA-256 ของ APK นี้ใน Firebase Console แล้ว");
-            setHint("");
+            clearNativeSendTimeout();
+            fallbackToWebFirebaseOtp(phone, "native timeout");
           }
         }, 30000);
         logOtp("native.signInWithPhoneNumber.start", { phone: cleanPhone });
-        await nativeAuth.signInWithPhoneNumber({ phoneNumber: cleanPhone, timeout: 60 });
+        try {
+          await nativeAuth.signInWithPhoneNumber({ phoneNumber: cleanPhone, timeout: 60 });
+        } catch (error) {
+          clearNativeSendTimeout();
+          await fallbackToWebFirebaseOtp(phone, error?.message || "native rejected");
+        }
         return;
       }
 
-      setHint("กำลังส่งรหัส OTP ผ่าน Firebase...");
-      await initFirebaseOtp();
-      const cleanPhone = toE164(phone);
-      logOtp("firebase.send.start", { phone: cleanPhone });
-      confirmationResult = await firebaseAuth.signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
-      logOtp("firebase.send.success");
-      setHint("ส่งรหัส OTP เข้ามือถือของคุณแล้ว");
-      startTimer(120);
+      await sendWebFirebaseOtp(phone);
     } catch (error) {
       logOtp("otp.send.error", { message: error.message });
       showErr(mapFirebaseOtpError(error));
