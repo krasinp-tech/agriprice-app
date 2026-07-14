@@ -36,6 +36,7 @@
   let otpProvider = IS_NATIVE ? "native-firebase" : "firebase";
   let nativeVerificationId = "";
   let nativeOtpListenersReady = false;
+  let nativeSendTimeoutId = null;
   let timerId = null;
   let remaining = 120;
 
@@ -228,6 +229,7 @@
     nativeOtpListenersReady = true;
 
     await nativeAuth.addListener("phoneCodeSent", (event) => {
+      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
       nativeVerificationId = event?.verificationId || "";
       confirmationResult = { provider: "native-firebase" };
       otpProvider = "native-firebase";
@@ -237,6 +239,7 @@
     });
 
     await nativeAuth.addListener("phoneVerificationCompleted", async () => {
+      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
       logOtp("native.phoneVerificationCompleted");
       try {
         await finishNativeFirebaseVerification();
@@ -247,6 +250,7 @@
     });
 
     await nativeAuth.addListener("phoneVerificationFailed", (event) => {
+      if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
       logOtp("native.phoneVerificationFailed", { message: event?.message || "" });
       showErr(mapFirebaseOtpError({ message: event?.message || "ส่ง OTP ไม่สำเร็จ" }));
     });
@@ -307,11 +311,18 @@
         const nativeAuth = getNativeFirebaseAuth();
         if (!nativeAuth) throw new Error("ไม่พบ Firebase Authentication plugin");
         await ensureNativeOtpListeners();
-        setHint("กำลังส่งรหัส OTP ผ่าน Firebase...");
+        setHint("กำลังส่งรหัส OTP ผ่าน Firebase Native...");
         const cleanPhone = toE164(phone);
         otpProvider = "native-firebase";
         nativeVerificationId = "";
         confirmationResult = null;
+        if (nativeSendTimeoutId) clearTimeout(nativeSendTimeoutId);
+        nativeSendTimeoutId = setTimeout(() => {
+          if (!confirmationResult && !nativeVerificationId) {
+            showErr("Firebase ยังไม่ตอบกลับการส่ง OTP ภายใน 30 วินาที กรุณาตรวจว่าเปิด Phone provider และเพิ่ม SHA-1/SHA-256 ของ APK นี้ใน Firebase Console แล้ว");
+            setHint("");
+          }
+        }, 30000);
         logOtp("native.signInWithPhoneNumber.start", { phone: cleanPhone });
         await nativeAuth.signInWithPhoneNumber({ phoneNumber: cleanPhone, timeout: 60 });
         return;
