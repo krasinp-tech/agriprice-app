@@ -118,6 +118,7 @@ app.get('/', (req, res) => {
 
 // --- 5. Public / Help Endpoints ---
 // เอาไว้ให้ตัว Monitor ของ Render ตรวจสอบว่าเซิร์ฟเวอร์ยังไม่ตาย
+// Keep this route lightweight because it is used to verify active Render deploys.
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   time: new Date(),
