@@ -18,8 +18,47 @@ const THAI_ANNOUNCEMENT_KEYWORDS = [
 
 let thaiAnnouncementCache = {
   expiresAt: 0,
+  staleUntil: 0,
   items: [],
+  refreshPromise: null,
+  retryAfter: 0,
 };
+
+const ANNOUNCEMENT_CACHE_TTL_MS = 15 * 60 * 1000;
+const ANNOUNCEMENT_STALE_TTL_MS = 6 * 60 * 60 * 1000;
+const ANNOUNCEMENT_RETRY_COOLDOWN_MS = 5 * 60 * 1000;
+const ANNOUNCEMENT_FETCH_TIMEOUT_MS = 1800;
+
+const FALLBACK_ANNOUNCEMENTS = [
+  {
+    title: 'Ministry of Agriculture and Cooperatives updates',
+    link: 'https://www.moac.go.th/site-home',
+    source: 'MOAC',
+    published_at: null,
+    content: '',
+  },
+  {
+    title: 'Department of Agricultural Extension news',
+    link: 'https://www.doae.go.th/home-new-2024/',
+    source: 'DOAE',
+    published_at: null,
+    content: '',
+  },
+  {
+    title: 'Department of Agriculture announcements',
+    link: 'https://www.doa.go.th/',
+    source: 'DOA',
+    published_at: null,
+    content: '',
+  },
+  {
+    title: 'Office of Agricultural Economics updates',
+    link: 'https://www.oae.go.th/',
+    source: 'OAE',
+    published_at: null,
+    content: '',
+  },
+];
 
 // --- Parsers and Helpers ---
 function decodeXmlEntities(input) {
@@ -124,6 +163,98 @@ function parseHtmlNewsItems(html, feedUrl, sourceName) {
   return items;
 }
 
+async function fetchThaiAnnouncementItems() {
+  const settled = await Promise.allSettled(
+    THAI_ANNOUNCEMENT_FEEDS.map(async (feed) => {
+      const response = await fetch(feed.url, {
+        method: 'GET',
+        signal: AbortSignal.timeout(ANNOUNCEMENT_FETCH_TIMEOUT_MS),
+        headers: {
+          'User-Agent': 'AgripriceBot/1.0',
+          Accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
+        },
+      });
+      if (!response.ok) return [];
+      const body = await response.text();
+      const rssItems = parseRssItems(body, feed.name);
+      if (rssItems.length) return rssItems;
+      return parseHtmlNewsItems(body, feed.url, feed.name);
+    })
+  );
+
+  const collected = [];
+  for (const result of settled) {
+    if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+      collected.push(...result.value);
+    }
+  }
+
+  const dedupMap = new Map();
+  collected.forEach((item) => {
+    const key = String(item.link || '').trim();
+    if (!key) return;
+    if (!dedupMap.has(key)) dedupMap.set(key, item);
+  });
+
+  const uniqueItems = Array.from(dedupMap.values()).filter((item) => isThaiGovernmentUrl(item.link));
+  const agriOnly = uniqueItems.filter((item) => looksLikeThaiAgriNews(item.title, item.summary));
+  return (agriOnly.length ? agriOnly : uniqueItems)
+    .sort((a, b) => {
+      const ta = Date.parse(a.publishedAt || '') || 0;
+      const tb = Date.parse(b.publishedAt || '') || 0;
+      return tb - ta;
+    })
+    .slice(0, 30)
+    .map((item) => ({
+      title: item.title,
+      link: item.link,
+      source: item.source,
+      published_at: item.publishedAt,
+      content: item.summary || '',
+    }));
+}
+
+async function refreshThaiAnnouncementCache() {
+  try {
+    const finalItems = await fetchThaiAnnouncementItems();
+
+    if (finalItems.length) {
+      thaiAnnouncementCache.items = finalItems;
+      thaiAnnouncementCache.expiresAt = Date.now() + ANNOUNCEMENT_CACHE_TTL_MS;
+      thaiAnnouncementCache.staleUntil = Date.now() + ANNOUNCEMENT_STALE_TTL_MS;
+      thaiAnnouncementCache.retryAfter = 0;
+      return finalItems;
+    }
+
+    thaiAnnouncementCache.retryAfter = Date.now() + ANNOUNCEMENT_RETRY_COOLDOWN_MS;
+    if (thaiAnnouncementCache.items.length) {
+      thaiAnnouncementCache.expiresAt = Date.now() + ANNOUNCEMENT_RETRY_COOLDOWN_MS;
+      thaiAnnouncementCache.staleUntil = Date.now() + ANNOUNCEMENT_STALE_TTL_MS;
+    }
+    return thaiAnnouncementCache.items;
+  } catch (_) {
+    thaiAnnouncementCache.retryAfter = Date.now() + ANNOUNCEMENT_RETRY_COOLDOWN_MS;
+    return thaiAnnouncementCache.items;
+  }
+}
+
+function refreshThaiAnnouncementsInBackground() {
+  if (thaiAnnouncementCache.refreshPromise) return;
+  if (Date.now() < thaiAnnouncementCache.retryAfter) return;
+
+  thaiAnnouncementCache.refreshPromise = refreshThaiAnnouncementCache()
+    .finally(() => {
+      thaiAnnouncementCache.refreshPromise = null;
+    });
+}
+
+function getAnnouncementResponseItems(limit) {
+  const now = Date.now();
+  const hasUsableCache = thaiAnnouncementCache.items.length && now < thaiAnnouncementCache.staleUntil;
+  const source = hasUsableCache ? thaiAnnouncementCache.items : FALLBACK_ANNOUNCEMENTS;
+  return source.slice(0, limit);
+}
+
 /**
  * GET /api/announcements
  */
@@ -131,6 +262,7 @@ router.get('/', async (req, res) => {
   try {
     const limitRaw = Number.parseInt(String(req.query.limit || '6'), 10);
     const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 12)) : 6;
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=3600');
 
     if (Date.now() < thaiAnnouncementCache.expiresAt && thaiAnnouncementCache.items.length) {
       return res.json({
@@ -140,63 +272,11 @@ router.get('/', async (req, res) => {
       });
     }
 
-    const settled = await Promise.allSettled(
-      THAI_ANNOUNCEMENT_FEEDS.map(async (feed) => {
-        const response = await fetch(feed.url, {
-          method: 'GET',
-          signal: AbortSignal.timeout(4500),
-          headers: {
-            'User-Agent': 'AgripriceBot/1.0',
-            Accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
-          },
-        });
-        if (!response.ok) return [];
-        const body = await response.text();
-        const rssItems = parseRssItems(body, feed.name);
-        if (rssItems.length) return rssItems;
-        return parseHtmlNewsItems(body, feed.url, feed.name);
-      })
-    );
-
-    const collected = [];
-    for (const result of settled) {
-      if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-        collected.push(...result.value);
-      }
-    }
-
-    const dedupMap = new Map();
-    collected.forEach((item) => {
-      const key = String(item.link || '').trim();
-      if (!key) return;
-      if (!dedupMap.has(key)) dedupMap.set(key, item);
-    });
-
-    const uniqueItems = Array.from(dedupMap.values()).filter((item) => isThaiGovernmentUrl(item.link));
-    const agriOnly = uniqueItems.filter((item) => looksLikeThaiAgriNews(item.title, item.summary));
-    const finalItems = (agriOnly.length ? agriOnly : uniqueItems)
-      .sort((a, b) => {
-        const ta = Date.parse(a.publishedAt || '') || 0;
-        const tb = Date.parse(b.publishedAt || '') || 0;
-        return tb - ta;
-      })
-      .slice(0, 30)
-      .map((item) => ({
-        title: item.title,
-        link: item.link,
-        source: item.source,
-        published_at: item.publishedAt,
-        content: item.summary || '',
-      }));
-
-    thaiAnnouncementCache = {
-      items: finalItems,
-      expiresAt: Date.now() + 15 * 60 * 1000,
-    };
+    refreshThaiAnnouncementsInBackground();
 
     res.json({
       success: true,
-      data: finalItems.slice(0, limit),
+      data: getAnnouncementResponseItems(limit),
       message: 'ok',
     });
   } catch (error) {
