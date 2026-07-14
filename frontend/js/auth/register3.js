@@ -7,6 +7,15 @@
   const KEY_PROFILE = "reg_profile";
   const KEY_TEMP_TOKEN = "otp_temp_token";
   const OTP_LEN = 6;
+  const cap = window.Capacitor;
+  const capPlatform = typeof cap?.getPlatform === "function" ? cap.getPlatform() : "";
+  const IS_NATIVE = (
+    window.location.protocol === "capacitor:" ||
+    window.location.protocol === "ionic:" ||
+    capPlatform === "android" ||
+    capPlatform === "ios" ||
+    !!cap?.isNative
+  );
 
   const otpTo = document.getElementById("otpTo");
   const timerTx = document.getElementById("timerText");
@@ -24,6 +33,9 @@
   let recaptchaVerifier = null;
   let recaptchaRenderPromise = null;
   let confirmationResult = null;
+  let otpProvider = IS_NATIVE ? "native-firebase" : "firebase";
+  let nativeVerificationId = "";
+  let nativeOtpListenersReady = false;
   let timerId = null;
   let remaining = 120;
 
@@ -206,6 +218,82 @@
     return error?.message || "ยืนยัน OTP ไม่สำเร็จ";
   }
 
+  function getNativeFirebaseAuth() {
+    return window.Capacitor?.Plugins?.FirebaseAuthentication || null;
+  }
+
+  async function ensureNativeOtpListeners() {
+    const nativeAuth = getNativeFirebaseAuth();
+    if (!nativeAuth || nativeOtpListenersReady) return;
+    nativeOtpListenersReady = true;
+
+    await nativeAuth.addListener("phoneCodeSent", (event) => {
+      nativeVerificationId = event?.verificationId || "";
+      confirmationResult = { provider: "native-firebase" };
+      otpProvider = "native-firebase";
+      logOtp("native.phoneCodeSent", { hasVerificationId: !!nativeVerificationId });
+      setHint("ส่งรหัส OTP เข้ามือถือของคุณแล้ว");
+      startTimer(120);
+    });
+
+    await nativeAuth.addListener("phoneVerificationCompleted", async () => {
+      logOtp("native.phoneVerificationCompleted");
+      try {
+        await finishNativeFirebaseVerification();
+      } catch (error) {
+        logOtp("native.phoneVerificationCompleted.error", { message: error?.message || "unknown" });
+        showErr(mapFirebaseVerifyError(error));
+      }
+    });
+
+    await nativeAuth.addListener("phoneVerificationFailed", (event) => {
+      logOtp("native.phoneVerificationFailed", { message: event?.message || "" });
+      showErr(mapFirebaseOtpError({ message: event?.message || "ส่ง OTP ไม่สำเร็จ" }));
+    });
+  }
+
+  async function verifyFirebaseIdTokenWithBackend(idToken, phone) {
+    const res = await fetch(getApiBase() + "/api/auth/firebase/verify-phone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken, phone }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.success) throw new Error(json.message || "ยืนยัน OTP ไม่สำเร็จ");
+    return json.data || json;
+  }
+
+  async function handleVerifiedPayload(payload) {
+    const flow = sessionStorage.getItem("otp_flow");
+    if (flow === "forgot_password") {
+      if (payload.isNewUser) {
+        showErr("ไม่พบเบอร์โทรศัพท์นี้ในระบบ กรุณาสมัครสมาชิกก่อน");
+        throw new Error("__redirect__");
+      }
+      sessionStorage.setItem("reset_temp_token", payload.temp_token || "");
+      if (window.navigateWithTransition) window.navigateWithTransition("./forgot-password.html?step=3");
+      else window.location.href = "./forgot-password.html?step=3";
+      throw new Error("__redirect__");
+    }
+
+    sessionStorage.setItem(KEY_TEMP_TOKEN, payload.temp_token || "");
+    if (!payload.isNewUser) {
+      markExistingAccount();
+      throw new Error("__redirect__");
+    }
+  }
+
+  async function finishNativeFirebaseVerification() {
+    const phone = getPhone();
+    const nativeAuth = getNativeFirebaseAuth();
+    if (!nativeAuth) throw new Error("ไม่พบ Firebase Authentication plugin");
+    const tokenResult = await nativeAuth.getIdToken({ forceRefresh: true });
+    const idToken = tokenResult?.token || "";
+    if (!idToken) throw new Error("ไม่พบ Firebase ID token");
+    const payload = await verifyFirebaseIdTokenWithBackend(idToken, phone);
+    await handleVerifiedPayload(payload);
+  }
+
   async function sendOtp() {
     clearErr();
     const phone = getPhone();
@@ -215,15 +303,18 @@
     }
 
     try {
-      if (window.api?.otpSend) {
-        try {
-          const res = await window.api.otpSend(phone);
-          if (!res || !res.success) {
-            logOtp("backend.otpSend.warn", { message: res?.message || "backend preflight failed" });
-          }
-        } catch (preflightError) {
-          logOtp("backend.otpSend.error", { message: preflightError?.message || "backend preflight failed" });
-        }
+      if (IS_NATIVE) {
+        const nativeAuth = getNativeFirebaseAuth();
+        if (!nativeAuth) throw new Error("ไม่พบ Firebase Authentication plugin");
+        await ensureNativeOtpListeners();
+        setHint("กำลังส่งรหัส OTP ผ่าน Firebase...");
+        const cleanPhone = toE164(phone);
+        otpProvider = "native-firebase";
+        nativeVerificationId = "";
+        confirmationResult = null;
+        logOtp("native.signInWithPhoneNumber.start", { phone: cleanPhone });
+        await nativeAuth.signInWithPhoneNumber({ phoneNumber: cleanPhone, timeout: 60 });
+        return;
       }
 
       setHint("กำลังส่งรหัส OTP ผ่าน Firebase...");
@@ -247,6 +338,18 @@
     if (remaining <= 0) throw new Error("รหัสหมดอายุ กรุณาขอรหัสใหม่");
     if (!confirmationResult) throw new Error("ไม่พบคำขอ OTP กรุณากดขอรหัสใหม่");
 
+    if (otpProvider === "native-firebase") {
+      const nativeAuth = getNativeFirebaseAuth();
+      if (!nativeAuth) throw new Error("ไม่พบ Firebase Authentication plugin");
+      if (!nativeVerificationId) throw new Error("ไม่พบ verification ID กรุณาขอรหัสใหม่");
+      await nativeAuth.confirmVerificationCode({
+        verificationId: nativeVerificationId,
+        verificationCode: otp,
+      });
+      await finishNativeFirebaseVerification();
+      return;
+    }
+
     const firebaseUserCredential = await confirmationResult.confirm(otp);
     const idToken = await firebaseUserCredential.user.getIdToken();
     logOtp("otp.verify.firebase.success", {
@@ -255,32 +358,8 @@
       hasIdToken: !!idToken,
     });
 
-    const res = await fetch(getApiBase() + "/api/auth/firebase/verify-phone", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken, phone }),
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.success) throw new Error(json.message || "ยืนยัน OTP ไม่สำเร็จ");
-
-    const payload = json.data || json;
-    const flow = sessionStorage.getItem("otp_flow");
-    if (flow === "forgot_password") {
-      if (payload.isNewUser) {
-        showErr("ไม่พบเบอร์โทรศัพท์นี้ในระบบ กรุณาสมัครสมาชิกก่อน");
-        throw new Error("__redirect__");
-      }
-      sessionStorage.setItem("reset_temp_token", payload.temp_token || "");
-      if (window.navigateWithTransition) window.navigateWithTransition("./forgot-password.html?step=3");
-      else window.location.href = "./forgot-password.html?step=3";
-      throw new Error("__redirect__");
-    }
-
-    sessionStorage.setItem(KEY_TEMP_TOKEN, payload.temp_token || "");
-    if (!payload.isNewUser) {
-      markExistingAccount();
-      throw new Error("__redirect__");
-    }
+    const payload = await verifyFirebaseIdTokenWithBackend(idToken, phone);
+    await handleVerifiedPayload(payload);
   }
 
   resendB?.addEventListener("click", async () => {

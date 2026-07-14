@@ -27,9 +27,8 @@ class AuthService {
     if (DEV_OTP_MODE) {
       return { success: true, message: 'ส่ง OTP แล้ว (Mock Mode)' };
     }
-    // สำหรับโหมด Real: เนื่องจากฝั่ง Client (เว็บ/Capacitor) จะใช้ Firebase Phone Auth ส่ง SMS เอง
-    // ตัว Backend จึงไม่ต้องส่งผ่าน Supabase เพื่อหลีกเลี่ยงความขัดแย้งและข้อผิดพลาดของการไม่ได้เปิดใช้งาน SMS ใน Supabase
-    // ให้ผ่านฉลุยเพื่อให้ Frontend สามารถเริ่มกระบวนการส่ง OTP ทาง Firebase ได้ทันที
+    // Real OTP is sent by Firebase on the client/native layer.
+    // This endpoint is kept as a lightweight compatibility preflight.
     return { success: true, message: 'ส่ง OTP แล้ว' };
   }
 
