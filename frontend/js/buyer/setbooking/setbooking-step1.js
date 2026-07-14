@@ -200,7 +200,12 @@
 
     // กรองตามคำค้น
     const q = (query || '').trim().toLowerCase();
-    return q ? items.filter(p => p.name.toLowerCase().includes(q)) : items;
+    if (!q) return items;
+    return items.filter(p => {
+      const orig = p.name.toLowerCase();
+      const trans = (window.i18nT ? window.i18nT(p.name, p.name) : p.name).toLowerCase();
+      return orig.includes(q) || trans.includes(q);
+    });
   }
 
   const VARIETY_FALLBACK = {
@@ -264,8 +269,19 @@
       const fruitKey = Object.keys(VARIETY_FALLBACK).find(k => fruitId.includes(k) || k.includes(fruitId));
       if (fruitKey) {
         const fallbackList = VARIETY_FALLBACK[fruitKey].map(n => ({ id: n, name: n }));
-        items = q ? fallbackList.filter(v => v.name.toLowerCase().includes(q)) : fallbackList;
+        items = q ? fallbackList.filter(v => {
+          const orig = v.name.toLowerCase();
+          const trans = (window.i18nT ? window.i18nT(v.name, v.name) : v.name).toLowerCase();
+          return orig.includes(q) || trans.includes(q);
+        }) : fallbackList;
       }
+    } else if (query) {
+      const q = query.trim().toLowerCase();
+      items = items.filter(v => {
+        const orig = v.name.toLowerCase();
+        const trans = (window.i18nT ? window.i18nT(v.name, v.name) : v.name).toLowerCase();
+        return orig.includes(q) || trans.includes(q);
+      });
     }
 
     return items;
@@ -289,7 +305,8 @@
       const row = document.createElement("div");
       row.className = "combo-item";
       row.setAttribute("role", "option");
-      row.innerHTML = `<strong>${sanitizeText(it.name)}</strong>${it.hint ? `<small>${sanitizeText(it.hint)}</small>` : `<small>&nbsp;</small>`}`;
+      const displayName = window.i18nT ? window.i18nT(it.name, it.name) : it.name;
+      row.innerHTML = `<strong>${sanitizeText(displayName)}</strong>${it.hint ? `<small>${sanitizeText(it.hint)}</small>` : `<small>&nbsp;</small>`}`;
       row.addEventListener("click", () => onPick(it));
       menuEl.appendChild(row);
     });
@@ -300,7 +317,8 @@
     const items = await loadProducts(productInput.value || "");
     renderMenu(productMenu, items, (it) => {
       state.selectedProduct = { id: it.id, fruit_id: it.fruit_id, name: it.name };
-      productInput.value = it.name;
+      const displayName = window.i18nT ? window.i18nT(it.name, it.name) : it.name;
+      productInput.value = displayName;
       closeCombo(productCombo);
 
       // enable variety
@@ -352,7 +370,8 @@
     const items = await loadVarieties(state.selectedProduct.name, varietyInput.value || "");
     renderMenu(varietyMenu, items, (it) => {
       state.selectedVariety = { id: it.id, variety_id: it.variety_id || it.id, name: it.name };
-      varietyInput.value = it.name;
+      const displayName = window.i18nT ? window.i18nT(it.name, it.name) : it.name;
+      varietyInput.value = displayName;
       closeCombo(varietyCombo);
     });
   }
@@ -557,12 +576,12 @@
         const payload = JSON.parse(raw);
         if (payload.product) {
           state.selectedProduct = payload.product;
-          productInput.value = payload.product.name || "";
+          productInput.value = window.i18nT ? window.i18nT(payload.product.name, payload.product.name) : (payload.product.name || "");
           enableVariety();
         }
         if (payload.variety) {
           state.selectedVariety = payload.variety;
-          varietyInput.value = payload.variety.name || "";
+          varietyInput.value = window.i18nT ? window.i18nT(payload.variety.name, payload.variety.name) : (payload.variety.name || "");
         }
         if (payload.details) {
           state.details = payload.details;

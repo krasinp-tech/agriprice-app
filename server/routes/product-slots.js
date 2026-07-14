@@ -169,6 +169,15 @@ router.post('/batch', authMiddleware, async (req, res) => {
 
     if (error) throw error;
 
+    // Reactivate the parent buy offer if there's any active slot
+    const hasActiveSlot = slotsToInsert.some(s => s.is_active);
+    if (hasActiveSlot) {
+      await supabaseAdmin
+        .from('buy_offers')
+        .update({ is_active: true })
+        .eq('offer_id', requestedOfferId);
+    }
+
     const rows = (data || []).map((slot) => ({
       ...slot,
       product_id: slot.offer_id,
@@ -234,6 +243,15 @@ router.patch('/:id', authMiddleware, async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Reactivate parent buy offer if this slot is active
+    if (data && data.is_active) {
+      await supabaseAdmin
+        .from('buy_offers')
+        .update({ is_active: true })
+        .eq('offer_id', data.offer_id);
+    }
+
     res.json(response.success('อัปเดตคิวสำเร็จ', {
       ...data,
       product_id: data.offer_id,
@@ -243,10 +261,6 @@ router.patch('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/product-slots/:id
- * ลบคิวเดี่ยว (soft delete)
- */
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;

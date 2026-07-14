@@ -30,6 +30,32 @@ async function updateReadByAnyId(userId, notificationId) {
   return { updated: Array.isArray(result.data) && result.data.length > 0 };
 }
 
+async function updateUnreadByAnyId(userId, notificationId) {
+  // Try modern key first.
+  let result = await supabaseAdmin
+    .from('notifications')
+    .update({ is_read: false })
+    .eq('notification_id', notificationId)
+    .eq('user_id', userId)
+    .select('notification_id');
+
+  if (!result.error) {
+    return { updated: Array.isArray(result.data) && result.data.length > 0 };
+  }
+  if (result.error.code !== '42703') return { error: result.error };
+
+  // Fallback for legacy schema.
+  result = await supabaseAdmin
+    .from('notifications')
+    .update({ is_read: false })
+    .eq('id', notificationId)
+    .eq('user_id', userId)
+    .select('id');
+
+  if (result.error) return { error: result.error };
+  return { updated: Array.isArray(result.data) && result.data.length > 0 };
+}
+
 async function deleteByAnyId(userId, notificationId) {
   // Try modern key first.
   let result = await supabaseAdmin
@@ -240,6 +266,44 @@ router.patch('/:id/read', authMiddleware, async (req, res) => {
     res.json(response.success('อ่านแจ้งเตือนสำเร็จ'));
   } catch (e) {
     res.status(500).json(response.error('อ่านแจ้งเตือนไม่สำเร็จ', e.message));
+  }
+});
+
+/**
+ * PATCH /api/notifications/:id/unread — ทำเครื่องหมายว่ายังไม่อ่าน
+ */
+router.patch('/:id/unread', authMiddleware, async (req, res) => {
+  try {
+    const result = await updateUnreadByAnyId(req.user.id, req.params.id);
+    if (result.error) return res.status(500).json(response.error('ทำเครื่องหมายว่ายังไม่อ่านไม่สำเร็จ', result.error.message));
+    if (!result.updated) return res.status(404).json(response.error('ไม่พบแจ้งเตือนรายการนี้'));
+    res.json(response.success('ทำเครื่องหมายว่ายังไม่อ่านสำเร็จ'));
+  } catch (e) {
+    res.status(500).json(response.error('ทำเครื่องหมายว่ายังไม่อ่านไม่สำเร็จ', e.message));
+  }
+});
+
+async function deleteReadNotifications(userId) {
+  const { data, error } = await supabaseAdmin
+    .from('notifications')
+    .delete()
+    .eq('user_id', userId)
+    .eq('is_read', true)
+    .select();
+  if (error) return { error };
+  return { deleted: true, count: data ? data.length : 0 };
+}
+
+/**
+ * DELETE /api/notifications/delete-read — ลบการแจ้งเตือนที่อ่านแล้วทั้งหมด
+ */
+router.delete('/delete-read', authMiddleware, async (req, res) => {
+  try {
+    const result = await deleteReadNotifications(req.user.id);
+    if (result.error) return res.status(500).json(response.error('ลบแจ้งเตือนที่อ่านแล้วไม่สำเร็จ', result.error.message));
+    res.json(response.success('ลบแจ้งเตือนที่อ่านแล้วสำเร็จ', { deleted_count: result.count }));
+  } catch (e) {
+    res.status(500).json(response.error('ลบแจ้งเตือนที่อ่านแล้วไม่สำเร็จ', e.message));
   }
 });
 

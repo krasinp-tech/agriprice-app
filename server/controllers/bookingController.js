@@ -35,7 +35,9 @@ class BookingController {
   async updateStatus(req, res) {
     try {
       const { id: userId, role } = req.user;
-      const result = await bookingService.updateBookingStatus(req.params.id, userId, role, req.body.status);
+      const result = await bookingService.updateBookingStatus(
+        req.params.id, userId, role, req.body.status, req.body.cancel_reason || null
+      );
       res.json(response.success('อัปเดตสถานะสำเร็จ', result));
     } catch (e) {
       res.status(e.statusCode || 400).json(response.error(e.message));

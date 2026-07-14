@@ -52,8 +52,7 @@
   }
 
   /* --- Path Helpers --- */
-  const prefixRoot = "../../"; 
-  function resolveToRootUrl(p) {
+  const prefixRoot = "../../";  function resolveToRootUrl(p) {
     if (!p) return "";
     if (/^(https?:\/\/|data:|blob:|#|tel:|mailto:)/i.test(p)) return p;
     return prefixRoot + String(p).replace(/^(\.\/)+/g, "").replace(/^(\.\.\/)+/g, "");
@@ -114,7 +113,6 @@
   async function loadFromApi(q) {
     try {
       if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-      
       if (mount) {
         mount.innerHTML = Array(4).fill(0).map(() => `
           <div class="skeleton-card">
@@ -137,7 +135,6 @@
         const unit = p.unit || t('kg_unit', 'กก.');
         let prices = { priceA: null, priceB: null, priceC: null };
         const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
-        
         let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
         let primaryPrice = Number(p.price || 0);
 
@@ -182,7 +179,7 @@
           type: 'product',
           sellerId: p.user_id,
           sellerName: p.profiles ? `${p.profiles.first_name} ${p.profiles.last_name}`.trim() : t('booking_unknown_name', 'ไม่ทราบชื่อ'),
-          sellerSub: p.variety ? `${p.name} (${p.variety})` : p.name,
+          sellerSub: p.variety ? `${t(p.name, p.name)} (${t(p.variety, p.variety)})` : t(p.name, p.name),
           avatar: p.profiles?.avatar || resolveToRootUrl('assets/images/avatar-guest.svg'),
           priceA: prices.priceA,
           priceB: prices.priceB,
@@ -199,6 +196,34 @@
             sellerName: profile ? profileName(profile) : t('booking_unknown_name', 'Unknown'),
             avatar: profile?.avatar || resolveToRootUrl('assets/images/avatar-guest.svg'),
           }))()
+        };
+      });
+
+      const users = json.data?.users || [];
+      const mappedUsers = users.map(u => {
+        const distKm = (userLat !== null && u.lat !== null && u.lng !== null && window.LocationHelper?.calculateDistance)
+          ? window.LocationHelper.calculateDistance(userLat, userLng, u.lat, u.lng)
+          : null;
+        return {
+          id: u.id,
+          offerId: '',
+          productId: '',
+          type: 'seller',
+          sellerId: u.id,
+          sellerName: `${u.first_name || ''} ${u.last_name || ''}`.trim() || t('role_user', 'ผู้ใช้งาน'),
+          sellerSub: u.role === 'buyer' ? t('role_buyer', 'ผู้รับซื้อ') : t('role_farmer', 'เกษตรกร'),
+          avatar: u.avatar || resolveToRootUrl('assets/images/avatar-guest.svg'),
+          priceA: null,
+          priceB: null,
+          priceC: null,
+          priceSortValue: 0,
+          createdAtMonth: null,
+          updateTime: '',
+          updatedMinutesAgo: 999999,
+          _offerId: '',
+          _productId: '',
+          _distKm: distKm,
+          distanceText: window.LocationHelper?.formatDistance ? window.LocationHelper.formatDistance(distKm) : ''
         };
       });
 
@@ -247,7 +272,6 @@
         };
 
         const node = window.ProductCard.createCardEl(data, {}, tpl.innerHTML);
-        
         // Favorite sync for search results
         const favId = item.id || item.sellerId;
         if (window.FavoritesStore?.has(favId, item.id ? 'product' : 'seller')) {
@@ -277,8 +301,7 @@
            if (res.granted && res.position) {
              userLat = res.position.coords.latitude;
              userLng = res.position.coords.longitude;
-             refresh(); 
-           }
+             refresh();           }
          });
       }
       list.sort((a, b) => (a._distKm ?? 9999) - (b._distKm ?? 9999));

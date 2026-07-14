@@ -73,7 +73,7 @@
             localStorage.removeItem('agriprice_dashboard_demo');
             const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            const bg = savedTheme === 'dark' ? '#121212' : '#F7F9FA';
+            const bg = savedTheme === 'dark' ? '#0f1115' : '#F7F9FA';
             document.documentElement.style.backgroundColor = bg;
         })();
     </script>
@@ -142,7 +142,7 @@
 
         function applyShellTheme(theme, options = {}) {
             const nextTheme = normalizeShellTheme(theme);
-            const bg = nextTheme === 'dark' ? '#121212' : '#F7F9FA';
+            const bg = nextTheme === 'dark' ? '#0f1115' : '#F7F9FA';
 
             document.documentElement.setAttribute('data-theme', nextTheme);
             document.body.setAttribute('data-theme', nextTheme);
@@ -297,17 +297,8 @@
                     }
 
                     // Update Notification Badge
-                    const apiBase = window.getAgriPriceApiUrl
-                        ? window.getAgriPriceApiUrl()
-                        : (window.API_BASE_URL || '').replace(/\/$/, '');
-
-                    if (!apiBase) return;
-
-                    const notiRes = await fetch(apiBase + '/api/notifications/unread', {
-                        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                    });
-                    if (notiRes.ok) {
-                        const json = await notiRes.json();
+                    const json = await window.api.call('GET', '/api/notifications/unread');
+                    if (json) {
                         const notiCount = json.data?.unreadCount || json.unreadCount || 0;
                         const notiBadge = document.getElementById('shellNotiBadge');
                         if (notiBadge) {

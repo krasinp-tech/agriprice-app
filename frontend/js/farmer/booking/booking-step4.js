@@ -121,7 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const ownerAddress = offerOwner
           ? [offerOwner.address_line1, offerOwner.address_line2].filter(Boolean).join(" ")
           : "";
-        const resolvedAddress = ownerAddress || offerOwner?.address || d.address || "";
+        const resolvedAddress = ownerAddress || offerOwner?.address || "";
+
         const shopLabel = offerOwner
           ? (offerOwner.shop_name || `${offerOwner.first_name || ""} ${offerOwner.last_name || ""}`.trim())
           : "";
@@ -207,10 +208,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return { name: '', address: '', lat: null, lng: null, googleMapsUrl: '' };
     },
 
-    async cancelBooking(bookingId) {
+    async cancelBooking(bookingId, cancelReason) {
       if (!window.api) return { success: false, message: "API client not ready" };
       try {
-        await window.api.updateBooking(bookingId, 'cancel');
+        await window.api.updateBooking(bookingId, 'cancel', cancelReason ? { cancel_reason: cancelReason } : {});
         localStorage.removeItem("confirmedBooking");
         localStorage.removeItem("bookingSlotId");
         localStorage.removeItem("bookingStep1");
@@ -218,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return { success: true, message: t('cancel_booking_success', "ยกเลิกการจองสำเร็จ") };
       } catch (e) {
         if (DEBUG_BOOKING) console.warn('[BookingAPI] cancelBooking:', e.message);
-        return { success: false, message: e.message || t('error_occurred', "ยกเลิกการจองไม่สำเร็จ") };
+        return { success: false, message: e.message || t('error_occurred', "เกิดข้อผิดพลาด") };
       }
     },
   };
@@ -487,28 +488,70 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleCancelBooking() {
-    const message = t('cancel_booking_confirm', "คุณต้องการยกเลิกการจองหรือไม่?");
-    if (window.showConfirm) {
-      window.showConfirm(message, async (confirmed) => {
-        if (!confirmed) return;
-        const bkId = bookingIdText?.textContent || "";
-        const result = await BookingAPI.cancelBooking(bkId);
-        if (result.success) {
-          if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");
-          window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
-        } else {
-          if (window.appNotify) window.appNotify(result.message || t('cancel_error', "เกิดข้อผิดพลาดในการยกเลิกการจอง"), "error");
-        }
+    // Step 1: Ask for reason first with preset choices
+    const reasonOptions = [
+      t("cancel_reason_change_plan", "เปลี่ยนแผน / ไม่ว่างตามนัด"),
+      t("cancel_reason_price", "ราคาไม่เป็นที่ต้องการ"),
+      t("cancel_reason_product", "ผลผลิตไม่พร้อมจำหน่าย"),
+      t("cancel_reason_emergency", "เหตุฉุกเฉิน / เป็นเหตุสุดวิสัย"),
+      t("cancel_reason_double_book", "จองซ้ำ / ผิดรายการ"),
+      t("cancel_reason_other", "อื่นๆ"),
+    ];
+
+    let cancelReason = null;
+    try {
+      cancelReason = await new Promise((resolve) => {
+        // Build a small inline dialog
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+        const card = document.createElement("div");
+        card.style.cssText = "background:#fff;border-radius:20px;padding:24px 20px;max-width:380px;width:100%;font-family:'Outfit',sans-serif;";
+        card.innerHTML = `
+          <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#1a1a1a">${t("cancel_reason_title", "กรุณาระบุเหตุผลการยกเลิก")}</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:#888">${t("cancel_reason_sub", "ข้อมูลนี้จะถูกแสดงให้ผู้รับซื้อทราบสาเหตุการยกเลิก")}</p>
+          <div id="reasonOptions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            ${reasonOptions.map((r, i) => `<button data-idx="${i}" style="background:#F0F4F1;border:1.5px solid transparent;border-radius:12px;padding:11px 14px;text-align:left;font-size:14px;font-weight:600;cursor:pointer;color:#1a1a1a;font-family:inherit;width:100%">${r}</button>`).join("")}
+          </div>
+          <textarea id="reasonFreeText" placeholder="${t("or_type_reason", "หรือพิมพ์เหตุผลเพิ่มเติม...สามารถไม่ระบุก็ได้")}" style="width:100%;height:70px;border:1.5px solid #ddd;border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;margin-bottom:14px;box-sizing:border-box"></textarea>
+          <div style="display:flex;gap:10px">
+            <button id="reasonCancel" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #ddd;background:transparent;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#666">${t("back", "ยกเลิก")}</button>
+            <button id="reasonConfirm" style="flex:1;padding:12px;border-radius:12px;border:none;background:#E53935;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">${t("confirm_cancel", "ยืนยันยกเลิก")}</button>
+          </div>
+        `;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        let selected = null;
+        card.querySelectorAll("#reasonOptions button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            card.querySelectorAll("#reasonOptions button").forEach(b => { b.style.background = "#F0F4F1"; b.style.border = "1.5px solid transparent"; b.style.color = "#1a1a1a"; });
+            btn.style.background = "rgba(229,57,53,0.08)";
+            btn.style.border = "1.5px solid rgba(229,57,53,0.4)";
+            btn.style.color = "#E53935";
+            selected = reasonOptions[Number(btn.dataset.idx)];
+            card.querySelector("#reasonFreeText").value = "";
+          });
+        });
+        card.querySelector("#reasonFreeText").addEventListener("input", () => { selected = null; });
+        card.querySelector("#reasonCancel").onclick = () => { document.body.removeChild(overlay); resolve(null); };
+        card.querySelector("#reasonConfirm").onclick = () => {
+          const freeText = card.querySelector("#reasonFreeText").value.trim();
+          document.body.removeChild(overlay);
+          resolve(freeText || selected || "");
+        };
       });
+    } catch (_) { cancelReason = null; }
+
+    // null means user dismissed without confirming
+    if (cancelReason === null) return;
+
+    const bkId = bookingIdText?.textContent || "";
+    const result = await BookingAPI.cancelBooking(bkId, cancelReason);
+    if (result.success) {
+      if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");
+      window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
     } else {
-      // fallback
-      const confirmed = window.confirm(message);
-      if (!confirmed) return;
-      const bkId = bookingIdText?.textContent || "";
-      const result = await BookingAPI.cancelBooking(bkId);
-      if (result.success) {
-        window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
-      }
+      if (window.appNotify) window.appNotify(result.message || t('cancel_error', "ยกเลิกการจองไม่สำเร็จ"), "error");
     }
   }
 

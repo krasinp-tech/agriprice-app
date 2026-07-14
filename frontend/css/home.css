@@ -338,6 +338,34 @@
     box-shadow: 0 8px 20px rgba(217, 119, 6, 0.35);
 }
 
+.home-product-empty {
+    margin: 8px 16px 4px;
+    min-height: 132px;
+    border: 1px dashed var(--border-light, rgba(15, 23, 42, 0.12));
+    border-radius: 18px;
+    background: var(--bg-card, #fff);
+}
+
+.home-product-empty .material-icons-outlined {
+    font-size: 34px;
+    color: var(--primary, #0B853C);
+    margin-bottom: 8px;
+}
+
+.home-product-empty h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.home-product-empty p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
 .product-item[href*="category=organic"]:hover .cat-icon {
     box-shadow: 0 8px 20px rgba(13, 148, 136, 0.35);
 }

@@ -38,17 +38,13 @@
   }
 
   async function fetchFavoritesFromApi() {
-    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, "");
+    if (!window.api || typeof window.api.call !== 'function') return null;
     const token = localStorage.getItem(window.AUTH_TOKEN_KEY || "token") || "";
-    if (!currentBase || !token) return null;
+    if (!token) return null;
 
     try {
-      const res = await fetch(currentBase + "/api/favorites", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!res.ok) return null;
-      const json = await res.json();
+      const json = await window.api.call('GET', '/api/favorites');
+      if (!json) return null;
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({
@@ -68,18 +64,14 @@
   }
 
   async function fetchFollowingFromApi() {
-    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-    const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || "").replace(/\/$/, "");
+    if (!window.api || typeof window.api.call !== 'function') return null;
     const token = localStorage.getItem(window.AUTH_TOKEN_KEY || "token") || "";
     const userId = getCurrentUserId();
-    if (!currentBase || !token || !userId) return null;
+    if (!token || !userId) return null;
 
     try {
-      const res = await fetch(currentBase + "/api/follow/" + encodeURIComponent(userId) + "/following", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!res.ok) return null;
-      const json = await res.json();
+      const json = await window.api.call('GET', `/api/follow/${encodeURIComponent(userId)}/following`);
+      if (!json) return null;
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
         .map((item) => ({

@@ -255,41 +255,69 @@
       return platform === "android" || platform === "ios" || !!cap.isNative;
     };
 
+    function setScannerUiActive(active) {
+      document.documentElement.classList.toggle("scanner-active", active);
+      document.body.classList.toggle("scanner-active", active);
+    }
+
+    function removeNativeListeners() {
+      nativeListeners.forEach(listener => listener?.remove?.());
+      nativeListeners = [];
+    }
+
     async function start() {
+      if (isNative()) {
+        await startNativeScanner();
+        return;
+      }
+
       if (window.AgriPermission && window.AgriPermission.requestCamera) {
         const p = await window.AgriPermission.requestCamera();
         if (!p.granted) return;
       }
-
-      if (isNative()) {
-        startNativeScanner();
-      } else {
-        startWebScanner();
-      }
+      await startWebScanner();
     }
 
     async function startNativeScanner() {
       try {
-        const { BarcodeScanner } = window.Capacitor.Plugins;
+        const BarcodeScanner = window.Capacitor?.Plugins?.BarcodeScanner;
         if (!BarcodeScanner) throw new Error("Scanner plugin not found");
 
-        document.body.classList.add("scanner-active");
+        if (BarcodeScanner.isSupported) {
+          const support = await BarcodeScanner.isSupported();
+          if (support?.supported === false) throw new Error("Scanner is not supported on this device");
+        }
+
+        // Request camera permission directly via the BarcodeScanner plugin to bypass localStorage lockout
+        const check = await BarcodeScanner.checkPermissions();
+        let granted = check.camera === 'granted';
+        if (!granted) {
+          const req = await BarcodeScanner.requestPermissions();
+          granted = req.camera === 'granted';
+        }
+        if (!granted) {
+          alert(t('error_permission_camera', 'กรุณาอนุญาตสิทธิ์การเข้าถึงกล้องเพื่อทำการสแกน'));
+          return;
+        }
+
+        await BarcodeScanner.stopScan().catch(() => {});
+        removeNativeListeners();
+
+        setScannerUiActive(true);
         modal.classList.add("show");
         modal.setAttribute("aria-hidden", "false");
 
-        nativeListeners = [
-          await BarcodeScanner.addListener("barcodesScanned", (event) => {
-            const barcode = event?.barcodes?.[0];
-            const value = barcode?.rawValue || barcode?.displayValue;
-            if (value) handleDetected(value);
-          }),
-          await BarcodeScanner.addListener("scanError", (event) => {
-            console.error("[Native Scan] Scan error:", event?.message || event);
-            stop();
-          })
-        ];
+        nativeListeners.push(await BarcodeScanner.addListener("barcodesScanned", (event) => {
+          const barcode = event?.barcodes?.[0];
+          const value = barcode?.rawValue || barcode?.displayValue;
+          if (value) handleDetected(value);
+        }));
+        nativeListeners.push(await BarcodeScanner.addListener("scanError", (event) => {
+          console.error("[Native Scan] Scan error:", event?.message || event);
+          stop();
+        }));
 
-        await BarcodeScanner.startScan({ formats: ["QR_CODE"] });
+        await BarcodeScanner.startScan({ formats: ["QR_CODE"], lensFacing: "BACK" });
       } catch (err) {
         console.error("[Native Scan] Error:", err);
         stop();
@@ -346,7 +374,7 @@
         return;
       }
       
-      const { BarcodeScanner } = window.Capacitor.Plugins;
+      const BarcodeScanner = window.Capacitor?.Plugins?.BarcodeScanner;
       if (!BarcodeScanner) return;
       try {
         if (BarcodeScanner.toggleTorch) {
@@ -366,15 +394,22 @@
 
     function stop() {
       if (isNative()) {
-        const { BarcodeScanner } = window.Capacitor.Plugins;
-        BarcodeScanner?.stopScan();
-        document.body.classList.remove("scanner-active");
+        const BarcodeScanner = window.Capacitor?.Plugins?.BarcodeScanner;
+        if (BarcodeScanner?.stopScan) {
+          Promise.resolve(BarcodeScanner.stopScan()).catch(() => {});
+        }
+        setScannerUiActive(false);
       }
-      nativeListeners.forEach(listener => listener?.remove?.());
-      nativeListeners = [];
+      removeNativeListeners();
 
-      if (scanInterval) clearInterval(scanInterval);
-      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+      }
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
       
       const video = document.getElementById("scanVideo");
       if (video) video.remove();

@@ -1,5 +1,7 @@
 package com.agriprice.app;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -9,6 +11,8 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
     }
 
     @Override
@@ -21,6 +25,8 @@ public class MainActivity extends BridgeActivity {
             webview.setHorizontalScrollBarEnabled(false);
             webview.setScrollbarFadingEnabled(false);
             webview.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            webview.setBackgroundColor(Color.TRANSPARENT);
+            webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             
             // Re-enforce after a short delay just in case Capacitor resets it
             webview.postDelayed(new Runnable() {
@@ -29,6 +35,8 @@ public class MainActivity extends BridgeActivity {
                     webview.setVerticalScrollBarEnabled(false);
                     webview.setHorizontalScrollBarEnabled(false);
                     webview.setOverScrollMode(View.OVER_SCROLL_NEVER);
+                    webview.setBackgroundColor(Color.TRANSPARENT);
+                    webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 }
             }, 1000);
         }

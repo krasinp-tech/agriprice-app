@@ -110,12 +110,9 @@
 
       // 3. Request permissions quietly
       try {
-        if (window.AgriPermission) {
-          const prefs = window.AgriPermission.getPrefs();
-          if (!prefs.notification && typeof Notification !== 'undefined' && Notification.permission === 'default') {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await window.AgriPermission.requestNotification();
-          }
+        if (window.AgriPermission?.requestNotification) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          await window.AgriPermission.requestNotification();
         }
       } catch (_) {}
 

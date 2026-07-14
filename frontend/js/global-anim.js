@@ -5,6 +5,52 @@
   if (window.__AGRIPRICE_GLOBAL_ANIM_READY) return;
   window.__AGRIPRICE_GLOBAL_ANIM_READY = true;
 
+  function normalizeTheme(theme) {
+    return theme === 'dark' ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme, options = {}) {
+    const nextTheme = normalizeTheme(theme);
+    const isDark = nextTheme === 'dark';
+    const bgColor = isDark ? '#0f1115' : '#F7F9FA';
+
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.style.setProperty('--html-bg', bgColor);
+    document.documentElement.style.backgroundColor = bgColor;
+
+    const syncBody = () => {
+      if (!document.body) return;
+      document.body.setAttribute('data-theme', nextTheme);
+      document.body.style.backgroundColor = bgColor;
+    };
+
+    if (document.body) {
+      syncBody();
+    } else {
+      document.addEventListener('DOMContentLoaded', syncBody, { once: true });
+    }
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0f1115' : '#0B853C');
+
+    if (options.persist) {
+      localStorage.setItem('agriprice_theme', nextTheme);
+    }
+
+    if (options.broadcast && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'agriprice:theme', theme: nextTheme }, '*');
+    }
+  }
+
+  window.__AGRIPRICE_APPLY_THEME = applyTheme;
+  applyTheme(localStorage.getItem('agriprice_theme') || 'light');
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'agriprice_theme') {
+      applyTheme(event.newValue || 'light');
+    }
+  });
+
   // Hide bottom nav inside iframe to avoid duplicate bars
   if (window.self !== window.top) {
     const iframeStyle = document.createElement('style');
@@ -16,6 +62,16 @@
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
         height: auto !important;
+      }
+      /* Override bottom paddings designed for bottom-nav inside sub-pages */
+      .result-view,
+      .dashboard-container,
+      .content,
+      .main-content,
+      .app-container,
+      .chat-shell,
+      .account-container {
+        padding-bottom: 16px !important;
       }
     `;
     document.head.appendChild(iframeStyle);
@@ -218,9 +274,6 @@
     }
 
     /* ── Page Transition Animations ── */
-    @view-transition {
-      navigation: auto;
-    }
     html {
       background-color: var(--html-bg, #F7F9FA) !important;
     }
@@ -236,10 +289,6 @@
       opacity: 0 !important;
     }
   `;
-
-  const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
-  const bgColor = savedTheme === 'dark' ? '#121212' : '#F7F9FA';
-  document.documentElement.style.setProperty('--html-bg', bgColor);
 
   document.head.appendChild(style);
 

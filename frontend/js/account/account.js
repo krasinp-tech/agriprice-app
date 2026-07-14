@@ -111,7 +111,11 @@
 
     // avatar: ถ้ามีรูปที่ user เคยเลือกไว้ ให้ใช้ก่อน
     const hasSaved = loadSavedAvatar(role);
-    if (!hasSaved && avatarImg) avatarImg.src = u.avatarUrl || defaultAvatar;
+    if (!hasSaved && avatarImg) {
+      const isRelative = u.avatarUrl && !u.avatarUrl.startsWith('data:') && !u.avatarUrl.startsWith('http://') && !u.avatarUrl.startsWith('https://');
+      const rootPrefix = (typeof window.getRelativePrefixToRoot === 'function') ? window.getRelativePrefixToRoot() : '../../';
+      avatarImg.src = isRelative ? (rootPrefix + u.avatarUrl.replace(/^\/+/, '')) : (u.avatarUrl || defaultAvatar);
+    }
     if (avatarImg) {
       avatarImg.onerror = function () {
         this.onerror = null;
@@ -126,7 +130,7 @@
 
     // buyer-only menu
     if (buyerProfileLink) {
-      buyerProfileLink.style.display = role !== "guest" ? "flex" : "none";
+      buyerProfileLink.style.display = role === "buyer" ? "flex" : "none";
     }
 
     const tier = String(u.tier || "free").toLowerCase();
@@ -176,22 +180,18 @@
     const s = u.stats || {};
     safeText(statFollowing, s.following ?? 0);
     safeText(statFollowers, s.followers ?? 0);
-    safeText(statPros, s.pros ?? 0);
 
-    // ซ่อน "รายการโปร" สำหรับ buyer
+    const localProsCount = window.FavoritesStore ? window.FavoritesStore.read().length : (s.pros ?? 0);
+    safeText(statPros, localProsCount);
+
+    // Only show "รายการโปรด" for farmers (who bookmark buyers)
+    const showPros = role === "farmer";
     const prosStatEl = statPros?.closest('.stat');
     const prosStatDivider = prosStatEl?.previousElementSibling;
 
-    if (role === "buyer") {
-      if (prosStatEl) prosStatEl.style.display = "none";
-      if (prosStatDivider?.classList.contains('stat-divider')) {
-        prosStatDivider.style.display = "none";
-      }
-    } else {
-      if (prosStatEl) prosStatEl.style.display = "";
-      if (prosStatDivider?.classList.contains('stat-divider')) {
-        prosStatDivider.style.display = "";
-      }
+    if (prosStatEl) prosStatEl.style.display = showPros ? "" : "none";
+    if (prosStatDivider?.classList.contains('stat-divider')) {
+      prosStatDivider.style.display = showPros ? "" : "none";
     }
   }
 

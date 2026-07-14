@@ -28,10 +28,17 @@
 			!!cap?.isNative
 		);
 		const useLocalApi = localStorage.getItem('agriprice_use_local') === '1';
+		const isLocalhost = (
+			window.location.hostname === 'localhost' ||
+			window.location.hostname === '127.0.0.1'
+		);
 
-		if (useLocalApi) {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Local API override enabled: Using http://localhost:5000');
-			return 'http://localhost:5000';
+		if (useLocalApi || (isLocalhost && !isNative)) {
+			const localUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+				? window.location.origin
+				: 'http://localhost:5000';
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Localhost or Local API override enabled: Using', localUrl);
+			return localUrl;
 		}
 
 		if (isNative) {

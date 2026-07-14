@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnBack = document.getElementById("btnBack");
   const toggleDetailBtn = document.getElementById("toggleDetailBtn");
   const btnCancelBooking = document.getElementById("btnCancelBooking");
+  const heroBg = document.getElementById("heroBg");
+  const heroStatusIcon = document.getElementById("heroStatusIcon");
+  const heroSub = document.getElementById("heroSub");
+  const statusPill = document.getElementById("statusPill");
   const queueNo = document.getElementById("queueNo");
   const timeText = document.getElementById("timeText");
   const bookingIdText = document.getElementById("bookingIdText");
@@ -109,6 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
       booking_id: d.booking_id || null,
       booking_no: d.booking_no || null,
       status: d.status || "waiting",
+      cancel_by: d.cancel_by || d.cancelled_by || null,
+      cancel_reason: d.cancel_reason || d.cancel_note || null,
       shopName: farmer
         ? (farmer.shop_name || `${farmer.first_name || ""} ${farmer.last_name || ""}`.trim())
         : (d.shop_name || ""),
@@ -131,6 +137,70 @@ document.addEventListener("DOMContentLoaded", () => {
       chatTargetId: farmer?.profile_id || d.farmer_id || d.seller_id || null,
       dateFormatted: d.scheduled_time ? new Date(d.scheduled_time).toISOString() : "",
     };
+  }
+
+  function normalizeUiStatus(status) {
+    const value = String(status || "waiting").toLowerCase();
+    if (value === "success" || value === "completed" || value === "complete") return "completed";
+    if (value === "cancel" || value === "cancelled" || value === "canceled") return "cancelled";
+    if (value === "confirmed") return "confirmed";
+    if (value === "in_progress" || value === "processing") return "in_progress";
+    if (value === "rejected") return "rejected";
+    return "waiting";
+  }
+
+  function applyStatusUi(status) {
+    const uiStatus = normalizeUiStatus(status);
+    const config = {
+      waiting: {
+        icon: "hourglass_top",
+        label: t("status_waiting", "รอคิว"),
+        message: t("status_msg_waiting", "การจองของคุณอยู่ในคิวรอ"),
+      },
+      confirmed: {
+        icon: "check_circle",
+        label: t("status_confirmed", "ยืนยันแล้ว"),
+        message: t("status_msg_confirmed", "การจองของคุณได้รับการยืนยันแล้ว"),
+      },
+      in_progress: {
+        icon: "sync",
+        label: t("status_in_progress", "กำลังดำเนินการ"),
+        message: t("status_msg_in_progress", "กำลังดำเนินการรับสินค้าของคุณ"),
+      },
+      completed: {
+        icon: "task_alt",
+        label: t("status_completed", "เสร็จสิ้น"),
+        message: t("status_msg_completed", "การรับสินค้าเสร็จสิ้นแล้ว"),
+      },
+      cancelled: {
+        icon: "cancel",
+        label: t("status_cancelled", "ยกเลิกแล้ว"),
+        message: t("status_msg_cancelled", "การจองนี้ถูกยกเลิกแล้ว"),
+      },
+      rejected: {
+        icon: "block",
+        label: t("status_rejected", "ถูกปฏิเสธ"),
+        message: t("status_msg_rejected", "การจองนี้ถูกปฏิเสธโดยร้านล้ง"),
+      },
+    }[uiStatus];
+
+    if (heroBg) {
+      heroBg.classList.remove(
+        "status-waiting",
+        "status-confirmed",
+        "status-in_progress",
+        "status-completed",
+        "status-cancelled",
+        "status-rejected"
+      );
+      heroBg.classList.add(`status-${uiStatus}`);
+    }
+    if (heroStatusIcon) heroStatusIcon.textContent = config.icon;
+    if (heroSub) heroSub.textContent = config.message;
+    if (statusPill) statusPill.textContent = config.label;
+    if (btnCancelBooking) {
+      btnCancelBooking.style.display = ["completed", "cancelled", "rejected"].includes(uiStatus) ? "none" : "";
+    }
   }
 
   const BookingAPI = {
@@ -188,21 +258,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return { currentQueue: "-", waitingQueues: 0, estimatedMinutes: 0, averageTimePerQueue: 0 };
     },
 
-    async cancelBooking(bookingId) {
+    async cancelBooking(bookingId, cancelReason) {
       if (!bookingId) return { success: false, message: t("booking_id_not_found", "ไม่พบรหัสการจอง") };
       try {
-        if (window.api?.updateBooking) {
-          await window.api.updateBooking(bookingId, "cancel");
-        } else {
-          const apiBase = getApiBase();
-          if (!apiBase) throw new Error(t("api_not_ready", "ยังไม่พร้อมเชื่อมต่อเซิร์ฟเวอร์"));
-          const res = await fetch(`${apiBase}/api/bookings/${encodeURIComponent(bookingId)}`, {
-            method: "PATCH",
-            headers: { ...authHeaders(), "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "cancel" }),
-          });
-          if (!res.ok) throw new Error(t("cancel_error", "ยกเลิกการจองไม่สำเร็จ"));
-        }
+        const apiBase = getApiBase();
+        if (!apiBase) throw new Error(t("api_not_ready", "ยังไม่พร้อมเชื่อมต่อเซิร์ฟเวอร์"));
+        const body = { status: "cancel" };
+        if (cancelReason) body.cancel_reason = cancelReason;
+
+        const res = await fetch(`${apiBase}/api/bookings/${encodeURIComponent(bookingId)}`, {
+          method: "PATCH",
+          headers: { ...authHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(t("cancel_error", "ยกเลิกการจองไม่สำเร็จ"));
 
         localStorage.removeItem("confirmedBooking");
         localStorage.removeItem("bookingSlotId");
@@ -311,6 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookingData = await BookingAPI.loadConfirmedBooking();
     if (!bookingData) throw new Error(t("booking_not_found", "ไม่พบข้อมูลการจอง"));
     if (!bookingData.bookingId) throw new Error(t("booking_id_not_found", "ไม่พบรหัสการจองจากเซิร์ฟเวอร์"));
+    applyStatusUi(bookingData.status);
 
     const slot = bookingData.queueNo || bookingData.slotId || localStorage.getItem("bookingSlotId") || "";
     if (queueNo) queueNo.textContent = slot || "-";
@@ -372,15 +442,65 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleCancelBooking() {
-    const confirmed = await new Promise((resolve) => {
-      const message = t("confirm_cancel_booking", "คุณต้องการยกเลิกการจองหรือไม่?\n\nการยกเลิกจะไม่สามารถย้อนกลับได้");
-      if (window.showConfirm) window.showConfirm(message, resolve);
-      else resolve(window.confirm(message));
-    });
-    if (!confirmed) return;
+    // Step 1: Ask for reason first with preset choices
+    const reasonOptions = [
+      t("cancel_reason_change_plan", "เปลี่ยนแผน / ไม่ว่างตามนัด"),
+      t("cancel_reason_price", "ราคาไม่เป็นที่ต้องการ"),
+      t("cancel_reason_product", "ผลผลิตไม่พร้อมจำหน่าย"),
+      t("cancel_reason_emergency", "เหตุฉุกเฉิน / เป็นเหตุสุดวิสัย"),
+      t("cancel_reason_double_book", "จองซ้ำ / ผิดรายการ"),
+      t("cancel_reason_other", "อื่นๆ"),
+    ];
+
+    let cancelReason = null;
+    try {
+      cancelReason = await new Promise((resolve) => {
+        // Build a small inline dialog if appNotify is not enough
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+        const card = document.createElement("div");
+        card.style.cssText = "background:#fff;border-radius:20px;padding:24px 20px;max-width:380px;width:100%;font-family:'Outfit',sans-serif;";
+        card.innerHTML = `
+          <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#1a1a1a">${t("cancel_reason_title", "กรุณาระบุเหตุผลการยกเลิก")}</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:#888">${t("cancel_reason_sub", "ข้อมูลนี้จะถูกแสดงให้ผู้รับซื้อทราบสาเหตุการยกเลิก")}</p>
+          <div id="reasonOptions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            ${reasonOptions.map((r, i) => `<button data-idx="${i}" style="background:#F0F4F1;border:1.5px solid transparent;border-radius:12px;padding:11px 14px;text-align:left;font-size:14px;font-weight:600;cursor:pointer;color:#1a1a1a;font-family:inherit;width:100%">${r}</button>`).join("")}
+          </div>
+          <textarea id="reasonFreeText" placeholder="${t("or_type_reason", "หรือพิมพ์เหตุผลเพิ่มเติม...สามารถไม่ระบุก็ได้")}" style="width:100%;height:70px;border:1.5px solid #ddd;border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;margin-bottom:14px;box-sizing:border-box"></textarea>
+          <div style="display:flex;gap:10px">
+            <button id="reasonCancel" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #ddd;background:transparent;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#666">${t("back", "ยกเลิก")}</button>
+            <button id="reasonConfirm" style="flex:1;padding:12px;border-radius:12px;border:none;background:#E53935;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">${t("confirm_cancel", "ยืนยันยกเลิก")}</button>
+          </div>
+        `;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        let selected = null;
+        card.querySelectorAll("#reasonOptions button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            card.querySelectorAll("#reasonOptions button").forEach(b => { b.style.background = "#F0F4F1"; b.style.border = "1.5px solid transparent"; b.style.color = "#1a1a1a"; });
+            btn.style.background = "rgba(229,57,53,0.08)";
+            btn.style.border = "1.5px solid rgba(229,57,53,0.4)";
+            btn.style.color = "#E53935";
+            selected = reasonOptions[Number(btn.dataset.idx)];
+            card.querySelector("#reasonFreeText").value = "";
+          });
+        });
+        card.querySelector("#reasonFreeText").addEventListener("input", () => { selected = null; });
+        card.querySelector("#reasonCancel").onclick = () => { document.body.removeChild(overlay); resolve(null); };
+        card.querySelector("#reasonConfirm").onclick = () => {
+          const freeText = card.querySelector("#reasonFreeText").value.trim();
+          document.body.removeChild(overlay);
+          resolve(freeText || selected || "");
+        };
+      });
+    } catch (_) { cancelReason = null; }
+
+    // null means user dismissed without confirming
+    if (cancelReason === null) return;
 
     const bkId = (bookingIdText?.textContent || "").trim();
-    const result = await BookingAPI.cancelBooking(bkId);
+    const result = await BookingAPI.cancelBooking(bkId, cancelReason);
     if (result?.success) {
       if (window.appNotify) window.appNotify(t("cancel_success", "ยกเลิกการจองสำเร็จ"), "success");
       const nextHref = resolveToRootUrl("pages/buyer/setbooking/booking.html?filter=cancel");

@@ -100,6 +100,8 @@ CREATE TABLE public.bookings (
   note text,
   address text,
   status text DEFAULT 'waiting' CHECK (status IN ('waiting', 'success', 'cancel')),
+  cancel_by text CHECK (cancel_by IS NULL OR cancel_by IN ('farmer', 'buyer')),
+  cancel_reason text,
   quantity numeric,
   contact_name text,
   contact_phone text,
@@ -171,6 +173,15 @@ CREATE TABLE public.chat_messages (
   CONSTRAINT chat_messages_pkey PRIMARY KEY (message_id),
   CONSTRAINT chat_messages_room_id_fkey FOREIGN KEY (room_id) REFERENCES public.chat_rooms(room_id),
   CONSTRAINT chat_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(profile_id)
+);
+
+CREATE TABLE public.chat_room_deletions (
+  room_id bigint NOT NULL,
+  user_id uuid NOT NULL,
+  deleted_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT chat_room_deletions_pkey PRIMARY KEY (room_id, user_id),
+  CONSTRAINT chat_room_deletions_room_id_fkey FOREIGN KEY (room_id) REFERENCES public.chat_rooms(room_id) ON DELETE CASCADE,
+  CONSTRAINT chat_room_deletions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(profile_id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.notifications (
@@ -275,6 +286,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS chat_rooms_unordered_user_pair_idx
   )
   WHERE user1_id IS NOT NULL
     AND user2_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_chat_room_deletions_user_room
+  ON public.chat_room_deletions(user_id, room_id);
 
 COMMENT ON TABLE public.offer_slots IS
   'Slots for buy offers. booked_count is not stored; it is derived from bookings.';

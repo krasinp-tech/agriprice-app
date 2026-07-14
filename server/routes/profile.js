@@ -58,7 +58,7 @@ function normalizeServices(value) {
 
 async function attachProfileDetails(profile) {
   if (!profile) return profile;
-  const [linksRes, servicesRes] = await Promise.all([
+  const [linksRes, servicesRes, offersCountRes] = await Promise.all([
     supabaseAdmin
       .from('profile_links')
       .select('id, link_type, url')
@@ -69,6 +69,10 @@ async function attachProfileDetails(profile) {
       .select('id, service_name')
       .eq('profile_id', profile.profile_id)
       .order('id'),
+    supabaseAdmin
+      .from('buy_offers')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', profile.profile_id),
   ]);
 
   return {
@@ -81,6 +85,7 @@ async function attachProfileDetails(profile) {
     })),
     services: (servicesRes.data || []).map((service) => service.service_name),
     profile_services: servicesRes.data || [],
+    promoCount: offersCountRes.count || 0,
   };
 }
 

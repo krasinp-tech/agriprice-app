@@ -44,8 +44,10 @@ For an existing Supabase project, run these files in Supabase SQL Editor:
 1. `infrastructure/database/migrations/final_teacher_normalization_migration.sql`
 2. `infrastructure/database/migrations/create-reviews-and-notification-link.sql`
 3. `infrastructure/database/migrations/zz-fix-chat-device-unique-constraints.sql`
-4. `infrastructure/database/maintenance/SUPABASE_OPTIMIZE.sql`
-5. `infrastructure/database/maintenance/verify_submission_constraints.sql`
+4. `infrastructure/database/migrations/bug-freeze-booking-queue-sequence.sql`
+5. `infrastructure/database/migrations/add-booking-cancel-info-and-chat-deletions.sql`
+6. `infrastructure/database/maintenance/SUPABASE_OPTIMIZE.sql`
+7. `infrastructure/database/maintenance/verify_submission_constraints.sql`
 
 Reference documentation:
 

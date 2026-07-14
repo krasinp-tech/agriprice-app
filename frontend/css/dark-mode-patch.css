@@ -2145,3 +2145,970 @@
 [data-theme="dark"] .leaflet-container {
   background: #1c1c1e !important;
 }
+
+/* ============================================================
+   SECTION 42: Dark Theme Redesign Layer
+   Keep this section last. It normalizes scattered page tokens and
+   gives every dark screen the same readable surface system.
+   ============================================================ */
+
+html[data-theme="dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --primary: #2fcf77;
+  --primary-gradient: linear-gradient(135deg, #2fcf77 0%, #10a456 100%);
+  --primary-light: rgba(47, 207, 119, 0.16);
+  --secondary: #8fb7ff;
+
+  --bg-page: #0b1210;
+  --bg-card: #121b17;
+  --bg-card-raised: #16231d;
+  --bg-input: #1a2520;
+  --bg-hover: #203128;
+  --bg-active: rgba(47, 207, 119, 0.16);
+
+  --text-main: #f3f7f2;
+  --text-primary: #f3f7f2;
+  --text-body: #dce8df;
+  --text-muted: #b3c2b9;
+  --text-dim: #7f9087;
+  --text-time-ago: #63e6a0;
+
+  --border-light: rgba(229, 244, 235, 0.10);
+  --border-medium: rgba(229, 244, 235, 0.18);
+  --border-strong: rgba(229, 244, 235, 0.26);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 22px 56px rgba(0, 0, 0, 0.42);
+  --shadow-card: var(--shadow-sm);
+  --shadow-soft: var(--shadow-sm);
+
+  --bg: var(--bg-page);
+  --card: var(--bg-card);
+  --text: var(--text-main);
+  --muted: var(--text-muted);
+  --line: var(--border-light);
+  --soft: var(--bg-input);
+  --border: var(--border-light);
+  --icon-color: var(--text-muted);
+  --chevron: var(--text-dim);
+  --green: var(--primary);
+  --green-dark: #10a456;
+  --green-title: #63e6a0;
+  --g1: #2fcf77;
+  --g2: #10a456;
+  --g3: #08783f;
+}
+
+html[data-theme="dark"] {
+  --html-bg: var(--bg-page) !important;
+  background: var(--bg-page) !important;
+}
+
+html[data-theme="dark"] body,
+[data-theme="dark"] body {
+  background: var(--bg-page) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] body::selection,
+[data-theme="dark"] ::selection {
+  background: rgba(47, 207, 119, 0.35);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .app-container,
+[data-theme="dark"] .page,
+[data-theme="dark"] .page-shell,
+[data-theme="dark"] .acc-page,
+[data-theme="dark"] .chat-page,
+[data-theme="dark"] .booking-step1,
+[data-theme="dark"] .booking-step2,
+[data-theme="dark"] .booking-step3,
+[data-theme="dark"] .booking-step4,
+[data-theme="dark"] .register-page,
+[data-theme="dark"] .reg-page,
+[data-theme="dark"] .payment-page,
+[data-theme="dark"] .sub-page,
+[data-theme="dark"] .notify-page,
+[data-theme="dark"] .lang-page,
+[data-theme="dark"] .address-page,
+[data-theme="dark"] .terms-page,
+[data-theme="dark"] .review-page,
+[data-theme="dark"] .ud-page,
+[data-theme="dark"] .ma-page,
+[data-theme="dark"] .detail-page {
+  background: var(--bg-page) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .search-section {
+  background: var(--bg-card) !important;
+  box-shadow: 0 -10px 26px rgba(0, 0, 0, 0.20) !important;
+}
+
+[data-theme="dark"] .product-tabs-section,
+[data-theme="dark"] .products-section,
+[data-theme="dark"] .banner-section,
+[data-theme="dark"] .content,
+[data-theme="dark"] .chat-shell {
+  background: var(--bg-page) !important;
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(18, 27, 23, 0.96) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+[data-theme="dark"] .bottom-nav-item {
+  color: var(--text-dim) !important;
+}
+
+[data-theme="dark"] .bottom-nav-item.active,
+[data-theme="dark"] .bottom-nav-item:hover {
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] .chat-header,
+[data-theme="dark"] .room-header,
+[data-theme="dark"] .room-composer,
+[data-theme="dark"] .modal-top,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .card:not(.info):not(.warning-card),
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .booking-card,
+[data-theme="dark"] .empty-card,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .profile-content-card,
+[data-theme="dark"] .profile-info-card,
+[data-theme="dark"] .product-card-light,
+[data-theme="dark"] .favorites-section .fav-card,
+[data-theme="dark"] .chat-list,
+[data-theme="dark"] .chat-room,
+[data-theme="dark"] .chat-empty-card,
+[data-theme="dark"] .menu-card,
+[data-theme="dark"] .payment-card,
+[data-theme="dark"] .sub-card,
+[data-theme="dark"] .plan-card,
+[data-theme="dark"] .notify-card,
+[data-theme="dark"] .noti-setting-card,
+[data-theme="dark"] .lang-card,
+[data-theme="dark"] .lang-item,
+[data-theme="dark"] .device-card,
+[data-theme="dark"] .address-card,
+[data-theme="dark"] .terms-card,
+[data-theme="dark"] .review-card,
+[data-theme="dark"] .ud-card,
+[data-theme="dark"] .ma-card,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .big-card,
+[data-theme="dark"] .calendar-container,
+[data-theme="dark"] .timeslots-container,
+[data-theme="dark"] .vehicle-card,
+[data-theme="dark"] .contact-card,
+[data-theme="dark"] .gov-price-float,
+[data-theme="dark"] .gov-price-panel,
+[data-theme="dark"] .avg-card,
+[data-theme="dark"] .price-table-wrap,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-sheet,
+[data-theme="dark"] .logout-modal-content,
+[data-theme="dark"] .soft-guard-sheet,
+[data-theme="dark"] .scan-modal-content,
+[data-theme="dark"] .filter-drawer-content {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+[data-theme="dark"] .card.info,
+[data-theme="dark"] .summary-card.warning-card {
+  background: rgba(248, 198, 109, 0.13) !important;
+  border-color: rgba(248, 198, 109, 0.42) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .round-card,
+[data-theme="dark"] .grade-card,
+[data-theme="dark"] .price-box,
+[data-theme="dark"] .pc-grade-box,
+[data-theme="dark"] .vehicleItem,
+[data-theme="dark"] .vehicleInfo,
+[data-theme="dark"] .queueBox,
+[data-theme="dark"] .statusGrid,
+[data-theme="dark"] .statusMini,
+[data-theme="dark"] .placeBox,
+[data-theme="dark"] .detailPanel,
+[data-theme="dark"] .vehicleRow,
+[data-theme="dark"] .payment-summary,
+[data-theme="dark"] .secure-info,
+[data-theme="dark"] .current-device-badge,
+[data-theme="dark"] .info-chip,
+[data-theme="dark"] .preview-item,
+[data-theme="dark"] .msg-date-separator span,
+[data-theme="dark"] .product-icon-wrapper,
+[data-theme="dark"] .vehicle-icon,
+[data-theme="dark"] .device-icon-wrap,
+[data-theme="dark"] .fav-avatar,
+[data-theme="dark"] .seller-avatar,
+[data-theme="dark"] .pc-avatar,
+[data-theme="dark"] .room-avatar,
+[data-theme="dark"] .chat-item-avatar {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .menu-item,
+[data-theme="dark"] .lang-item,
+[data-theme="dark"] .chat-item {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .menu-item:hover,
+[data-theme="dark"] .lang-item:hover,
+[data-theme="dark"] .chat-item:hover,
+[data-theme="dark"] .combo-item:hover,
+[data-theme="dark"] .room-action:hover,
+[data-theme="dark"] .composer-btn:hover,
+[data-theme="dark"] .icon-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+[data-theme="dark"] .chat-item.active,
+[data-theme="dark"] .lang-item.active,
+[data-theme="dark"] .profile-tab.active,
+[data-theme="dark"] .tab-btn.active,
+[data-theme="dark"] .period-tab.active,
+[data-theme="dark"] .seg-btn.active,
+[data-theme="dark"] .pill.selected {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .segmented,
+[data-theme="dark"] .seg-control,
+[data-theme="dark"] .segment-control,
+[data-theme="dark"] .tabs-wrap,
+[data-theme="dark"] .tab-bar {
+  background: var(--bg-card-raised) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .seg-btn:not(.active),
+[data-theme="dark"] .period-tab:not(.active),
+[data-theme="dark"] .tab-btn:not(.active),
+[data-theme="dark"] .profile-tab:not(.active),
+[data-theme="dark"] .pill:not(.selected),
+[data-theme="dark"] .btn.ghost,
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-cancel,
+[data-theme="dark"] .btn-social,
+[data-theme="dark"] .btn-contact,
+[data-theme="dark"] .pc-btn-contact,
+[data-theme="dark"] .logout-modal-btn-cancel,
+[data-theme="dark"] .btn-close-modal,
+[data-theme="dark"] .btn-modal-cancel,
+[data-theme="dark"] .room-back,
+[data-theme="dark"] .room-action,
+[data-theme="dark"] .composer-btn,
+[data-theme="dark"] .back-btn,
+[data-theme="dark"] #getCurrentLocationBtn,
+[data-theme="dark"] .map-open-btn {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .input,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .text-input,
+[data-theme="dark"] .combo,
+[data-theme="dark"] .combo-menu,
+[data-theme="dark"] .combo-input,
+[data-theme="dark"] .textarea-wrap,
+[data-theme="dark"] .textarea,
+[data-theme="dark"] .price-input,
+[data-theme="dark"] .price-number,
+[data-theme="dark"] .searchbox,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .chat-search,
+[data-theme="dark"] .room-composer input,
+[data-theme="dark"] .select-field,
+[data-theme="dark"] .select-wrap select,
+[data-theme="dark"] .date-row input[type="date"],
+[data-theme="dark"] .feedback-textarea,
+[data-theme="dark"] #servicesEditor {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+[data-theme="dark"] .combo-input::placeholder,
+[data-theme="dark"] .search-input::placeholder {
+  color: var(--text-dim) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .text-input:focus,
+[data-theme="dark"] .combo:focus-within,
+[data-theme="dark"] .textarea-wrap:focus-within,
+[data-theme="dark"] .price-input:focus-within,
+[data-theme="dark"] .searchbox:focus-within,
+[data-theme="dark"] .chat-search:focus-within {
+  border-color: rgba(47, 207, 119, 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(47, 207, 119, 0.14) !important;
+}
+
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .section-title-home,
+[data-theme="dark"] .section-header,
+[data-theme="dark"] .page-header-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .menu-title,
+[data-theme="dark"] .profile-name,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .stat-num,
+[data-theme="dark"] .products-list-title,
+[data-theme="dark"] .chat-list-title,
+[data-theme="dark"] .chat-empty-title,
+[data-theme="dark"] .room-name,
+[data-theme="dark"] .shop,
+[data-theme="dark"] .vehicle-title,
+[data-theme="dark"] .round-card-title,
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .logout-modal-title,
+[data-theme="dark"] .plan-name,
+[data-theme="dark"] .plan-price,
+[data-theme="dark"] .notify-title,
+[data-theme="dark"] .noti-setting-title,
+[data-theme="dark"] .device-name,
+[data-theme="dark"] .location-address,
+[data-theme="dark"] .service-name,
+[data-theme="dark"] .reviewer-name,
+[data-theme="dark"] .seller-sub,
+[data-theme="dark"] .pc-sub,
+[data-theme="dark"] .field-value,
+[data-theme="dark"] .info-value,
+[data-theme="dark"] .contact-value,
+[data-theme="dark"] .product-name,
+[data-theme="dark"] .round-card-details span,
+[data-theme="dark"] .rounds-table tbody td,
+[data-theme="dark"] .price-table tbody td,
+[data-theme="dark"] .gov-val {
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .section-subtitle,
+[data-theme="dark"] .section-sub,
+[data-theme="dark"] .menu-sub,
+[data-theme="dark"] .profile-sub,
+[data-theme="dark"] .profile-tagline-text,
+[data-theme="dark"] .profile-about-text,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .meta,
+[data-theme="dark"] .empty-desc,
+[data-theme="dark"] .hint,
+[data-theme="dark"] .help,
+[data-theme="dark"] .help-text,
+[data-theme="dark"] .label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .field-label,
+[data-theme="dark"] .input-label,
+[data-theme="dark"] .info-label,
+[data-theme="dark"] .contact-label,
+[data-theme="dark"] .vehicle-detail,
+[data-theme="dark"] .product-info,
+[data-theme="dark"] .price,
+[data-theme="dark"] .price-label,
+[data-theme="dark"] .price-unit,
+[data-theme="dark"] .price-suffix,
+[data-theme="dark"] .pc-grade-price,
+[data-theme="dark"] .pc-footer,
+[data-theme="dark"] .distance,
+[data-theme="dark"] .chat-item-time,
+[data-theme="dark"] .chat-item-snippet,
+[data-theme="dark"] .chat-empty-sub,
+[data-theme="dark"] .room-sub,
+[data-theme="dark"] .msg-time,
+[data-theme="dark"] .notify-sub,
+[data-theme="dark"] .noti-setting-sub,
+[data-theme="dark"] .device-sub,
+[data-theme="dark"] .device-meta,
+[data-theme="dark"] .address-detail,
+[data-theme="dark"] .section-body,
+[data-theme="dark"] .plan-feature,
+[data-theme="dark"] .payment-row-label,
+[data-theme="dark"] .location-sub,
+[data-theme="dark"] .location-text .location-sub,
+[data-theme="dark"] .gov-label,
+[data-theme="dark"] .gov-price-date,
+[data-theme="dark"] .gov-price-source,
+[data-theme="dark"] .round-card-status,
+[data-theme="dark"] .round-card-details,
+[data-theme="dark"] .warning-list li {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .text-dim,
+[data-theme="dark"] .version,
+[data-theme="dark"] .product-location,
+[data-theme="dark"] .chev,
+[data-theme="dark"] .gov-chevron,
+[data-theme="dark"] .news-link-icon,
+[data-theme="dark"] .round-card-details .material-icons-outlined {
+  color: var(--text-dim) !important;
+}
+
+[data-theme="dark"] .seller-name,
+[data-theme="dark"] .pc-name,
+[data-theme="dark"] .grade,
+[data-theme="dark"] .pc-grade-letter,
+[data-theme="dark"] .grade-letter,
+[data-theme="dark"] .grade-item-letter,
+[data-theme="dark"] .update-time,
+[data-theme="dark"] .queueNo,
+[data-theme="dark"] .chat-title .material-icons-outlined,
+[data-theme="dark"] .room-action .material-icons-outlined,
+[data-theme="dark"] .composer-btn .material-icons-outlined,
+[data-theme="dark"] .chat-refresh .material-icons-outlined,
+[data-theme="dark"] .card-icon,
+[data-theme="dark"] .vehicleHeader,
+[data-theme="dark"] .news-more,
+[data-theme="dark"] .news-chip,
+[data-theme="dark"] .gov-icon-wrap,
+[data-theme="dark"] .info-chip {
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] .divider,
+[data-theme="dark"] .separator,
+[data-theme="dark"] .card-divider,
+[data-theme="dark"] .stat-divider,
+[data-theme="dark"] .info-row,
+[data-theme="dark"] .chat-list-top,
+[data-theme="dark"] .chat-item,
+[data-theme="dark"] .room-header,
+[data-theme="dark"] .room-composer,
+[data-theme="dark"] .composer-preview,
+[data-theme="dark"] .menu-item + .menu-item,
+[data-theme="dark"] .logout-item,
+[data-theme="dark"] .round-card-details,
+[data-theme="dark"] .rounds-table tbody td,
+[data-theme="dark"] .price-table tbody td {
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .rounds-table thead th,
+[data-theme="dark"] .price-table thead th,
+[data-theme="dark"] .gov-price-table thead,
+[data-theme="dark"] .gov-price-table th {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .badge,
+[data-theme="dark"] .product-tag,
+[data-theme="dark"] .category-badge,
+[data-theme="dark"] .noti-item-icon {
+  background: rgba(229, 244, 235, 0.08) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .badge.waiting,
+[data-theme="dark"] .badge.success,
+[data-theme="dark"] .pc-badge.open,
+[data-theme="dark"] .status-badge.open,
+[data-theme="dark"] .current-device-badge,
+[data-theme="dark"] .product-tag,
+[data-theme="dark"] .default-badge {
+  background: rgba(47, 207, 119, 0.16) !important;
+  color: #63e6a0 !important;
+}
+
+[data-theme="dark"] .badge.cancel,
+[data-theme="dark"] .pc-badge.closed,
+[data-theme="dark"] .status-badge.closed,
+[data-theme="dark"] .error {
+  background: rgba(248, 113, 113, 0.16) !important;
+  border-color: rgba(248, 113, 113, 0.28) !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .primary-btn,
+[data-theme="dark"] .btn.solid,
+[data-theme="dark"] .btn-book,
+[data-theme="dark"] .pc-btn-book,
+[data-theme="dark"] .btn-submit,
+[data-theme="dark"] .modal-save,
+[data-theme="dark"] .add-round-btn,
+[data-theme="dark"] .btn-manual,
+[data-theme="dark"] .scan-btn,
+[data-theme="dark"] .cta .btn,
+[data-theme="dark"] .composer-send,
+[data-theme="dark"] .logout-modal-btn-confirm {
+  background: var(--primary-gradient) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 28px rgba(16, 164, 86, 0.26) !important;
+}
+
+[data-theme="dark"] .scan-btn .material-icons-outlined,
+[data-theme="dark"] .primary-btn *,
+[data-theme="dark"] .btn.solid *,
+[data-theme="dark"] .btn-book *,
+[data-theme="dark"] .pc-btn-book *,
+[data-theme="dark"] .composer-send * {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .toggle,
+[data-theme="dark"] .toggle-track {
+  background: rgba(229, 244, 235, 0.16) !important;
+}
+
+[data-theme="dark"] .toggle.on,
+[data-theme="dark"] .toggle-track.on {
+  background: var(--primary-gradient) !important;
+}
+
+[data-theme="dark"] .toggle::after,
+[data-theme="dark"] .toggle-thumb,
+[data-theme="dark"] .notify-slider:before {
+  background: #f3f7f2 !important;
+}
+
+[data-theme="dark"] .room-messages,
+[data-theme="dark"] .composer-preview {
+  background: #0d1512 !important;
+}
+
+[data-theme="dark"] .msg.them .bubble {
+  background: var(--bg-card-raised) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .msg.me .bubble {
+  background: var(--primary-gradient) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .hero-indicator .dot,
+[data-theme="dark"] .page-indicator .dot,
+[data-theme="dark"] .product-dots .dot,
+[data-theme="dark"] .favorites-dots .dot {
+  background: rgba(229, 244, 235, 0.28) !important;
+}
+
+[data-theme="dark"] .hero-indicator .dot.active,
+[data-theme="dark"] .page-indicator .dot.active,
+[data-theme="dark"] .product-dots .dot.active,
+[data-theme="dark"] .favorites-dots .dot.active {
+  background: var(--primary) !important;
+}
+
+[data-theme="dark"] .shimmer,
+[data-theme="dark"] .skeleton,
+[data-theme="dark"] .shimmer-element {
+  background: linear-gradient(90deg, #152019 25%, #203128 50%, #152019 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+[data-theme="dark"] .modal-overlay,
+[data-theme="dark"] .logout-modal-overlay,
+[data-theme="dark"] .soft-guard-backdrop,
+[data-theme="dark"] .filter-drawer-backdrop {
+  background: rgba(5, 10, 8, 0.72) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .autocomplete-items {
+  background: var(--bg-card) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+[data-theme="dark"] .autocomplete-items div {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .autocomplete-items div.autocomplete-active {
+  background: var(--bg-active) !important;
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] .logout-modal-icon {
+  background: rgba(248, 113, 113, 0.16) !important;
+}
+
+[data-theme="dark"] .warn,
+[data-theme="dark"] .warning-icon,
+[data-theme="dark"] .summary-card.warning-card .card-title,
+[data-theme="dark"] .summary-card.warning-card .warning-icon,
+[data-theme="dark"] .service-icon.orange span {
+  color: #f8c66d !important;
+}
+
+[data-theme="dark"] .service-icon.green,
+[data-theme="dark"] .service-icon.money,
+[data-theme="dark"] .service-icon.orange,
+[data-theme="dark"] .service-icon.purple,
+[data-theme="dark"] .gov-icon-wrap,
+[data-theme="dark"] .location-link {
+  background: rgba(47, 207, 119, 0.16) !important;
+  border-color: rgba(47, 207, 119, 0.20) !important;
+}
+
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .acc-hero {
+  background: linear-gradient(160deg, #0f7a43 0%, #14ae60 54%, #096036 100%) !important;
+  box-shadow: 0 18px 44px rgba(6, 96, 54, 0.28) !important;
+}
+
+[data-theme="dark"] .topbar .title,
+[data-theme="dark"] .acc-title,
+[data-theme="dark"] .scan-header h2,
+[data-theme="dark"] .scan-hint,
+[data-theme="dark"] .torch-btn span,
+[data-theme="dark"] .torch-btn .material-icons-outlined,
+[data-theme="dark"] .manual-input-box input {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .topbar .back-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .news-item {
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(47, 207, 119, 0.08) 100%) !important;
+}
+
+[data-theme="dark"] #qrCanvas,
+[data-theme="dark"] .promptpay-qr-card {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+[data-theme="dark"] #leafletMapDiv {
+  filter: invert(92%) hue-rotate(160deg) brightness(86%) contrast(90%) !important;
+}
+
+/* ============================================================
+   SECTION 43: Neutral Dark Correction
+   Dark mode must read as charcoal/black, not green-tinted UI.
+   Green remains only for brand actions, active states, and success.
+   ============================================================ */
+
+html[data-theme="dark"],
+[data-theme="dark"] {
+  --primary: #22c55e;
+  --primary-gradient: linear-gradient(135deg, #22c55e 0%, #0B853C 100%);
+  --primary-light: rgba(34, 197, 94, 0.14);
+  --secondary: #93c5fd;
+
+  --bg-page: #0f1115;
+  --bg-card: #171a20;
+  --bg-card-raised: #1d222b;
+  --bg-input: #20252e;
+  --bg-hover: #252b35;
+  --bg-active: rgba(34, 197, 94, 0.14);
+
+  --text-main: #f5f7fa;
+  --text-primary: #f5f7fa;
+  --text-body: #e1e6ee;
+  --text-muted: #b6beca;
+  --text-dim: #77808e;
+  --text-time-ago: #4ade80;
+
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --bg: var(--bg-page);
+  --card: var(--bg-card);
+  --text: var(--text-main);
+  --muted: var(--text-muted);
+  --line: var(--border-light);
+  --soft: var(--bg-input);
+  --border: var(--border-light);
+  --icon-color: var(--text-muted);
+  --chevron: var(--text-dim);
+  --green: var(--primary);
+  --green-dark: #0B853C;
+  --green-title: #4ade80;
+  --g1: #22c55e;
+  --g2: #0B853C;
+  --g3: #086333;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+[data-theme="dark"] body {
+  --html-bg: var(--bg-page) !important;
+  background: var(--bg-page) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] body::selection,
+[data-theme="dark"] ::selection {
+  background: rgba(34, 197, 94, 0.30);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(23, 26, 32, 0.96) !important;
+  border-color: var(--border-light) !important;
+  box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.36) !important;
+}
+
+[data-theme="dark"] .search-section,
+[data-theme="dark"] .chat-header,
+[data-theme="dark"] .room-header,
+[data-theme="dark"] .room-composer,
+[data-theme="dark"] .modal-top,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .card:not(.info):not(.warning-card),
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .booking-card,
+[data-theme="dark"] .empty-card,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .profile-content-card,
+[data-theme="dark"] .profile-info-card,
+[data-theme="dark"] .product-card-light,
+[data-theme="dark"] .favorites-section .fav-card,
+[data-theme="dark"] .chat-list,
+[data-theme="dark"] .chat-room,
+[data-theme="dark"] .chat-empty-card,
+[data-theme="dark"] .menu-card,
+[data-theme="dark"] .payment-card,
+[data-theme="dark"] .sub-card,
+[data-theme="dark"] .plan-card,
+[data-theme="dark"] .notify-card,
+[data-theme="dark"] .noti-setting-card,
+[data-theme="dark"] .lang-card,
+[data-theme="dark"] .lang-item,
+[data-theme="dark"] .device-card,
+[data-theme="dark"] .address-card,
+[data-theme="dark"] .terms-card,
+[data-theme="dark"] .review-card,
+[data-theme="dark"] .ud-card,
+[data-theme="dark"] .ma-card,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .big-card,
+[data-theme="dark"] .calendar-container,
+[data-theme="dark"] .timeslots-container,
+[data-theme="dark"] .vehicle-card,
+[data-theme="dark"] .contact-card,
+[data-theme="dark"] .gov-price-float,
+[data-theme="dark"] .gov-price-panel,
+[data-theme="dark"] .avg-card,
+[data-theme="dark"] .price-table-wrap,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-sheet,
+[data-theme="dark"] .logout-modal-content,
+[data-theme="dark"] .soft-guard-sheet,
+[data-theme="dark"] .scan-modal-content,
+[data-theme="dark"] .filter-drawer-content {
+  background: var(--bg-card) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .round-card,
+[data-theme="dark"] .grade-card,
+[data-theme="dark"] .price-box,
+[data-theme="dark"] .pc-grade-box,
+[data-theme="dark"] .vehicleItem,
+[data-theme="dark"] .vehicleInfo,
+[data-theme="dark"] .queueBox,
+[data-theme="dark"] .statusGrid,
+[data-theme="dark"] .statusMini,
+[data-theme="dark"] .placeBox,
+[data-theme="dark"] .detailPanel,
+[data-theme="dark"] .vehicleRow,
+[data-theme="dark"] .payment-summary,
+[data-theme="dark"] .secure-info,
+[data-theme="dark"] .preview-item,
+[data-theme="dark"] .msg-date-separator span,
+[data-theme="dark"] .product-icon-wrapper,
+[data-theme="dark"] .vehicle-icon,
+[data-theme="dark"] .device-icon-wrap,
+[data-theme="dark"] .fav-avatar,
+[data-theme="dark"] .seller-avatar,
+[data-theme="dark"] .pc-avatar,
+[data-theme="dark"] .room-avatar,
+[data-theme="dark"] .chat-item-avatar {
+  background: var(--bg-input) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .input,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .text-input,
+[data-theme="dark"] .combo,
+[data-theme="dark"] .combo-menu,
+[data-theme="dark"] .combo-input,
+[data-theme="dark"] .textarea-wrap,
+[data-theme="dark"] .textarea,
+[data-theme="dark"] .price-input,
+[data-theme="dark"] .price-number,
+[data-theme="dark"] .searchbox,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .chat-search,
+[data-theme="dark"] .room-composer input,
+[data-theme="dark"] .select-field,
+[data-theme="dark"] .select-wrap select,
+[data-theme="dark"] .date-row input[type="date"],
+[data-theme="dark"] .feedback-textarea,
+[data-theme="dark"] #servicesEditor {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .text-input:focus,
+[data-theme="dark"] .combo:focus-within,
+[data-theme="dark"] .textarea-wrap:focus-within,
+[data-theme="dark"] .price-input:focus-within,
+[data-theme="dark"] .searchbox:focus-within,
+[data-theme="dark"] .chat-search:focus-within {
+  border-color: rgba(34, 197, 94, 0.58) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12) !important;
+}
+
+[data-theme="dark"] .room-messages,
+[data-theme="dark"] .composer-preview {
+  background: #111318 !important;
+}
+
+[data-theme="dark"] .msg.them .bubble,
+[data-theme="dark"] .segmented,
+[data-theme="dark"] .seg-control,
+[data-theme="dark"] .segment-control,
+[data-theme="dark"] .tabs-wrap,
+[data-theme="dark"] .tab-bar {
+  background: var(--bg-card-raised) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .menu-item:hover,
+[data-theme="dark"] .lang-item:hover,
+[data-theme="dark"] .chat-item:hover,
+[data-theme="dark"] .combo-item:hover,
+[data-theme="dark"] .room-action:hover,
+[data-theme="dark"] .composer-btn:hover,
+[data-theme="dark"] .icon-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+[data-theme="dark"] .shimmer,
+[data-theme="dark"] .skeleton,
+[data-theme="dark"] .shimmer-element {
+  background: linear-gradient(90deg, #191d24 25%, #252b35 50%, #191d24 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+[data-theme="dark"] .modal-overlay,
+[data-theme="dark"] .logout-modal-overlay,
+[data-theme="dark"] .soft-guard-backdrop,
+[data-theme="dark"] .filter-drawer-backdrop {
+  background: rgba(6, 8, 12, 0.74) !important;
+}
+
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .acc-hero {
+  background: linear-gradient(180deg, #1b2028 0%, #11151b 100%) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.30) !important;
+}
+
+[data-theme="dark"] .topbar::after,
+[data-theme="dark"] .acc-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.55), transparent);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .news-item {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-raised) 100%) !important;
+}
+
+[data-theme="dark"] .service-icon.green,
+[data-theme="dark"] .service-icon.money,
+[data-theme="dark"] .gov-icon-wrap,
+[data-theme="dark"] .location-link {
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(34, 197, 94, 0.20) !important;
+}
+
+[data-theme="dark"] .service-icon.orange {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.20) !important;
+}
+
+[data-theme="dark"] .service-icon.purple {
+  background: rgba(168, 85, 247, 0.14) !important;
+  border-color: rgba(168, 85, 247, 0.20) !important;
+}
+
+[data-theme="dark"] #leafletMapDiv {
+  filter: invert(90%) hue-rotate(180deg) brightness(82%) contrast(90%) saturate(0.85) !important;
+}

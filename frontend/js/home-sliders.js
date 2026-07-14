@@ -16,6 +16,23 @@
   let ALL_PRODUCTS = [];
   let FILTERED_SELLER_ID = null;
 
+  function setLoadMoreVisible(show) {
+    const btn = document.querySelector('.btn-load-more');
+    if (btn) btn.style.display = show ? 'flex' : 'none';
+  }
+
+  function renderProductState(mount, title, description, icon = 'inventory_2') {
+    if (!mount) return;
+    setLoadMoreVisible(false);
+    mount.innerHTML = `
+      <div class="empty-state home-product-empty">
+        <span class="material-icons-outlined">${icon}</span>
+        <h3>${title}</h3>
+        <p>${description}</p>
+      </div>
+    `;
+  }
+
   // ── Simple session cache (TTL = 5 min) ────────────────────────
   const PRODUCTS_CACHE_KEY = '__agri_products_cache';
   const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -45,6 +62,20 @@
     'เมล็ดพันธุ์': 'seedlings.png',
     'ไม้ประดับ': 'ornamental-plants.png',
     'สมุนไพร': 'herbs.png',
+  };
+
+  // Map Thai names → i18n keys so labels change when language is switched
+  const categoryI18nKeyMap = {
+    'ทุเรียน': 'durian',
+    'ลองกอง': 'longkong',
+    'มังคุด': 'mangosteen',
+    'เงาะ': 'rambutan',
+    'ปาล์ม': 'palm',
+    'ยางพารา': 'rubber',
+    'ผักสด': 'vegetable',
+    'เมล็ดพันธุ์': 'seedlings',
+    'ไม้ประดับ': 'ornamental_plants',
+    'สมุนไพร': 'herbs',
   };
 
   // --- 1. Hero Slider ---
@@ -160,13 +191,15 @@
         };
 
         const imgName = categoryImageMap[cat.name] || 'durian.png';
+        const i18nKey = categoryI18nKeyMap[cat.name] || cat.name;
+        const displayName = t(i18nKey, cat.name);
         item.innerHTML = `
           <div class="cat-icon">
             <img src="${window.AgriPriceRouter?.resolveAsset('assets/images/' + imgName) || ('assets/images/' + imgName)}" 
-                 alt="${t(cat.name, cat.name)}" onerror="this.src='${window.AgriPriceRouter?.resolveAsset('assets/images/durian.png') || 'assets/images/durian.png'}'"
+                 alt="${displayName}" onerror="this.src='${window.AgriPriceRouter?.resolveAsset('assets/images/durian.png') || 'assets/images/durian.png'}'"
                  style="width: 32px; height: 32px; object-fit: contain;">
           </div>
-          <span>${t(cat.name, cat.name)}</span>
+          <span data-i18n="${i18nKey}">${displayName}</span>
         `;
         grid.appendChild(item);
       });
@@ -347,8 +380,23 @@
             renderProducts(ALL_PRODUCTS, userLoc, mount);
           }
         }).catch(() => {});
+      } else {
+        renderProductState(
+          mount,
+          t('products_load_failed_title', 'โหลดรายการแนะนำไม่สำเร็จ'),
+          t('products_load_failed_desc', 'กรุณาลองรีเฟรชหน้าอีกครั้ง'),
+          'cloud_off'
+        );
       }
-    } catch (err) { if (DEBUG_HOME) console.error("[ProductCards] Error:", err); }
+    } catch (err) {
+      if (DEBUG_HOME) console.error("[ProductCards] Error:", err);
+      renderProductState(
+        mount,
+        t('products_load_failed_title', 'โหลดรายการแนะนำไม่สำเร็จ'),
+        t('products_load_failed_desc', 'กรุณาลองรีเฟรชหน้าอีกครั้ง'),
+        'cloud_off'
+      );
+    }
   }
 
   // ── Shared render helper (แยกออกมาให้ใช้ร่วมกับ cache path) ──
@@ -411,7 +459,7 @@
           offerId,
           sellerId: p.user_id,
           sellerName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ'),
-          sellerSub: p.variety ? `${p.name} (${p.variety})` : p.name,
+          sellerSub: p.variety ? `${t(p.name, p.name)} (${t(p.variety, p.variety)})` : t(p.name, p.name),
           avatar: profile?.avatar || 'assets/images/avatar-guest.svg',
           ...prices,
           updateTime: formatTime(p.created_at),
@@ -425,6 +473,18 @@
     if (userLoc) products.sort((a, b) => (a._distKm ?? 999) - (b._distKm ?? 999));
 
     mount.innerHTML = '';
+    if (products.length === 0) {
+      renderProductState(
+        mount,
+        FILTERED_SELLER_ID
+          ? t('no_products_for_seller', 'ยังไม่มีรายการรับซื้อจากร้านนี้')
+          : t('no_products_yet', 'ยังไม่มีรายการรับซื้อ'),
+        t('no_products_home_desc', 'เมื่อผู้รับซื้อเปิดประกาศรับซื้อ รายการจะแสดงที่นี่'),
+        'inventory_2'
+      );
+      return;
+    }
+
     let currentIndex = 0;
     const PAGE_SIZE = 3;
 
@@ -493,8 +553,7 @@
     };
 
     const updateButtonVisibility = () => {
-      const btn = document.querySelector('.btn-load-more');
-      if (btn) btn.style.display = currentIndex >= products.length ? 'none' : 'flex';
+      setLoadMoreVisible(currentIndex < products.length);
     };
 
     renderNextBatch();

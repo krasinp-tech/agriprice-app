@@ -159,6 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resolveBookingAddress(step1Data, step2Data) {
+    const profileAddress = [
+      step2Data?.contact?.address,
+      step2Data?.contact?.address_line1
+    ].find(v => typeof v === "string" && v.trim());
+
     const step1Address = [
       step1Data?.address,
       step1Data?.address_line1,
@@ -167,13 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
       step1Data?.map_link
     ].find(v => typeof v === "string" && v.trim());
 
-    const profileAddress = [
-      step2Data?.contact?.address,
-      step2Data?.contact?.address_line1
-    ].find(v => typeof v === "string" && v.trim());
-
-    return (step1Address || profileAddress || step2Data?.contact?.name || "").trim();
+    return (profileAddress || step1Address || step2Data?.contact?.name || "").trim();
   }
+
 
   // ================================
   // Render Vehicle List

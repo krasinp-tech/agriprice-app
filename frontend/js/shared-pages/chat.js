@@ -13,6 +13,7 @@
   let MESSAGES = [];
   let LAST_RENDER_KEY = '';
   let POLLING_INTERVAL = null;
+  let SWIPE_GLOBAL_CLEANUPS = [];
 
   function t(key, fallback) {
     if (window.i18nT) return window.i18nT(key, fallback);
@@ -117,16 +118,28 @@
       }
 
       return `
-        <div class="chat-item ${isActive ? 'active' : ''} ${isUnread ? 'is-unread' : ''}" data-id="${r.room_id}" data-target-id="${other.id || other.profile_id}">
-          <div class="chat-item-avatar"><img src="${esc(avatar)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt=""></div>
-          <div class="chat-item-body">
-            <div class="chat-item-top">
-              <div class="chat-item-name">${esc(name)}</div>
-              <div class="chat-item-time">${esc(timeStr)}</div>
-            </div>
-            <div class="chat-item-meta">
-              <div class="chat-item-snippet">${esc(lastMsg)}</div>
-              ${isUnread ? `<div class="chat-item-unread">${esc(r.unread_count)}</div>` : ''}
+        <div class="chat-item-wrapper" data-id="${r.room_id}">
+          <!-- Underlay buttons -->
+          <div class="chat-item-underlay-left" style="background: #22c55e;">
+            <span class="material-icons-outlined">done_all</span>
+            <span>${isUnread ? t('mark_read', 'อ่านแล้ว') : t('mark_unread', 'ยังไม่อ่าน')}</span>
+          </div>
+          <div class="chat-item-underlay-right" style="background: #ef4444;">
+            <span class="material-icons-outlined">delete</span>
+            <span>${t('delete', 'ลบ')}</span>
+          </div>
+          <!-- Main Chat Item -->
+          <div class="chat-item ${isActive ? 'active' : ''} ${isUnread ? 'is-unread' : ''}" data-id="${r.room_id}" data-target-id="${other.id || other.profile_id}">
+            <div class="chat-item-avatar"><img src="${esc(avatar)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt=""></div>
+            <div class="chat-item-body">
+              <div class="chat-item-top">
+                <div class="chat-item-name">${esc(name)}</div>
+                <div class="chat-item-time">${esc(timeStr)}</div>
+              </div>
+              <div class="chat-item-meta">
+                <div class="chat-item-snippet">${esc(lastMsg)}</div>
+                ${isUnread ? `<div class="chat-item-unread">${esc(r.unread_count)}</div>` : ''}
+              </div>
             </div>
           </div>
         </div>
@@ -140,6 +153,210 @@
         const room = ALL_ROOMS.find(r => String(r.room_id) === String(id));
         openChat(id, targetId, room);
       };
+    });
+
+    bindSwipeActions();
+  }
+
+  function bindSwipeActions() {
+    if (!listMount) return;
+    SWIPE_GLOBAL_CLEANUPS.forEach(cleanup => cleanup());
+    SWIPE_GLOBAL_CLEANUPS = [];
+
+    listMount.querySelectorAll('.chat-item-wrapper').forEach(wrapper => {
+      const item = wrapper.querySelector('.chat-item');
+      const underlayLeft = wrapper.querySelector('.chat-item-underlay-left');
+      const underlayRight = wrapper.querySelector('.chat-item-underlay-right');
+
+      function updateUnderlays(x) {
+        if (underlayLeft) underlayLeft.style.display = x > 0 ? 'flex' : 'none';
+        if (underlayRight) underlayRight.style.display = x < 0 ? 'flex' : 'none';
+      }
+
+      function resetSwipe() {
+        currentX = 0;
+        activeSwipe = 0;
+        item.style.transform = 'translateX(0)';
+        item.dataset.swipeOpen = 'false';
+        updateUnderlays(0);
+      }
+
+      function settleSwipe() {
+        let nextX = 0;
+        if (currentX > 40) nextX = 76;
+        else if (currentX < -40) nextX = -76;
+
+        currentX = nextX;
+        activeSwipe = nextX;
+        item.style.transform = `translateX(${nextX}px)`;
+        item.dataset.swipeOpen = nextX !== 0 ? 'true' : 'false';
+        updateUnderlays(nextX);
+      }
+
+      function suppressNextClick() {
+        item.dataset.swipeSuppress = 'true';
+        setTimeout(() => {
+          if (item.dataset.swipeSuppress === 'true') item.dataset.swipeSuppress = '';
+        }, 350);
+      }
+
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let isDragging = false;
+      let isHorizontal = false;
+      let movedDuringGesture = false;
+      let activeSwipe = 0; // -76 for left (delete), 76 for right (read)
+
+      item.addEventListener('click', (e) => {
+        if (item.dataset.swipeSuppress === 'true' || activeSwipe !== 0) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          item.dataset.swipeSuppress = '';
+          item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+          resetSwipe();
+        }
+      }, true);
+
+      // Touch events for mobile
+      item.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentX = activeSwipe;
+        isDragging = true;
+        isHorizontal = false;
+        movedDuringGesture = false;
+        item.style.transition = 'none';
+      }, { passive: true });
+
+      item.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const diffX = e.touches[0].clientX - startX;
+        const diffY = e.touches[0].clientY - startY;
+
+        // Detect horizontal swipe
+        if (!isHorizontal && Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+          isHorizontal = true;
+        }
+
+        if (isHorizontal) {
+          movedDuringGesture = true;
+          currentX = diffX + activeSwipe;
+          // Clamp swipe distance
+          if (currentX > 84) currentX = 84;
+          if (currentX < -84) currentX = -84;
+          item.style.transform = `translateX(${currentX}px)`;
+          updateUnderlays(currentX);
+        }
+      }, { passive: true });
+
+      item.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        settleSwipe();
+        if (movedDuringGesture) suppressNextClick();
+      });
+
+      // Mouse drag events for testing / desktop
+      let isMouseDragging = false;
+      item.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        currentX = activeSwipe;
+        isMouseDragging = true;
+        movedDuringGesture = false;
+        item.style.transition = 'none';
+      });
+
+      const handleMouseMove = (e) => {
+        if (!isMouseDragging) return;
+        const diffX = e.clientX - startX;
+        if (Math.abs(diffX) > 4) movedDuringGesture = true;
+        currentX = diffX + activeSwipe;
+        if (currentX > 84) currentX = 84;
+        if (currentX < -84) currentX = -84;
+        item.style.transform = `translateX(${currentX}px)`;
+        updateUnderlays(currentX);
+      };
+      window.addEventListener('mousemove', handleMouseMove);
+      SWIPE_GLOBAL_CLEANUPS.push(() => window.removeEventListener('mousemove', handleMouseMove));
+
+      const handleMouseUp = () => {
+        if (!isMouseDragging) return;
+        isMouseDragging = false;
+        item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        settleSwipe();
+        if (movedDuringGesture) suppressNextClick();
+      };
+      window.addEventListener('mouseup', handleMouseUp);
+      SWIPE_GLOBAL_CLEANUPS.push(() => window.removeEventListener('mouseup', handleMouseUp));
+
+      // Close swiped state on body interaction elsewhere
+      const handleDocumentClick = (e) => {
+        if (!wrapper.contains(e.target) && activeSwipe !== 0) {
+          item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+          resetSwipe();
+        }
+      };
+      document.addEventListener('click', handleDocumentClick);
+      SWIPE_GLOBAL_CLEANUPS.push(() => document.removeEventListener('click', handleDocumentClick));
+
+      // Left Action: Toggle Read/Unread
+      wrapper.querySelector('.chat-item-underlay-left')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const roomId = wrapper.dataset.id;
+        const room = ALL_ROOMS.find(r => String(r.room_id) === String(roomId));
+        if (room) {
+          try {
+            const isUnread = room.unread_count > 0;
+            if (isUnread) {
+              if (api.markChatRead) await api.markChatRead(roomId);
+              else await api.call('PATCH', `/api/chats/${roomId}/read`);
+              room.unread_count = 0;
+            } else {
+              const result = api.markChatUnread
+                ? await api.markChatUnread(roomId)
+                : await api.call('PATCH', `/api/chats/${roomId}/unread`);
+              room.unread_count = result?.data?.updated ? 1 : 0;
+            }
+            resetSwipe();
+            renderChatList(ALL_ROOMS);
+          } catch(err) {
+            console.error('[Chat] Mark read/unread failed:', err);
+          }
+        }
+      });
+
+      // Right Action: Delete Chat
+      wrapper.querySelector('.chat-item-underlay-right')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const roomId = wrapper.dataset.id;
+        const confirmMsg = t('confirm_delete_chat', 'คุณต้องการลบการสนทนานี้ใช่หรือไม่?');
+        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+
+        showConfirm(confirmMsg, async (confirmed) => {
+          if (confirmed) {
+            try {
+              if (api.deleteChat) await api.deleteChat(roomId);
+              else await api.call('DELETE', `/api/chats/${roomId}`);
+              // Animation height collapse
+              wrapper.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+              wrapper.style.height = '0';
+              wrapper.style.margin = '0';
+              wrapper.style.opacity = '0';
+              wrapper.style.padding = '0';
+              setTimeout(() => {
+                loadConversations();
+              }, 350);
+            } catch(err) {
+              console.error('[Chat] Delete failed:', err);
+              if (window.showToast) window.showToast(t('error_delete_chat', 'ลบการสนทนาไม่สำเร็จ'), 'error');
+            }
+          } else {
+            resetSwipe();
+          }
+        });
+      });
     });
   }
 
@@ -170,10 +387,8 @@
 
     // Load Messages
     await loadMessages(roomId);
-    
     // Start Polling
     startPolling(roomId);
-    
     // Refresh list to clear unread marker locally
     renderChatList(ALL_ROOMS);
   }
@@ -193,7 +408,6 @@
           m.image_url || ''
         ].join('~'))
       ].join('|');
-      
       // Re-render when switching rooms or when message content changes.
       if (renderKey !== LAST_RENDER_KEY) {
         MESSAGES = items;
@@ -213,7 +427,6 @@
     roomMessages.innerHTML = items.map(m => {
       const isMe = String(m.sender_id) === String(me);
       const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
-      
       let contentHtml = '';
       if (m.message_type === 'image' || m.image_url) {
         const imageUrl = safeUrl(m.image_url);
@@ -237,7 +450,6 @@
     roomMessages.querySelectorAll('.bubble-image[data-image-url]').forEach((img) => {
       img.addEventListener('click', () => window.open(img.dataset.imageUrl, '_blank', 'noopener'));
     });
-    
     roomMessages.scrollTop = roomMessages.scrollHeight;
   }
 

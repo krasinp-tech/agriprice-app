@@ -64,32 +64,54 @@
 /* ── Dark Mode ───────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-page:       #000000;
-    --bg-card:       #1c1c1e;
-    --bg-input:      #2c2c2e;
-    --text-main:     #f2f2f7;
-    --text-muted:    #8e8e93;
-    --text-dim:      #636366;
-    --border-light:  rgba(255,255,255,0.08);
-    --border-medium: rgba(255,255,255,0.15);
-    --shadow-sm:     0 2px 8px rgba(0,0,0,0.5);
-    --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
-    --text-time-ago: #34d399;
+    color-scheme: dark;
+    --primary:          #22c55e;
+    --primary-gradient: linear-gradient(135deg, #22c55e 0%, #0B853C 100%);
+    --primary-light:    rgba(34,197,94,0.14);
+    --secondary:        #93c5fd;
+
+    --bg-page:          #0f1115;
+    --bg-card:          #171a20;
+    --bg-input:         #20252e;
+
+    --text-main:        #f5f7fa;
+    --text-muted:       #b6beca;
+    --text-dim:         #77808e;
+    --text-time-ago:    #4ade80;
+
+    --border-light:     rgba(255,255,255,0.08);
+    --border-medium:    rgba(255,255,255,0.14);
+
+    --shadow-xs:        0 1px 2px rgba(0,0,0,0.35);
+    --shadow-sm:        0 8px 24px rgba(0,0,0,0.28);
+    --shadow-md:        0 14px 36px rgba(0,0,0,0.34);
+    --shadow-lg:        0 22px 56px rgba(0,0,0,0.42);
   }
 }
 
 [data-theme="dark"] {
-  --bg-page:       #000000;
-  --bg-card:       #1c1c1e;
-  --bg-input:      #2c2c2e;
-  --text-main:     #f2f2f7;
-  --text-muted:    #8e8e93;
-  --text-dim:      #636366;
-  --border-light:  rgba(255,255,255,0.08);
-  --border-medium: rgba(255,255,255,0.15);
-  --shadow-sm:     0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md:     0 4px 16px rgba(0,0,0,0.7);
-  --text-time-ago: #34d399;
+  color-scheme: dark;
+  --primary:          #22c55e;
+  --primary-gradient: linear-gradient(135deg, #22c55e 0%, #0B853C 100%);
+  --primary-light:    rgba(34,197,94,0.14);
+  --secondary:        #93c5fd;
+
+  --bg-page:          #0f1115;
+  --bg-card:          #171a20;
+  --bg-input:         #20252e;
+
+  --text-main:        #f5f7fa;
+  --text-muted:       #b6beca;
+  --text-dim:         #77808e;
+  --text-time-ago:    #4ade80;
+
+  --border-light:     rgba(255,255,255,0.08);
+  --border-medium:    rgba(255,255,255,0.14);
+
+  --shadow-xs:        0 1px 2px rgba(0,0,0,0.35);
+  --shadow-sm:        0 8px 24px rgba(0,0,0,0.28);
+  --shadow-md:        0 14px 36px rgba(0,0,0,0.34);
+  --shadow-lg:        0 22px 56px rgba(0,0,0,0.42);
 }
 
 /* ── Reset ───────────────────────────────────────────────────── */

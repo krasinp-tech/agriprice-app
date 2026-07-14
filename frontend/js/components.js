@@ -2,8 +2,15 @@
   // Cordova/Capacitor: intercept backbutton globally
   document.addEventListener('deviceready', function() {
     document.addEventListener('backbutton', function(e) {
-      // Detect if on home page
-      var isHome = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '/index.html';
+      // Detect page categories
+      var path = window.location.pathname.toLowerCase();
+      var isHome = path.endsWith('index.html') || path === '/' || path === '/index.html' || path.endsWith('home.html');
+      var isRootTab = isHome ||
+                      path.endsWith('chat.html') ||
+                      path.endsWith('booking.html') ||
+                      path.endsWith('notifications.html') ||
+                      path.endsWith('account.html');
+
       if (isHome) {
         // Show confirm dialog or block exit
         if (window.navigator && window.navigator.notification && window.navigator.notification.confirm) {
@@ -14,13 +21,35 @@
                 navigator.app.exitApp();
               }
             },
-            window.i18nT ? window.i18nT('exit_app_title', 'ออกจากแอพ') : 'ออกจากแอพ',
-            [window.i18nT ? window.i18nT('ok', 'ตกลง') : 'ตกลง', window.i18nT ? window.i18nT('cancel', 'ยกเลิก') : 'ยกเลิก']
+            window.i18nT ? window.i18nT('exit_app_title', 'ออกจากระบบ') : 'ออกจากระบบ',
+            [
+              window.i18nT ? window.i18nT('confirm', 'ตกลง') : 'ตกลง',
+              window.i18nT ? window.i18nT('cancel', 'ยกเลิก') : 'ยกเลิก'
+            ]
           );
+        } else {
+          const conf = confirm(window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?');
+          if (conf) {
+            navigator.app.exitApp();
+          }
         }
- else {
-          // Block exit (do nothing)
-        }
+        e.preventDefault();
+        return false;
+      } else if (isRootTab) {
+        // Switch to Home tab directly instead of going back through linear page histories
+        const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : './';
+        const cap = window.Capacitor;
+        const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+        const isNative = (
+          window.location.protocol === 'capacitor:' ||
+          window.location.protocol === 'ionic:' ||
+          (window.Capacitor && window.Capacitor.isNative) ||
+          capPlatform === 'android' ||
+          capPlatform === 'ios' ||
+          !!cap?.isNative ||
+          (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+        );
+        window.location.href = baseRoot + (isNative ? 'home.html' : 'index.html');
         e.preventDefault();
         return false;
       } else {
@@ -187,7 +216,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       if (!isBottomNav) return;
 
       const pageKey = isBottomNav.dataset.page;
-      
       // ป้องกันการโหลดซ้ำหน้าเดิม (ป้องกันหน้าขาว/กระพริบ)
       if (document.body && document.body.dataset.active === pageKey) {
         e.preventDefault();
@@ -231,12 +259,10 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const path = (window.location.pathname || "").replace(/\\/g, "/");
     const idx = path.lastIndexOf("/pages/");
     if (idx === -1) return "./";
-    
     // Calculate depth after /pages/
     const afterPages = path.substring(idx + "/pages/".length);
     const segments = afterPages.split("/").filter(Boolean);
     const depth = segments.length > 0 ? segments.length - 1 : 0;
-    
     // Depth 0 means inside pages/ (e.g. pages/test.html) -> need one ../ to get to root
     // Depth 1 means inside pages/shared/ (e.g. pages/shared/chat.html) -> need two ../ to get to root
     return "../" + "../".repeat(depth);
@@ -338,13 +364,10 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
       // 1. Clean existing relative indicators to make it idempotent
       let clean = href.replace(/^(\.\.\/)+/g, "").replace(/^(\.\/)+/g, "");
-      
       // 2. Ensure exactly one "pages/" prefix for subfolder links if missing
       // (The template already has "pages/shared/chat.html" etc., so usually not needed)
-      
       // 3. Set the final relative path
       a.setAttribute("href", base + clean);
-      
       if (window.AGRIPRICE_DEBUG) {
         console.log(`[NAV_FIX] [${a.dataset.page}] ${href} -> ${base + clean}`);
       }
@@ -370,6 +393,22 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         ? "pages/buyer/setbooking/booking.html"
         : "pages/farmer/booking/booking.html";
       bookingA.setAttribute("href", base + target);
+
+      const iconEl = bookingA.querySelector('.material-icons-outlined');
+      const labelEl = bookingA.querySelector('.nav-label');
+      if (role === "buyer") {
+        if (iconEl) iconEl.textContent = "qr_code_scanner";
+        if (labelEl) {
+          labelEl.textContent = window.i18nT ? window.i18nT('scan_qr_queue', 'สแกนคิว') : 'สแกนคิว';
+          labelEl.setAttribute('data-i18n', 'scan_qr_queue');
+        }
+      } else {
+        if (iconEl) iconEl.textContent = "local_mall";
+        if (labelEl) {
+          labelEl.textContent = window.i18nT ? window.i18nT('nav_booking_history', 'ประวัติการจอง') : 'ประวัติการจอง';
+          labelEl.setAttribute('data-i18n', 'nav_booking_history');
+        }
+      }
     }
   }
 
@@ -636,7 +675,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        
         // ไปแชททันที (สร้าง/หา room ผ่าน API)
         const card = contact.closest(".product-card");
         const targetId = card?.dataset?.sellerId || card?.getAttribute("data-seller-id") || "";
@@ -725,7 +763,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     backButtons.forEach(btn => {
       // Remove inline onclick if it exists (HTML side should ideally have this removed)
       btn.removeAttribute('onclick');
-      
       // Clean up previous event listeners by cloning the node
       const newBtn = btn.cloneNode(true);
       if (btn.parentNode) {
@@ -734,10 +771,20 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
       newBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        
         const fallbackUrl = newBtn.dataset.fallback || newBtn.getAttribute('data-back');
         const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
-        const finalFallback = fallbackUrl || (baseRoot + 'index.html');
+        const cap = window.Capacitor;
+        const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+        const isNative = (
+          window.location.protocol === 'capacitor:' ||
+          window.location.protocol === 'ionic:' ||
+          (window.Capacitor && window.Capacitor.isNative) ||
+          capPlatform === 'android' ||
+          capPlatform === 'ios' ||
+          !!cap?.isNative ||
+          (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+        );
+        const finalFallback = fallbackUrl || (baseRoot + (isNative ? 'home.html' : 'index.html'));
 
         if (document.referrer && document.referrer.includes(window.location.host)) {
           window.history.back();
@@ -766,7 +813,18 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
              history.back();
            } else {
              const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
-             window.location.href = baseRoot + 'index.html';
+             const cap = window.Capacitor;
+             const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+             const isNative = (
+               window.location.protocol === 'capacitor:' ||
+               window.location.protocol === 'ionic:' ||
+               (window.Capacitor && window.Capacitor.isNative) ||
+               capPlatform === 'android' ||
+               capPlatform === 'ios' ||
+               !!cap?.isNative ||
+               (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+             );
+             window.location.href = baseRoot + (isNative ? 'home.html' : 'index.html');
            }
         }
       });
@@ -804,7 +862,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       const user = raw ? JSON.parse(raw) : null;
       role = String(user?.role || "").toLowerCase();
     } catch (_) { }
-    
     if (role === "buyer") {
       mount.remove();
       return;
@@ -839,18 +896,15 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       if (!role || role === "buyer") return;
 
       const sync = async () => {
-        if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+        if (!window.api || typeof window.api.call !== 'function') return;
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
-        if (!currentBase || !token) return;
-        fetch(currentBase + '/api/favorites', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        }).then(r => r.ok ? r.json() : null).then(json => {
+        if (!token) return;
+        try {
+          const json = await window.api.call('GET', '/api/favorites');
           if (!json) return;
           const arr = Array.isArray(json) ? json : (json.data || []);
           const store = window.FavoritesStore;
           if (!store) return;
-          const before = store.read();
           const apiIds = new Set(arr.map(item => String(item.target_user_id || item.user_id || item.id || '')).filter(Boolean));
           const local = store.read().filter(item => {
             const kind = String(item?.kind || 'seller');
@@ -865,7 +919,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           });
           store.write(local);
           window.syncFavoritesUI?.();
-        }).catch(() => { });
+        } catch (_) { }
       };
       sync();
     })();

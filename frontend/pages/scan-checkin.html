@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title data-i18n="scan_checkin_title">ตรวจสอบการเช็คอิน | AGRIPRICE</title>
-    <meta name="theme-color" content="#0B853C">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0B853C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/dark-mode-patch.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-  
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || 'light';
@@ -20,199 +19,374 @@
   </script>
 
   <style>
-    body { 
-      margin: 0;
-      padding: 20px;
-      background: var(--bg-page, #F8F9FA); 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      min-height: 100vh; 
-      font-family: 'Outfit', -apple-system, sans-serif;
-      transition: background 0.3s ease;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {      margin: 0;
+      padding: 20px 16px 40px;
+      background: var(--bg-page, #F0F4F1);      display: flex;      align-items: flex-start;
+      justify-content: center;      min-height: 100vh;      font-family: 'Outfit', -apple-system, sans-serif;
       color: var(--text-main, #1a1a1a);
-      box-sizing: border-box;
     }
 
-    * { box-sizing: inherit; }
-
-    .checkin-card { 
-      background: var(--bg-card, #ffffff); 
-      border-radius: 28px; 
-      padding: 32px 24px; 
-      width: 100%; 
-      max-width: 400px; 
-      text-align: center; 
-      box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.1));
-      border: 1px solid var(--border-light, #EFEFEF);
+    /* ===== CARD ===== */
+    .checkin-card {      background: var(--bg-card, #ffffff);      border-radius: 28px;      padding: 32px 24px 28px;
+      width: 100%;      max-width: 420px;
+      text-align: center;      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-light, rgba(0,0,0,0.06));
+      margin-top: 20px;
+      animation: slideUp 0.4s ease both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ===== ICON ===== */
     .status-icon-wrap {
-      width: 80px;
-      height: 80px;
+      width: 88px; height: 88px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       margin: 0 auto 20px;
-      background: rgba(11, 133, 60, 0.1);
-      color: var(--primary, #0B853C);
+      transition: all 0.3s ease;
     }
-    .status-icon-wrap.error {
-      background: rgba(229, 57, 53, 0.1);
-      color: #E53935;
+    .status-icon-wrap .material-icons-outlined { font-size: 44px; }
+
+    /* Colors per state */
+    .icon-loading  { background: rgba(11,133,60,0.08); color: var(--primary, #0B853C); }
+    .icon-waiting  { background: rgba(11,133,60,0.08); color: var(--primary, #0B853C); }
+    .icon-success  { background: rgba(11,133,60,0.1);  color: var(--primary, #0B853C); animation: pulseGreen 2s infinite; }
+    .icon-already  { background: rgba(45,156,219,0.1); color: #2D9CDB; }
+    .icon-cancel   { background: rgba(229,57,53,0.08); color: #E53935; }
+    .icon-error    { background: rgba(255,160,0,0.1);  color: #F59E0B; }
+    .icon-forbidden{ background: rgba(229,57,53,0.08); color: #E53935; }
+
+    @keyframes pulseGreen {
+      0%   { box-shadow: 0 0 0 0   rgba(11,133,60,0.35); }
+      70%  { box-shadow: 0 0 0 18px rgba(11,133,60,0); }
+      100% { box-shadow: 0 0 0 0   rgba(11,133,60,0); }
     }
-    .status-icon-wrap .material-icons-outlined { font-size: 40px; }
 
-    .title { font-size: 22px; font-weight: 800; color: var(--text-main, #1a1a1a); margin-bottom: 8px; margin-top: 0; }
-    .subtitle { font-size: 15px; color: var(--text-muted, #666); margin-bottom: 24px; margin-top: 0; line-height: 1.5; }
+    /* ===== TYPOGRAPHY ===== */
+    .card-title { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; line-height: 1.3; }
+    .card-sub   { font-size: 14px; color: var(--text-muted, #666); line-height: 1.6; margin-bottom: 24px; }
 
-    .info-box { 
-      background: rgba(0,0,0,0.02); 
-      border-radius: 20px; 
-      padding: 20px; 
-      margin-bottom: 24px; 
+    /* ===== INFO BOX ===== */
+    .info-box {
+      background: var(--bg-page, #F8F9FA);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 22px;
       text-align: left;
-      border: 1px solid var(--border-light, #EFEFEF);
+      border: 1px solid var(--border-light, rgba(0,0,0,0.06));
     }
-    [data-theme="dark"] .info-box { background: rgba(255,255,255,0.03); }
+    [data-theme="dark"] .info-box { background: rgba(255,255,255,0.04); }
 
-    .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
-    .info-row:last-child { margin-bottom: 0; }
-    .info-label { color: var(--text-muted, #666); }
-    .info-value { font-weight: 700; color: var(--text-main, #1a1a1a); }
-    .queue-value { color: var(--primary, #0B853C); font-size: 18px; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--border-light, rgba(0,0,0,0.04)); }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row:first-child { padding-top: 0; }
+    .info-label { color: var(--text-muted, #888); font-weight: 500; flex-shrink: 0; margin-right: 12px; }
+    .info-value { font-weight: 700; color: var(--text-main); text-align: right; }
+    .info-value.queue-big { color: var(--primary, #0B853C); font-size: 20px; font-weight: 800; }
 
-    .action-group { display: flex; flex-direction: column; gap: 12px; }
-    
+    /* ===== STATUS BADGE ===== */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 13px; font-weight: 700; margin-bottom: 20px;
+    }
+    .badge-waiting   { background: rgba(11,133,60,0.1);  color: #0B853C; }
+    .badge-success   { background: rgba(11,133,60,0.1);  color: #0B853C; }
+    .badge-cancel    { background: rgba(229,57,53,0.1);   color: #E53935; }
+    .badge-already   { background: rgba(45,156,219,0.1);  color: #2D9CDB; }
+
+    /* ===== CANCEL REASON BOX ===== */
+    .cancel-reason-box {
+      background: rgba(229,57,53,0.05);
+      border: 1px solid rgba(229,57,53,0.15);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .cancel-reason-label {
+      font-size: 12px; font-weight: 700; color: #E53935;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .cancel-reason-label .material-icons-outlined { font-size: 14px; }
+    .cancel-reason-text { font-size: 14px; color: var(--text-main); font-weight: 500; line-height: 1.5; }
+    .cancel-who-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 10px; font-size: 12px; color: var(--text-muted, #888);
+      background: var(--bg-page, #F8F9FA);
+      padding: 4px 10px; border-radius: 100px;
+    }
+    .cancel-who-badge .material-icons-outlined { font-size: 14px; }
+
+    /* ===== SUCCESS QUEUE DISPLAY ===== */
+    .success-queue-box {
+      background: rgba(11,133,60,0.06);
+      border: 1px solid rgba(11,133,60,0.15);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+    .success-queue-label { font-size: 13px; color: #0B853C; font-weight: 600; margin-bottom: 4px; }
+    .success-queue-number { font-size: 40px; font-weight: 800; color: #0B853C; line-height: 1; }
+
+    /* ===== BUTTONS ===== */
+    .action-group { display: flex; flex-direction: column; gap: 10px; }
     .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 15px 16px;
+      border-radius: 16px; font-weight: 700; font-size: 15px;
+      cursor: pointer; border: none; font-family: inherit;
+      transition: all 0.2s ease; text-decoration: none;
     }
+    .btn-primary   { background: var(--primary, #0B853C); color: #fff; box-shadow: 0 6px 18px rgba(11,133,60,0.25); }
+    .btn-primary:active   { transform: scale(0.97); filter: brightness(0.9); }
+    .btn-secondary { background: transparent; color: var(--text-muted, #666); border: 1.5px solid var(--border-light, #ddd); }
+    .btn-secondary:active { background: rgba(0,0,0,0.04); }
+    .btn-danger    { background: rgba(229,57,53,0.08); color: #E53935; border: 1.5px solid rgba(229,57,53,0.15); }
+    .btn .material-icons-outlined { font-size: 20px; }
 
-    .btn-primary {
-      background: var(--primary, #0B853C);
-      color: white;
-      box-shadow: 0 8px 20px rgba(11, 133, 60, 0.25);
+    /* ===== SPINNER ===== */
+    .loading-spinner {
+      border: 3px solid var(--border-light, #e0e0e0);
+      border-top-color: var(--primary, #0B853C);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
     }
-    .btn-primary:active { transform: scale(0.97); filter: brightness(0.9); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 15px; color: var(--text-muted, #888); margin-bottom: 0; font-weight: 500; }
 
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-muted, #666);
-      border: 1px solid var(--border-light, #EFEFEF);
+    /* ===== BOOKING NO LABEL ===== */
+    .booking-no-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--bg-page, #F0F4F1); border-radius: 100px;
+      padding: 4px 12px; font-size: 12px; color: var(--text-muted);
+      font-weight: 600; margin-bottom: 16px; letter-spacing: 0.2px;
     }
-    .btn-secondary:active { background: rgba(0,0,0,0.05); }
-    [data-theme="dark"] .btn-secondary:active { background: rgba(255,255,255,0.05); }
+    .booking-no-chip .material-icons-outlined { font-size: 14px; }
 
-    .loading-spinner { 
-      border: 3px solid var(--border-light, #EFEFEF); 
-      border-top: 3px solid var(--primary, #0B853C); 
-      border-radius: 50%; 
-      width: 32px; 
-      height: 32px; 
-      animation: spin 1s linear infinite; 
-      margin: 0 auto 16px; 
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* ===== DIVIDER ===== */
+    .divider { height: 1px; background: var(--border-light, rgba(0,0,0,0.06)); margin: 16px 0; }
 
-    /* Success animation state */
-    .success-pulse {
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(11, 133, 60, 0.4); }
-      70% { box-shadow: 0 0 0 15px rgba(11, 133, 60, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(11, 133, 60, 0); }
-    }
+    /* ===== SECTION HIDE ===== */
+    .sec { display: none; }
   </style>
- 
-    <script src="../js/config.js"></script>
-    <script src="../js/components/i18n.js"></script>
-    <script src="../js/global-anim.js"></script>
-    <script src="../js/components.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/components/i18n.js"></script>
+  <script src="../js/global-anim.js"></script>
+  <script src="../js/components.js"></script>
 </head>
 <body>
 
   <div class="checkin-card" id="card">
-    
-    <!-- Phase 1: Loading Details -->
+    <!-- ========== Phase 1: Loading ========== -->
     <div id="loadingSec">
       <div class="loading-spinner"></div>
-      <p class="subtitle" data-i18n="fetching_booking_data">กำลังดึงข้อมูลการจอง...</p>
+      <p class="loading-text" id="loadingMsg">กำลังดึงข้อมูลการจอง...</p>
     </div>
 
-    <!-- Phase 2: Confirmation Preview -->
-    <div id="previewSec" style="display: none;">
-      <div class="status-icon-wrap">
+    <!-- ========== Phase 2: CONFIRM CHECK-IN (waiting) ========== -->
+    <div id="previewSec" class="sec">
+      <div class="status-icon-wrap icon-waiting">
         <span class="material-icons-outlined">qr_code_2</span>
       </div>
-      <h2 class="title" data-i18n="confirm_checkin_title">ยืนยันการเช็คอิน</h2>
-      <p class="subtitle" data-i18n="confirm_checkin_subtitle">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
-      
+      <div class="status-badge badge-waiting">
+        <span class="material-icons-outlined" style="font-size:15px;">hourglass_empty</span>
+        รอการเช็คอิน
+      </div>
+      <h2 class="card-title">ยืนยันการเช็คอิน</h2>
+      <p class="card-sub">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
+
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label" data-i18n="queue_number_label">หมายเลขคิว:</span>
-          <span class="info-value queue-value" id="prevQueue">-</span>
+          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-value queue-big" id="prevQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label" data-i18n="farmer_name_label">ชื่อเกษตรกร:</span>
+          <span class="info-label">ชื่อเกษตรกร</span>
           <span class="info-value" id="prevFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label" data-i18n="product_label">สินค้า:</span>
+          <span class="info-label">สินค้า</span>
           <span class="info-value" id="prevProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label" data-i18n="amount_label">จำนวน:</span>
+          <span class="info-label">จำนวน</span>
           <span class="info-value" id="prevAmount">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">วันที่จอง</span>
+          <span class="info-value" id="prevDate">-</span>
         </div>
       </div>
 
       <div class="action-group">
         <button id="btnConfirm" class="btn btn-primary">
           <span class="material-icons-outlined">check_circle</span>
-          <span data-i18n="confirm_reg_title">ยืนยันการรับเข้า</span>
+          <span>ยืนยันการรับเข้า</span>
         </button>
-        <button id="btnCancel" class="btn btn-secondary" data-i18n="cancel">ยกเลิก</button>
+        <button id="btnCancel" class="btn btn-secondary">
+          <span class="material-icons-outlined">close</span>
+          <span>ยกเลิก</span>
+        </button>
       </div>
     </div>
 
-    <!-- Phase 3: Success Result -->
-    <div id="successSec" style="display: none;">
-      <div class="status-icon-wrap success-pulse">
+    <!-- ========== Phase 3: SUCCESS (just checked in) ========== -->
+    <div id="successSec" class="sec">
+      <div class="status-icon-wrap icon-success">
         <span class="material-icons-outlined">verified</span>
       </div>
-      <h2 class="title" data-i18n="checkin_success_title">เช็คอินสำเร็จ!</h2>
-      <p class="subtitle" data-i18n="checkin_success_subtitle">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
-      
-      <div class="info-box" style="text-align: center; background: rgba(11, 133, 60, 0.05);">
-        <div class="info-label" style="margin-bottom: 4px;" data-i18n="your_queue_number">หมายเลขคิวของคุณ</div>
-        <div class="info-value" style="font-size: 32px; color: var(--primary);" id="resQueue">-</div>
+      <h2 class="card-title">เช็คอินสำเร็จ!</h2>
+      <p class="card-sub">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
+
+      <div class="success-queue-box">
+        <div class="success-queue-label">หมายเลขคิวของคุณ</div>
+        <div class="success-queue-number" id="resQueue">-</div>
       </div>
 
-      <button id="btnDone" class="btn btn-primary" data-i18n="ok">ตกลง</button>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-value" id="resFarmer">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สินค้า</span>
+          <span class="info-value" id="resProduct">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สถานะ</span>
+          <span class="info-value" style="color:#0B853C;">✅ เช็คอินสำเร็จ</span>
+        </div>
+      </div>
+
+      <button id="btnDone" class="btn btn-primary">
+        <span class="material-icons-outlined">home</span>
+        <span>กลับหน้าหลัก</span>
+      </button>
     </div>
 
-    <!-- Phase 4: Error Result -->
-    <div id="errorSec" style="display: none;">
-      <div class="status-icon-wrap error">
-        <span class="material-icons-outlined">error_outline</span>
+    <!-- ========== Phase 4: ALREADY CHECKED IN ========== -->
+    <div id="alreadySec" class="sec">
+      <div class="status-icon-wrap icon-already">
+        <span class="material-icons-outlined">check_circle</span>
       </div>
-      <h2 class="title" data-i18n="error_occurred_title">เกิดข้อผิดพลาด</h2>
-      <p class="subtitle" id="errorMsg" data-i18n="error_cannot_proceed">ไม่สามารถดำเนินการได้ในขณะนี้</p>
-      <button data-back class="btn btn-secondary" data-i18n="try_again">กลับไปลองใหม่</button>
+      <div class="status-badge badge-already">
+        <span class="material-icons-outlined" style="font-size:15px;">info</span>
+        เช็คอินแล้ว
+      </div>
+      <h2 class="card-title">คิวนี้เช็คอินแล้ว</h2>
+      <p class="card-sub">การเช็คอินคิวนี้ถูกบันทึกไปแล้ว<br>ไม่สามารถสแกนซ้ำได้</p>
+
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-value queue-big" id="alreadyQueue">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-value" id="alreadyFarmer">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สินค้า</span>
+          <span class="info-value" id="alreadyProduct">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สถานะ</span>
+          <span class="info-value" style="color:#2D9CDB;">✔ เสร็จสิ้นแล้ว</span>
+        </div>
+      </div>
+
+      <button data-back class="btn btn-secondary">
+        <span class="material-icons-outlined">arrow_back</span>
+        <span>กลับ</span>
+      </button>
+    </div>
+
+    <!-- ========== Phase 5: CANCELLED ========== -->
+    <div id="cancelledSec" class="sec">
+      <div class="status-icon-wrap icon-cancel">
+        <span class="material-icons-outlined">cancel</span>
+      </div>
+      <div class="status-badge badge-cancel">
+        <span class="material-icons-outlined" style="font-size:15px;">block</span>
+        ยกเลิกแล้ว
+      </div>
+      <h2 class="card-title">คิวนี้ถูกยกเลิกแล้ว</h2>
+      <p class="card-sub">ไม่สามารถเช็คอินคิวที่ถูกยกเลิกได้</p>
+
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-value queue-big" style="color:#E53935;" id="cancelQueue">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-value" id="cancelFarmer">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สินค้า</span>
+          <span class="info-value" id="cancelProduct">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">วันที่จอง</span>
+          <span class="info-value" id="cancelDate">-</span>
+        </div>
+      </div>
+
+      <!-- Cancel Reason Box -->
+      <div class="cancel-reason-box" id="cancelReasonBox">
+        <div class="cancel-reason-label">
+          <span class="material-icons-outlined">info</span>
+          สาเหตุการยกเลิก
+        </div>
+        <div class="cancel-reason-text" id="cancelReasonText">ไม่ระบุสาเหตุ</div>
+        <div class="cancel-who-badge" id="cancelWhoBadge">
+          <span class="material-icons-outlined">person</span>
+          <span id="cancelWhoText">-</span>
+        </div>
+      </div>
+
+      <button data-back class="btn btn-danger">
+        <span class="material-icons-outlined">arrow_back</span>
+        <span>กลับ</span>
+      </button>
+    </div>
+
+    <!-- ========== Phase 6: ERROR ========== -->
+    <div id="errorSec" class="sec">
+      <div class="status-icon-wrap icon-error">
+        <span class="material-icons-outlined">warning_amber</span>
+      </div>
+      <h2 class="card-title" id="errorTitle">เกิดข้อผิดพลาด</h2>
+      <p class="card-sub" id="errorMsg">ไม่สามารถดำเนินการได้ในขณะนี้</p>
+
+      <div class="action-group">
+        <button data-back class="btn btn-primary">
+          <span class="material-icons-outlined">refresh</span>
+          <span>ลองสแกนใหม่</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ========== Phase 7: FORBIDDEN ========== -->
+    <div id="forbiddenSec" class="sec">
+      <div class="status-icon-wrap icon-forbidden">
+        <span class="material-icons-outlined">lock</span>
+      </div>
+      <h2 class="card-title">ไม่มีสิทธิ์</h2>
+      <p class="card-sub">คิวนี้ไม่ได้อยู่ในรายการของคุณ<br>กรุณาสแกน QR ที่ถูกต้อง</p>
+      <button data-back class="btn btn-secondary">
+        <span class="material-icons-outlined">arrow_back</span>
+        <span>กลับ</span>
+      </button>
     </div>
 
   </div>
@@ -220,61 +394,152 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
-      
+
+      // --- Helpers ---
+      const $ = id => document.getElementById(id);
+      const setText = (id, val) => { const el = $(id); if (el) el.textContent = val || '-'; };
+
+      const ALL_SECS = ['loadingSec','previewSec','successSec','alreadySec','cancelledSec','errorSec','forbiddenSec'];
+      function showSection(id) {
+        ALL_SECS.forEach(s => { const el = $(s); if (el) el.style.display = s === id ? 'block' : 'none'; });
+      }
+
+      function fmtDate(val) {
+        if (!val) return '-';
+        try {
+          const d = new Date(val);
+          const lang = localStorage.getItem('lang') || 'th';
+          const locale = lang === 'en' ? 'en-GB' : lang === 'zh' ? 'zh-CN' : 'th-TH';
+          return d.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch { return val; }
+      }
+
+      function farmerName(b) {
+        const f = b.farmer || b.buyer || b.requester;
+        if (!f) return t('booking_unknown_name', 'ไม่ทราบชื่อ');
+        return (`${f.first_name || ''} ${f.last_name || ''}`).trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
+      }
+
+      function productName(b) {
+        const p = b.product || b.products || b.buy_offers;
+        const name = p?.name || b.product_name || '-';
+        const variety = p?.variety || b.variety_name;
+        return variety ? `${name} (${variety})` : name;
+      }
+
+      function amountStr(b) {
+        const qty = Number(b.quantity || b.product_amount || b.expected_qty || 0);
+        return Number.isFinite(qty) && qty > 0 ? `${qty.toLocaleString()} ${t('kg_unit','กก.')}` : '-';
+      }
+
+      // Determine cancel reason & who cancelled
+      function getCancelInfo(b) {
+        // The notification text stored in bookingService helps us guess:
+        // If cancelled by farmer → notification goes to buyer (offer_owner_id)
+        // If cancelled by buyer  → notification goes to farmer (buyer_id)
+        // We approximate from the cancel_note or just show generic reason
+        const note = b.cancel_note || b.cancel_reason || b.note || null;
+        const cancelledByFarmer = b.cancelled_by === 'farmer' || b.cancel_by === 'farmer';
+        const cancelledByBuyer  = b.cancelled_by === 'buyer'  || b.cancel_by === 'buyer';
+
+        let who = '';
+        if (cancelledByFarmer)      who = `ยกเลิกโดย: เกษตรกร (${farmerName(b)})`;
+        else if (cancelledByBuyer)  who = `ยกเลิกโดย: ผู้รับซื้อ`;
+        else                        who = `ยกเลิกโดย: ไม่ทราบฝ่าย`;
+
+        const reason = note || 'ไม่ได้ระบุสาเหตุ';
+        return { reason, who };
+      }
+
+      // ----------------------------------------
       const params = new URLSearchParams(window.location.search);
       const bid = params.get('bid') || params.get('bookingId') || params.get('id');
       if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-      const API_BASE = window.getAgriPriceApiUrl
-        ? window.getAgriPriceApiUrl()
-        : (window.API_BASE_URL || '').replace(/\/$/, '');
+      const API_BASE = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
       const TOKEN = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
 
-      const loadingSec = document.getElementById('loadingSec');
-      const previewSec = document.getElementById('previewSec');
-      const successSec = document.getElementById('successSec');
-      const errorSec   = document.getElementById('errorSec');
-
       if (!bid || !TOKEN || !API_BASE) {
-        showSection(errorSec);
-        document.getElementById('errorMsg').textContent = t('invalid_info_rescan', 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง');
+        showSection('errorSec');
+        setText('errorTitle', 'ข้อมูลไม่ครบถ้วน');
+        setText('errorMsg', t('invalid_info_rescan', 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง'));
         return;
       }
 
-      function showSection(sec) {
-        [loadingSec, previewSec, successSec, errorSec].forEach(s => s.style.display = 'none');
-        sec.style.display = 'block';
-      }
+      showSection('loadingSec');
+      $('loadingMsg').textContent = t('fetching_booking_data', 'กำลังดึงข้อมูลการจอง...');
 
-      // 1. Fetch Booking Details first (Preview)
+      // =====================
+      // 1. FETCH BOOKING DETAIL
+      // =====================
+      let booking = null;
       try {
         const res = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(bid)}`, {
           headers: { 'Authorization': 'Bearer ' + TOKEN }
         });
         const json = await res.json();
-        
-        if (res.ok && json.data) {
-          const b = json.data;
-          const amountKg = b.quantity || b.product_amount || b.expected_qty || 0;
-          const amountValue = Number(amountKg);
-          document.getElementById('prevQueue').textContent = b.queue_no || '-';
-          document.getElementById('prevFarmer').textContent = b.farmer ? `${b.farmer.first_name} ${b.farmer.last_name}` : t('booking_unknown_name', 'ไม่ทราบชื่อ');
-          document.getElementById('prevProduct').textContent = b.product?.name || '-';
-          document.getElementById('prevAmount').textContent = (Number.isFinite(amountValue) ? amountValue.toLocaleString() : '-') + ' ' + t('kg_unit', 'กก.');
-          
-          showSection(previewSec);
-        } else {
-          document.getElementById('errorMsg').textContent = json.message || t('booking_not_found', 'ไม่พบข้อมูลการจองนี้');
-          showSection(errorSec);
+
+        if (res.status === 403) {
+          showSection('forbiddenSec'); return;
         }
+        if (!res.ok || !json.data) {
+          showSection('errorSec');
+          setText('errorTitle', t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
+          setText('errorMsg', json.message || t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
+          return;
+        }
+
+        booking = json.data;
       } catch (e) {
-        document.getElementById('errorMsg').textContent = t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ');
-        showSection(errorSec);
+        showSection('errorSec');
+        setText('errorTitle', 'เชื่อมต่อไม่ได้');
+        setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาลองใหม่'));
+        return;
       }
 
-      // 2. Handle Confirmation
-      document.getElementById('btnConfirm').addEventListener('click', async () => {
-        showSection(loadingSec);
-        loadingSec.querySelector('p').textContent = t('saving_checkin', 'กำลังบันทึกการเช็คอิน...');
+      const status = booking.status;
+
+      // =====================
+      // 2. RENDER BY STATUS
+      // =====================
+
+      // --- CANCELLED ---
+      if (status === 'cancel') {
+        setText('cancelQueue',   booking.queue_no);
+        setText('cancelFarmer',  farmerName(booking));
+        setText('cancelProduct', productName(booking));
+        setText('cancelDate',    fmtDate(booking.scheduled_time || booking.created_at));
+
+        const { reason, who } = getCancelInfo(booking);
+        setText('cancelReasonText', reason);
+        setText('cancelWhoText',    who);
+
+        showSection('cancelledSec');
+        return;
+      }
+
+      // --- ALREADY CHECKED IN ---
+      if (status === 'success') {
+        setText('alreadyQueue',   booking.queue_no);
+        setText('alreadyFarmer',  farmerName(booking));
+        setText('alreadyProduct', productName(booking));
+        showSection('alreadySec');
+        return;
+      }
+
+      // --- WAITING → SHOW PREVIEW ---
+      setText('prevQueue',   booking.queue_no);
+      setText('prevFarmer',  farmerName(booking));
+      setText('prevProduct', productName(booking));
+      setText('prevAmount',  amountStr(booking));
+      setText('prevDate',    fmtDate(booking.scheduled_time || booking.created_at));
+      showSection('previewSec');
+
+      // =====================
+      // 3. CONFIRM BUTTON
+      // =====================
+      $('btnConfirm').addEventListener('click', async () => {
+        showSection('loadingSec');
+        $('loadingMsg').textContent = t('saving_checkin', 'กำลังบันทึกการเช็คอิน...');
 
         try {
           const res = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(bid)}/checkin`, {
@@ -283,28 +548,37 @@
           });
           const json = await res.json();
 
-          if (res.ok) {
-            document.getElementById('resQueue').textContent = json.data?.queue_no || '-';
-            showSection(successSec);
+          if (res.ok && json.data) {
+            const result = json.data;
+            setText('resQueue',   result.queue_no || booking.queue_no);
+            setText('resFarmer',  farmerName(result));
+            setText('resProduct', productName(result));
+            showSection('successSec');
+          } else if (res.status === 403) {
+            showSection('forbiddenSec');
           } else {
-            document.getElementById('errorMsg').textContent = json.message || t('checkin_failed', 'เช็คอินไม่สำเร็จ');
-            showSection(errorSec);
+            showSection('errorSec');
+            setText('errorTitle', t('checkin_failed', 'เช็คอินไม่สำเร็จ'));
+            setText('errorMsg', json.message || t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน'));
           }
         } catch (e) {
-          document.getElementById('errorMsg').textContent = t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน');
-          showSection(errorSec);
+          showSection('errorSec');
+          setText('errorTitle', 'เชื่อมต่อไม่ได้');
+          setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'));
         }
       });
 
-      // 3. Handle Cancel
-      document.getElementById('btnCancel').addEventListener('click', () => {
-        window.history.back();
+      // =====================
+      // 4. OTHER BUTTONS
+      // =====================
+      $('btnCancel').addEventListener('click', () => window.history.back());
+      $('btnDone').addEventListener('click', () => {
+        if (window.navigateWithTransition) window.navigateWithTransition('../index.html');
+        else window.location.href = '../index.html';
       });
 
-      // 4. Handle Done
-      document.getElementById('btnDone').addEventListener('click', () => {
-        // Go back to booking list
-        window.location.href = 'buyer/setbooking/booking.html';
+      document.querySelectorAll('[data-back]').forEach(btn => {
+        btn.addEventListener('click', () => window.history.back());
       });
     });
   </script>

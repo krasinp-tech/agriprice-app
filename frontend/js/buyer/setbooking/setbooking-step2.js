@@ -233,8 +233,8 @@
       <div class="summary-card-inner">
         <div class="summary-title">${window.i18nT ? window.i18nT('summary_title', 'สรุปการรับซื้อที่เลือก') : 'สรุปการรับซื้อที่เลือก'}</div>
         <div class="summary-info">
-          <div class="summary-label">${window.i18nT ? window.i18nT('summary_product', 'ผลผลิต') : 'ผลผลิต'}: <strong>${escapeHtml(p.name || "-")}</strong></div>
-          <div class="summary-label">${window.i18nT ? window.i18nT('summary_variety', 'สายพันธุ์') : 'สายพันธุ์'}: <strong>${escapeHtml(v?.name || "-")}</strong></div>
+          <div class="summary-label">${window.i18nT ? window.i18nT('summary_product', 'ผลผลิต') : 'ผลผลิต'}: <strong>${escapeHtml(window.i18nT ? window.i18nT(p.name, p.name) : (p.name || "-"))}</strong></div>
+          <div class="summary-label">${window.i18nT ? window.i18nT('summary_variety', 'สายพันธุ์') : 'สายพันธุ์'}: <strong>${escapeHtml(window.i18nT ? window.i18nT(v?.name, v?.name) : (v?.name || "-"))}</strong></div>
         </div>
         <div class="summary-desc">${window.i18nT ? window.i18nT('summary_desc', 'คำอธิบาย') : 'คำอธิบาย'}: ${escapeHtml(details || "-")}</div>
         <div class="summary-pills">

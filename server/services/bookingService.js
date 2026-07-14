@@ -74,6 +74,9 @@ function normalizeBooking(row) {
     offer_owner: offerOwner,
     buyer_profile: offerOwner,
     vehicle_plates: vehicles.map((vehicle) => vehicle.plate_no).filter(Boolean).join(', '),
+    // Cancel info — populated when status = 'cancel'
+    cancel_by: row.cancel_by || null,       // 'farmer' | 'buyer' | null
+    cancel_reason: row.cancel_reason || null, // free-text reason or null
   };
 }
 
@@ -412,7 +415,7 @@ class BookingService {
     return createBookingWithQueueValidation(farmerId, bookingData);
   }
 
-  async updateBookingStatus(bookingId, userId, role, status) {
+  async updateBookingStatus(bookingId, userId, role, status, cancelReason = null) {
     const requestedStatus = String(status || '').toLowerCase();
     const nextStatus = normalizeBookingStatus(status);
     const booking = await this.getBookingDetail(bookingId, userId);
@@ -432,9 +435,16 @@ class BookingService {
       throw createHttpError('Only the offer owner can update this booking', 403);
     }
 
+    // Build update payload — include cancel info when cancelling
+    const updatePayload = { status: nextStatus };
+    if (nextStatus === 'cancel') {
+      updatePayload.cancel_by = role; // 'farmer' or 'buyer'
+      if (cancelReason) updatePayload.cancel_reason = String(cancelReason).trim().slice(0, 500);
+    }
+
     const { data, error } = await supabaseAdmin
       .from('bookings')
-      .update({ status: nextStatus })
+      .update(updatePayload)
       .eq('booking_id', booking.booking_id)
       .select()
       .single();

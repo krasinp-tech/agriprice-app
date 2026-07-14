@@ -41,16 +41,16 @@
 }
 
 .hero-bg {
-  height: 170px;
-  border-radius: 26px;
+  height: 160px;
+  border-radius: 22px 22px 0 0;
   background: linear-gradient(135deg, #16a34a, #22c55e);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.10);
 }
 
 .hero-content {
   position: relative;
-  margin-top: -150px;
-  padding: 18px 16px 0;
+  margin-top: -160px;
+  padding: 22px 0 0;
 }
 
 .hero-title {
@@ -58,23 +58,25 @@
   color: #fff;
   font-weight: 1000;
   font-size: 24px;
+  margin: 0 0 6px 0;
 }
 
 .hero-sub {
   text-align: center;
   color: rgba(255, 255, 255, 0.92);
-  margin-top: 6px;
   font-size: 13px;
   line-height: 1.5;
+  padding: 0 16px 14px;
+  margin: 0;
 }
 
 /* ================================
    Big Card (Main Info)
 ================================ */
 .big-card {
-  margin-top: 14px;
+  margin-top: 0;
   background: #fff;
-  border-radius: 22px;
+  border-radius: 0 0 22px 22px;
   padding: 16px;
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.10);
 }
@@ -362,7 +364,11 @@
   }
 
   .hero-bg {
-    height: 200px;
+    height: 180px;
+  }
+
+  .hero-content {
+    margin-top: -180px;
   }
 
   .hero-title {
@@ -384,7 +390,11 @@
   }
 
   .hero-bg {
-    height: 220px;
+    height: 190px;
+  }
+
+  .hero-content {
+    margin-top: -190px;
   }
 
   .hero-title {

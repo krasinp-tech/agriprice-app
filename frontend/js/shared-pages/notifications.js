@@ -4,6 +4,7 @@
 
   let ALL_NOTIFICATIONS = [];
   let CURRENT_TAB = 'all';
+  let SWIPE_GLOBAL_CLEANUPS = [];
 
   function getRelativePrefixToRoot() {
     const path = (window.location.pathname || "").replace(/\\/g, "/");
@@ -83,6 +84,11 @@
         <div class="skeleton-card"><div class="skeleton skeleton-avatar"></div><div class="skeleton-card-content"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div></div>
       `;
 
+      if (emptyState) {
+        emptyState.hidden = true;
+        emptyState.style.display = 'none';
+      }
+
       const api = getApi();
       if (!api.getNotifications) throw new Error('Notification API is not ready');
 
@@ -92,7 +98,6 @@
         ...n,
         id: n.id || n.notification_id,
       }));
-      
       refreshUI();
     } catch (err) {
       console.error('[Notifications] Load Error:', err);
@@ -106,8 +111,8 @@
     const unreadBadge = document.getElementById('unreadBadge');
 
     // Filter by tab
-    const filtered = CURRENT_TAB === 'unread' 
-      ? ALL_NOTIFICATIONS.filter(n => !n.is_read) 
+    const filtered = CURRENT_TAB === 'unread'
+      ? ALL_NOTIFICATIONS.filter(n => !n.is_read)
       : ALL_NOTIFICATIONS;
 
     // Update unread count
@@ -118,12 +123,18 @@
     }
 
     if (filtered.length === 0) {
-      if (emptyState) emptyState.hidden = false;
+      if (emptyState) {
+        emptyState.hidden = false;
+        emptyState.style.display = 'flex';
+      }
       listMount.innerHTML = '';
       return;
     }
 
-    if (emptyState) emptyState.hidden = true;
+    if (emptyState) {
+      emptyState.hidden = true;
+      emptyState.style.display = 'none';
+    }
     renderNotifications(filtered, listMount);
   }
 
@@ -133,16 +144,28 @@
       const isUnread = !n.is_read;
       const id = n.id || n.notification_id;
       const html = `
-        <div class="noti-item ${isUnread ? 'is-unread' : ''}" data-id="${escapeHtml(id)}" style="cursor:pointer; ${isUnread ? 'background: rgba(30,158,108,0.04);' : ''}">
-          <div class="noti-item-icon ${getIconClass(type)}">
-            <span class="material-icons-outlined">${getIconName(type)}</span>
+        <div class="noti-item-wrapper" data-id="${escapeHtml(id)}">
+          <!-- Underlay buttons -->
+          <div class="noti-item-underlay-left" style="background: #22c55e;">
+            <span class="material-icons-outlined">done_all</span>
+            <span>${isUnread ? t('mark_read', 'อ่านแล้ว') : t('mark_unread', 'ยังไม่อ่าน')}</span>
           </div>
-          <div class="noti-item-body">
-            <div class="noti-item-title">${escapeHtml(n.title)}</div>
-            <div class="noti-item-desc">${escapeHtml(n.message || n.content || n.description)}</div>
-            <div class="noti-item-time">${formatRelativeTime(n.created_at)}</div>
+          <div class="noti-item-underlay-right" style="background: #ef4444;">
+            <span class="material-icons-outlined">delete</span>
+            <span>${t('delete', 'ลบ')}</span>
           </div>
-          ${isUnread ? `<div class="noti-unread-dot" style="width:8px; height:8px; background:var(--brand); border-radius:50%; margin-left:8px;"></div>` : ''}
+          <!-- Main Noti Item -->
+          <div class="noti-item ${isUnread ? 'is-unread' : ''}" data-id="${escapeHtml(id)}" style="cursor:pointer; ${isUnread ? 'background: rgba(30,158,108,0.04);' : ''}">
+            <div class="noti-item-icon ${getIconClass(type)}">
+              <span class="material-icons-outlined">${getIconName(type)}</span>
+            </div>
+            <div class="noti-item-body">
+              <div class="noti-item-title">${escapeHtml(n.title)}</div>
+              <div class="noti-item-desc">${escapeHtml(n.message || n.content || n.description)}</div>
+              <div class="noti-item-time">${formatRelativeTime(n.created_at)}</div>
+            </div>
+            ${isUnread ? `<div class="noti-unread-dot" style="width:8px; height:8px; background:var(--brand); border-radius:50%; margin-left:8px;"></div>` : ''}
+          </div>
         </div>
         ${index < items.length - 1 ? '<div class="noti-divider"></div>' : ''}
       `;
@@ -154,8 +177,7 @@
       el.addEventListener('click', async () => {
         const id = el.dataset.id;
         const noti = ALL_NOTIFICATIONS.find(x => String(x.id || x.notification_id) === String(id));
-        
-        if (noti && !noti.is_read) {
+        if (noti && noti.is_read === false) {
           try {
             const api = getApi();
             if (api.markRead) await api.markRead(id);
@@ -166,7 +188,6 @@
             console.error('[Notifications] Mark read failed:', err);
           }
         }
-        
         // Handle deep linking if available
         if (noti && noti.link) {
           const resolvedLink = resolveToRootUrl(noti.link);
@@ -176,6 +197,217 @@
             window.location.href = resolvedLink;
           }
         }
+      });
+    });
+
+    bindSwipeActions();
+  }
+
+  function bindSwipeActions() {
+    const listMount = document.getElementById('notificationListMount');
+    if (!listMount) return;
+    SWIPE_GLOBAL_CLEANUPS.forEach(cleanup => cleanup());
+    SWIPE_GLOBAL_CLEANUPS = [];
+
+    listMount.querySelectorAll('.noti-item-wrapper').forEach(wrapper => {
+      const item = wrapper.querySelector('.noti-item');
+      const underlayLeft = wrapper.querySelector('.noti-item-underlay-left');
+      const underlayRight = wrapper.querySelector('.noti-item-underlay-right');
+
+      function updateUnderlays(x) {
+        if (underlayLeft) underlayLeft.style.display = x > 0 ? 'flex' : 'none';
+        if (underlayRight) underlayRight.style.display = x < 0 ? 'flex' : 'none';
+      }
+
+      function resetSwipe() {
+        currentX = 0;
+        activeSwipe = 0;
+        item.style.transform = 'translateX(0)';
+        item.dataset.swipeOpen = 'false';
+        updateUnderlays(0);
+      }
+
+      function settleSwipe() {
+        let nextX = 0;
+        if (currentX > 40) nextX = 76;
+        else if (currentX < -40) nextX = -76;
+
+        currentX = nextX;
+        activeSwipe = nextX;
+        item.style.transform = `translateX(${nextX}px)`;
+        item.dataset.swipeOpen = nextX !== 0 ? 'true' : 'false';
+        updateUnderlays(nextX);
+      }
+
+      function suppressNextClick() {
+        item.dataset.swipeSuppress = 'true';
+        setTimeout(() => {
+          if (item.dataset.swipeSuppress === 'true') item.dataset.swipeSuppress = '';
+        }, 350);
+      }
+
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let isDragging = false;
+      let isHorizontal = false;
+      let movedDuringGesture = false;
+      let activeSwipe = 0; // -76 for left (delete), 76 for right (read)
+
+      item.addEventListener('click', (e) => {
+        if (item.dataset.swipeSuppress === 'true' || activeSwipe !== 0) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          item.dataset.swipeSuppress = '';
+          item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+          resetSwipe();
+        }
+      }, true);
+
+      // Touch events for mobile
+      item.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentX = activeSwipe;
+        isDragging = true;
+        isHorizontal = false;
+        movedDuringGesture = false;
+        item.style.transition = 'none';
+      }, { passive: true });
+
+      item.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const diffX = e.touches[0].clientX - startX;
+        const diffY = e.touches[0].clientY - startY;
+
+        // Detect horizontal swipe
+        if (!isHorizontal && Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+          isHorizontal = true;
+        }
+
+        if (isHorizontal) {
+          movedDuringGesture = true;
+          currentX = diffX + activeSwipe;
+          // Clamp swipe distance
+          if (currentX > 84) currentX = 84;
+          if (currentX < -84) currentX = -84;
+          item.style.transform = `translateX(${currentX}px)`;
+          updateUnderlays(currentX);
+        }
+      }, { passive: true });
+
+      item.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        settleSwipe();
+        if (movedDuringGesture) suppressNextClick();
+      });
+
+      // Mouse drag events for testing / desktop
+      let isMouseDragging = false;
+      item.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        currentX = activeSwipe;
+        isMouseDragging = true;
+        movedDuringGesture = false;
+        item.style.transition = 'none';
+      });
+
+      const handleMouseMove = (e) => {
+        if (!isMouseDragging) return;
+        const diffX = e.clientX - startX;
+        if (Math.abs(diffX) > 4) movedDuringGesture = true;
+        currentX = diffX + activeSwipe;
+        if (currentX > 84) currentX = 84;
+        if (currentX < -84) currentX = -84;
+        item.style.transform = `translateX(${currentX}px)`;
+        updateUnderlays(currentX);
+      };
+      window.addEventListener('mousemove', handleMouseMove);
+      SWIPE_GLOBAL_CLEANUPS.push(() => window.removeEventListener('mousemove', handleMouseMove));
+
+      const handleMouseUp = () => {
+        if (!isMouseDragging) return;
+        isMouseDragging = false;
+        item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        settleSwipe();
+        if (movedDuringGesture) suppressNextClick();
+      };
+      window.addEventListener('mouseup', handleMouseUp);
+      SWIPE_GLOBAL_CLEANUPS.push(() => window.removeEventListener('mouseup', handleMouseUp));
+
+      // Close swiped state on body interaction elsewhere
+      const handleDocumentClick = (e) => {
+        if (!wrapper.contains(e.target) && activeSwipe !== 0) {
+          item.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+          resetSwipe();
+        }
+      };
+      document.addEventListener('click', handleDocumentClick);
+      SWIPE_GLOBAL_CLEANUPS.push(() => document.removeEventListener('click', handleDocumentClick));
+
+      // Left Action: Toggle Read/Unread
+      wrapper.querySelector('.noti-item-underlay-left')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const notiId = wrapper.dataset.id;
+        const noti = ALL_NOTIFICATIONS.find(x => String(x.id || x.notification_id) === String(notiId));
+        if (noti) {
+          try {
+            const api = getApi();
+            const isUnread = !noti.is_read;
+            if (isUnread) {
+              if (api.markRead) await api.markRead(notiId);
+              else await api.call('PATCH', `/api/notifications/${notiId}/read`);
+              noti.is_read = true;
+            } else {
+              if (api.markUnread) await api.markUnread(notiId);
+              else await api.call('PATCH', `/api/notifications/${notiId}/unread`);
+              noti.is_read = false;
+            }
+            resetSwipe();
+            refreshUI();
+          } catch(err) {
+            console.error('[Notifications] Mark read/unread failed:', err);
+          }
+        }
+      });
+
+      // Right Action: Delete Notification
+      wrapper.querySelector('.noti-item-underlay-right')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const notiId = wrapper.dataset.id;
+        const confirmMsg = t('confirm_delete_notification', 'คุณต้องการลบการแจ้งเตือนนี้ใช่หรือไม่?');
+        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+
+        showConfirm(confirmMsg, async (confirmed) => {
+          if (confirmed) {
+            try {
+              const api = getApi();
+              if (api.deleteNotification) await api.deleteNotification(notiId);
+              else await api.call('DELETE', `/api/notifications/${notiId}`);
+              // Animation height collapse
+              wrapper.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+              wrapper.style.height = '0';
+              wrapper.style.margin = '0';
+              wrapper.style.opacity = '0';
+              wrapper.style.padding = '0';
+              // Hide adjacent divider
+              const nextEl = wrapper.nextElementSibling;
+              if (nextEl && nextEl.classList.contains('noti-divider')) {
+                nextEl.style.display = 'none';
+              }
+              setTimeout(() => {
+                loadNotifications();
+              }, 350);
+            } catch(err) {
+              console.error('[Notifications] Delete failed:', err);
+              if (window.showToast) window.showToast(t('error_delete_notification', 'ลบการแจ้งเตือนไม่สำเร็จ'), 'error');
+            }
+          } else {
+            resetSwipe();
+          }
+        });
       });
     });
   }
@@ -197,6 +429,34 @@
     }
   }
 
+  function deleteReadNotifications() {
+    const hasRead = ALL_NOTIFICATIONS.some(n => n.is_read);
+    if (!hasRead) {
+      if (window.showToast) window.showToast(t('no_read_notifications', 'ไม่มีการแจ้งเตือนที่อ่านแล้ว'), 'info');
+      return;
+    }
+
+    const confirmMsg = t('confirm_delete_all_read', 'คุณต้องการลบการแจ้งเตือนที่อ่านแล้วทั้งหมดใช่หรือไม่?');
+    const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+
+    showConfirm(confirmMsg, async (confirmed) => {
+      if (confirmed) {
+        try {
+          const api = getApi();
+          if (api.deleteReadNotifications) await api.deleteReadNotifications();
+          else await api.call('DELETE', '/api/notifications/delete-read');
+          // Filter out read notifications from local state
+          ALL_NOTIFICATIONS = ALL_NOTIFICATIONS.filter(n => !n.is_read);
+          refreshUI();
+          if (window.showToast) window.showToast(t('read_notifications_deleted', 'ลบการแจ้งเตือนที่อ่านแล้วสำเร็จ'), 'success');
+        } catch (err) {
+          console.error('[Notifications] Delete read notifications failed:', err);
+          if (window.showToast) window.showToast(t('error_delete_read', 'ลบการแจ้งเตือนที่อ่านแล้วไม่สำเร็จ'), 'error');
+        }
+      }
+    });
+  }
+
   function init() {
     // Tab switching
     document.querySelectorAll('.noti-tab').forEach(tab => {
@@ -214,6 +474,9 @@
 
     const markAllReadBtn = document.getElementById('markAllReadBtn');
     if (markAllReadBtn) markAllReadBtn.onclick = () => markAllRead();
+
+    const deleteReadBtn = document.getElementById('deleteReadBtn');
+    if (deleteReadBtn) deleteReadBtn.onclick = () => deleteReadNotifications();
 
     loadNotifications();
   }

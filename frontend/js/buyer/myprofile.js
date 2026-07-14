@@ -61,7 +61,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (profileData.avatar) {
                         localStorage.setItem(AVATAR_KEY, profileData.avatar);
                     }
-                    
                     // Update user_data in localStorage with synced profile coordinates
                     try {
                         const rawUser = localStorage.getItem("user_data");
@@ -110,16 +109,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (role === 'farmer') {
             const addPurchaseBtn = document.getElementById('addPurchaseBtn');
             if (addPurchaseBtn) addPurchaseBtn.style.display = 'none';
-            
             const listTitle = document.querySelector('.products-list-title');
             if (listTitle) listTitle.style.display = 'none';
 
             const productsContainer = document.getElementById('productListContainer');
             if (productsContainer) productsContainer.style.display = 'none';
-            
             const servicesTab = document.querySelector('.profile-tab[data-tab="services"]');
             if (servicesTab) servicesTab.style.display = 'none';
-            
             const servicesEditor = document.getElementById('servicesEditor');
             const servicesEditorLabel = document.querySelector('label[data-i18n="services_label"]');
             if (servicesEditor) servicesEditor.style.display = 'none';
@@ -164,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const productId = p.offerId || p.offer_id || p.id || p.productId;
         const currentStatus = p.is_active;
         const newStatus = !currentStatus;
-        
         const btn = card.querySelector('[data-action="toggle-status"]');
         if (btn) btn.disabled = true;
 
@@ -172,14 +167,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const res = await api.updateProduct(productId, { is_active: newStatus });
             if (res && res.success) {
                 p.is_active = newStatus;
-                
                 // Update Badge
                 const badge = card.querySelector('.status-badge');
                 if (badge) {
                     badge.textContent = newStatus ? 'เปิดรับซื้อ' : 'ปิดรับซื้อ';
                     badge.className = `status-badge ${newStatus ? 'open' : 'closed'}`;
                 }
-                
                 // Update Button Text
                 const btnText = card.querySelector('.status-text');
                 if (btnText) {
@@ -284,11 +277,33 @@ document.addEventListener("DOMContentLoaded", function () {
             cb.checked = profileData.services.includes(cb.value);
         });
 
+        // Reset to first tab when opening
+        const firstTabBtn = editAboutModal.querySelector('.modal-tab-btn[data-modal-tab="general"]');
+        if (firstTabBtn) {
+            editAboutModal.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+            editAboutModal.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
+            firstTabBtn.classList.add('active');
+            const panel = document.getElementById('modal-panel-general');
+            if (panel) panel.classList.add('active');
+        }
+
         editAboutModal.hidden = false;
     }
 
     if (editAboutBtn) editAboutBtn.addEventListener("click", openEditModal);
     if (cancelAboutBtn) cancelAboutBtn.addEventListener("click", () => { editAboutModal.hidden = true; });
+
+    // Modal tab switching logic
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.modalTab;
+            document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const panel = document.getElementById(`modal-panel-${targetTab}`);
+            if (panel) panel.classList.add('active');
+        });
+    });
 
     if (saveAboutBtn) {
         saveAboutBtn.addEventListener("click", async () => {
@@ -341,7 +356,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function uploadImage(file, type) {
         if (!file || !api.updateProfile) return;
-        
         const fd = new FormData();
         fd.append(type === 'avatar' ? 'avatar' : 'hero_image', file);
 
@@ -416,20 +430,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (getCurrentLocationBtn) {
-        getCurrentLocationBtn.addEventListener('click', () => {
-            if (!navigator.geolocation) return alert('เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง');
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
+        getCurrentLocationBtn.addEventListener('click', async () => {
+            try {
+                let pos = null;
+                if (window.AgriPermission?.requestLocation) {
+                    const res = await window.AgriPermission.requestLocation();
+                    if (res.granted && res.position) pos = res.position;
+                } else if (navigator.geolocation) {
+                    pos = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, maximumAge: 300000 });
+                    });
+                } else {
+                    alert('เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง');
+                    return;
+                }
+
+                if (!pos) {
+                    alert('ไม่สามารถเข้าถึงตำแหน่งของคุณได้');
+                    return;
+                }
+
+                const coords = pos.coords || pos;
+                const lat = coords.latitude;
+                const lng = coords.longitude;
                 mapLatEditor.value = lat.toFixed(6);
                 mapLngEditor.value = lng.toFixed(6);
                 if (map) {
                     map.setView([lat, lng], 15);
                     marker.setLatLng([lat, lng]);
                 }
-            }, (err) => {
+            } catch (_) {
                 alert('ไม่สามารถเข้าถึงตำแหน่งของคุณได้');
-            });
+            }
         });
     }
 
@@ -441,7 +473,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const tier = (profileData.tier || 'free').toLowerCase();
             const limit = tier === 'pro' ? 10 : 3;
             const currentCount = profileData.products ? profileData.products.filter(p => p.is_active !== false).length : 0;
-            
             if (currentCount >= limit) {
                 const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
                 if (tier === 'free') {

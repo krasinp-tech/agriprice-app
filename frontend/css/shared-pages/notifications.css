@@ -186,13 +186,53 @@ body {
   flex-direction: column;
 }
 
+/* Swipe-to-Action Wrapper */
+.noti-item-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: var(--card);
+  user-select: none;
+}
+
+.noti-item-underlay-left,
+.noti-item-underlay-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 76px;
+  display: none; /* Hidden by default, displayed dynamically on swipe */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.noti-item-underlay-left {
+  left: 0;
+}
+
+.noti-item-underlay-right {
+  right: 0;
+}
+
+.noti-item-wrapper .noti-item {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--card);
+}
+
 /* ─── ITEM ─── */
 .noti-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  transition: opacity .22s ease, transform .22s ease;
 }
 
 .noti-divider {

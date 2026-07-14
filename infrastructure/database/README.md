@@ -12,6 +12,8 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 - `migrations/final_teacher_normalization_migration.sql`: Main migration that removes duplicated columns and aligns the database with the teacher's feedback.
 - `migrations/create-reviews-and-notification-link.sql`: Adds app reviews and notification deep links used by the current API.
 - `migrations/zz-fix-chat-device-unique-constraints.sql`: Adds final chat-room and push-token uniqueness fixes used by verification.
+- `migrations/bug-freeze-booking-queue-sequence.sql`: Adds atomic queue sequence support for booking slots.
+- `migrations/add-booking-cancel-info-and-chat-deletions.sql`: Adds booking cancellation metadata and per-user chat deletion tracking.
 - `maintenance/SUPABASE_OPTIMIZE.sql`: Safe indexes and update timestamp triggers for the current normalized schema.
 - `maintenance/verify_submission_constraints.sql`: Final check for unique constraints required by normalized tables.
 
@@ -24,8 +26,10 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 1. Run `migrations/final_teacher_normalization_migration.sql`.
 2. Run `migrations/create-reviews-and-notification-link.sql`.
 3. Run `migrations/zz-fix-chat-device-unique-constraints.sql`.
-4. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
-5. Run `maintenance/verify_submission_constraints.sql` and confirm the final SELECT returns all expected constraints.
-6. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
+4. Run `migrations/bug-freeze-booking-queue-sequence.sql`.
+5. Run `migrations/add-booking-cancel-info-and-chat-deletions.sql`.
+6. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
+7. Run `maintenance/verify_submission_constraints.sql` and confirm the final SELECT returns all expected constraints.
+8. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
 
 The files in `schemas/` are references for documentation. For an existing Supabase project, use the migration files above instead of recreating all tables.

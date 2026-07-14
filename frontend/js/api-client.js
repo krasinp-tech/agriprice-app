@@ -224,13 +224,15 @@
   const getBooking = id => call('GET', '/api/bookings/' + id);
   const getQueueStatus = id => call('GET', '/api/bookings/' + id + '/queue-status');
   const createBooking = body => call('POST', '/api/bookings', body);
-  const updateBooking = (id, s) => call('PATCH', '/api/bookings/' + id, { status: s });
+  const updateBooking = (id, s, extra = {}) => call('PATCH', '/api/bookings/' + id, { status: s, ...extra });
 
   // --- 8. Chat & Presence ---
   const getChats = () => call('GET', '/api/chats');
   const startChat = target_user_id => call('POST', '/api/chats/start', { target_user_id });
   const getChatMessages = id => call('GET', '/api/chats/' + id + '/messages');
   const markChatRead = id => call('PATCH', '/api/chats/' + id + '/read');
+  const markChatUnread = id => call('PATCH', '/api/chats/' + id + '/unread');
+  const deleteChat = id => call('DELETE', '/api/chats/' + id);
   const getUnreadChats = () => call('GET', '/api/chats/unread');
   async function sendMessage(chatId, message, imageFile) {
     if (imageFile) {
@@ -247,8 +249,10 @@
   // --- 9. Notifications & Device Sessions ---
   const getNotifications = () => call('GET', '/api/notifications');
   const markRead = id => call('PATCH', '/api/notifications/' + id + '/read');
+  const markUnread = id => call('PATCH', '/api/notifications/' + id + '/unread');
   const markAllRead = () => call('PATCH', '/api/notifications/read-all');
   const deleteNotification = id => call('DELETE', '/api/notifications/' + id);
+  const deleteReadNotifications = () => call('DELETE', '/api/notifications/delete-read');
   const getNotificationSettings = () => call('GET', '/api/notification-settings');
   const saveNotificationSettings = (settings, role) => call('PATCH', '/api/notification-settings', { settings, role });
   const updatePushToken = (token, platform = 'native') => call('POST', '/api/notifications/push-token', { token, platform });
@@ -284,9 +288,9 @@
     getProductSlots, getAllSlots, createProductSlot, createSlotsBatch, updateProductSlot, deleteProductSlot,
     getUsers, getFollowingCount,
     getBookings, getBooking, getQueueStatus, createBooking, updateBooking,
-    getChats, startChat, getChatMessages, markChatRead, getUnreadChats, sendMessage,
+    getChats, startChat, getChatMessages, markChatRead, markChatUnread, deleteChat, getUnreadChats, sendMessage,
     pingPresence, getUserPresence,
-    getNotifications, markRead, markAllRead, deleteNotification, getNotificationSettings, saveNotificationSettings, updatePushToken,
+    getNotifications, markRead, markUnread, markAllRead, deleteNotification, deleteReadNotifications, getNotificationSettings, saveNotificationSettings, updatePushToken,
     getDeviceSessions, logoutDevice,
     search, getDashboard, getAnnouncements, checkoutPayment, submitAppReview
   };

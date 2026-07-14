@@ -65,6 +65,26 @@ class ChatController {
       res.status(e.statusCode || 500).json(response.error(e.message));
     }
   }
+
+  async markUnread(req, res) {
+    try {
+      const { roomId } = req.params;
+      const result = await chatService.markAsUnread(roomId, req.user.id);
+      res.json(response.success('ทำเครื่องหมายว่ายังไม่อ่านสำเร็จ', { updated: !!result, message: result }));
+    } catch (e) {
+      res.status(e.statusCode || 500).json(response.error(e.message));
+    }
+  }
+
+  async deleteRoom(req, res) {
+    try {
+      const { roomId } = req.params;
+      const result = await chatService.deleteRoom(roomId, req.user.id);
+      res.json(response.success('ลบแชทสำเร็จ', result));
+    } catch (e) {
+      res.status(e.statusCode || 500).json(response.error(e.message));
+    }
+  }
 }
 
 module.exports = new ChatController();

@@ -46,12 +46,19 @@
 
 
     <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-bg"></div>
+    <section class="hero" id="heroSection">
+      <div class="hero-bg" id="heroBg"></div>
 
       <div class="hero-content">
-
-        <div class="hero-sub" id="heroSub" data-i18n="booking_confirmed_msg">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+        <!-- Status Icon + Message -->
+        <div class="hero-status-row">
+          <span class="material-icons-outlined hero-status-icon" id="heroStatusIcon">check_circle</span>
+          <div class="hero-sub" id="heroSub">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+        </div>
+        <!-- Status Pill -->
+        <div class="status-pill-wrap">
+          <span class="status-pill" id="statusPill">ยืนยันแล้ว</span>
+        </div>
 
         <div class="big-card">
           <div class="label" data-i18n="queue_number">หมายเลขคิว</div>
@@ -128,39 +135,42 @@
     </section>
 
     <!-- Farmer Personal Information Card -->
-    <section class="card">
-      <div class="card-title" data-i18n="farmer_info_title">
+    <section class="card farmer-card">
+      <div class="card-title">
         <span class="material-icons-outlined">person</span>
-        ข้อมูลส่วนตัวของเกษตรกร
+        <span data-i18n="farmer_info_title">ข้อมูลส่วนตัวของเกษตรกร</span>
       </div>
 
-      <div class="placeBox">
-        <div class="placeName" id="shopName">-</div>
-        <div class="placeAddr" id="shopAddr">-</div>
-
-        <!-- New Contact Section -->
-        <div class="farmer-contact">
-          <div class="contact-row">
-            <span class="contact-label" data-i18n="farmer_phone">เบอร์โทรศัพท์:</span>
-            <span class="contact-value" id="farmerPhone">-</span>
+      <div class="farmer-profile-box">
+        <!-- Avatar + Name -->
+        <div class="farmer-profile-header">
+          <div class="farmer-avatar">
+            <span class="material-icons-outlined">account_circle</span>
           </div>
-          <div class="action-row">
-            <button class="btn-action-small call" id="btnCall">
-              <span class="material-icons-outlined">call</span>
-              <span data-i18n="call_now">โทรออก</span>
-            </button>
-            <button class="btn-action-small chat" id="btnChat">
-              <span class="material-icons-outlined">chat</span>
-              <span data-i18n="chat_now">แชท</span>
-            </button>
+          <div class="farmer-profile-info">
+            <div class="farmer-name" id="shopName">-</div>
+            <div class="farmer-addr" id="shopAddr">-</div>
           </div>
         </div>
 
-        <!-- Map Button -->
-        <button class="btn-map-link" id="btnOpenMap">
-          <span class="material-icons-outlined">map</span>
-          <span data-i18n="open_map">เปิดแผนที่</span>
-        </button>
+        <!-- Phone Row -->
+        <div class="farmer-phone-row">
+          <span class="material-icons-outlined">phone</span>
+          <span class="farmer-phone-label" data-i18n="farmer_phone">เบอร์โทรศัพท์:</span>
+          <span class="farmer-phone-value" id="farmerPhone">-</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="farmer-action-row">
+          <button class="btn-farmer-action call" id="btnCall">
+            <span class="material-icons-outlined">call</span>
+            <span data-i18n="call_now">โทรออก</span>
+          </button>
+          <button class="btn-farmer-action chat" id="btnChat">
+            <span class="material-icons-outlined">chat_bubble_outline</span>
+            <span data-i18n="chat_now">แชท</span>
+          </button>
+        </div>
       </div>
     </section>
 

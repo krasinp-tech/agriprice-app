@@ -215,9 +215,7 @@
     const gradesContainer = card.querySelector("[data-bind='gradesContainer']");
     if (gradesContainer && window.ProductGrade) {
         const gradesHtml = window.ProductGrade.render(data, 'บ.กก.');
-        if (gradesHtml) {
-            safeHtml(gradesContainer, gradesHtml);
-        }
+        safeHtml(gradesContainer, gradesHtml || '');
     } else {
         // Fallback to manual binding if ProductGrade not available
         safeText(card.querySelector("[data-bind='priceA']"), data.priceA || "-");

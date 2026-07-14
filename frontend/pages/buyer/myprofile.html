@@ -147,69 +147,155 @@
 <!-- Edit Profile Modal -->
 <div id="editAboutModal" class="modal" hidden>
     <div class="modal-backdrop"></div>
-    <div class="modal-content">
-        <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
-
-        <label data-i18n="shop_name">ชื่อร้าน</label>
-        <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
-
-        <label data-i18n="tagline_label">Tagline / คำอธิบายสั้น</label>
-        <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint">
-
-        <label data-i18n="about_label">เกี่ยวกับ</label>
-        <textarea id="aboutEditor" rows="4"></textarea>
-
-        <label data-i18n="phone_label">โทรศัพท์</label>
-        <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
-
-        <label data-i18n="email_label">อีเมล</label>
-        <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
-
-        <label data-i18n="profile_link_label">ลิงก์ติดต่อ</label>
-        <input id="linkEditor" type="url" placeholder="เว็บไซต์, Facebook หรือ LINE OA" data-i18n-placeholder="profile_link_placeholder">
-
-        <label data-i18n="address_label">ที่อยู่</label>
-        <input id="addr1Editor" type="text" placeholder="ที่อยู่" data-i18n-placeholder="address_label">
-
-        <label data-i18n="address_cont_label">ที่อยู่ (ต่อ)</label>
-        <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder">
-
-        <label data-i18n="services_label">บริการของคุณ (เลือกได้หลายข้อ)</label>
-        <div id="servicesEditor" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
-                <input type="checkbox" value="รับซื้อถึงสวน" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_onsite">รับซื้อถึงสวน</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
-                <input type="checkbox" value="จ่ายเงินสด" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_cash">จ่ายเงินสด</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
-                <input type="checkbox" value="จองคิวล่วงหน้า" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_booking">จองคิวล่วงหน้า</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; margin-bottom: 0;">
-                <input type="checkbox" value="มีตาชั่งมาตรฐาน" style="width: 18px; height: 18px; accent-color: #16a34a;"> <span data-i18n="service_scale">มีตาชั่งมาตรฐาน</span>
-            </label>
-        </div>
-
-        <label data-i18n="map_pin_label">ปักหมุดตำแหน่งบนแผนที่</label>
-        <div id="mapPickerWrapper" style="margin-bottom: 15px;">
-            <button id="openMapPickerBtn" type="button" class="btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span class="material-icons-outlined">place</span>
-                <span id="mapPickerStatusText" data-i18n="map_picker_btn">เลือกตำแหน่งบนแผนที่...</span>
+    <div class="modal-content premium-modal">
+        <div class="modal-header-premium">
+            <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
+            <button type="button" class="modal-close-btn" onclick="document.getElementById('editAboutModal').hidden = true;">
+                <span class="material-icons-outlined">close</span>
             </button>
-            <div id="mapPickerContainer" style="display: none; margin-top: 10px;">
-                <button id="getCurrentLocationBtn" type="button" class="btn-outline" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #16a34a; border-color: #16a34a;">
-                    <span class="material-icons-outlined">my_location</span>
-                    <span data-i18n="current_location_btn">ใช้ตำแหน่งปัจจุบันของฉัน</span>
-                </button>
-                <div id="leafletMapDiv" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #ddd; z-index: 0;"></div>
-            </div>
-            <input type="hidden" id="mapLatEditor">
-            <input type="hidden" id="mapLngEditor">
         </div>
 
-        <div class="modal-actions">
-            <button id="cancelAboutBtn" class="btn-outline" data-i18n="cancel_btn">ยกเลิก</button>
-            <button id="saveAboutBtn" style="background:#00c853;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;cursor:pointer;" data-i18n="save_btn">บันทึก</button>
+        <!-- Tab Buttons inside Modal -->
+        <div class="modal-tab-bar">
+            <button type="button" class="modal-tab-btn active" data-modal-tab="general">
+                <span class="material-icons-outlined">storefront</span>
+                <span>ข้อมูลร้าน</span>
+            </button>
+            <button type="button" class="modal-tab-btn" data-modal-tab="contact">
+                <span class="material-icons-outlined">contact_mail</span>
+                <span>ติดต่อ</span>
+            </button>
+            <button type="button" class="modal-tab-btn" data-modal-tab="services">
+                <span class="material-icons-outlined">room_service</span>
+                <span>บริการ & ที่อยู่</span>
+            </button>
+        </div>
+
+        <div class="modal-form-body">
+            <!-- Section 1: General -->
+            <div class="modal-tab-panel active" id="modal-panel-general">
+                <div class="form-group-premium">
+                    <label data-i18n="shop_name">
+                        <span class="material-icons-outlined">store</span> ชื่อร้าน
+                    </label>
+                    <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="tagline_label">
+                        <span class="material-icons-outlined">subtitles</span> Tagline / คำอธิบายสั้น
+                    </label>
+                    <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="about_label">
+                        <span class="material-icons-outlined">info</span> รายละเอียดเกี่ยวกับร้าน
+                    </label>
+                    <textarea id="aboutEditor" rows="4" placeholder="ระบุรายละเอียดเพิ่มเติมเกี่ยวกับร้านค้าของคุณ..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section 2: Contact -->
+            <div class="modal-tab-panel" id="modal-panel-contact">
+                <div class="form-group-premium">
+                    <label data-i18n="phone_label">
+                        <span class="material-icons-outlined">phone</span> โทรศัพท์
+                    </label>
+                    <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="email_label">
+                        <span class="material-icons-outlined">email</span> อีเมล
+                    </label>
+                    <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="profile_link_label">
+                        <span class="material-icons-outlined">link</span> ลิงก์ติดต่ออื่นๆ
+                    </label>
+                    <input id="linkEditor" type="url" placeholder="เว็บไซต์, Facebook หรือ LINE OA" data-i18n-placeholder="profile_link_placeholder">
+                </div>
+            </div>
+
+            <!-- Section 3: Services & Location -->
+            <div class="modal-tab-panel" id="modal-panel-services">
+                <div class="form-group-premium">
+                    <label data-i18n="address_label">
+                        <span class="material-icons-outlined">location_on</span> ที่อยู่
+                    </label>
+                    <input id="addr1Editor" type="text" placeholder="ที่อยู่" data-i18n-placeholder="address_label">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="address_cont_label">
+                        <span class="material-icons-outlined">map</span> ที่อยู่ (ต่อ)
+                    </label>
+                    <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder">
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="services_label">บริการของคุณ (เลือกได้หลายข้อ)</label>
+                    <div id="servicesEditor" class="services-editor-grid">
+                        <label class="service-checkbox-pill">
+                            <input type="checkbox" value="รับซื้อถึงสวน">
+                            <span class="pill-box">
+                                <span class="material-icons-outlined icon">local_shipping</span>
+                                <span data-i18n="service_onsite">รับซื้อถึงสวน</span>
+                            </span>
+                        </label>
+                        <label class="service-checkbox-pill">
+                            <input type="checkbox" value="จ่ายเงินสด">
+                            <span class="pill-box">
+                                <span class="material-icons-outlined icon">payments</span>
+                                <span data-i18n="service_cash">จ่ายเงินสด</span>
+                            </span>
+                        </label>
+                        <label class="service-checkbox-pill">
+                            <input type="checkbox" value="จองคิวล่วงหน้า">
+                            <span class="pill-box">
+                                <span class="material-icons-outlined icon">schedule</span>
+                                <span data-i18n="service_booking">จองคิวล่วงหน้า</span>
+                            </span>
+                        </label>
+                        <label class="service-checkbox-pill">
+                            <input type="checkbox" value="มีตาชั่งมาตรฐาน">
+                            <span class="pill-box">
+                                <span class="material-icons-outlined icon">scale</span>
+                                <span data-i18n="service_scale">มีตาชั่งมาตรฐาน</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group-premium">
+                    <label data-i18n="map_pin_label">
+                        <span class="material-icons-outlined">pin_drop</span> พิกัดแผนที่
+                    </label>
+                    <div id="mapPickerWrapper" style="margin-bottom: 15px;">
+                        <button id="openMapPickerBtn" type="button" class="btn-outline map-picker-trigger">
+                            <span class="material-icons-outlined">place</span>
+                            <span id="mapPickerStatusText" data-i18n="map_picker_btn">เลือกตำแหน่งบนแผนที่...</span>
+                        </button>
+                        <div id="mapPickerContainer" style="display: none; margin-top: 10px;">
+                            <button id="getCurrentLocationBtn" type="button" class="btn-outline current-location-btn">
+                                <span class="material-icons-outlined">my_location</span>
+                                <span data-i18n="current_location_btn">ใช้ตำแหน่งปัจจุบันของฉัน</span>
+                            </button>
+                            <div id="leafletMapDiv" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #ddd; z-index: 0;"></div>
+                        </div>
+                        <input type="hidden" id="mapLatEditor">
+                        <input type="hidden" id="mapLngEditor">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions-premium">
+            <button id="cancelAboutBtn" class="modal-btn-cancel" data-i18n="cancel_btn">ยกเลิก</button>
+            <button id="saveAboutBtn" class="modal-btn-save" data-i18n="save_btn">บันทึก</button>
         </div>
     </div>
 </div>
@@ -247,6 +333,390 @@
 }
 .service-row:last-child { border-bottom: none; }
 .service-row .material-icons-outlined { color: #00a651; font-size: 20px; }
+
+/* ── Premium Modal Custom Design ── */
+.premium-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 480px !important;
+  width: 92% !important;
+  border-radius: 24px !important;
+  background: var(--bg-card, #ffffff) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+  max-height: 90vh !important;
+  padding: 0 !important;
+  border: 1px solid var(--border-light, rgba(0,0,0,0.06)) !important;
+}
+
+.modal-header-premium {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 20px 14px !important;
+  border-bottom: 1px solid var(--border-light, #f0f0f0) !important;
+}
+
+.modal-header-premium h3 {
+  margin: 0 !important;
+  font-family: 'Sarabun', 'Kanit', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: var(--text-main, #1a1a1a) !important;
+}
+
+.modal-close-btn {
+  border: none !important;
+  background: transparent !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  color: var(--text-muted, #888888) !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+
+.modal-close-btn:hover {
+  background: var(--bg-input, #f5f5f5) !important;
+}
+
+/* Modal Tab Bar */
+.modal-tab-bar {
+  display: flex !important;
+  background: var(--bg-input, #f7f9fa) !important;
+  padding: 6px !important;
+  gap: 4px !important;
+  border-bottom: 1px solid var(--border-light, #f0f0f0) !important;
+}
+
+.modal-tab-btn {
+  flex: 1 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 4px !important;
+  font-family: 'Sarabun', 'Kanit', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--text-muted, #7c8b9a) !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.modal-tab-btn span.material-icons-outlined {
+  font-size: 18px !important;
+}
+
+.modal-tab-btn.active {
+  background: var(--bg-card, #ffffff) !important;
+  color: #0B853C !important;
+  box-shadow: 0 4px 12px rgba(11, 133, 60, 0.08) !important;
+}
+
+/* Modal Form Body */
+.modal-form-body {
+  padding: 20px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+}
+
+.modal-tab-panel {
+  display: none !important;
+}
+
+.modal-tab-panel.active {
+  display: block !important;
+}
+
+.form-group-premium {
+  margin-bottom: 18px !important;
+}
+
+.form-group-premium:last-child {
+  margin-bottom: 0 !important;
+}
+
+.form-group-premium label {
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary, #4a5568) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+  margin-top: 0 !important;
+}
+
+.form-group-premium label span.material-icons-outlined {
+  font-size: 16px !important;
+  color: #0B853C !important;
+}
+
+.form-group-premium input[type="text"],
+.form-group-premium input[type="email"],
+.form-group-premium input[type="url"],
+.form-group-premium textarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--border-light, #e2e8f0) !important;
+  background: var(--bg-input, #fafafa) !important;
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 14px !important;
+  color: var(--text-main, #1a1a1a) !important;
+  outline: none !important;
+  transition: all 0.2s !important;
+  margin: 0 !important;
+}
+
+.form-group-premium input:focus,
+.form-group-premium textarea:focus {
+  border-color: #0B853C !important;
+  background: var(--bg-card, #ffffff) !important;
+  box-shadow: 0 0 0 3px rgba(11, 133, 60, 0.1) !important;
+}
+
+/* Checkbox Pills */
+.services-editor-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+.service-checkbox-pill {
+  position: relative !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+}
+
+.service-checkbox-pill input[type="checkbox"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.pill-box {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 10px !important;
+  border-radius: 14px !important;
+  background: var(--bg-input, #f7f9fa) !important;
+  border: 1px solid var(--border-light, #e2e8f0) !important;
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary, #4a5568) !important;
+  transition: all 0.2s !important;
+  text-align: center !important;
+}
+
+.pill-box span.icon {
+  font-size: 16px !important;
+  color: var(--text-muted, #888888) !important;
+  transition: color 0.2s !important;
+}
+
+.service-checkbox-pill input[type="checkbox"]:checked + .pill-box {
+  background: rgba(11, 133, 60, 0.08) !important;
+  border-color: #0B853C !important;
+  color: #0B853C !important;
+}
+
+.service-checkbox-pill input[type="checkbox"]:checked + .pill-box span.icon {
+  color: #0B853C !important;
+}
+
+/* Map Picker Button styling */
+.map-picker-trigger {
+  width: 100% !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  background: var(--bg-card, #ffffff) !important;
+  border: 1.5px dashed #0B853C !important;
+  color: #0B853C !important;
+  transition: all 0.2s !important;
+}
+
+.map-picker-trigger:hover {
+  background: rgba(11, 133, 60, 0.04) !important;
+}
+
+.current-location-btn {
+  width: 100% !important;
+  border-radius: 12px !important;
+  padding: 10px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #0B853C !important;
+  border-color: #0B853C !important;
+  margin-bottom: 8px !important;
+}
+
+/* Actions footer */
+.modal-actions-premium {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  padding: 16px 20px 20px !important;
+  gap: 12px !important;
+  border-top: 1px solid var(--border-light, #f0f0f0) !important;
+}
+
+.modal-btn-cancel {
+  border: 1px solid var(--border-light, #dadada) !important;
+  background: transparent !important;
+  color: var(--text-secondary, #4a5568) !important;
+  padding: 12px !important;
+  border-radius: 14px !important;
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+
+.modal-btn-cancel:hover {
+  background: var(--bg-input, #f5f5f5) !important;
+}
+
+.modal-btn-save {
+  background: #0B853C !important;
+  border: none !important;
+  color: #fff !important;
+  padding: 12px !important;
+  border-radius: 14px !important;
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(11, 133, 60, 0.2) !important;
+  transition: all 0.2s !important;
+}
+
+.modal-btn-save:hover {
+  background: #00c853 !important;
+  box-shadow: 0 6px 16px rgba(11, 133, 60, 0.3) !important;
+}
+
+.modal-btn-save:active {
+  transform: scale(0.98) !important;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .premium-modal {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-header-premium,
+[data-theme="dark"] .modal-actions-premium {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-header-premium h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .modal-tab-bar {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-tab-btn {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .modal-tab-btn.active {
+  background: #1e293b !important;
+  color: #22c55e !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .form-group-premium label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .form-group-premium label span.material-icons-outlined {
+  color: #22c55e !important;
+}
+
+[data-theme="dark"] .form-group-premium input[type="text"],
+[data-theme="dark"] .form-group-premium input[type="email"],
+[data-theme="dark"] .form-group-premium input[type="url"],
+[data-theme="dark"] .form-group-premium textarea {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .form-group-premium input:focus,
+[data-theme="dark"] .form-group-premium textarea:focus {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .pill-box {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .service-checkbox-pill input[type="checkbox"]:checked + .pill-box {
+  background: rgba(34, 197, 94, 0.1) !important;
+  border-color: #22c55e !important;
+  color: #22c55e !important;
+}
+
+[data-theme="dark"] .service-checkbox-pill input[type="checkbox"]:checked + .pill-box span.icon {
+  color: #22c55e !important;
+}
+
+[data-theme="dark"] .map-picker-trigger {
+  background: transparent !important;
+  border-color: #22c55e !important;
+  color: #22c55e !important;
+}
+
+[data-theme="dark"] .current-location-btn {
+  color: #22c55e !important;
+  border-color: #22c55e !important;
+}
+
+[data-theme="dark"] .modal-btn-cancel {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .modal-btn-save {
+  background: #22c55e !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-theme="dark"] .modal-btn-save:hover {
+  background: #4ade80 !important;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3) !important;
+}
 </style>
 
 <script src="../../js/components.js"></script>

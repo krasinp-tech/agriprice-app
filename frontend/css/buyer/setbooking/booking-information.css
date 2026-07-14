@@ -52,34 +52,85 @@
 }
 
 .hero-bg {
-  height: 170px;
-  border-radius: 26px;
+  height: 130px;
+  border-radius: 22px 22px 0 0;
   background: linear-gradient(135deg, #16a34a, #22c55e);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.10);
+  transition: background 0.4s ease;
 }
+
+/* ── Status-specific hero gradients ── */
+.hero-bg.status-waiting    { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.hero-bg.status-confirmed  { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.hero-bg.status-in_progress{ background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+.hero-bg.status-completed  { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+.hero-bg.status-cancelled  { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.hero-bg.status-rejected   { background: linear-gradient(135deg, #c2410c, #f97316); }
 
 .hero-content {
   position: relative;
-  margin-top: -180px;
-  padding: 18px 16px 0;
+  margin-top: -130px;
+  padding: 16px 0 0;
 }
 
+/* Status row (icon + message) */
+.hero-status-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 4px;
+}
+
+.hero-status-icon {
+  font-size: 32px;
+  color: rgba(255,255,255,0.95);
+  animation: heroIconPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes heroIconPop {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
 
 .hero-sub {
   text-align: center;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
 
-  font-size: 20px;
-  line-height: 1.5;
+/* ── Status Pill ── */
+.status-pill-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 10px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: rgba(255,255,255,0.22);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 /* ================================
    Big Card (Main Info)
 ================================ */
 .big-card {
-  margin-top: 14px;
+  margin-top: 0;
   background: var(--bg-card);
-  border-radius: 22px;
+  border-radius: 0 0 22px 22px;
   padding: 16px;
   box-shadow: var(--shadow-sm);
   color: var(--text-main);
@@ -329,43 +380,168 @@
 }
 
 /* ================================
-   Place Box (Map)
+   Farmer Info Card
 ================================ */
-.placeBox {
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.03);
-  padding: 12px;
+.farmer-card {
+  border: none;
+}
+
+.farmer-profile-box {
+  border-radius: 16px;
+  background: rgba(22, 163, 74, 0.05);
+  border: 1px solid rgba(22, 163, 74, 0.12);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+[data-theme="dark"] .farmer-profile-box {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+/* Profile Header Row */
+.farmer-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.farmer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.farmer-avatar .material-icons-outlined {
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.farmer-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.farmer-name {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.placeName {
-  font-weight: 1000;
-}
-
-.placeAddr {
-  margin-top: 4px;
-  font-size: 13px;
+.farmer-addr {
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-.btn-map {
-  margin-top: 10px;
-  width: 100%;
-  border-radius: 999px;
-  padding: 12px 14px;
-  border: 1px solid rgba(22, 163, 74, 0.35);
+/* Phone Row */
+.farmer-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
   background: var(--bg-card);
-  color: #1d4ed8;
-  font-weight: 1000;
+  border-radius: 12px;
+  border: 1px solid var(--border-light, rgba(0,0,0,0.08));
+}
+
+[data-theme="dark"] .farmer-phone-row {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.farmer-phone-row > .material-icons-outlined {
+  font-size: 18px;
+  color: #16a34a;
+}
+
+.farmer-phone-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.farmer-phone-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  flex: 1;
+}
+
+/* Action Buttons */
+.farmer-action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-farmer-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-.btn-map:hover {
-  background: rgba(29, 78, 216, 0.05);
+.btn-farmer-action .material-icons-outlined {
+  font-size: 18px;
 }
 
+.btn-farmer-action.call {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}
+
+.btn-farmer-action.call:hover {
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-farmer-action.call:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.btn-farmer-action.chat {
+  background: var(--bg-card);
+  color: #16a34a;
+  border: 1.5px solid rgba(22, 163, 74, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.btn-farmer-action.chat:hover {
+  background: rgba(22, 163, 74, 0.07);
+  border-color: #16a34a;
+}
+
+.btn-farmer-action.chat:active {
+  transform: scale(0.97);
+}
+
+[data-theme="dark"] .btn-farmer-action.chat {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.3);
+}
 
 /* ================================
    Responsive - Tablet
@@ -378,7 +554,11 @@
   }
 
   .hero-bg {
-    height: 200px;
+    height: 140px;
+  }
+
+  .hero-content {
+    margin-top: -140px;
   }
 
   .hero-title {
@@ -400,7 +580,11 @@
   }
 
   .hero-bg {
-    height: 220px;
+    height: 150px;
+  }
+
+  .hero-content {
+    margin-top: -150px;
   }
 
   .hero-title {

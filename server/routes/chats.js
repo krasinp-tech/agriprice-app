@@ -18,5 +18,7 @@ router.post('/:roomId/messages', authMiddleware, (req, res, next) => {
 }, chatController.sendMessage);
 router.post('/start', authMiddleware, chatController.startChat);
 router.patch('/:roomId/read', authMiddleware, chatController.markRead);
+router.patch('/:roomId/unread', authMiddleware, chatController.markUnread);
+router.delete('/:roomId', authMiddleware, chatController.deleteRoom);
 
 module.exports = router;

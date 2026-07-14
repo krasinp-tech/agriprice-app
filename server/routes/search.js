@@ -58,7 +58,7 @@ async function searchOffers(term, limit) {
 
   const pattern = `%${term}%`;
   const lookupLimit = Math.min(limit * 4, 200);
-  const [descriptionRes, productNameRes, productCategoryRes, varietyNameRes] = await Promise.all([
+  const [descriptionRes, productNameRes, productCategoryRes, varietyNameRes, profileFirstNameRes, profileLastNameRes] = await Promise.all([
     supabaseAdmin
       .from('buy_offers')
       .select(NORMALIZED_OFFER_SELECT)
@@ -81,12 +81,24 @@ async function searchOffers(term, limit) {
       .select('variety_id')
       .ilike('variety_name', pattern)
       .limit(lookupLimit),
+    supabaseAdmin
+      .from('profiles')
+      .select('profile_id')
+      .ilike('first_name', pattern)
+      .limit(lookupLimit),
+    supabaseAdmin
+      .from('profiles')
+      .select('profile_id')
+      .ilike('last_name', pattern)
+      .limit(lookupLimit),
   ]);
 
   if (descriptionRes.error) throw descriptionRes.error;
   if (productNameRes.error) throw productNameRes.error;
   if (productCategoryRes.error) throw productCategoryRes.error;
   if (varietyNameRes.error) throw varietyNameRes.error;
+  if (profileFirstNameRes.error) throw profileFirstNameRes.error;
+  if (profileLastNameRes.error) throw profileLastNameRes.error;
 
   const productIds = [
     ...(productNameRes.data || []),
@@ -122,8 +134,26 @@ async function searchOffers(term, limit) {
     varietyOfferRows = data || [];
   }
 
+  const matchedProfileIds = [
+    ...(profileFirstNameRes.data || []).map(r => r.profile_id),
+    ...(profileLastNameRes.data || []).map(r => r.profile_id),
+  ].filter(Boolean);
+
+  let profileOfferRows = [];
+  if (matchedProfileIds.length > 0) {
+    const { data, error } = await supabaseAdmin
+      .from('buy_offers')
+      .select(NORMALIZED_OFFER_SELECT)
+      .eq('is_active', true)
+      .in('user_id', [...new Set(matchedProfileIds)])
+      .order('created_at', { ascending: false })
+      .limit(lookupLimit);
+    if (error) throw error;
+    profileOfferRows = data || [];
+  }
+
   const seen = new Set();
-  return [...(descriptionRes.data || []), ...varietyOfferRows]
+  return [...(descriptionRes.data || []), ...varietyOfferRows, ...profileOfferRows]
     .map(normalizeOffer)
     .filter((offer) => {
       const id = getOfferId(offer);
