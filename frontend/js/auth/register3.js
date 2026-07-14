@@ -215,10 +215,15 @@
     }
 
     try {
-      const res = await window.api.otpSend(phone);
-      if (!res || !res.success) {
-        showErr(res?.message || "ส่ง OTP ไม่สำเร็จ");
-        return;
+      if (window.api?.otpSend) {
+        try {
+          const res = await window.api.otpSend(phone);
+          if (!res || !res.success) {
+            logOtp("backend.otpSend.warn", { message: res?.message || "backend preflight failed" });
+          }
+        } catch (preflightError) {
+          logOtp("backend.otpSend.error", { message: preflightError?.message || "backend preflight failed" });
+        }
       }
 
       setHint("กำลังส่งรหัส OTP ผ่าน Firebase...");
