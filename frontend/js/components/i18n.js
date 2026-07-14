@@ -2636,6 +2636,9 @@
   }
 
   let legacyByteMap = null;
+  let mojibakeObserverStarted = false;
+  let mojibakeRepairQueued = false;
+  let mojibakeRepairing = false;
   function getLegacyByteMap() {
     if (legacyByteMap) return legacyByteMap;
     legacyByteMap = new Map();
@@ -2689,23 +2692,57 @@
 
   function repairMojibakeDom() {
     if (!document.body) return;
+    if (mojibakeRepairing) return;
+    mojibakeRepairing = true;
 
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-    textNodes.forEach(node => {
-      const fixed = decodeMojibake(node.nodeValue);
-      if (fixed !== node.nodeValue) node.nodeValue = fixed;
+    try {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      textNodes.forEach(node => {
+        const fixed = decodeMojibake(node.nodeValue);
+        if (fixed !== node.nodeValue) node.nodeValue = fixed;
+      });
+
+      const attrs = ['placeholder', 'title', 'aria-label', 'alt', 'value'];
+      document.querySelectorAll('*').forEach(el => {
+        attrs.forEach(attr => {
+          if (!el.hasAttribute(attr)) return;
+          const original = el.getAttribute(attr);
+          const fixed = decodeMojibake(original);
+          if (fixed !== original) el.setAttribute(attr, fixed);
+        });
+      });
+    } finally {
+      mojibakeRepairing = false;
+    }
+  }
+
+  function scheduleMojibakeRepair() {
+    if (mojibakeRepairQueued) return;
+    mojibakeRepairQueued = true;
+    const schedule = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+    schedule(() => {
+      mojibakeRepairQueued = false;
+      repairMojibakeDom();
+    });
+  }
+
+  function startMojibakeObserver() {
+    if (mojibakeObserverStarted || !document.body || typeof MutationObserver === 'undefined') return;
+    mojibakeObserverStarted = true;
+
+    const observer = new MutationObserver(() => {
+      if (mojibakeRepairing) return;
+      scheduleMojibakeRepair();
     });
 
-    const attrs = ['placeholder', 'title', 'aria-label', 'alt', 'value'];
-    document.querySelectorAll('*').forEach(el => {
-      attrs.forEach(attr => {
-        if (!el.hasAttribute(attr)) return;
-        const original = el.getAttribute(attr);
-        const fixed = decodeMojibake(original);
-        if (fixed !== original) el.setAttribute(attr, fixed);
-      });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['placeholder', 'title', 'aria-label', 'alt', 'value']
     });
   }
 
@@ -2816,9 +2853,11 @@
     translatePage();
     setupLanguageSelector();
     repairMojibakeDom();
+    startMojibakeObserver();
   };
 
   window.i18nT = i18nT;
+  window.decodeMojibakeText = decodeMojibake;
   window.getCurrentLang = getCurrentLang;
   window.setCurrentLang = setCurrentLang;
   window.LANGUAGE_LABELS = LANGUAGE_LABELS;
