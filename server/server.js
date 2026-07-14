@@ -118,7 +118,11 @@ app.get('/', (req, res) => {
 
 // --- 5. Public / Help Endpoints ---
 // เอาไว้ให้ตัว Monitor ของ Render ตรวจสอบว่าเซิร์ฟเวอร์ยังไม่ตาย
-app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
+app.get('/api/health', (req, res) => res.json({
+  status: 'ok',
+  time: new Date(),
+  commit: process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT || null,
+}));
 
 
 // --- 6. Start Server & Background Tasks ---
