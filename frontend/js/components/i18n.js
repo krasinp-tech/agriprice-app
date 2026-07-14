@@ -2635,7 +2635,82 @@
       .replace(/'/g, '&#39;');
   }
 
+  let legacyByteMap = null;
+  function getLegacyByteMap() {
+    if (legacyByteMap) return legacyByteMap;
+    legacyByteMap = new Map();
+
+    try {
+      const decoder = new TextDecoder('windows-874');
+      for (let i = 0; i <= 255; i++) {
+        const char = decoder.decode(new Uint8Array([i]));
+        if (char && char !== '\uFFFD' && char.length === 1 && !legacyByteMap.has(char)) {
+          legacyByteMap.set(char, i);
+        }
+      }
+    } catch (_) {
+      legacyByteMap = null;
+    }
+
+    return legacyByteMap;
+  }
+
+  function looksMojibake(value) {
+    return /เธ|เน[\u0080-\u009F\u20AC\u2018-\u201D]|โ[\u0080-\u009F\u20AC\u2018-\u201D]/.test(String(value || ''));
+  }
+
+  function decodeMojibake(value) {
+    const text = String(value == null ? '' : value);
+    if (!looksMojibake(text)) return text;
+
+    const map = getLegacyByteMap();
+    if (!map) return text;
+
+    const bytes = [];
+    for (const char of text) {
+      const code = char.charCodeAt(0);
+      if (code <= 0x7F) {
+        bytes.push(code);
+      } else if (map.has(char)) {
+        bytes.push(map.get(char));
+      } else {
+        return text;
+      }
+    }
+
+    try {
+      const decoded = new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes));
+      if (!decoded || decoded.includes('\uFFFD') || !/[\u0E00-\u0E7F]/.test(decoded)) return text;
+      return decoded;
+    } catch (_) {
+      return text;
+    }
+  }
+
+  function repairMojibakeDom() {
+    if (!document.body) return;
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    textNodes.forEach(node => {
+      const fixed = decodeMojibake(node.nodeValue);
+      if (fixed !== node.nodeValue) node.nodeValue = fixed;
+    });
+
+    const attrs = ['placeholder', 'title', 'aria-label', 'alt', 'value'];
+    document.querySelectorAll('*').forEach(el => {
+      attrs.forEach(attr => {
+        if (!el.hasAttribute(attr)) return;
+        const original = el.getAttribute(attr);
+        const fixed = decodeMojibake(original);
+        if (fixed !== original) el.setAttribute(attr, fixed);
+      });
+    });
+  }
+
   function renderTranslatedText(el, translated, iconHtml = '') {
+    translated = decodeMojibake(translated);
     if (/<br\s*\/?>/i.test(translated)) {
       const safeHtml = translated.split(/<br\s*\/?>/i).map(escapeHtml).join('<br>');
       el.innerHTML = iconHtml ? iconHtml + ' ' + safeHtml : safeHtml;
@@ -2681,15 +2756,17 @@
       const targetAttr = attrMap[dataAttr];
       document.querySelectorAll(`[${dataAttr}]`).forEach(el => {
         const key = el.getAttribute(dataAttr);
-        if (t[key]) el.setAttribute(targetAttr, interpolate(t[key], getI18nParams(el)));
+        if (t[key]) el.setAttribute(targetAttr, decodeMojibake(interpolate(t[key], getI18nParams(el))));
       });
     });
 
     // 3. Document Title
     const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
     if (titleKey && t[titleKey]) {
-      document.title = t[titleKey] + ' | AGRIPRICE';
+      document.title = decodeMojibake(t[titleKey]) + ' | AGRIPRICE';
     }
+
+    repairMojibakeDom();
 
     window.dispatchEvent(new CustomEvent('i18n:updated', { detail: { lang } }));
   }
@@ -2702,11 +2779,11 @@
 
     const lang = getCurrentLang();
     const t = TRANSLATIONS[lang] || TRANSLATIONS.th;
-    if (Object.prototype.hasOwnProperty.call(t, key)) return interpolate(t[key], params);
+    if (Object.prototype.hasOwnProperty.call(t, key)) return decodeMojibake(interpolate(t[key], params));
     if (lang !== 'th' && TRANSLATIONS.th && Object.prototype.hasOwnProperty.call(TRANSLATIONS.th, key)) {
-      return interpolate(TRANSLATIONS.th[key], params);
+      return decodeMojibake(interpolate(TRANSLATIONS.th[key], params));
     }
-    return interpolate(fallback == null ? key : fallback, params);
+    return decodeMojibake(interpolate(fallback == null ? key : fallback, params));
   }
 
   function setupLanguageSelector() {
@@ -2721,7 +2798,7 @@
       btn.type = 'button';
       btn.className = 'lang-btn' + (current === lang ? ' active' : '');
       btn.innerHTML = `
-        <span class="lang-label">${LANGUAGE_LABELS[lang]}</span>
+        <span class="lang-label">${decodeMojibake(LANGUAGE_LABELS[lang])}</span>
         ${current === lang ? '<span class="material-icons-outlined">check_circle</span>' : ''}
       `;
       btn.onclick = () => {
@@ -2738,6 +2815,7 @@
   window.i18nInit = function() {
     translatePage();
     setupLanguageSelector();
+    repairMojibakeDom();
   };
 
   window.i18nT = i18nT;
