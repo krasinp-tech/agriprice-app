@@ -189,18 +189,53 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function parsePriceValue(value) {
+        if (value === undefined || value === null) return null;
+        const raw = String(value).trim();
+        if (!raw || raw === '-' || raw.toLowerCase() === 'null') return null;
+        const match = raw.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+        const price = Number(match ? match[0] : raw);
+        return Number.isFinite(price) && price > 0 ? price : null;
+    }
+
+    function getEditableGrades(product) {
+        const source = Array.isArray(product.grades)
+            ? product.grades
+            : (Array.isArray(product.product_grades)
+                ? product.product_grades
+                : (Array.isArray(product.offer_grades) ? product.offer_grades : []));
+
+        const grades = source
+            .map((g) => ({
+                grade: g.grade_name || g.grade || 'A',
+                price: parsePriceValue(g.price)
+            }))
+            .filter((g) => g.price !== null);
+
+        if (grades.length > 0) return grades;
+
+        return [
+            { grade: 'A', price: parsePriceValue(product.priceA) },
+            { grade: 'B', price: parsePriceValue(product.priceB) },
+            { grade: 'C', price: parsePriceValue(product.priceC) },
+            { grade: product.grade || 'A', price: parsePriceValue(product.price) }
+        ].filter((g) => g.price !== null);
+    }
+
     function editPurchase(product) {
         const productId = product.offerId || product.offer_id || product.id || product.productId;
         const productName = product.productName || product.offerName || product.rawTitle || product.name || product.title;
         const varietyName = product.varietyName || product.rawSubtitle || product.variety || '';
+        const grades = getEditableGrades(product);
+        if (grades.length === 0) {
+            if (window.showToast) window.showToast('Please add at least one valid price before editing');
+            return;
+        }
         const payload = {
             product: { id: productId, offer_id: productId, name: productName },
             variety: varietyName ? { name: varietyName } : null,
-            grades: [
-                { grade: 'A', price: product.priceA },
-                { grade: 'B', price: product.priceB },
-                { grade: 'C', price: product.priceC }
-            ].filter(g => g.price),
+            grades,
+            details: product.description || product.rawProduct?.description || '',
             editSource: { page: "myprofile", isEdit: true, offer_id: productId, product_id: productId }
         };
         sessionStorage.setItem("setbooking_step1", JSON.stringify(payload));

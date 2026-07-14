@@ -419,6 +419,29 @@
       filteredRows = rows.filter(r => String(r.user_id) === String(FILTERED_SELLER_ID));
     }
 
+    const parsePositivePrice = (value) => {
+      if (value === undefined || value === null) return null;
+      const raw = String(value).trim();
+      if (!raw || raw === '-' || raw.toLowerCase() === 'null') return null;
+      const match = raw.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+      const price = Number(match ? match[0] : raw);
+      return Number.isFinite(price) && price > 0 ? price : null;
+    };
+
+    const getGradeRows = (p, mixedLabel) => {
+      const source = Array.isArray(p.grades)
+        ? p.grades
+        : (Array.isArray(p.product_grades)
+          ? p.product_grades
+          : (Array.isArray(p.offer_grades) ? p.offer_grades : []));
+      const rows = source
+        .map(g => ({ grade: g.grade_name || g.grade || mixedLabel, price: parsePositivePrice(g.price) }))
+        .filter(g => g.price !== null);
+      if (rows.length) return rows;
+      const fallbackPrice = parsePositivePrice(p.price);
+      return fallbackPrice !== null ? [{ grade: p.grade || mixedLabel, price: fallbackPrice }] : [];
+    };
+
     const products = filteredRows
       .map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
@@ -427,21 +450,15 @@
         const unitStr = `${bahtUnit}/${unit}`;
         const mixedLabel = t('mixed', 'คละ');
         
-        let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
+        let gradesArr = getGradeRows(p, mixedLabel);
         if (gradesArr.length > 0) {
             gradesArr.forEach(g => {
                 const gName = String(g.grade || mixedLabel).toUpperCase();
-                const pStr = `${Number(g.price || 0)} ${unitStr}`;
+                const pStr = `${g.price} ${unitStr}`;
                 if (gName === 'B') prices.priceB = pStr;
                 else if (gName === 'C') prices.priceC = pStr;
                 else prices.priceA = pStr;
             });
-        } else {
-            const priceStr = `${Number(p.price || 0)} ${unitStr}`;
-            const gradeName = (p.grade || mixedLabel).toUpperCase();
-            if (gradeName === 'B') prices.priceB = priceStr;
-            else if (gradeName === 'C') prices.priceC = priceStr;
-            else prices.priceA = priceStr;
         }
 
         const profile = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
@@ -462,6 +479,7 @@
           sellerSub: p.variety ? `${t(p.name, p.name)} (${t(p.variety, p.variety)})` : t(p.name, p.name),
           avatar: profile?.avatar || 'assets/images/avatar-guest.svg',
           ...prices,
+          grades: gradesArr,
           updateTime: formatTime(p.created_at),
           distance: (distKm !== null) ? (window.LocationHelper.formatDistance?.(distKm) || '') : '',
           _distKm: distKm,

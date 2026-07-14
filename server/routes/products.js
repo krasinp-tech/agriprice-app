@@ -73,6 +73,21 @@ function filterOffers(rows, { q, category }) {
   return filtered;
 }
 
+function toPositivePrice(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const price = Number(value);
+  return Number.isFinite(price) && price > 0 ? price : null;
+}
+
+function hasValidPriceInput(price, grades) {
+  if (toPositivePrice(price) !== null) return true;
+  return parseGrades(grades).some((row) => toPositivePrice(row.price) !== null);
+}
+
+function hasOfferPrice(offer) {
+  return Array.isArray(offer?.grades) && offer.grades.length > 0;
+}
+
 async function fetchOfferById(productId) {
   const { data, error } = await supabaseAdmin
     .from('buy_offers')
@@ -89,7 +104,7 @@ async function createOffer(userId, body, file) {
   if (!name && !variety_id) throw Object.assign(new Error('Product name is required'), { statusCode: 400 });
 
   const parsedGrades = parseGrades(grades);
-  if (!price && parsedGrades.length === 0) {
+  if (!hasValidPriceInput(price, parsedGrades)) {
     throw Object.assign(new Error('Price is required'), { statusCode: 400 });
   }
 
@@ -128,6 +143,11 @@ async function updateOffer(productId, userId, body, file) {
 
   if (!existing) throw Object.assign(new Error('Product not found'), { statusCode: 404 });
   if (String(existing.user_id) !== String(userId)) throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
+
+  if ((grades !== undefined || price !== undefined || grade !== undefined)
+    && !hasValidPriceInput(price !== undefined ? price : existing.price, grades !== undefined ? grades : [])) {
+    throw Object.assign(new Error('Price is required'), { statusCode: 400 });
+  }
 
   const updates = {};
   if (name !== undefined || category !== undefined || variety !== undefined || variety_id !== undefined) {
@@ -195,7 +215,7 @@ router.get('/', async (req, res) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    const rows = filterOffers((data || []).map(normalizeOffer), { q, category });
+    const rows = filterOffers((data || []).map(normalizeOffer).filter(hasOfferPrice), { q, category });
 
     const from = (pageNumber - 1) * limitNumber;
     const pagedRows = hasTextSearch ? rows.slice(from, from + limitNumber) : rows;

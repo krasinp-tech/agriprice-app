@@ -130,32 +130,55 @@
       const json = await window.api.call('GET', '/api/search?q=' + encodeURIComponent(q));
       const products = json.data?.products || [];
 
+      const parsePositivePrice = (value) => {
+        if (value === undefined || value === null) return null;
+        const raw = String(value).trim();
+        if (!raw || raw === '-' || raw.toLowerCase() === 'null') return null;
+        const match = raw.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+        const price = Number(match ? match[0] : raw);
+        return Number.isFinite(price) && price > 0 ? price : null;
+      };
+
+      const getGradeRows = (p) => {
+        const source = Array.isArray(p.grades)
+          ? p.grades
+          : (Array.isArray(p.product_grades)
+            ? p.product_grades
+            : (Array.isArray(p.offer_grades) ? p.offer_grades : []));
+        const rows = source
+          .map(g => ({ grade: g.grade_name || g.grade || 'Mixed', price: parsePositivePrice(g.price) }))
+          .filter(g => g.price !== null);
+        if (rows.length) return rows;
+        const fallbackPrice = parsePositivePrice(p.price);
+        return fallbackPrice !== null ? [{ grade: p.grade || 'Mixed', price: fallbackPrice }] : [];
+      };
+
       // Map API products to UI model
       const mapped = products.map(p => {
         const unit = p.unit || t('kg_unit', 'กก.');
         let prices = { priceA: null, priceB: null, priceC: null };
         const unitStr = `${t('unit_baht', 'บ.')}/${unit}`;
-        let gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
-        let primaryPrice = Number(p.price || 0);
+        let gradesArr = getGradeRows(p);
+        let primaryPrice = parsePositivePrice(p.price) || 0;
 
         if (gradesArr.length > 0) {
             gradesArr.forEach(g => {
                 const gName = String(g.grade || 'คละ').toUpperCase();
-                const pStr = `${Number(g.price || 0)} ${unitStr}`;
+                const pStr = `${g.price} ${unitStr}`;
                 if (gName === 'B') prices.priceB = pStr;
                 else if (gName === 'C') prices.priceC = pStr;
                 else {
                     prices.priceA = pStr;
-                    primaryPrice = Number(g.price || 0);
+                    primaryPrice = g.price;
                 }
             });
             if (!prices.priceA) {
                 const firstGrade = gradesArr[0];
-                prices.priceA = `${Number(firstGrade.price || p.price || 0)} ${unitStr}`;
-                primaryPrice = Number(firstGrade.price || p.price || 0);
+                prices.priceA = `${firstGrade.price} ${unitStr}`;
+                primaryPrice = firstGrade.price;
             }
         } else {
-            const priceStr = `${Number(p.price || 0)} ${unitStr}`;
+            const priceStr = '';
             const gradeName = (p.grade || 'คละ').toUpperCase();
             if (gradeName === 'B') prices.priceB = priceStr;
             else if (gradeName === 'C') prices.priceC = priceStr;
@@ -184,6 +207,7 @@
           priceA: prices.priceA,
           priceB: prices.priceB,
           priceC: prices.priceC,
+          grades: gradesArr,
           priceSortValue: primaryPrice,
           createdAtMonth: p.created_at ? (new Date(p.created_at).getMonth() + 1).toString() : null,
           updateTime: window.AgriPriceUI ? window.AgriPriceUI.formatTimeAgo(p.created_at) : p.created_at,
@@ -268,7 +292,8 @@
           distance: item.distanceText,
           priceA: item.priceA,
           priceB: item.priceB,
-          priceC: item.priceC
+          priceC: item.priceC,
+          grades: item.grades
         };
 
         const node = window.ProductCard.createCardEl(data, {}, tpl.innerHTML);

@@ -5,6 +5,10 @@ const { supabaseAdmin } = require('../utils/supabase');
 const { getOptionalAuthUser } = require('../utils/helpers');
 const { NORMALIZED_OFFER_SELECT, getOfferId, normalizeOffer } = require('../utils/offers');
 
+function hasOfferPrice(offer) {
+  return Array.isArray(offer?.grades) && offer.grades.length > 0;
+}
+
 async function searchProfiles(term, limit) {
   const select = 'id:profile_id, first_name, last_name, avatar, role, lat, lng, address_line2';
 
@@ -53,7 +57,7 @@ async function searchOffers(term, limit) {
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) throw error;
-    return (data || []).map(normalizeOffer);
+    return (data || []).map(normalizeOffer).filter(hasOfferPrice);
   }
 
   const pattern = `%${term}%`;
@@ -156,6 +160,7 @@ async function searchOffers(term, limit) {
   return [...(descriptionRes.data || []), ...varietyOfferRows, ...profileOfferRows]
     .map(normalizeOffer)
     .filter((offer) => {
+      if (!hasOfferPrice(offer)) return false;
       const id = getOfferId(offer);
       if (!id || seen.has(id)) return false;
       seen.add(id);

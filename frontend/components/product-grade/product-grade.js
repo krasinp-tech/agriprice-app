@@ -5,49 +5,69 @@
 (function () {
     'use strict';
 
+    function normalizePrice(value, unitSuffix) {
+        if (value === undefined || value === null) return '';
+        const raw = String(value).trim();
+        if (!raw || raw === '-' || raw.toLowerCase() === 'null') return '';
+
+        const match = raw.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+        const numeric = Number(match ? match[0] : raw);
+        if (!Number.isFinite(numeric) || numeric <= 0) return '';
+
+        if (raw.includes('บ.') || raw.includes('Baht')) return raw;
+        return `${numeric} ${unitSuffix}`;
+    }
+
+    function getRelationGrades(data) {
+        const grades = Array.isArray(data.grades)
+            ? data.grades
+            : (Array.isArray(data.product_grades)
+                ? data.product_grades
+                : (Array.isArray(data.offer_grades) ? data.offer_grades : []));
+
+        return grades.map((g) => ({
+            label: g.grade_name || g.grade || 'A',
+            value: g.price
+        }));
+    }
+
     /**
      * Render the grades row HTML
-     * @param {Object} data - Object containing priceA, priceB, priceC
-     * @param {string} unitSuffix - Suffix for price (default: 'บ.')
+     * @param {Object} data - Object containing grades or priceA, priceB, priceC
+     * @param {string} unitSuffix - Suffix for price
      * @returns {string} - HTML string
      */
-    function render(data, unitSuffix = 'บ.กก.') {
+    function render(data, unitSuffix = 'บ./กก.') {
         if (!data) return '';
-        
-        const rawGrades = [
+
+        const relationGrades = getRelationGrades(data);
+        const rawGrades = relationGrades.length ? relationGrades : [
             { label: 'A', value: data.priceA !== undefined ? data.priceA : data.price_a },
             { label: 'B', value: data.priceB !== undefined ? data.priceB : data.price_b },
             { label: 'C', value: data.priceC !== undefined ? data.priceC : data.price_c }
         ];
 
-        // Filter out empty grades
-        const grades = rawGrades.filter(g => {
-            if (g.value === undefined || g.value === null) return false;
-            const valStr = String(g.value).trim();
-            return valStr !== '' && valStr !== '-' && valStr !== '0' && !valStr.startsWith('0 ');
-        });
+        const grades = rawGrades
+            .map((g) => ({
+                label: g.label || 'A',
+                price: normalizePrice(g.value, unitSuffix)
+            }))
+            .filter((g) => g.price);
 
         if (grades.length === 0) return '';
 
         return `
             <div class="price-row">
-                ${grades.map(g => {
-                    let displayPrice = g.value;
-                    if (!String(displayPrice).includes('บ.')) {
-                        displayPrice = `${displayPrice} ${unitSuffix}`;
-                    }
-                    return `
+                ${grades.map((g) => `
                     <div class="price-box">
                         <div class="grade">${g.label}</div>
-                        <div class="price">${displayPrice}</div>
+                        <div class="price">${g.price}</div>
                     </div>
-                    `;
-                }).join('')}
+                `).join('')}
             </div>
         `;
     }
 
-    // Expose to window
     window.ProductGrade = {
         render
     };

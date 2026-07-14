@@ -77,27 +77,62 @@
     return null;
   }
 
+  function parsePositivePrice(value) {
+    if (value === undefined || value === null) return null;
+    const raw = String(value).trim();
+    if (!raw || raw === '-' || raw.toLowerCase() === 'null') return null;
+    const match = raw.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+    const price = Number(match ? match[0] : raw);
+    return Number.isFinite(price) && price > 0 ? price : null;
+  }
+
+  function normalizeGradeRows(p) {
+    const source = Array.isArray(p.grades)
+      ? p.grades
+      : (Array.isArray(p.product_grades)
+        ? p.product_grades
+        : (Array.isArray(p.offer_grades) ? p.offer_grades : []));
+
+    const rows = source
+      .map((g) => ({
+        grade: g.grade_name || g.grade || t('mixed', 'Mixed'),
+        price: parsePositivePrice(g.price)
+      }))
+      .filter((g) => g.price !== null);
+
+    if (rows.length > 0) return rows;
+
+    const fallbackPrice = parsePositivePrice(p.price);
+    if (fallbackPrice === null) return [];
+
+    return [{
+      grade: p.grade || t('mixed', 'Mixed'),
+      price: fallbackPrice
+    }];
+  }
+
   function mapProductData(p) {
     const unit = p.unit || t('kg_unit', 'กก.');
     let prices = { priceA: null, priceB: null, priceC: null };
     const bahtUnit = t('unit_baht', 'บ.');
     const unitStr = `${bahtUnit}/${unit}`;
     
-    const gradesArr = Array.isArray(p.grades) ? p.grades : (Array.isArray(p.product_grades) ? p.product_grades : []);
+    const gradesArr = normalizeGradeRows(p);
     if (gradesArr.length > 0) {
         gradesArr.forEach(g => {
             const gName = String(g.grade || t('mixed', 'คละ')).toUpperCase();
-            const pStr = `${Number(g.price || 0)} ${unitStr}`;
+            const pStr = `${g.price} ${unitStr}`;
             if (gName === 'B') prices.priceB = pStr;
             else if (gName === 'C') prices.priceC = pStr;
             else prices.priceA = pStr;
         });
         if (!prices.priceA) {
             const firstGrade = gradesArr[0];
-            prices.priceA = `${Number(firstGrade.price || p.price || 0)} ${unitStr}`;
+            prices.priceA = `${firstGrade.price} ${unitStr}`;
         }
     } else {
-        const priceStr = `${Number(p.price || 0)} ${unitStr}`;
+        const fallbackPrice = parsePositivePrice(p.price);
+        const priceStr = fallbackPrice !== null ? `${fallbackPrice} ${unitStr}` : '';
         const gradeName = (p.grade || t('mixed', 'คละ')).toUpperCase();
         if (gradeName === 'B') prices.priceB = priceStr;
         else if (gradeName === 'C') prices.priceC = priceStr;
@@ -146,6 +181,9 @@
       priceA: prices.priceA || '',
       priceB: prices.priceB || '',
       priceC: prices.priceC || '',
+      grades: gradesArr,
+      rawProduct: p,
+      description: p.description || '',
       unit: unit,
       updated: updatedStr,
       is_active: p.is_active !== false,

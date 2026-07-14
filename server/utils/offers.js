@@ -40,12 +40,14 @@ function normalizeOffer(row) {
 
   const varietyRef = row.variety_ref || null;
   const productRef = varietyRef?.product_ref || null;
-  const grades = (row.offer_grades || []).map((grade) => ({
-    id: grade.id,
-    grade: grade.grade_name,
-    grade_name: grade.grade_name,
-    price: Number(grade.price || 0),
-  }));
+  const grades = (row.offer_grades || [])
+    .map((grade) => ({
+      id: grade.id,
+      grade: grade.grade_name,
+      grade_name: grade.grade_name,
+      price: toPositivePrice(grade.price),
+    }))
+    .filter((grade) => grade.price !== null);
   const firstGrade = grades[0] || {};
   const fallbackName = row.name || row.description || 'สินค้าเกษตร';
   const offerId = getOfferId(row);
