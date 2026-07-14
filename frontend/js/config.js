@@ -5,7 +5,6 @@
 	window.AGRIPRICE_CONFIG_LOADED = true;
 
 	const DEFAULT_URL = (() => {
-		const { protocol = '', origin = '', hostname = '' } = window.location || {};
 		const normalize = (v) => String(v || '').replace(/\/$/, '');
 
 		// 1. Manual override from localStorage (Highest priority)
@@ -30,22 +29,14 @@
 		);
 		const useLocalApi = localStorage.getItem('agriprice_use_local') === '1';
 
-		if (isNative && !useLocalApi) {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Native app detected: Using Production API');
-			return 'https://agriprice-app.onrender.com';
+		if (useLocalApi) {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Local API override enabled: Using http://localhost:5000');
+			return 'http://localhost:5000';
 		}
 
-		// Auto-detect local development (localhost, 127.0.0.1, file protocol, or local network IP)
-		const isLocal = (
-			(hostname === 'localhost' || hostname === '127.0.0.1') && 
-			(window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443') ||
-			hostname.startsWith('192.168.') || 
-			protocol === 'file:'
-		);
-
-		if (isLocal || useLocalApi) {
-			if (window.AGRIPRICE_DEBUG) console.log('[config] Local environment detected: Using http://localhost:5000');
-			return 'http://localhost:5000';
+		if (isNative) {
+			if (window.AGRIPRICE_DEBUG) console.log('[config] Native app detected: Using Production API');
+			return 'https://agriprice-app.onrender.com';
 		}
 
 		// Default to Production Render
