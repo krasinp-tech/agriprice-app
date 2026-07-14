@@ -59,6 +59,13 @@
     return p.length === 10 && p.startsWith("0");
   }
 
+  function goLoginSoon() {
+    setTimeout(() => {
+      if (window.navigateWithTransition) window.navigateWithTransition("./login2.html");
+      else window.location.href = "./login2.html";
+    }, 1800);
+  }
+
   function validate(){
     clearError();
     clearHelps();
@@ -126,6 +133,22 @@
       return;
     }
 
+    try {
+      setHint("กำลังตรวจสอบเบอร์โทร...");
+      const phoneCheck = await window.api.checkPhone(v.ph);
+      const exists = !!(phoneCheck?.data?.exists || phoneCheck?.exists);
+      if (exists) {
+        phoneHelp.textContent = "เบอร์นี้มีบัญชีอยู่แล้ว";
+        showError("เบอร์โทรนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทนการสมัครใหม่");
+        setHint("กำลังพาไปหน้าเข้าสู่ระบบ...");
+        goLoginSoon();
+        return;
+      }
+    } catch (err) {
+      console.warn("[Register] Phone precheck failed:", err);
+      setHint("");
+    }
+
     // [NEW] Request location before proceeding
     setHint("กำลังตรวจสอบตำแหน่ง...");
     let userLoc = null;
@@ -156,4 +179,3 @@
   // init
   setupVideo();
 })();
-

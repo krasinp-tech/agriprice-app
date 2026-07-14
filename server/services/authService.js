@@ -6,6 +6,36 @@ const { toE164, signToken, signTempToken, getDefaultAvatarByRole } = require('..
 const DEV_OTP_MODE = process.env.OTP_MOCK === 'true';
 
 class AuthService {
+  async getRegisteredProfileByPhone(phone) {
+    const cleanPhone = toE164(phone);
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('profile_id, first_name, last_name, role, tier, password_hash')
+      .eq('phone', cleanPhone)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data || !data.password_hash) return null;
+    return data;
+  }
+
+  async checkPhoneAvailability(phone) {
+    const cleanPhone = toE164(phone);
+    const profile = await this.getRegisteredProfileByPhone(cleanPhone);
+    return {
+      phone: cleanPhone,
+      available: !profile,
+      exists: !!profile,
+      user: profile ? {
+        id: profile.profile_id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        role: profile.role,
+        tier: profile.tier || 'free'
+      } : null
+    };
+  }
+
   async findAuthUserByPhone(phone) {
     const cleanPhone = toE164(phone);
     let page = 1;
@@ -171,6 +201,13 @@ class AuthService {
     } catch (err) {
       console.error('[AuthService] Token Verification Failed:', err.message);
       throw new Error('Token ยืนยัน OTP หมดอายุหรือไมถูกต้อง');
+    }
+
+    const registeredProfile = await this.getRegisteredProfileByPhone(verifiedPhone);
+    if (registeredProfile) {
+      const err = new Error('เบอร์โทรนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทนการสมัครใหม่');
+      err.statusCode = 409;
+      throw err;
     }
 
     const password_hash = await bcrypt.hash(password, 10);

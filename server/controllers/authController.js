@@ -2,6 +2,17 @@ const authService = require('../services/authService');
 const response = require('../utils/response');
 
 class AuthController {
+  async checkPhone(req, res) {
+    try {
+      const { phone } = req.body;
+      if (!phone) return res.status(400).json(response.error('กรุณาระบุเบอร์โทรศัพท์'));
+      const result = await authService.checkPhoneAvailability(phone);
+      res.json(response.success('ตรวจสอบเบอร์โทรสำเร็จ', result));
+    } catch (e) {
+      res.status(e.statusCode || 500).json(response.error(e.message));
+    }
+  }
+
   async sendOtp(req, res) {
     try {
       const { phone } = req.body;
@@ -41,7 +52,7 @@ class AuthController {
       res.status(201).json(response.success('สมัครสมาชิกสำเร็จ', result));
     } catch (e) {
       console.error('[AuthController] RegisterFinish Error:', e.message);
-      res.status(500).json(response.error('สมัครสมาชิกไม่สำเร็จ: ' + e.message));
+      res.status(e.statusCode || 500).json(response.error('สมัครสมาชิกไม่สำเร็จ: ' + e.message));
     }
   }
 

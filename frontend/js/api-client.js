@@ -141,6 +141,7 @@
   // --- 2. Auth (ระบบสมัครสมาชิกและล็อกอินผ่าน OTP) ---
   const otpSend = phone => call('POST', '/api/auth/otp/send', { phone });
   const otpVerify = (phone, otp) => call('POST', '/api/auth/otp/verify', { phone, otp });
+  const checkPhone = phone => call('POST', '/api/auth/check-phone', { phone });
   async function registerFinish(temp_token, role, profile, password) {
     const res = await call('POST', '/api/auth/register/finish', { temp_token, role, profile, password });
     if (res && res.data) {
@@ -280,7 +281,7 @@
   window.api = {
     call, getBase, getToken, setToken, clearAuth, getUser, setUser,
     getRole, setRole, isLoggedIn, persistAuth,
-    otpSend, otpVerify, registerFinish, passwordReset, changePassword, login, logout,
+    otpSend, otpVerify, checkPhone, registerFinish, passwordReset, changePassword, login, logout,
     getProfile, updateProfile, getProfileById, deleteProfile,
     getAddresses, createAddress, updateAddress, deleteAddress,
     getProducts, getOfferId, getProduct, createProduct, updateProduct, deleteProduct, getVarieties, getProductTypes,
