@@ -29,6 +29,12 @@ function parseGrades(grades) {
   }
 }
 
+function toPositivePrice(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const price = Number(value);
+  return Number.isFinite(price) && price > 0 ? price : null;
+}
+
 function normalizeOffer(row) {
   if (!row) return row;
 
@@ -100,11 +106,28 @@ function getOfferId(row) {
 
 async function replaceOfferGrades(supabaseAdmin, offerId, grades, fallback = {}) {
   const parsedGrades = parseGrades(grades);
-  const rows = parsedGrades.length > 0
-    ? parsedGrades
-    : (fallback.price !== undefined
-      ? [{ grade: fallback.grade || 'คละ', price: fallback.price }]
-      : []);
+  const rows = parsedGrades
+    .map((row) => ({
+      grade_name: row.grade_name || row.grade || 'คละ',
+      price: toPositivePrice(row.price),
+    }))
+    .filter((row) => row.price !== null);
+
+  if (rows.length === 0 && fallback.price !== undefined) {
+    const fallbackPrice = toPositivePrice(fallback.price);
+    if (fallbackPrice !== null) {
+      rows.push({
+        grade_name: fallback.grade || 'คละ',
+        price: fallbackPrice,
+      });
+    }
+  }
+
+  if (rows.length === 0) {
+    const err = new Error('Price is required');
+    err.statusCode = 400;
+    throw err;
+  }
 
   const { error: deleteError } = await supabaseAdmin
     .from('offer_grades')
@@ -113,12 +136,10 @@ async function replaceOfferGrades(supabaseAdmin, offerId, grades, fallback = {})
 
   if (deleteError) throw deleteError;
 
-  if (rows.length === 0) return;
-
   const inserts = rows.map((row) => ({
     offer_id: offerId,
-    grade_name: row.grade_name || row.grade || 'คละ',
-    price: Number(row.price || 0),
+    grade_name: row.grade_name,
+    price: row.price,
   }));
 
   const { error: insertError } = await supabaseAdmin

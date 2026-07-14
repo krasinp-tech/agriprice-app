@@ -82,6 +82,18 @@
     return hh * 60 + mm;
   }
 
+  function normalizeGrades(grades) {
+    return (Array.isArray(grades) ? grades : [])
+      .map((item) => {
+        const price = Number(item?.price);
+        return {
+          grade: item?.grade_name || item?.grade || "",
+          price,
+        };
+      })
+      .filter((item) => item.grade && Number.isFinite(item.price) && item.price > 0);
+  }
+
   // Back button: try step1 if we have saved payload, else history.back()
   function goBackToStep1() {
     try {
@@ -339,7 +351,13 @@
       saveAllBtn.textContent = window.i18nT ? window.i18nT('saving_btn', 'กำลังบันทึก...') : 'กำลังบันทึก...';
 
       // สร้าง product พร้อม variety + grades ทั้งหมด
-      const gradesArr = Array.isArray(state.step1.grades) ? state.step1.grades : [];
+      const gradesArr = normalizeGrades(state.step1.grades);
+      if (!gradesArr.length) {
+        window.appNotify(window.i18nT ? window.i18nT('please_add_at_least_one_grade', 'กรุณาเพิ่มเกรดและราคาอย่างน้อย 1 รายการ') : 'กรุณาเพิ่มเกรดและราคาอย่างน้อย 1 รายการ', "error");
+        saveAllBtn.disabled = false;
+        saveAllBtn.textContent = window.i18nT ? window.i18nT('save_btn', 'บันทึก') : 'บันทึก';
+        return;
+      }
       const productData = {
         name:        state.step1.product.name,
         description: state.step1.details || `${window.i18nT ? window.i18nT('buying_label', 'รับซื้อ') : 'รับซื้อ'} ${state.step1.product.name}${state.step1.variety?.name ? ' ' + state.step1.variety.name : ''}`,
@@ -348,7 +366,7 @@
         unit:        window.i18nT ? window.i18nT('kg_unit', 'กก.') : 'กก.',
         quantity:    999999,
         // ส่งราคาและเกรดตัวแรกไปเป็นค่าหลัก
-        price:       gradesArr[0]?.price || 0,
+        price:       gradesArr[0].price,
         grade:       gradesArr[0]?.grade || (window.i18nT ? window.i18nT('mixed_grade', 'คละ') : 'คละ'),
         // [NORMALIZED] Since we removed product_grades table, we only store the primary price/grade in products
         grades:      JSON.stringify(gradesArr),
