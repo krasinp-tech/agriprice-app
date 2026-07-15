@@ -103,6 +103,7 @@ app.use('/api/follow', require('./routes/follow'));
 app.use('/api/notification-settings', require('./routes/notificationSettings'));
 app.use('/api/public-config', require('./routes/publicConfig'));   // ส่งค่า Config ให้ฝั่งมือถือ
 app.use('/api/addresses', require('./routes/addresses'));          // สมุดที่อยู่ผู้ใช้
+app.use('/api/realtime', require('./routes/realtime'));            // สตรีม Supabase Realtime ที่ยืนยันตัวตนแล้ว
 
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/device-sessions', require('./middlewares/auth'), require('./routes/deviceSessions').router);

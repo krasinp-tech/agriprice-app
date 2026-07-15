@@ -27,16 +27,21 @@ async function recordDeviceSession(supabase, userId, req) {
     const ip = getRequestIp(req);
     const { name, icon } = parseUserAgent(ua);
 
-    await supabase.from('device_sessions').insert({
+    const { data, error } = await supabase.from('device_sessions').insert({
       user_id: userId,
       device_name: name,
       device_type: icon,
       ip_address: ip,
       user_agent: ua,
       last_active: new Date().toISOString(),
-    });
-  } catch (_) {
+    }).select('session_id').single();
+
+    if (error) throw error;
+    return data?.session_id ? String(data.session_id) : null;
+  } catch (error) {
     // Device-session recording must not block login.
+    console.warn('[DeviceSession] Failed to record session:', error.message);
+    return null;
   }
 }
 

@@ -20,6 +20,11 @@ function formatLastActive(dateStr) {
 }
 
 function pickCurrentSession(rows, req) {
+  const tokenSessionId = String(req.user?.sessionId || '');
+  if (tokenSessionId) {
+    const exact = rows.find((d) => String(d.session_id) === tokenSessionId);
+    if (exact) return exact;
+  }
   const ua = req.headers['user-agent'] || '';
   const ip = getRequestIp(req);
 
@@ -93,7 +98,7 @@ router.post('/:id/logout', async (req, res) => {
 
     const valid = await bcrypt.compare(password, profile.password_hash);
     if (!valid) {
-      return res.status(401).json({ success: false, message: 'Incorrect password' });
+      return res.status(400).json({ success: false, message: 'รหัสผ่านไม่ถูกต้อง' });
     }
 
     const { error: deleteError } = await supabaseAdmin

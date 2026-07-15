@@ -49,6 +49,18 @@ class AuthController {
   async registerFinish(req, res) {
     try {
       const result = await authService.registerFinish(req.body);
+      const { supabaseAdmin } = require('../utils/supabase');
+      const { recordDeviceSession } = require('../services/deviceSessionService');
+      const { signToken } = require('../utils/helpers');
+      const sessionId = await recordDeviceSession(supabaseAdmin, result.user.id, req);
+      if (!sessionId) throw new Error('ไม่สามารถสร้างเซสชันอุปกรณ์ได้');
+      result.token = signToken({
+        id: result.user.id,
+        phone: result.user.phone,
+        role: result.user.role,
+        tier: result.user.tier || 'free',
+        session_id: sessionId,
+      });
       res.status(201).json(response.success('สมัครสมาชิกสำเร็จ', result));
     } catch (e) {
       console.error('[AuthController] RegisterFinish Error:', e.message);
@@ -68,9 +80,19 @@ class AuthController {
       try {
         const { supabaseAdmin } = require('../utils/supabase');
         const { recordDeviceSession } = require('../services/deviceSessionService');
-        await recordDeviceSession(supabaseAdmin, result.user.id, req);
+        const sessionId = await recordDeviceSession(supabaseAdmin, result.user.id, req);
+        if (!sessionId) throw new Error('ไม่สามารถสร้างเซสชันอุปกรณ์ได้');
+        const { signToken } = require('../utils/helpers');
+        result.token = signToken({
+          id: result.user.id,
+          phone: result.user.phone,
+          role: result.user.role,
+          tier: result.user.tier || 'free',
+          session_id: sessionId,
+        });
       } catch (sessErr) {
         console.warn('[AuthController] Failed to record device session:', sessErr.message);
+        return res.status(503).json(response.error('ไม่สามารถเริ่มเซสชันเข้าสู่ระบบได้ กรุณาลองใหม่'));
       }
 
       res.json(response.success('เข้าสู่ระบบสำเร็จ', result));
