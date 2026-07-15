@@ -167,6 +167,7 @@
 [data-theme="dark"] .bottom-nav {
   background: var(--bg-card) !important;
   border-color: var(--border-light) !important;
+  border: none !important;
   box-shadow: 0 -4px 18px rgba(0,0,0,0.55) !important;
 }
 
@@ -2261,6 +2262,7 @@ html[data-theme="dark"] body::selection,
 [data-theme="dark"] .bottom-nav {
   background: rgba(18, 27, 23, 0.96) !important;
   border-color: var(--border-light) !important;
+  border: none !important;
   box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.34) !important;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -2897,6 +2899,7 @@ html[data-theme="dark"] body::selection,
 [data-theme="dark"] .bottom-nav {
   background: rgba(23, 26, 32, 0.96) !important;
   border-color: var(--border-light) !important;
+  border: none !important;
   box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.36) !important;
 }
 

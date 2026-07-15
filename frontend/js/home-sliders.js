@@ -615,14 +615,19 @@
   // Search Logic
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
+  const searchBox = document.getElementById('homeSearchBox');
   if (searchBtn && searchInput) {
     const goSearch = () => {
-      const q = searchInput.value.trim();
-      const url = q ? `pages/shared/search-results.html?q=${encodeURIComponent(q)}` : 'pages/shared/search-results.html';
+      const url = 'pages/shared/search-results.html';
       if (window.navigateWithTransition) window.navigateWithTransition(url); else window.location.href = url;
     };
-    searchBtn.onclick = goSearch;
-    searchInput.onkeypress = (e) => { if (e.key === 'Enter') goSearch(); };
+    searchBox?.addEventListener('click', goSearch);
+    searchBox?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        goSearch();
+      }
+    });
   }
 
   // Global Refresh Helper

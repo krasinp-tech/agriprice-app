@@ -483,6 +483,26 @@
   window.showConfirm = showCustomConfirm;
   window.appNotify = showToast; // standard alias
 
+  window.appConfirm = function(message) {
+    return new Promise((resolve) => showCustomConfirm(message, resolve));
+  };
+
+  window.openExternalInApp = async function(url) {
+    const safeUrl = String(url || '').trim();
+    if (!/^https?:\/\//i.test(safeUrl)) return false;
+    try {
+      const Browser = window.Capacitor?.Plugins?.Browser;
+      if (Browser?.open) {
+        await Browser.open({ url: safeUrl, presentationStyle: 'popover' });
+        return true;
+      }
+    } catch (error) {
+      console.warn('[Navigation] Native browser unavailable:', error);
+    }
+    window.location.href = safeUrl;
+    return true;
+  };
+
   // 3. Page Transitions
   window.navigateWithTransition = function(url) {
     if (document.body) {

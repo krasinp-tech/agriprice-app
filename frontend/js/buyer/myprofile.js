@@ -242,6 +242,46 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = "setbooking/setbooking-step1.html";
     }
 
+
+    async function deletePurchase(product, card) {
+        const productId = product.offerId || product.offer_id || product.id || product.productId;
+        if (!productId) return;
+
+        const confirmMsg = window.i18nT
+            ? window.i18nT('confirm_delete_purchase', 'คุณต้องการลบการรับซื้อนี้ใช่หรือไม่?')
+            : 'คุณต้องการลบการรับซื้อนี้ใช่หรือไม่?';
+
+        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+
+        showConfirm(confirmMsg, async (confirmed) => {
+            if (!confirmed) return;
+            try {
+                if (api.deleteProduct) {
+                    await api.deleteProduct(productId);
+                } else {
+                    await api.call('DELETE', '/api/products/' + productId);
+                }
+
+                const successMsg = window.i18nT
+                    ? window.i18nT('delete_success', 'ลบรายการรับซื้อสำเร็จ')
+                    : 'ลบรายการรับซื้อสำเร็จ';
+                if (window.showToast) window.showToast(successMsg, 'success');
+                else if (window.appNotify) window.appNotify(successMsg, 'success');
+                else alert(successMsg);
+
+                await loadProducts();
+            } catch (err) {
+                console.error('[MyProfile] Delete error:', err);
+                const errorMsg = window.i18nT
+                    ? window.i18nT('delete_failed', 'ลบรายการรับซื้อไม่สำเร็จ')
+                    : 'ลบรายการรับซื้อไม่สำเร็จ';
+                if (window.showToast) window.showToast(errorMsg, 'error');
+                else if (window.appNotify) window.appNotify(errorMsg, 'error');
+                else alert(errorMsg);
+            }
+        });
+    }
+
     function renderCustomProducts(container) {
         if (!profileData.products.length) {
             container.innerHTML = `<div style="text-align:center; padding:40px 20px; color:#94a3b8;">
@@ -267,7 +307,8 @@ document.addEventListener("DOMContentLoaded", function () {
             window.ProductCard.mount(container, items, {
                 handlers: {
                     onToggleStatus: (p, card) => toggleStatus(p, card),
-                    onEdit: (p, card) => editPurchase(p)
+                    onEdit: (p, card) => editPurchase(p),
+                    onDelete: (p, card) => deletePurchase(p, card)
                 }
             });
         }
@@ -519,10 +560,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         });
                     } else {
-                        const confirmUpgrade = confirm(confirmMsg);
-                        if (confirmUpgrade) {
-                            window.location.href = '../account/subscription.html';
-                        }
+                        window.showAlert?.(confirmMsg, 'info');
                     }
                 } else {
                     alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));

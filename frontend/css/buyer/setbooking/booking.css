@@ -337,6 +337,7 @@
   align-items: center;
   justify-content: center;
   margin: auto 0;
+  isolation: isolate;
 }
 
 /* Scanning active laser line animation */

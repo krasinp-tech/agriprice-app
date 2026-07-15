@@ -5,6 +5,8 @@
 
   let currentEditId = null;
   let currentTag = 'Home';
+  let geographyData = null;
+  let geographyLoadPromise = null;
 
   // ── Element refs ──────────────────────────────────────
   function $(id) { return document.getElementById(id); }
@@ -16,6 +18,121 @@
 
   function getBase() {
     return window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+  }
+
+  function loadGeography() {
+    if (geographyData) return Promise.resolve(geographyData);
+    if (!geographyLoadPromise) {
+      geographyLoadPromise = fetch('../../../assets/data/thai-geography.json')
+        .then(response => {
+          if (!response.ok) throw new Error('Unable to load Thai geography data');
+          return response.json();
+        })
+        .then(data => (geographyData = Array.isArray(data) ? data : []))
+        .catch(error => {
+          geographyLoadPromise = null;
+          console.error('[AddressBook] Geography load failed:', error);
+          return [];
+        });
+    }
+    return geographyLoadPromise;
+  }
+
+  function setupAddressAutocomplete(input) {
+    if (!input) return;
+    let activeIndex = -1;
+
+    const normalize = value => String(value || '')
+      .toLocaleLowerCase('th-TH')
+      .replace(/(ตำบล|ต\.|แขวง|อำเภอ|อ\.|เขต|จังหวัด|จ\.)/g, '')
+      .replace(/\s+/g, '')
+      .trim();
+
+    const closeSuggestions = () => {
+      input.parentElement.querySelector('.address-suggestions')?.remove();
+      input.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+    };
+
+    const selectSuggestion = row => {
+      const subdistrictPrefix = row.provinceCode === 10 ? 'แขวง' : 'ตำบล';
+      const districtPrefix = row.provinceCode === 10 ? 'เขต' : 'อำเภอ';
+      input.value = `${subdistrictPrefix}${row.subdistrictNameTh} ${districtPrefix}${row.districtNameTh} จังหวัด${row.provinceNameTh} ${row.postalCode}`;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      closeSuggestions();
+    };
+
+    const renderSuggestions = async () => {
+      const query = normalize(input.value);
+      closeSuggestions();
+      if (!query) return;
+
+      const data = await loadGeography();
+      if (normalize(input.value) !== query) return;
+
+      const matches = data.map(row => {
+        const fields = [
+          normalize(row.subdistrictNameTh),
+          normalize(row.districtNameTh),
+          normalize(row.provinceNameTh),
+          String(row.postalCode || '')
+        ];
+        const exactField = fields.findIndex(value => value === query);
+        const prefixField = fields.findIndex(value => value.startsWith(query));
+        const combined = fields.join('');
+        const score = exactField >= 0 ? exactField : (prefixField >= 0 ? 10 + prefixField : (combined.includes(query) ? 30 : 999));
+        return { row, score };
+      })
+        .filter(item => item.score < 999)
+        .sort((a, b) => a.score - b.score || a.row.subdistrictNameTh.localeCompare(b.row.subdistrictNameTh, 'th'))
+        .slice(0, 20);
+
+      if (!matches.length) return;
+      const list = document.createElement('div');
+      list.className = 'address-suggestions';
+      list.setAttribute('role', 'listbox');
+
+      matches.forEach(({ row }) => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'address-suggestion-item';
+        option.setAttribute('role', 'option');
+
+        const main = document.createElement('strong');
+        main.textContent = `${row.subdistrictNameTh}, ${row.districtNameTh}`;
+        const detail = document.createElement('small');
+        detail.textContent = `${row.provinceNameTh} · ${row.postalCode}`;
+        option.append(main, detail);
+        option.addEventListener('click', () => selectSuggestion(row));
+        list.appendChild(option);
+      });
+
+      input.parentElement.appendChild(list);
+      input.setAttribute('aria-expanded', 'true');
+    };
+
+    input.addEventListener('focus', loadGeography);
+    input.addEventListener('input', renderSuggestions);
+    input.addEventListener('keydown', event => {
+      const options = [...input.parentElement.querySelectorAll('.address-suggestion-item')];
+      if (!options.length) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeIndex = event.key === 'ArrowDown'
+          ? (activeIndex + 1) % options.length
+          : (activeIndex - 1 + options.length) % options.length;
+        options.forEach((option, index) => option.classList.toggle('active', index === activeIndex));
+        options[activeIndex].scrollIntoView({ block: 'nearest' });
+      } else if (event.key === 'Enter' && activeIndex >= 0) {
+        event.preventDefault();
+        options[activeIndex].click();
+      } else if (event.key === 'Escape') {
+        closeSuggestions();
+      }
+    });
+    document.addEventListener('click', event => {
+      if (!input.parentElement.contains(event.target)) closeSuggestions();
+    });
   }
 
   // ── Toast helper ──────────────────────────────────────
@@ -232,15 +349,14 @@
         if (agreed) runDelete();
       });
     } else {
-      if (confirm(msg)) {
-        runDelete();
-      }
+      window.showAlert?.(msg, 'info');
     }
   }
 
   // ── Init ──────────────────────────────────────────────
   function init() {
     loadAddresses();
+    setupAddressAutocomplete($('addrLine2'));
 
     // Open modal on add button click
     $('addAddressBtn')?.addEventListener('click', () => openModal(false));

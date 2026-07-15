@@ -49,7 +49,9 @@ window.initFavoritesComponent = function initFavoritesComponent() {
       ...(Array.isArray(fromApi) ? fromApi : []),
       ...(Array.isArray(fromStore) ? fromStore : []),
     ];
-    return dedupeFavoriteItems(merged).slice(0, 6);
+    // Only show product favorites on home page, not followed sellers
+    const onlyProducts = merged.filter(item => String(item?.kind || '') === 'product');
+    return dedupeFavoriteItems(onlyProducts).slice(0, 6);
   }
 
   function dedupeFavoriteItems(list) {

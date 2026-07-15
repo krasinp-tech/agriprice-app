@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentQueue = document.getElementById("currentQueue");
   const myQueue = document.getElementById("myQueue");
   const aheadCount = document.getElementById("aheadCount");
+
+  function setCancellationAvailable(status) {
+    if (!btnCancelBooking) return;
+    const normalizedStatus = String(status || '').toLowerCase();
+    const isTerminal = ['success', 'completed', 'cancel', 'cancelled', 'canceled', 'rejected'].includes(normalizedStatus);
+    btnCancelBooking.hidden = isTerminal;
+    btnCancelBooking.disabled = isTerminal;
+  }
   const eta = document.getElementById("eta");
   const shopName = document.getElementById("shopName");
   const shopAddr = document.getElementById("shopAddr");
@@ -310,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadSuccessData() {
     const bookingData = await BookingAPI.loadConfirmedBooking();
     if (!bookingData) throw new Error("ไม่พบข้อมูลการจอง");
+    setCancellationAvailable(bookingData.status);
 
     const queueLabel = bookingData.queueNo
       || bookingData.queue_no
@@ -435,6 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!snap) return;
       
       if (snap.status === 'success') {
+        setCancellationAvailable(snap.status);
         if (aheadCount) aheadCount.textContent = `0 ${t('unit_queue', 'คิว')}`;
         if (eta) eta.textContent = `0 ${t('unit_minute', 'นาที')}`;
         if (currentQueue) currentQueue.textContent = snap.queueNo || '-';
@@ -479,15 +489,32 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleDetailBtn.textContent = isHidden ? t('hide_booking_details', "ซ่อนรายละเอียดการจอง") : t('show_booking_details', "แสดงรายละเอียดการจอง");
   }
 
-  function handleOpenMap() {
+  async function handleOpenMap() {
     const mapsUrl = btnOpenMap?.dataset?.mapsUrl;
     if (mapsUrl) {
       const finalUrl = mapsUrl.startsWith('http') ? mapsUrl : `https://www.google.com/maps?q=${encodeURIComponent(mapsUrl)}`;
-      window.open(finalUrl, "_blank");
+      if (window.openExternalInApp) await window.openExternalInApp(finalUrl);
+      else window.location.href = finalUrl;
     }
   }
 
   async function handleCancelBooking() {
+    const bkId = (bookingIdText?.textContent || '').trim();
+    const latestBooking = await checkBookingStatusOnce(bkId);
+    const latestStatus = String(latestBooking?.status || '').toLowerCase();
+    if (['success', 'completed', 'cancel', 'cancelled', 'canceled', 'rejected'].includes(latestStatus)) {
+      setCancellationAvailable(latestStatus);
+      if (window.appNotify) {
+        window.appNotify(
+          ['success', 'completed'].includes(latestStatus)
+            ? t('completed_cannot_cancel', 'งานนี้เสร็จสิ้นแล้ว ไม่สามารถยกเลิกการจองได้')
+            : t('booking_cannot_cancel', 'การจองนี้ไม่สามารถยกเลิกได้'),
+          'warning'
+        );
+      }
+      return;
+    }
+
     // Step 1: Ask for reason first with preset choices
     const reasonOptions = [
       t("cancel_reason_change_plan", "เปลี่ยนแผน / ไม่ว่างตามนัด"),
@@ -545,7 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // null means user dismissed without confirming
     if (cancelReason === null) return;
 
-    const bkId = bookingIdText?.textContent || "";
     const result = await BookingAPI.cancelBooking(bkId, cancelReason);
     if (result.success) {
       if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");

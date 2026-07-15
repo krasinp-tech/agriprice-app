@@ -2,6 +2,7 @@ const { supabaseAdmin } = require('../utils/supabase');
 const { makeBookingNo } = require('../utils/helpers');
 const notificationService = require('./notificationService');
 const { NORMALIZED_OFFER_SELECT, getOfferId, normalizeOffer } = require('../utils/offers');
+const { normalizeBookingStatus, assertBookingTransition } = require('../domain/bookingStatus');
 
 const BOOKING_OFFER_SELECT = NORMALIZED_OFFER_SELECT;
 
@@ -85,15 +86,6 @@ function splitVehiclePlates(value) {
     .split(/[,;\n]+/)
     .map((plate) => plate.trim())
     .filter(Boolean);
-}
-
-function normalizeBookingStatus(status) {
-  const value = String(status || '').toLowerCase();
-  if (value === 'confirmed') return 'waiting';
-  if (value === 'completed') return 'success';
-  if (value === 'rejected' || value === 'cancelled' || value === 'canceled') return 'cancel';
-  if (['waiting', 'success', 'cancel'].includes(value)) return value;
-  throw new Error('สถานะการจองไม่ถูกต้อง');
 }
 
 function createHttpError(message, statusCode = 400) {
@@ -420,8 +412,10 @@ class BookingService {
     const nextStatus = normalizeBookingStatus(status);
     const booking = await this.getBookingDetail(bookingId, userId);
 
+    const transition = assertBookingTransition(booking.status, status);
+
     // 'confirmed' is an acknowledgment — send notification even if DB status stays 'waiting'
-    if (booking.status === nextStatus && requestedStatus !== 'confirmed') {
+    if (!transition.changed && requestedStatus !== 'confirmed') {
       return booking; // already in this status
     }
 
@@ -446,10 +440,14 @@ class BookingService {
       .from('bookings')
       .update(updatePayload)
       .eq('booking_id', booking.booking_id)
+      .eq('status', booking.status)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) {
+      throw createHttpError('สถานะการจองมีการเปลี่ยนแปลง กรุณาโหลดข้อมูลใหม่', 409);
+    }
 
     // Send status update notifications (in-app and push)
     try {
@@ -510,21 +508,19 @@ class BookingService {
     if (role !== 'buyer' || String(booking.offer_owner_id) !== String(userId)) {
       throw createHttpError('Only the buyer can confirm check-in for this booking', 403);
     }
-    if (booking.status === 'cancel') {
-      throw createHttpError('Cannot check in a canceled booking', 400);
-    }
-    if (booking.status === 'success') {
-      return booking;
-    }
+    const transition = assertBookingTransition(booking.status, 'success');
+    if (!transition.changed) return booking;
 
     const { data, error } = await supabaseAdmin
       .from('bookings')
       .update({ status: 'success' })
       .eq('booking_id', booking.booking_id)
+      .eq('status', booking.status)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw createHttpError('สถานะการจองมีการเปลี่ยนแปลง กรุณาโหลดข้อมูลใหม่', 409);
 
     await notificationService.createNotification(
       booking.buyer_id,

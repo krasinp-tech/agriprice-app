@@ -7,3 +7,5 @@ For final submission, run these current migrations in Supabase SQL Editor:
 3. `zz-fix-chat-device-unique-constraints.sql`
 4. `bug-freeze-booking-queue-sequence.sql`
 5. `add-booking-cancel-info-and-chat-deletions.sql`
+6. `separate-profile-favorites-from-follows.sql`
+7. `create-payment-submissions.sql`

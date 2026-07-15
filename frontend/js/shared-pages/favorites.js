@@ -6,7 +6,6 @@
   if (!mount || !helpers) return;
 
   let ALL_ITEMS = [];
-  let CURRENT_FILTER = 'all';
 
   function t(key, fallback) {
     return window.i18nT ? window.i18nT(key, fallback) : fallback;
@@ -93,8 +92,10 @@
     // Merge and dedupe
     const merged = [
       ...(Array.isArray(fromApi) ? fromApi : []),
-      ...(Array.isArray(fromStore) ? fromStore : [])
-    ];
+      ...(Array.isArray(fromStore) ? fromStore.filter(item => String(item?.kind || '') === 'product') : [])
+    ]
+      .filter(item => !['follow', 'following'].includes(String(item?.source || '').toLowerCase()))
+      .filter(item => String(item?.kind || '') === 'product'); // Only show product/offer favorites on this page
 
     const seen = new Set();
     const unique = merged.filter(item => {
@@ -112,10 +113,7 @@
   }
 
   function render(items) {
-    const filtered = items.filter(item => {
-      if (CURRENT_FILTER === 'all') return true;
-      return (item.kind || 'seller') === CURRENT_FILTER;
-    });
+    const filtered = items;
 
     if (filtered.length === 0) {
       mount.innerHTML = '';
@@ -182,7 +180,9 @@
 
         // Active heart icon
         const favBtn = card.querySelector('[data-action="toggle-favorite"]');
-        if (favBtn) favBtn.classList.add('active');
+        if (favBtn) {
+          favBtn.classList.add('active');
+        }
 
         mount.appendChild(card);
       });
@@ -265,6 +265,7 @@
         }
       }
     }
+
   });
 
   async function init() {

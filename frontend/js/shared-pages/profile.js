@@ -246,8 +246,8 @@
         items = items.map(p => ({
           ...p,
           sellerId: uid,
-          title: sellerName,
-          subtitle: p.subtitle ? `${p.title} (${p.subtitle})` : p.title,
+          // title = ชื่อสินค้า, subtitle = ชื่อเกรด/ประเภท (ไม่ใช้ชื่อผู้ขายเป็น title)
+          sellerName: sellerName,
           avatar: profileData.avatar || '../../assets/images/avatar-buyer.svg'
         }));
       }

@@ -3,6 +3,7 @@
 .env.*
 server/.env
 server/firebase-service-account.json
+/google-services.json
 node_modules/
 *.zip
 server_deploy.zip

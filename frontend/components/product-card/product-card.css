@@ -44,8 +44,8 @@
 
 .pc-header-right {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
 }
 
@@ -498,4 +498,89 @@
     .arrow, .pc-chevron-right {
         font-size: 42px;
     }
+}
+
+/* Options Menu (Three dots / Hide Delete Button) */
+.pc-options-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.pc-options-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--text-muted, #9ca3af);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.pc-options-btn:hover {
+    background: var(--bg-input, #f3f4f6);
+    color: var(--text-main, #374151);
+}
+
+[data-theme="dark"] .pc-options-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f3f4f6;
+}
+
+.pc-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-medium, #e5e7eb);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    min-width: 140px;
+    z-index: 100;
+    overflow: hidden;
+    padding: 4px;
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pc-dropdown-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main, #374151);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pc-dropdown-item:hover {
+    background: var(--bg-input, #f3f4f6);
+}
+
+.pc-dropdown-item.delete-btn {
+    color: #ef4444;
+}
+
+.pc-dropdown-item.delete-btn:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+[data-theme="dark"] .pc-dropdown-item.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
 }

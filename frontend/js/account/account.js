@@ -141,6 +141,12 @@
       buyerProfileLink.style.display = role === "buyer" ? "flex" : "none";
     }
 
+    // ซ่อนสมุดที่อยู่ในฝั่งผู้ซื้อ (เพราะมีให้กรอกในหน้าจัดการโปรไฟล์แล้ว)
+    const addressBookLink = document.getElementById("addressBookLink");
+    if (addressBookLink) {
+      addressBookLink.style.display = role === "buyer" ? "none" : "flex";
+    }
+
     const tier = String(u.tier || "free").toLowerCase();
     const buyerUpgradeLink = document.getElementById("buyerUpgradeLink");
 

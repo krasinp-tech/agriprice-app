@@ -74,6 +74,47 @@
 
   const t_helper = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
 
+  const CACHE_PREFIX = 'agriprice_api_cache_v1:';
+  const CACHEABLE_GET = [/^\/api\/products/, /^\/api\/product-types/, /^\/api\/varieties/, /^\/api\/announcements/, /^\/api\/gov-prices/];
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const isCacheable = (method, path) => method === 'GET' && CACHEABLE_GET.some(rule => rule.test(path));
+  function readCache(path) {
+    try { return JSON.parse(localStorage.getItem(CACHE_PREFIX + path) || 'null')?.data || null; } catch (_) { return null; }
+  }
+  function writeCache(path, data) {
+    try { localStorage.setItem(CACHE_PREFIX + path, JSON.stringify({ savedAt: Date.now(), data })); } catch (_) {}
+  }
+  function cachedResponse(path) {
+    const cached = readCache(path);
+    if (!cached) return null;
+    return Array.isArray(cached) ? cached : { ...cached, offline: true, from_cache: true };
+  }
+  function setOfflineState(offline) {
+    document.documentElement.classList.toggle('is-offline', offline);
+    window.dispatchEvent(new CustomEvent('agriprice:network', { detail: { offline } }));
+  }
+  window.addEventListener('online', () => setOfflineState(false));
+  window.addEventListener('offline', () => setOfflineState(true));
+
+  async function fetchWithRetry(url, opts, attempts) {
+    let lastError;
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        const response = await fetch(url, { ...opts, signal: controller.signal });
+        clearTimeout(timeout);
+        setOfflineState(false);
+        return response;
+      } catch (error) {
+        lastError = error;
+        if (attempt + 1 < attempts) await sleep(400 * (2 ** attempt));
+      }
+    }
+    setOfflineState(true);
+    throw lastError;
+  }
+
   // ฟังก์ชันหลักที่ใช้ยิง API ทุกตัว (จัดการเรื่องแนบ Token ให้อัตโนมัติ)
   async function call(method, path, body, isForm) {
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
@@ -91,7 +132,7 @@
     if (!currentBase) throw new Error('API Base URL not initialized');
 
     try {
-      res = await fetch(currentBase + path, opts);
+      res = await fetchWithRetry(currentBase + path, opts, method === 'GET' ? 3 : 1);
     } catch (err) {
       if (window.AGRIPRICE_DEBUG) console.error('[API] Network Error:', err);
 
@@ -102,13 +143,17 @@
 
         try {
           const fallbackBase = 'https://agriprice-app.onrender.com';
-          res = await fetch(fallbackBase + path, opts);
+          res = await fetchWithRetry(fallbackBase + path, opts, method === 'GET' ? 2 : 1);
         } catch (retryErr) {
           if (window.showToast) window.showToast(t_helper('server_fallback_error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์สำรองได้'));
+          const cached = isCacheable(method, path) ? cachedResponse(path) : null;
+          if (cached) return cached;
           throw new Error(t_helper('server_error', 'ไม่สามารถเชื่อมต่อ server ได้'));
         }
       } else {
         if (window.showToast) window.showToast(t_helper('server_retry_error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง'));
+        const cached = isCacheable(method, path) ? cachedResponse(path) : null;
+        if (cached) return cached;
         throw new Error(t_helper('server_error', 'ไม่สามารถเชื่อมต่อ server ได้'));
       }
     }
@@ -135,6 +180,7 @@
       throw new Error(json.message || `${t_helper('error_occurred', 'เกิดข้อผิดพลาด')} (${res.status})`);
     }
 
+    if (isCacheable(method, path)) writeCache(path, json);
     return json;
   }
 

@@ -223,6 +223,76 @@ img, video {
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
 
+/* Keep profile photos edge-to-edge in every avatar frame. */
+.avatar-wrap,
+.profile-avatar-wrap,
+.profile-avatar-box,
+.seller-avatar,
+.pc-avatar,
+.fav-avatar,
+.chat-item-avatar,
+.room-avatar,
+.reviewer-avatar {
+  overflow: hidden;
+}
+
+.avatar-wrap > img,
+.profile-avatar-wrap > img,
+.profile-avatar-box > img,
+.seller-avatar > img,
+.pc-avatar > img,
+.fav-avatar > img,
+.chat-item-avatar > img,
+.room-avatar > img,
+.reviewer-avatar > img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Catch page-specific avatar class names as well. */
+[class*="avatar"] > img,
+[class*="avatar"] picture > img,
+img[class*="avatar"] {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+[class*="avatar"]:has(> img),
+[class*="avatar"]:has(> picture) {
+  overflow: hidden;
+}
+
+/* Remove desktop-only interaction cues on touch screens. */
+@media (hover: none) and (pointer: coarse) {
+  *, *::before, *::after {
+    cursor: default !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.88;
+  }
+
+  .product-item:hover,
+  .product-card:hover,
+  .booking-card:hover,
+  .kpi-card:hover,
+  .detail-card:hover,
+  .news-item:hover,
+  .menu-item:hover,
+  .chat-item:hover {
+    transform: none !important;
+  }
+}
+
 /* ── Animations ──────────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

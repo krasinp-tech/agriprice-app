@@ -63,33 +63,6 @@
     }
   }
 
-  async function fetchFollowingFromApi() {
-    if (!window.api || typeof window.api.call !== 'function') return null;
-    const token = localStorage.getItem(window.AUTH_TOKEN_KEY || "token") || "";
-    const userId = getCurrentUserId();
-    if (!token || !userId) return null;
-
-    try {
-      const json = await window.api.call('GET', `/api/follow/${encodeURIComponent(userId)}/following`);
-      if (!json) return null;
-      const arr = Array.isArray(json) ? json : json.data || [];
-      return arr
-        .map((item) => ({
-          id: resolveId(item?.profile_id, item?.id),
-          kind: "seller",
-          title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
-          subtitle: item?.tagline || "",
-          avatar: item?.avatar || "",
-          source: "follow",
-          sellerId: resolveId(item?.profile_id, item?.id),
-          profileId: resolveId(item?.profile_id, item?.id),
-        }))
-        .filter((x) => x.id);
-    } catch (_) {
-      return null;
-    }
-  }
-
   function loadFavoritesFromStore() {
     const store = window.FavoritesStore;
     const arr = store?.read?.() || [];
@@ -135,7 +108,6 @@
     getRole,
     getRelativePrefixToPages,
     fetchFavoritesFromApi,
-    fetchFollowingFromApi,
     loadFavoritesFromStore,
   };
 })();

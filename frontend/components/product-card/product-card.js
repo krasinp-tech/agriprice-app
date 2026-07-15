@@ -107,6 +107,7 @@
       // Owner view: Hide standard actions, show owner actions
       card.querySelectorAll("[data-action='book'], [data-action='contact'], [data-action='toggle-favorite']").forEach(x => x.remove());
       card.querySelectorAll("[data-action='toggle-status'], [data-action='edit-purchase']").forEach(x => x.style.display = "");
+      card.querySelectorAll(".pc-options-menu").forEach(x => x.style.display = "block");
       
       // Hide distance for the owner
       const distWrap = card.querySelector(".distance");
@@ -155,6 +156,36 @@
     bind("[data-action='open-profile']", "click", "profile", handlers?.onProfile);
     bind("[data-action='toggle-status']", "click", "toggle-status", handlers?.onToggleStatus);
     bind("[data-action='edit-purchase']", "click", "edit", handlers?.onEdit);
+
+    // Toggle Options Dropdown Menu
+    const toggleBtn = card.querySelector("[data-action='toggle-options']");
+    const dropdown = card.querySelector(".pc-dropdown-menu");
+    if (toggleBtn && dropdown) {
+      toggleBtn.addEventListener("click", (e) => {
+        stopClick(e);
+        // Close all other dropdown menus first
+        document.querySelectorAll(".pc-dropdown-menu").forEach(d => {
+          if (d !== dropdown) d.style.display = "none";
+        });
+        const isHidden = dropdown.style.display === "none";
+        dropdown.style.display = isHidden ? "block" : "none";
+      });
+    }
+
+    // Handle clicking anywhere on document to close all dropdowns
+    if (!window.__AGRIPRICE_DROPDOWN_CLOSE_WIRED) {
+      window.__AGRIPRICE_DROPDOWN_CLOSE_WIRED = true;
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".pc-dropdown-menu").forEach(d => d.style.display = "none");
+      });
+    }
+
+    bind("[data-action='delete-purchase']", "click", "delete", (d, c) => {
+      if (dropdown) dropdown.style.display = "none";
+      if (handlers?.onDelete) {
+        handlers.onDelete(d, c);
+      }
+    });
   }
 
   /**

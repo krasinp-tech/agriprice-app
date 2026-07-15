@@ -137,13 +137,10 @@
           if (agreed) runDelete();
         });
       } else {
-        if (window.confirm(msg)) {
-          runDelete();
-        }
+        window.showAlert?.(msg, 'info');
       }
     });
   }
 
   hydrate();
 })();
-

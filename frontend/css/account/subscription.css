@@ -44,21 +44,30 @@ body {
 
 .header-text {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
   margin-top: 10px;
   margin-bottom: 24px;
 }
 
 .icon-container {
   background: var(--primary);
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .header-text h1 {

@@ -547,12 +547,8 @@
                     }
                   });
                 } else {
-                  const goUpgrade = confirm(confirmMsg);
-                  if (goUpgrade) {
-                    window.location.href = '../../../pages/account/subscription.html';
-                  } else {
-                    window.history.back();
-                  }
+                  window.showAlert?.(confirmMsg, 'info');
+                  window.history.back();
                 }
               } else {
                 alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));
@@ -602,4 +598,3 @@
 
   init();
 })();
-

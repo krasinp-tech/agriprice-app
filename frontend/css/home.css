@@ -130,6 +130,7 @@
 .search-box {
     position: relative;
     margin: 0 24px;
+    cursor: pointer;
 }
 
 .search-input {
@@ -143,6 +144,7 @@
     background: var(--bg-card);
     color: var(--text-main);
     font-family: 'Sarabun', sans-serif;
+    cursor: pointer;
 }
 
 .search-input::placeholder {

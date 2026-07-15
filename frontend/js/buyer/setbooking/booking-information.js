@@ -422,9 +422,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnOpenMap) {
       const mUrl = bookingData.mapLink || "";
       btnOpenMap.style.display = mUrl ? "flex" : "none";
-      btnOpenMap.onclick = () => {
+      btnOpenMap.onclick = async () => {
         const finalUrl = mUrl.startsWith("http") ? mUrl : `https://www.google.com/maps?q=${encodeURIComponent(mUrl)}`;
-        window.open(finalUrl, "_blank");
+        if (window.openExternalInApp) await window.openExternalInApp(finalUrl);
+        else window.location.href = finalUrl;
       };
     }
 
@@ -442,6 +443,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleCancelBooking() {
+    const latestBooking = await BookingAPI.loadConfirmedBooking();
+    const latestStatus = normalizeUiStatus(latestBooking?.status);
+    if (["completed", "cancelled", "rejected"].includes(latestStatus)) {
+      applyStatusUi(latestBooking?.status);
+      if (window.appNotify) {
+        window.appNotify(
+          latestStatus === "completed"
+            ? t("completed_cannot_cancel", "งานนี้เสร็จสิ้นแล้ว ไม่สามารถยกเลิกการจองได้")
+            : t("booking_cannot_cancel", "การจองนี้ไม่สามารถยกเลิกได้"),
+          "warning"
+        );
+      }
+      return;
+    }
+
     // Step 1: Ask for reason first with preset choices
     const reasonOptions = [
       t("cancel_reason_change_plan", "เปลี่ยนแผน / ไม่ว่างตามนัด"),

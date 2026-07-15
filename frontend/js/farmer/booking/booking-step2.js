@@ -21,34 +21,64 @@ document.addEventListener("DOMContentLoaded", () => {
     function setupProvinceAutocomplete(input) {
         let currentFocus;
         input.setAttribute('autocomplete', 'off');
-        input.addEventListener('input', function() {
-            let val = this.value;
+        input.setAttribute('role', 'combobox');
+        input.setAttribute('aria-autocomplete', 'list');
+        input.setAttribute('aria-expanded', 'false');
+
+        const normalize = value => String(value || '')
+            .trim()
+            .replace(/^จ(?:ังหวัด)?\.?\s*/i, '')
+            .replace(/\s+/g, '')
+            .toLocaleLowerCase('th-TH');
+
+        function renderSuggestions() {
+            const val = input.value;
+            const query = normalize(val);
             closeAllLists();
-            if (!val) return false;
             currentFocus = -1;
+
+            const matches = THAI_PROVINCES
+                .map(province => {
+                    const normalizedProvince = normalize(province);
+                    const matchIndex = normalizedProvince.indexOf(query);
+                    return { province, matchIndex };
+                })
+                .filter(item => !query || item.matchIndex !== -1)
+                .sort((a, b) => {
+                    // Prefix matches are the strongest prediction, followed by
+                    // matches found elsewhere in the province name.
+                    if (a.matchIndex !== b.matchIndex) return a.matchIndex - b.matchIndex;
+                    return a.province.localeCompare(b.province, 'th');
+                })
+                .slice(0, 12);
+
+            if (!matches.length) {
+                input.setAttribute('aria-expanded', 'false');
+                return;
+            }
+
             const list = document.createElement('div');
             list.setAttribute('class', 'autocomplete-items');
-            list.style.position = 'absolute';
-            list.style.background = '#fff';
-            list.style.border = '1px solid #ccc';
-            list.style.zIndex = 1000;
-            list.style.width = this.offsetWidth + 'px';
-            list.style.maxHeight = '180px';
-            list.style.overflowY = 'auto';
-            this.parentNode.appendChild(list);
-            THAI_PROVINCES.forEach(prov => {
-                if (prov.substr(0, val.length) === val) {
-                    const item = document.createElement('div');
-                    item.innerHTML = '<strong>' + prov.substr(0, val.length) + '</strong>' + prov.substr(val.length);
-                    item.innerHTML += '<input type="hidden" value="' + prov + '">';
-                    item.addEventListener('click', function() {
-                        input.value = this.getElementsByTagName('input')[0].value;
-                        closeAllLists();
-                    });
-                    list.appendChild(item);
-                }
+            list.setAttribute('role', 'listbox');
+            input.parentNode.appendChild(list);
+            input.setAttribute('aria-expanded', 'true');
+
+            matches.forEach(({ province }) => {
+                const item = document.createElement('div');
+                item.setAttribute('role', 'option');
+                item.textContent = province;
+                item.addEventListener('pointerdown', event => event.preventDefault());
+                item.addEventListener('click', () => {
+                    input.value = province;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    closeAllLists();
+                });
+                list.appendChild(item);
             });
-        });
+        }
+
+        input.addEventListener('input', renderSuggestions);
+        input.addEventListener('focus', renderSuggestions);
         input.addEventListener('keydown', function(e) {
             let x = this.parentNode.querySelector('.autocomplete-items');
             if (x) x = x.getElementsByTagName('div');
@@ -77,6 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const items = document.querySelectorAll('.autocomplete-items');
             for (let i = 0; i < items.length; i++) {
                 if (elmnt !== items[i] && elmnt !== input) items[i].parentNode.removeChild(items[i]);
+            }
+            if (!input.parentNode.querySelector('.autocomplete-items')) {
+                input.setAttribute('aria-expanded', 'false');
             }
         }
         document.addEventListener('click', function (e) { closeAllLists(e.target); });

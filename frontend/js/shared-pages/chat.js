@@ -385,6 +385,30 @@
       roomAvatarContainer.innerHTML = `<img src="${esc(avatarUrl)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt="">`;
     }
 
+    // Call Action Handler
+    const callBtn = document.querySelector('[data-action="call"]');
+    if (callBtn) {
+      callBtn.onclick = async () => {
+        let phone = other.phone || other.telephone || other.phone_number;
+        if (!phone && targetId) {
+          try {
+            const profile = await api.getProfileById?.(targetId);
+            phone = profile?.phone || profile?.telephone || profile?.phone_number;
+          } catch (err) {
+            console.error('[Chat] Fetching phone from profile failed:', err);
+          }
+        }
+        if (phone) {
+          window.location.href = 'tel:' + String(phone).replace(/[^\d+]/g, '');
+        } else {
+          const msg = t('no_phone_number', 'ไม่พบเบอร์โทรศัพท์ของผู้ใช้งานรายนี้');
+          if (window.showToast) window.showToast(msg, 'error');
+          else if (window.appNotify) window.appNotify(msg, 'error');
+          else alert(msg);
+        }
+      };
+    }
+
     // Load Messages
     await loadMessages(roomId);
     // Start Polling

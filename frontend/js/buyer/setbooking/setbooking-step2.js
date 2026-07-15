@@ -31,6 +31,21 @@
   const timeStart = document.getElementById("timeStart");
   const timeEnd = document.getElementById("timeEnd");
   const capacity = document.getElementById("capacity");
+  const roundNameSuggestions = document.createElement('datalist');
+  roundNameSuggestions.id = 'roundNameSuggestions';
+  roundName.setAttribute('list', roundNameSuggestions.id);
+  roundName.after(roundNameSuggestions);
+
+  function refreshRoundNameSuggestions() {
+    const saved = JSON.parse(localStorage.getItem('agriprice_round_names') || '[]');
+    const defaults = ['รอบเช้า', 'รอบบ่าย', 'รอบเย็น', 'รอบที่ 1'];
+    roundNameSuggestions.replaceChildren(...[...new Set([...saved, ...defaults])].map(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      return option;
+    }));
+  }
+  refreshRoundNameSuggestions();
 
   // ===== State =====
   const state = {
@@ -305,6 +320,10 @@
       window.appNotify(window.i18nT ? window.i18nT('overlap_time_error', 'เวลารอบคิวซ้อนกับรอบเดิม กรุณาเลือกช่วงเวลาใหม่') : 'เวลารอบคิวซ้อนกับรอบเดิม กรุณาเลือกช่วงเวลาใหม่', "error");
       return;
     }
+
+    const savedRoundNames = JSON.parse(localStorage.getItem('agriprice_round_names') || '[]');
+    localStorage.setItem('agriprice_round_names', JSON.stringify([name, ...savedRoundNames.filter(item => item !== name)].slice(0, 10)));
+    refreshRoundNameSuggestions();
 
     state.rounds.push({
       id: cryptoId(),

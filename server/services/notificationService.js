@@ -34,6 +34,19 @@ function isPushEnabled(settings, type) {
   return true;
 }
 
+function resolveNotificationLink(type, link, data = {}) {
+  if (link && /^\/pages\/[a-z0-9_./?=&%-]+$/i.test(link)) return link;
+  const id = encodeURIComponent(String(data.booking_id || data.bookingId || ''));
+  if (String(type).toLowerCase() === 'booking' && id) {
+    return `/pages/shared/notifications.html?booking_id=${id}`;
+  }
+  const chatId = encodeURIComponent(String(data.chat_id || data.chatId || ''));
+  if (['chat', 'message'].includes(String(type).toLowerCase()) && chatId) {
+    return `/pages/shared/chat.html?id=${chatId}`;
+  }
+  return '/pages/shared/notifications.html';
+}
+
 class NotificationService {
   /**
    * สร้างแจ้งเตือนและส่ง Push Notification
@@ -48,6 +61,7 @@ class NotificationService {
     try {
       if (!userId) return null;
 
+      link = resolveNotificationLink(type, link, data);
       // 1. บันทึกลงตาราง notifications ใน database (เพื่อใช้แสดงในหน้าเว็บ/ประวัติแจ้งเตือน)
       const { data: dbData, error: dbErr } = await supabaseAdmin
         .from('notifications')

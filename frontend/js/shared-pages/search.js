@@ -21,6 +21,7 @@
   const countEl = document.getElementById("resultCount");
   const mount = document.getElementById("searchResultsMount");
   const backBtn = document.getElementById("backBtn");
+  const suggestions = document.getElementById('mainSearchSuggestions');
 
   // Filter Drawer Elements
   const filterDrawer = document.getElementById("filterDrawer");
@@ -337,10 +338,28 @@
     }
 
     render(list);
+    if (suggestions) {
+      const recent = JSON.parse(localStorage.getItem('agriprice_recent_searches') || '[]');
+      const values = new Set(recent);
+      allItems.forEach(item => {
+        if (item.sellerName) values.add(item.sellerName);
+        const product = String(item.sellerSub || '').split(' (')[0].trim();
+        if (product) values.add(product);
+      });
+      suggestions.replaceChildren(...[...values].slice(0, 60).map(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        return option;
+      }));
+    }
   }
 
   async function refresh() {
     const q = input.value.trim();
+    if (q) {
+      const recent = JSON.parse(localStorage.getItem('agriprice_recent_searches') || '[]');
+      localStorage.setItem('agriprice_recent_searches', JSON.stringify([q, ...recent.filter(item => item !== q)].slice(0, 8)));
+    }
     const newUrl = new URL(window.location.href);
     if (q) newUrl.searchParams.set('q', q); else newUrl.searchParams.delete('q');
     history.replaceState({}, "", newUrl.toString());

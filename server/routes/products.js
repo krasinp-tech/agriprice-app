@@ -215,25 +215,46 @@ router.get('/', async (req, res) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    const rows = filterOffers((data || []).map(normalizeOffer).filter(hasOfferPrice), { q, category });
+    const optionalUser = getOptionalAuthUser(req);
+    const viewerId = optionalUser?.id;
+    let rows = filterOffers((data || []).map(normalizeOffer).filter(hasOfferPrice), { q, category });
+
+    // ฟีดหลักไม่แสดงประกาศของตัวเอง และสลับร้านเพื่อไม่ให้ร้านเดิมติดกันหลายใบ
+    if (!user_id && viewerId) rows = rows.filter((offer) => String(offer.user_id) !== String(viewerId));
+    if (!user_id) {
+      const queues = new Map();
+      rows.forEach((offer) => {
+        const key = String(offer.user_id || 'unknown');
+        if (!queues.has(key)) queues.set(key, []);
+        queues.get(key).push(offer);
+      });
+      const ranked = [];
+      while ([...queues.values()].some((queue) => queue.length)) {
+        [...queues.values()].forEach((queue) => { if (queue.length) ranked.push(queue.shift()); });
+      }
+      rows = ranked;
+    }
 
     const from = (pageNumber - 1) * limitNumber;
     const pagedRows = hasTextSearch ? rows.slice(from, from + limitNumber) : rows;
 
-    const optionalUser = getOptionalAuthUser(req);
-    const viewerId = optionalUser?.id;
     if (pagedRows.length > 0 && (!user_id || String(user_id) !== String(viewerId))) {
-      const impressionsToInsert = pagedRows.map((offer) => ({
-        offer_id: getOfferId(offer),
-        viewer_id: viewerId || null,
-      }));
-      supabaseAdmin
-        .from('offer_impressions')
-        .insert(impressionsToInsert)
-        .then(({ error: impressionError }) => {
-          if (impressionError) console.error('[GET /api/products] impression error:', impressionError.message);
-        })
-        .catch((err) => console.error('[GET /api/products] impression insert failed:', err.message));
+      const impressionsToInsert = pagedRows
+        .filter((offer) => !viewerId || String(offer.user_id) !== String(viewerId))
+        .map((offer) => ({
+          offer_id: getOfferId(offer),
+          viewer_id: viewerId || null,
+        }));
+
+      if (impressionsToInsert.length > 0) {
+        supabaseAdmin
+          .from('offer_impressions')
+          .insert(impressionsToInsert)
+          .then(({ error: impressionError }) => {
+            if (impressionError) console.error('[GET /api/products] impression error:', impressionError.message);
+          })
+          .catch((err) => console.error('[GET /api/products] impression insert failed:', err.message));
+      }
     }
 
     res.json({

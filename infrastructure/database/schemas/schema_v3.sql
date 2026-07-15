@@ -232,6 +232,34 @@ CREATE TABLE public.follows (
   CONSTRAINT follows_following_id_fkey FOREIGN KEY (following_id) REFERENCES public.profiles(profile_id)
 );
 
+CREATE TABLE public.profile_favorites (
+  owner_id uuid NOT NULL,
+  target_profile_id uuid NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
+  CONSTRAINT profile_favorites_pkey PRIMARY KEY (owner_id, target_profile_id),
+  CONSTRAINT profile_favorites_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(profile_id) ON DELETE CASCADE,
+  CONSTRAINT profile_favorites_target_profile_id_fkey FOREIGN KEY (target_profile_id) REFERENCES public.profiles(profile_id) ON DELETE CASCADE,
+  CONSTRAINT profile_favorites_not_self CHECK (owner_id <> target_profile_id)
+);
+
+CREATE TABLE public.payment_submissions (
+  payment_id bigserial PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES public.profiles(profile_id) ON DELETE CASCADE,
+  plan text NOT NULL DEFAULT 'pro',
+  amount numeric(12,2) NOT NULL CHECK (amount > 0),
+  method text NOT NULL DEFAULT 'promptpay',
+  slip_url text,
+  trans_ref text,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  verification_data jsonb,
+  verification_error text,
+  review_note text,
+  verified_at timestamptz,
+  reviewed_at timestamptz,
+  reviewed_by uuid REFERENCES public.profiles(profile_id),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE public.offer_impressions (
   id bigserial NOT NULL,
   offer_id bigint NOT NULL,

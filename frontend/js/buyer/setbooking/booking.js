@@ -332,7 +332,10 @@
 
         const video = document.createElement("video");
         video.id = "scanVideo";
-        video.style.cssText = "width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:-1;";
+        // Keep the preview above the viewfinder background. A negative z-index
+        // puts it behind the black container while BarcodeDetector can still
+        // read the stream, resulting in a black/covered preview that still scans.
+        video.style.cssText = "width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;";
         video.setAttribute("autoplay", "true");
         video.setAttribute("muted", "true");
         video.setAttribute("playsinline", "true");

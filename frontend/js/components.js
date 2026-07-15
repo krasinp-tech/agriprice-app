@@ -28,9 +28,11 @@
             ]
           );
         } else {
-          const conf = confirm(window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?');
-          if (conf) {
-            navigator.app.exitApp();
+          const message = window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?';
+          if (window.showConfirm) {
+            window.showConfirm(message, function(agreed) {
+              if (agreed) navigator.app.exitApp();
+            });
           }
         }
         e.preventDefault();
