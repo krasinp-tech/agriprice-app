@@ -19,7 +19,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 16px 10px;
+    padding: 20px var(--home-section-gutter, 20px) 10px;
     margin-bottom: 0;
 }
 
@@ -67,7 +67,7 @@
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;
-  padding: 6px 16px 14px;
+  padding: 6px 0 14px;
   overflow-x: auto;
   overflow-y: visible;
   scroll-snap-type: x mandatory;
@@ -245,7 +245,7 @@
 
   .favorites-section .favorites-grid {
     gap: 14px;
-    padding: 4px 20px 8px;
+    padding: 4px 0 8px;
   }
 
   .favorites-section .fav-card {
@@ -281,7 +281,7 @@
 
   .favorites-section .favorites-grid {
     gap: 22px;
-    padding: 4px 40px 8px;
+    padding: 4px 0 8px;
   }
 
   .favorites-section .fav-card {
@@ -298,6 +298,6 @@
   }
 
   .favorites-section .favorites-grid {
-    padding: 4px 80px 10px;
+    padding: 4px 0 10px;
   }
 }

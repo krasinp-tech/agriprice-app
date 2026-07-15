@@ -157,10 +157,6 @@ router.get('/promptpay/status', authMiddleware, async (req, res) => {
   res.json({ success: true, data });
 });
 
-router.post('/checkout', authMiddleware, (_req, res) => {
-  res.status(410).json({ success: false, message: 'กรุณาชำระผ่าน PromptPay และแนบสลิปเพื่อยืนยัน' });
-});
-
 router.post('/cancel', authMiddleware, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin.from('profiles').update({ tier: 'free', pro_expires_at: null })

@@ -38,12 +38,12 @@
   }
 
   async function fetchFavoritesFromApi() {
-    if (!window.api || typeof window.api.call !== 'function') return null;
+    if (!window.api || typeof window.api.getFavorites !== 'function') return null;
     const token = localStorage.getItem(window.AUTH_TOKEN_KEY || "token") || "";
     if (!token) return null;
 
     try {
-      const json = await window.api.call('GET', '/api/favorites');
+      const json = await window.api.getFavorites();
       if (!json) return null;
       const arr = Array.isArray(json) ? json : json.data || [];
       return arr
@@ -65,15 +65,15 @@
 
   async function addSellerFavorite(id) {
     const userId = resolveId(id);
-    if (!userId || !window.api?.call) return false;
-    await window.api.call('POST', '/api/favorites', { user_id: userId });
+    if (!userId || typeof window.api?.addFavorite !== 'function') return false;
+    await window.api.addFavorite(userId);
     return true;
   }
 
   async function removeSellerFavorite(id) {
     const userId = resolveId(id);
-    if (!userId || !window.api?.call) return false;
-    await window.api.call('DELETE', `/api/favorites/${encodeURIComponent(userId)}`);
+    if (!userId || typeof window.api?.removeFavorite !== 'function') return false;
+    await window.api.removeFavorite(userId);
     return true;
   }
 

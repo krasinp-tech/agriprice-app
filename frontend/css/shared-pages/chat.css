@@ -520,6 +520,24 @@
   cursor: zoom-in;
 }
 
+.bubble-media {
+  padding: 4px;
+  overflow: hidden;
+}
+
+.bubble-media .bubble-image {
+  width: 100%;
+  max-width: 100%;
+  box-shadow: none;
+  border-radius: 11px;
+}
+
+.bubble-caption {
+  padding: 7px 8px 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .msg.me .bubble-image{
   border-top-right-radius: 8px;
 }

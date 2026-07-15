@@ -96,16 +96,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
   // ===== Favorites Store (shared) =====
   window.FavoritesStore = (function () {
     const KEY = "agriprice_favorites_v1";
-    const LOG_PREFIX = "[FavoritesStore]";
-
-    function summarizeKinds(list) {
-      return (list || []).reduce((acc, item) => {
-        const kind = String(item?.kind || "seller");
-        acc[kind] = (acc[kind] || 0) + 1;
-        return acc;
-      }, {});
-    }
-
     function safeParse(s, fallback) {
       try { return JSON.parse(s); } catch { return fallback; }
     }
@@ -117,9 +107,6 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
     function write(list, skipId) {
       localStorage.setItem(KEY, JSON.stringify(list));
-      if (window.AGRIPRICE_DEBUG) {
-        // Guarded by debug flag but actually we will just remove for extreme clean
-      }
       window.dispatchEvent(new CustomEvent("favorites:changed", { detail: { list, skipId } }));
       return list;
     }
@@ -162,22 +149,11 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       const id = String(item.id || "");
       const kind = String(item.kind || "seller");
       const skipKey = `${kind}:${id}`;
-      if (window.AGRIPRICE_DEBUG) {
-        // request log removed
-      }
       if (!id) return { list: read(), active: false };
       if (has(id, kind)) {
-        const result = { list: remove(id, skipKey, kind), active: false };
-        if (window.AGRIPRICE_DEBUG) {
-          // removed log
-        }
-        return result;
+        return { list: remove(id, skipKey, kind), active: false };
       }
-      const result = { list: add({ ...item, kind }, skipKey), active: true };
-      if (window.AGRIPRICE_DEBUG) {
-        // removed log
-      }
-      return result;
+      return { list: add({ ...item, kind }, skipKey), active: true };
     }
 
     return { read, write, has, add, remove, toggle, KEY };

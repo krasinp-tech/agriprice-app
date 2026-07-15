@@ -22,7 +22,7 @@
 }
 
 [data-theme="dark"] .bottom-nav {
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: none;
 }
 
 .bottom-nav-item {

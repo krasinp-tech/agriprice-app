@@ -152,10 +152,22 @@
 /* Price row */
 .price-row, .pc-grades-row {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 8px;
     margin: 12px 0;
     position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 2px 2px 4px 2px;
+}
+
+.price-row::-webkit-scrollbar,
+.pc-grades-row::-webkit-scrollbar {
+    display: none;
 }
 
 .pc-grades-row {
@@ -163,12 +175,14 @@
 }
 
 .price-box, .pc-grade-box {
-    flex: 1;
+    flex: 1 0 calc((100% - 16px) / 3);
+    scroll-snap-align: start;
     border: 1px solid var(--border-medium, #E5E7EB);
     border-radius: 12px;
     padding: 10px 4px;
     text-align: center;
     background: var(--bg-card, #ffffff);
+    box-sizing: border-box;
 }
 
 .grade, .pc-grade-letter {

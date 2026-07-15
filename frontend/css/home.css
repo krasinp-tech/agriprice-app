@@ -179,7 +179,7 @@
 }
 
 .search-results-section {
-    padding: 0 16px 10px;
+    padding: 0 var(--home-section-gutter, 20px) 10px;
 }
 
 #searchResultsMount:empty {
@@ -211,7 +211,7 @@
     grid-template-rows: repeat(2, auto);
     grid-auto-columns: calc((100vw - 32px - 32px - (8px * 4)) / 5);
     gap: 10px 8px;
-    padding: 12px 16px;
+    padding: 12px var(--home-section-gutter, 20px);
     width: max-content;
 }
 
@@ -219,7 +219,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px 10px;
-    padding: 12px 16px;
+    padding: 12px var(--home-section-gutter, 20px);
     width: 100%;
 }
 
@@ -341,7 +341,7 @@
 }
 
 .home-product-empty {
-    margin: 8px 16px 4px;
+    margin: 8px var(--home-section-gutter, 20px) 4px;
     min-height: 132px;
     border: 1px dashed var(--border-light, rgba(15, 23, 42, 0.12));
     border-radius: 18px;
@@ -467,8 +467,8 @@
 .banner-carousel {
     display: flex;
     gap: 12px;
-    padding: 0 16px;
-    scroll-padding: 0 16px;
+    padding: 0 var(--home-section-gutter, 20px);
+    scroll-padding: 0 var(--home-section-gutter, 20px);
     margin-bottom: 10px;
 
     overflow-x: auto;
@@ -818,12 +818,23 @@
 }
 
   /* ── Section Header ─────────────────────────────── */
-/* ทุก section header ใช้ padding เดียวกัน = 16px ทั้งซ้ายขวา */
+/* Keep Home headings aligned with the responsive content container. */
+:root {
+    --home-section-gutter: 20px;
+}
+
+/* Home mixes full-width sections with sections wrapped by .container.
+   Remove the global 428px cap here so both layouts share the same origin. */
+.app-container .container {
+    max-width: 100%;
+    padding-inline: var(--home-section-gutter);
+}
+
 .app-container .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 16px 10px;
+    padding: 20px var(--home-section-gutter) 10px;
 }
 
 /* Keep every Home section title on the same vertical rhythm. */
@@ -851,6 +862,24 @@
 .app-container .favorites-section .section-title {
     font-size: 17px;
     letter-spacing: -0.4px;
+}
+
+@media (max-width: 360px) {
+    :root {
+        --home-section-gutter: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    :root {
+        --home-section-gutter: 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --home-section-gutter: 80px;
+    }
 }
 
 .gov-price-header {

@@ -323,7 +323,6 @@
   const search = q => call('GET', '/api/search?q=' + encodeURIComponent(q));
   const getDashboard = () => call('GET', '/api/dashboard');
   const getAnnouncements = p => call('GET', '/api/announcements' + (p ? '?' + new URLSearchParams(p).toString() : ''));
-  const checkoutPayment = body => call('POST', '/api/payments/checkout', body);
   const submitAppReview = body => call('POST', '/api/reviews/app', body);
 
   // --- Export ออกไปให้ทุกหน้าเรียกใช้ผ่านคำสั่ง window.api.xxx() ได้ ---
@@ -342,7 +341,7 @@
     pingPresence, getUserPresence,
     getNotifications, markRead, markUnread, markAllRead, deleteNotification, deleteReadNotifications, getNotificationSettings, saveNotificationSettings, updatePushToken,
     getDeviceSessions, logoutDevice,
-    search, getDashboard, getAnnouncements, checkoutPayment, submitAppReview
+    search, getDashboard, getAnnouncements, submitAppReview
   };
 
   // --- 12. Background Notification Polling & Triggering ---

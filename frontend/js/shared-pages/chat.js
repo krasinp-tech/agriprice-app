@@ -33,7 +33,48 @@
   function safeUrl(value, fallback = '') {
     const raw = String(value || '').trim();
     if (!raw || /^(javascript|data):/i.test(raw)) return fallback;
+    if (raw.startsWith('/uploads/')) {
+      const base = api.getBase ? String(api.getBase() || '').replace(/\/$/, '') : '';
+      return base ? `${base}${raw}` : fallback;
+    }
     return raw;
+  }
+
+  function openImageViewer(url) {
+    const imageUrl = safeUrl(url);
+    if (!imageUrl) return;
+
+    let viewer = document.getElementById('chatImageViewer');
+    if (!viewer) {
+      viewer = document.createElement('div');
+      viewer.id = 'chatImageViewer';
+      viewer.className = 'chat-image-viewer';
+      viewer.setAttribute('role', 'dialog');
+      viewer.setAttribute('aria-modal', 'true');
+      viewer.innerHTML = `
+        <button type="button" class="chat-image-viewer-close" aria-label="${esc(t('close', 'ปิด'))}">
+          <span class="material-icons-outlined" aria-hidden="true">close</span>
+        </button>
+        <img class="chat-image-viewer-image" alt="">
+      `;
+      document.body.appendChild(viewer);
+
+      const closeViewer = () => {
+        viewer.classList.remove('show');
+        document.body.classList.remove('chat-image-viewer-open');
+        viewer.querySelector('.chat-image-viewer-image').removeAttribute('src');
+      };
+      viewer.querySelector('.chat-image-viewer-close').addEventListener('click', closeViewer);
+      viewer.addEventListener('click', (event) => {
+        if (event.target === viewer) closeViewer();
+      });
+      viewer._closeViewer = closeViewer;
+    }
+
+    viewer.querySelector('.chat-image-viewer-image').src = imageUrl;
+    viewer.classList.add('show');
+    document.body.classList.add('chat-image-viewer-open');
+    viewer.querySelector('.chat-image-viewer-close').focus();
   }
 
   // DOM Elements
@@ -451,14 +492,21 @@
     roomMessages.innerHTML = items.map(m => {
       const isMe = String(m.sender_id) === String(me);
       const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+      const messageText = String(m.message || '').trim();
       let contentHtml = '';
       if (m.message_type === 'image' || m.image_url) {
         const imageUrl = safeUrl(m.image_url);
-        contentHtml = imageUrl
-          ? `<img src="${esc(imageUrl)}" class="bubble-image" data-image-url="${esc(imageUrl)}" alt="">`
-          : `<div class="bubble">${esc(t('image_unavailable', 'Image unavailable'))}</div>`;
+        if (imageUrl) {
+          const imageHtml = `<img src="${esc(imageUrl)}" class="bubble-image" data-image-url="${esc(imageUrl)}" alt="">`;
+          contentHtml = messageText
+            ? `<div class="bubble bubble-media">${imageHtml}<div class="bubble-caption">${esc(messageText)}</div></div>`
+            : imageHtml;
+        } else {
+          const unavailable = esc(t('image_unavailable', 'Image unavailable'));
+          contentHtml = `<div class="bubble">${unavailable}${messageText ? `\n${esc(messageText)}` : ''}</div>`;
+        }
       } else {
-        contentHtml = `<div class="bubble">${esc(m.message)}</div>`;
+        contentHtml = `<div class="bubble">${esc(messageText)}</div>`;
       }
 
       return `
@@ -472,7 +520,7 @@
     }).join('');
 
     roomMessages.querySelectorAll('.bubble-image[data-image-url]').forEach((img) => {
-      img.addEventListener('click', () => window.open(img.dataset.imageUrl, '_blank', 'noopener'));
+      img.addEventListener('click', () => openImageViewer(img.dataset.imageUrl));
     });
     roomMessages.scrollTop = roomMessages.scrollHeight;
   }
