@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const api = window.api || {};
   
   let currentTier = 'free';
+  let proStartedAt = null;
+  let proExpiresAt = null;
 
   function t(key, fallback) {
     if (window.i18nT) return window.i18nT(key, fallback);
@@ -32,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const profile = await api.getProfile();
         if (profile && profile.tier) {
           currentTier = profile.tier.toLowerCase();
+          proStartedAt = profile.pro_started_at || null;
+          proExpiresAt = profile.pro_expires_at || null;
           
           // Update user_data in localStorage
           const rawUser = localStorage.getItem("user_data");
@@ -61,6 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const proBtn = document.querySelector('.pro-plan .plan-btn');
     const cancelSubWrap = document.getElementById('cancelSubWrap');
     const cancelSubLink = document.getElementById('cancelSubLink');
+
+    let periodEl = document.getElementById('proMembershipPeriod');
+    const proCard = document.querySelector('.pro-plan');
+    if (!periodEl && proCard) {
+      periodEl = document.createElement('div');
+      periodEl.id = 'proMembershipPeriod';
+      periodEl.style.cssText = 'margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(11,133,60,.08);color:#0B853C;font-size:13px;font-weight:700;line-height:1.6;text-align:center';
+      proCard.appendChild(periodEl);
+    }
+
+    if (periodEl) {
+      if (currentTier === 'pro' && proStartedAt && proExpiresAt) {
+        const formatDate = value => new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(value));
+        periodEl.textContent = `เริ่ม ${formatDate(proStartedAt)} • หมดอายุ ${formatDate(proExpiresAt)}`;
+        periodEl.style.display = 'block';
+      } else {
+        periodEl.style.display = 'none';
+      }
+    }
 
     if (currentTier === 'pro') {
       // Free Plan card -> Disabled base plan style
@@ -131,9 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
               if (agreed) runCancel();
             });
           } else {
-            if (confirm(confirmText)) {
-              runCancel();
-            }
+            window.showAlert?.(confirmText, 'info');
           }
         };
       }

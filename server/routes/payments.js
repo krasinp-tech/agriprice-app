@@ -47,14 +47,21 @@ async function easySlipRequest(path, body) {
 }
 
 async function issueProToken(userId) {
+  const startedAt = new Date();
+  const expiresAt = new Date(startedAt);
+  expiresAt.setMonth(expiresAt.getMonth() + 1);
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .update({ tier: 'pro' })
+    .update({ tier: 'pro', pro_started_at: startedAt.toISOString(), pro_expires_at: expiresAt.toISOString() })
     .eq('profile_id', userId)
-    .select('profile_id, phone, role')
+    .select('profile_id, phone, role, pro_started_at, pro_expires_at')
     .single();
   if (error || !data) throw new Error(error?.message || 'ไม่พบบัญชีผู้ใช้');
-  return signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'pro' });
+  return {
+    token: signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'pro' }),
+    startedAt: data.pro_started_at,
+    expiresAt: data.pro_expires_at,
+  };
 }
 
 router.get('/promptpay/qr', authMiddleware, paymentLimiter, async (req, res) => {
@@ -123,8 +130,8 @@ router.post('/promptpay/verify', authMiddleware, paymentLimiter, upload.single('
     }
 
     if (status === 'approved') {
-      const token = await issueProToken(userId);
-      return res.json({ success: true, message: 'ตรวจสอบสลิปสำเร็จ อัปเกรดเป็น PRO แล้ว', data: { ...submission, token, tier: 'pro' } });
+      const membership = await issueProToken(userId);
+      return res.json({ success: true, message: 'ตรวจสอบสลิปสำเร็จ อัปเกรดเป็น PRO แล้ว', data: { ...submission, token: membership.token, tier: 'pro', pro_started_at: membership.startedAt, pro_expires_at: membership.expiresAt } });
     }
 
     return res.status(202).json({
@@ -156,7 +163,7 @@ router.post('/checkout', authMiddleware, (_req, res) => {
 
 router.post('/cancel', authMiddleware, async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin.from('profiles').update({ tier: 'free' })
+    const { data, error } = await supabaseAdmin.from('profiles').update({ tier: 'free', pro_expires_at: null })
       .eq('profile_id', req.user.id).select('profile_id, phone, role').single();
     if (error || !data) throw new Error(error?.message || 'User not found');
     const token = signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'free' });

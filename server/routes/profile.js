@@ -126,7 +126,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('profiles')
-      .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier')
+      .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier, pro_started_at, pro_expires_at')
       .eq('profile_id', req.user.id)
       .single();
 
@@ -223,7 +223,7 @@ router.patch('/', authMiddleware, (req, res, next) => {
 
     const { data: updatedProfile } = await supabaseAdmin
       .from('profiles')
-      .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier')
+      .select('profile_id, phone, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, email, birth_date, account_status, lat, lng, tier, pro_started_at, pro_expires_at')
       .eq('profile_id', req.user.id)
       .single();
     
