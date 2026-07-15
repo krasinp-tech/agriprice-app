@@ -1,183 +1,59 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="payment_title">เธเธณเธฃเธฐเน€เธเธดเธ | AGRIPRICE</title>
-  <script>
-    (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>ชำระเงิน | AGRIPRICE</title>
+  <script>(function(){const t=localStorage.getItem('agriprice_theme')||'light';document.documentElement.setAttribute('data-theme',t)})();</script>
   <meta name="theme-color" content="#0B853C">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-
-  <link rel="stylesheet" href="../../css/global.css" />
-  <link rel="stylesheet" href="../../css/account/payment.css" />
+  <link rel="stylesheet" href="../../css/global.css">
+  <link rel="stylesheet" href="../../css/account/payment.css">
   <link rel="stylesheet" href="../../css/dark-mode-patch.css">
 </head>
-
 <body>
   <header class="payment-header">
-    <button class="back-btn" data-back>
-      <span class="material-icons-outlined">chevron_left</span>
-    </button>
-    <h1 data-i18n="payment_title">เธเธณเธฃเธฐเน€เธเธดเธ</h1>
+    <button class="back-btn" data-back aria-label="ย้อนกลับ"><span class="material-icons-outlined">chevron_left</span></button>
+    <h1>ชำระเงิน</h1>
   </header>
-
   <main class="payment-container fade-slide">
     <section class="plan-summary">
-      <h2 class="section-title" data-i18n="subscription_plans">เนเธเธเธเธฒเธฃเธชเธกเธฑเธเธฃ</h2>
+      <h2 class="section-title">แผนการสมัคร</h2>
       <div class="plan-card">
-        <div class="plan-info">
-          <span class="plan-name">AgriPrice Premium (Pro)</span>
-          <span class="plan-desc" data-i18n="upgrade_pro_desc">เธเธฒเธฃเน€เธเนเธฒเธ–เธถเธเธเธตเน€เธเธญเธฃเนเธ—เธฑเนเธเธซเธกเธ”</span>
-        </div>
-        <div class="plan-price">
-          <span class="currency">เธฟ</span><span class="amount">499</span><span class="period"
-            data-i18n="month_period">/เน€เธ”เธทเธญเธ</span>
-        </div>
+        <div class="plan-info"><span class="plan-name">AgriPrice Premium (Pro)</span><span class="plan-desc">เข้าถึงฟีเจอร์ทั้งหมด</span></div>
+        <div class="plan-price"><span class="currency">฿</span><span class="amount">499</span><span class="period">/เดือน</span></div>
       </div>
     </section>
-
     <section class="payment-methods">
-      <h2 class="section-title" data-i18n="select_payment_method">เธงเธดเธเธตเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธ</h2>
-
-      <!-- Tab Controls -->
-      <div class="method-tabs">
-        <button type="button" class="tab-btn active" data-tab="card">
-          <span class="material-icons-outlined">credit_card</span>
-          <span data-i18n="credit_card_tab">เธเธฑเธ•เธฃเน€เธเธฃเธ”เธดเธ•</span>
-        </button>
-        <button type="button" class="tab-btn" data-tab="qr">
-          <span class="material-icons-outlined">qr_code</span>
-          <span data-i18n="qr_code_tab">QR Code</span>
-        </button>
-      </div>
-
-      <!-- Tab Content: Credit Card -->
-      <div class="tab-content active" id="cardTabContent">
-        <div class="form-group">
-          <label class="label" data-i18n="card_number">เธซเธกเธฒเธขเน€เธฅเธเธเธฑเธ•เธฃ</label>
-          <input type="tel" class="input" placeholder="0000 0000 0000 0000" maxlength="19">
-        </div>
-
-        <div class="form-group">
-          <label class="label" data-i18n="card_name">เธเธทเนเธญเธเธเธเธฑเธ•เธฃ</label>
-          <input type="text" class="input" placeholder="JOHN DOE">
-        </div>
-
-        <div class="row">
-          <div class="form-group">
-            <label class="label" data-i18n="expiry_date">เธงเธฑเธเธซเธกเธ”เธญเธฒเธขเธธ</label>
-            <input type="text" class="input" placeholder="MM/YY" maxlength="5">
-          </div>
-          <div class="form-group">
-            <label class="label">CVV</label>
-            <input type="password" class="input" placeholder="***" maxlength="3">
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab Content: QR Code / PromptPay -->
-      <div class="tab-content" id="qrTabContent" style="display: none;">
+      <h2 class="section-title">ชำระด้วย PromptPay</h2>
+      <div class="method-tabs single-method"><button type="button" class="tab-btn active"><span class="material-icons-outlined">qr_code</span><span>พร้อมเพย์</span></button></div>
+      <div class="tab-content active" id="qrTabContent">
         <div class="qr-container">
           <div class="promptpay-qr-card">
-            <div class="pp-header">
-              <div class="pp-logo-wrap">
-                <span class="pp-title">Prompt Pay</span>
-              </div>
-              <span class="pp-sub">เธเธฃเนเธญเธกเน€เธเธขเน</span>
-            </div>
-            <div class="pp-body">
-              <svg class="qr-code-svg" viewBox="0 0 100 100" width="200" height="200">
-                <rect x="0" y="0" width="100" height="100" fill="#fff" />
-                <rect x="5" y="5" width="25" height="25" fill="#0E3480" />
-                <rect x="10" y="10" width="15" height="15" fill="#fff" />
-                <rect x="13" y="13" width="9" height="9" fill="#0E3480" />
-
-                <rect x="70" y="5" width="25" height="25" fill="#0E3480" />
-                <rect x="75" y="10" width="15" height="15" fill="#fff" />
-                <rect x="78" y="13" width="9" height="9" fill="#0E3480" />
-
-                <rect x="5" y="70" width="25" height="25" fill="#0E3480" />
-                <rect x="10" y="75" width="15" height="15" fill="#fff" />
-                <rect x="13" y="78" width="9" height="9" fill="#0E3480" />
-
-                <rect x="35" y="5" width="5" height="10" fill="#0E3480" />
-                <rect x="45" y="5" width="10" height="5" fill="#0E3480" />
-                <rect x="60" y="10" width="5" height="15" fill="#0E3480" />
-                <rect x="35" y="20" width="15" height="5" fill="#0E3480" />
-                <rect x="55" y="20" width="5" height="5" fill="#0E3480" />
-                <rect x="40" y="30" width="5" height="20" fill="#0E3480" />
-                <rect x="50" y="30" width="20" height="5" fill="#0E3480" />
-                <rect x="10" y="35" width="10" height="5" fill="#0E3480" />
-                <rect x="25" y="35" width="5" height="15" fill="#0E3480" />
-                <rect x="5" y="45" width="5" height="10" fill="#0E3480" />
-                <rect x="15" y="45" width="5" height="5" fill="#0E3480" />
-                <rect x="45" y="45" width="10" height="10" fill="#0E3480" />
-                <rect x="65" y="40" width="5" height="20" fill="#0E3480" />
-                <rect x="75" y="40" width="20" height="5" fill="#0E3480" />
-                <rect x="80" y="50" width="5" height="15" fill="#0E3480" />
-                <rect x="90" y="50" width="5" height="5" fill="#0E3480" />
-                <rect x="35" y="60" width="15" height="5" fill="#0E3480" />
-                <rect x="55" y="60" width="10" height="10" fill="#0E3480" />
-                <rect x="70" y="65" width="15" height="5" fill="#0E3480" />
-                <rect x="5" y="65" width="10" height="5" fill="#0E3480" />
-                <rect x="40" y="70" width="5" height="5" fill="#0E3480" />
-                <rect x="40" y="80" width="10" height="15" fill="#0E3480" />
-                <rect x="60" y="80" width="20" height="5" fill="#0E3480" />
-                <rect x="55" y="90" width="5" height="5" fill="#0E3480" />
-                <rect x="65" y="90" width="15" height="5" fill="#0E3480" />
-                <rect x="85" y="80" width="10" height="10" fill="#0E3480" />
-              </svg>
-            </div>
-            <div class="pp-footer">
-              <span class="pp-amount-label" data-i18n="pp_amount_label">เธขเธญเธ”เธเธณเธฃเธฐเน€เธเธดเธ</span>
-              <span class="pp-amount-val">เธฟ499.00</span>
-            </div>
+            <div class="pp-header"><div class="pp-logo-wrap"><span class="pp-title">Prompt Pay</span></div><span class="pp-sub">พร้อมเพย์</span></div>
+            <div class="pp-body"><div class="qr-loading" id="qrLoading">กำลังสร้าง QR...</div><img class="qr-code-image" id="promptpayQr" alt="QR Code พร้อมเพย์" hidden></div>
+            <div class="pp-footer"><span class="pp-amount-label">ยอดชำระเงิน</span><span class="pp-amount-val" id="promptpayAmount">฿499.00</span></div>
           </div>
         </div>
-
-        <div class="countdown-timer">
-          <span data-i18n="qr_countdown_prefix">เธเธฃเธธเธ“เธฒเธเธณเธฃเธฐเน€เธเธดเธเธ เธฒเธขเนเธ</span>
-          <span class="timer-digits" id="timerDigits">15:00</span>
-          <span data-i18n="qr_countdown_suffix">เธเธฒเธ—เธต</span>
+        <div class="countdown-timer">กรุณาชำระเงินภายใน <span class="timer-digits" id="timerDigits">15:00</span> นาที</div>
+        <div class="slip-upload">
+          <input type="file" id="slipInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+          <button type="button" class="slip-picker" id="slipPicker"><span class="material-icons-outlined">add_photo_alternate</span><span id="slipPickerText">แนบรูปสลิปการโอนเงิน</span></button>
+          <img id="slipPreview" class="slip-preview" alt="ตัวอย่างสลิป" hidden>
+          <p class="slip-note">ระบบจะตรวจยอด 499 บาท บัญชีผู้รับ และป้องกันการใช้สลิปซ้ำ</p>
         </div>
       </div>
-
-      <div class="secure-info">
-        <span class="material-icons-outlined">lock</span>
-        <span data-i18n="secure_payment_info">เธเนเธญเธกเธนเธฅเธเธฑเธ•เธฃเธเธญเธเธเธธเธ“เธเธฐเธ–เธนเธเน€เธเนเธฒเธฃเธซเธฑเธชเธญเธขเนเธฒเธเธเธฅเธญเธ”เธ เธฑเธข</span>
-      </div>
-
-      <button class="btn btn-primary" id="checkoutBtn">
-        <span class="btn-text" data-i18n="payment_confirm">เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธ</span>
-      </button>
+      <div class="secure-info"><span class="material-icons-outlined">verified_user</span><span>สลิปถูกส่งผ่านเซิร์ฟเวอร์อย่างปลอดภัยและตรวจสอบอัตโนมัติ</span></div>
+      <button class="btn btn-primary" id="checkoutBtn"><span class="btn-text">ตรวจสอบสลิปและยืนยัน</span></button>
     </section>
   </main>
-
   <script src="../../js/config.js"></script>
   <script src="../../js/global-anim.js"></script>
   <script src="../../js/components/i18n.js"></script>
   <script src="../../js/api-client.js"></script>
   <script src="../../js/account/payment.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      if (window.i18nInit) window.i18nInit();
-    });
-
-  </script>
 </body>
-
 </html>

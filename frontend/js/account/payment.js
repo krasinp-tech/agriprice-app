@@ -1,205 +1,64 @@
-(function() {
-  "use strict";
+(function () {
+  'use strict';
+  const notify = (message, type = 'success') => window.showToast?.(message, type) || window.appNotify?.(message, type);
+  const apiBase = () => window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : String(window.API_BASE_URL || '').replace(/\/$/, '');
+  const auth = () => ({ Authorization: `Bearer ${localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || ''}` });
 
-  const api = window.api || {};
+  document.addEventListener('DOMContentLoaded', async () => {
+    const byId = id => document.getElementById(id);
+    const qr = byId('promptpayQr'), loading = byId('qrLoading'), amount = byId('promptpayAmount');
+    const input = byId('slipInput'), picker = byId('slipPicker'), pickerText = byId('slipPickerText');
+    const preview = byId('slipPreview'), submit = byId('checkoutBtn'), timerDigits = byId('timerDigits');
+    let qrReady = false, remaining = 900;
+    document.querySelector('.back-btn')?.addEventListener('click', () => history.back());
+    picker?.addEventListener('click', () => input.click());
+    input?.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 4 * 1024 * 1024) { input.value = ''; return notify('รูปสลิปต้องมีขนาดไม่เกิน 4 MB', 'error'); }
+      pickerText.textContent = file.name;
+      preview.src = URL.createObjectURL(file);
+      preview.hidden = false;
+    });
 
-  function t(key, fallback) {
-    if (window.i18nT) return window.i18nT(key, fallback);
-    return fallback || key;
-  }
-
-  // --- Toast Helper (Application Alert replacement) ---
-  function toast(msg, type = 'success') {
-    if (window.showToast) {
-      window.showToast(msg, type);
-    } else if (window.AGRIPRICE_DEBUG) {
-      console.log(`[Payment ${type}]`, msg);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    const backBtn = document.querySelector('.back-btn');
-    const cardInput = document.querySelector('input[placeholder="0000 0000 0000 0000"]');
-    const nameInput = document.querySelector('input[placeholder="JOHN DOE"]');
-    const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
-    const cvvInput = document.querySelector('input[placeholder="***"]');
-
-    // Tab Selection Elements
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const cardTabContent = document.getElementById('cardTabContent');
-    const qrTabContent = document.getElementById('qrTabContent');
-    const secureInfo = document.querySelector('.secure-info');
-    let activeTab = 'card';
-    let timerInterval = null;
-
-    if (backBtn) {
-      backBtn.onclick = () => {
-        window.history.back();
-      };
+    try {
+      const response = await fetch(`${apiBase()}/api/payments/promptpay/qr`, { headers: auth() });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || 'สร้าง QR ไม่สำเร็จ');
+      qr.src = `data:${result.data.mime || 'image/png'};base64,${result.data.image}`;
+      qr.hidden = false; loading.hidden = true; qrReady = true;
+      amount.textContent = `฿${Number(result.data.amount).toFixed(2)}`;
+    } catch (error) {
+      loading.textContent = error.message; submit.disabled = true; notify(error.message, 'error');
     }
 
-    // Format Card Number (space every 4 digits)
-    if (cardInput) {
-      cardInput.addEventListener('input', (e) => {
-        let val = e.target.value.replace(/\D/g, '');
-        let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
-        e.target.value = formatted.substring(0, 19);
-      });
-    }
+    const timer = setInterval(() => {
+      remaining--;
+      timerDigits.textContent = `${String(Math.floor(Math.max(remaining, 0) / 60)).padStart(2, '0')}:${String(Math.max(remaining, 0) % 60).padStart(2, '0')}`;
+      if (remaining <= 0) { clearInterval(timer); qrReady = false; submit.disabled = true; notify('QR หมดเวลา กรุณาเปิดหน้านี้ใหม่', 'warning'); }
+    }, 1000);
 
-    // Format Expiry Date (MM/YY)
-    if (expiryInput) {
-      expiryInput.addEventListener('input', (e) => {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length >= 2) {
-          e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
-        } else {
-          e.target.value = val;
+    submit?.addEventListener('click', async () => {
+      const file = input.files?.[0];
+      if (!qrReady) return notify('QR ยังไม่พร้อม กรุณาลองใหม่', 'error');
+      if (!file) return notify('กรุณาแนบรูปสลิปก่อนยืนยัน', 'warning');
+      const original = submit.innerHTML;
+      submit.disabled = true; submit.innerHTML = '<span>กำลังตรวจสอบสลิป...</span>';
+      try {
+        const form = new FormData(); form.append('slip', file);
+        const response = await fetch(`${apiBase()}/api/payments/promptpay/verify`, { method: 'POST', headers: auth(), body: form });
+        const result = await response.json();
+        if (!response.ok && response.status !== 202) throw new Error(result.message || 'ตรวจสอบสลิปไม่สำเร็จ');
+        if (result.data?.token) {
+          localStorage.setItem(window.AUTH_TOKEN_KEY || 'token', result.data.token);
+          const key = window.AUTH_USER_KEY || 'user_data', raw = localStorage.getItem(key);
+          if (raw) { const user = JSON.parse(raw); user.tier = 'pro'; localStorage.setItem(key, JSON.stringify(user)); }
+          notify(result.message, 'success');
+          return setTimeout(() => { location.href = 'subscription.html'; }, 1200);
         }
-      });
-    }
-
-    // Format CVV (digits only)
-    if (cvvInput) {
-      cvvInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
-      });
-    }
-
-    // Tab Switching Logic
-    if (tabBtns.length > 0) {
-      tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          tabBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          activeTab = btn.dataset.tab;
-
-          if (activeTab === 'card') {
-            cardTabContent.style.display = 'block';
-            qrTabContent.style.display = 'none';
-            if (secureInfo) secureInfo.style.display = 'flex';
-            if (timerInterval) {
-              clearInterval(timerInterval);
-              timerInterval = null;
-            }
-          } else {
-            cardTabContent.style.display = 'none';
-            qrTabContent.style.display = 'block';
-            if (secureInfo) secureInfo.style.display = 'none';
-            startQrTimer();
-          }
-        });
-      });
-    }
-
-    // Countdown Timer for QR Code Tab (15 minutes)
-    function startQrTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      let duration = 15 * 60; // 15 mins in seconds
-      const timerDigits = document.getElementById('timerDigits');
-
-      function updateTimer() {
-        let minutes = Math.floor(duration / 60);
-        let seconds = duration % 60;
-
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        if (timerDigits) timerDigits.textContent = minutes + ':' + seconds;
-
-        if (duration <= 0) {
-          clearInterval(timerInterval);
-          toast(t('payment_timeout', 'หมดเวลาการทำรายการ กรุณาลองใหม่อีกครั้ง'), 'error');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        }
-        duration--;
-      }
-
-      updateTimer();
-      timerInterval = setInterval(updateTimer, 1000);
-    }
-
-    // Checkout / Payment confirm event handler
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener('click', async () => {
-        
-        // 1. Validation for Card tab only
-        if (activeTab === 'card') {
-          const cardVal = cardInput ? cardInput.value.replace(/\s/g, '') : '';
-          const nameVal = nameInput ? nameInput.value.trim() : '';
-          const expiryVal = expiryInput ? expiryInput.value.trim() : '';
-          const cvvVal = cvvInput ? cvvInput.value.trim() : '';
-
-          if (cardVal.length < 16) {
-            toast(t('error_invalid_card', 'กรุณาระบุหมายเลขบัตรเครดิตให้ครบถ้วน'), 'error');
-            return;
-          }
-          if (!nameVal) {
-            toast(t('error_invalid_card_name', 'กรุณากรอกชื่อผู้ถือบัตร'), 'error');
-            return;
-          }
-          if (expiryVal.length < 5 || !expiryVal.includes('/')) {
-            toast(t('error_invalid_expiry', 'กรุณากรอกวันหมดอายุในรูปแบบ MM/YY'), 'error');
-            return;
-          }
-          if (cvvVal.length < 3) {
-            toast(t('error_invalid_cvv', 'กรุณากรอกรหัส CVV 3 หลักหลังบัตร'), 'error');
-            return;
-          }
-        }
-
-        // 2. Submit payment to server
-        checkoutBtn.disabled = true;
-        const origText = checkoutBtn.innerHTML;
-        checkoutBtn.innerHTML = `<span>${t('processing', 'กำลังดำเนินการ...')}</span>`;
-
-        try {
-          let res;
-          if (api.call) {
-            res = await api.call('POST', '/api/payments/checkout', { plan: 'pro', method: activeTab });
-          } else {
-            const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-            const token = localStorage.getItem('token');
-            const response = await fetch(currentBase + '/api/payments/checkout', {
-              method: 'POST',
-              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ plan: 'pro', method: activeTab })
-            });
-            res = await response.json();
-          }
-
-          if (res && res.success) {
-            // Clear timer if any
-            if (timerInterval) clearInterval(timerInterval);
-
-            // Save new token & update user local storage tier
-            if (res.data && res.data.token) {
-              localStorage.setItem('token', res.data.token);
-              const rawUser = localStorage.getItem("user_data");
-              if (rawUser) {
-                const user = JSON.parse(rawUser);
-                user.tier = 'pro';
-                localStorage.setItem("user_data", JSON.stringify(user));
-              }
-            }
-            toast(t('payment_success', 'ชำระเงินสำเร็จ! บัญชีของคุณอัปเกรดเป็น PRO เรียบร้อยแล้ว'), 'success');
-            setTimeout(() => {
-              window.location.href = 'subscription.html';
-            }, 1500);
-          } else {
-            throw new Error(res.message || 'Payment rejected');
-          }
-        } catch (err) {
-          console.error('[Payment] Checkout failed:', err);
-          toast(err.message || t('payment_failed', 'การชำระเงินล้มเหลว กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง'), 'error');
-          checkoutBtn.disabled = false;
-          checkoutBtn.innerHTML = origText;
-        }
-      });
-    }
+        notify(result.message || 'ส่งสลิปเพื่อรอตรวจสอบแล้ว', 'warning');
+        submit.innerHTML = '<span>ส่งสลิปแล้ว • รอตรวจสอบ</span>';
+      } catch (error) { notify(error.message, 'error'); submit.disabled = false; submit.innerHTML = original; }
+    });
   });
-
 })();
