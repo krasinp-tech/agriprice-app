@@ -1,9 +1,11 @@
 # Environment secrets
 .env
 .env.*
+!server/.env.example
 server/.env
 server/firebase-service-account.json
 /google-services.json
+frontend/android/app/google-services.json
 node_modules/
 *.zip
 server_deploy.zip
