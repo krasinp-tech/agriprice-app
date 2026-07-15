@@ -3168,3 +3168,66 @@ html[data-theme="dark"] body::selection,
   -webkit-text-fill-color: var(--text-main) !important;
   box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
 }
+
+/* App-wide semantic text contrast. Every page loads this stylesheet. */
+[data-theme="dark"] body :is(
+  h1, h2, h3, h4, h5, h6, legend, caption, dt, dd, th, td,
+  [class$="-title"], [class$="_title"], [class*="-title "],
+  [class$="-name"], [class$="_name"], [class*="-name "],
+  [class$="-heading"], [class$="_heading"],
+  [class$="-value"], [class$="_value"]
+):not(
+  button *, .btn *, [class*="button"] *, [class*="badge"] *,
+  [class*="status"] *, [class*="price"] *, [class*="success"] *,
+  [class*="error"] *, [class*="warning"] *, [class*="danger"] *,
+  [class*="primary"] *, [class*="hero"] *
+) {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] body :is(
+  p, small, label, li, blockquote, figcaption,
+  [class$="-desc"], [class$="_desc"], [class*="-desc "],
+  [class$="-subtitle"], [class$="_subtitle"],
+  [class$="-sub"], [class$="_sub"],
+  [class$="-meta"], [class$="_meta"],
+  [class$="-hint"], [class$="_hint"],
+  [class$="-label"], [class$="_label"]
+):not(
+  button *, .btn *, [class*="button"] *, [class*="badge"] *,
+  [class*="status"] *, [class*="price"] *, [class*="success"] *,
+  [class*="error"] *, [class*="warning"] *, [class*="danger"] *,
+  [class*="primary"] *, [class*="hero"] *
+) {
+  color: var(--text-muted) !important;
+}
+
+/* Text nodes commonly rendered as spans/divs inside neutral cards. */
+[data-theme="dark"] :is(
+  .card, .product-card, .booking-card, .profile-card, .profile-content-card,
+  .profile-info-card, .menu-card, .payment-card, .plan-card, .notify-card,
+  .device-card, .address-card, .terms-card, .review-card, .detail-card,
+  .form-card, .summary-card, .calendar-container, .timeslots-container,
+  .vehicle-card, .contact-card, .modal-content, .modal-sheet
+) :is(span, div):not(
+  .material-icons, .material-icons-outlined, .material-symbols-outlined,
+  button *, .btn *, [class*="button"] *, [class*="badge"] *,
+  [class*="status"] *, [class*="price"] *, [class*="success"] *,
+  [class*="error"] *, [class*="warning"] *, [class*="danger"] *,
+  [class*="primary"] *, [class*="progress"] *, [class*="dot"] *
+) {
+  color: inherit;
+}
+
+[data-theme="dark"] body :is(a:not(.btn):not([class*="button"]), [role="link"]) {
+  color: #6ee7a0;
+}
+
+[data-theme="dark"] body :is(hr, .divider, [class*="separator"]) {
+  border-color: var(--border-light) !important;
+}
+
+/* Native date/time controls sometimes keep black glyphs in Android WebView. */
+[data-theme="dark"] :is(input[type="date"], input[type="time"], input[type="datetime-local"]) {
+  color-scheme: dark;
+}
