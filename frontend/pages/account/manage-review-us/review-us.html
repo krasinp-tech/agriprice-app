@@ -10,7 +10,7 @@
     <script src="../../../js/auth/guard.js"></script>
     <script src="../../../js/components/i18n.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="review_us_title">เธฃเธตเธงเธดเธงเนเธซเนเนเธญเธเน€เธฃเธฒ | AGRIPRICE</title>
+    <title data-i18n="review_us_title">รีวิวให้แอปเรา | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -46,19 +46,19 @@
 
 <body>
     <main class="review-page">
-        <!-- โ”€โ”€ Header โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Header ───────────────────────────────────────── -->
         <header class="review-header fade-slide">
-            <a class="back-btn" href="../account.html" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
+            <a class="back-btn" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
                 <span class="material-icons-outlined">chevron_left</span>
             </a>
-            <h1 class="page-title" data-i18n="review">เธฃเธตเธงเธดเธงเนเธซเนเนเธญเธเน€เธฃเธฒ</h1>
+            <h1 class="page-title" data-i18n="review">รีวิวให้แอปเรา</h1>
         </header>
 
-        <!-- โ”€โ”€ Content Card โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Content Card ─────────────────────────────────── -->
         <div class="review-card fade-slide">
             <span class="review-illustration">โญ</span>
-            <h2 class="review-headline" data-i18n="do_you_like_agriprice">เธเธธเธ“เธเธญเธ AgriPrice เนเธซเธก?</h2>
-            <p class="review-sub" data-i18n="review_hint">เธเธฐเนเธเธเธเธญเธเธเธธเธ“เธเนเธงเธขเนเธซเนเน€เธฃเธฒเธเธฑเธ’เธเธฒเธเธฃเธดเธเธฒเธฃเนเธซเนเธ”เธตเธขเธดเนเธเธเธถเนเธ</p>
+            <h2 class="review-headline" data-i18n="do_you_like_agriprice">คุณชอบ AgriPrice ไหม?</h2>
+            <p class="review-sub" data-i18n="review_hint">คะแนนของคุณช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น</p>
 
             <!-- Star Rating System -->
             <div class="star-rating" id="starContainer">
@@ -71,10 +71,10 @@
 
             <!-- Feedback Area -->
             <div class="feedback-box">
-                <textarea class="feedback-textarea" id="feedbackText" placeholder="เน€เธเธตเธขเธเธเนเธญเน€เธชเธเธญเนเธเธฐเธซเธฃเธทเธญเธเธงเธฒเธกเธเธฃเธฐเธ—เธฑเธเนเธเธ—เธตเนเธเธตเน..." data-i18n-placeholder="feedback_placeholder"></textarea>
+                <textarea class="feedback-textarea" id="feedbackText" placeholder="เขียนข้อเสนอแนะหรือความประทับใจที่นี่..." data-i18n-placeholder="feedback_placeholder"></textarea>
             </div>
 
-            <button class="btn-submit-review" id="submitReviewBtn" data-i18n="submit_review">เธชเนเธเธฃเธตเธงเธดเธง</button>
+            <button class="btn-submit-review" id="submitReviewBtn" data-i18n="submit_review">ส่งรีวิว</button>
         </div>
     </main>
 

@@ -6,7 +6,7 @@
     <script src="js/components/i18n.js"></script>
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="home_title">AGRIPRICE - เนเธเธฅเธ•เธเธญเธฃเนเธกเธเธทเนเธญเธเธฒเธขเธเธฅเธเธฅเธดเธ•เธเธฒเธฃเน€เธเธฉเธ•เธฃ</title>
+    <title data-i18n="home_title">AGRIPRICE - แพลตฟอร์มซื้อขายผลผลิตการเกษตร</title>
 
     <!-- PWA & Mobile Meta Tags -->
     <meta name="theme-color" content="#0B853C">
@@ -44,77 +44,77 @@
 
 <body data-active="home">
     <div class="app-container">
-        <!-- โ”€โ”€ Hero Carousel โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Hero Carousel ──────────────────────────────────── -->
         <section class="hero-background">
             <div class="hero-carousel" id="heroCarousel">
-                <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เน€เธเธฉเธ•เธฃเธเธฃ"
+                <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกร"
                         data-i18n-alt="slider_farmer"></div>
-                <div class="hero-slide"><img src="assets/images/hero.png" alt="เธเธฅเธเธฅเธดเธ•เธชเธ”เนเธซเธกเน"
+                <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลผลิตสดใหม่"
                         data-i18n-alt="slider_fresh_produce"></div>
-                <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="เนเธเธฃเนเธกเธเธฑเธ"
+                <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="โปรโมชัน"
                         data-i18n-alt="slider_promotion"></div>
             </div>
             <div class="hero-indicator" id="heroIndicator"></div>
         </section>
 
-        <!-- โ”€โ”€ Search & Overlap โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Search & Overlap ────────────────────────────────── -->
         <section class="search-section">
-            <div class="search-box">
-                <input type="text" placeholder="เธเนเธเธซเธฒเธเธนเนเธฃเธฑเธเธเธทเนเธญ เธซเธฃเธทเธญเธเธฅเธเธฅเธดเธ•..." class="search-input" id="searchInput"
-                    data-i18n-placeholder="search_buyer">
-                <button class="search-button" id="searchBtn">
+            <div class="search-box" id="homeSearchBox" role="link" tabindex="0">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ หรือผลผลิต..." class="search-input" id="searchInput"
+                    data-i18n-placeholder="search_buyer" readonly aria-label="เปิดหน้าค้นหา">
+                <button type="button" class="search-button" id="searchBtn" aria-label="เปิดหน้าค้นหา">
                     <span class="material-icons-outlined" style="color: #fff; font-size: 24px;">search</span>
                 </button>
             </div>
         </section>
 
-        <!-- โ”€โ”€ Categories โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Categories ────────────────────────────────────── -->
         <section class="product-tabs-section">
             <div class="section-header">
-                <h2 class="section-title" data-i18n="categories_title">เธซเธกเธงเธ”เธซเธกเธนเนเธชเธดเธเธเนเธฒ</h2>
+                <h2 class="section-title" data-i18n="categories_title">หมวดหมู่สินค้า</h2>
             </div>
             <div class="product-grid">
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=fruit">
-                    <div class="cat-icon"><img src="assets/images/durian.png" alt="เธเธฅเนเธกเน"
+                    <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="fruit">เธเธฅเนเธกเน</span>
+                    <span data-i18n="fruit">ผลไม้</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=vegetable">
-                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="เธเธฑเธเธชเธ”"
+                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="vegetable">เธเธฑเธเธชเธ”</span>
+                    <span data-i18n="vegetable">ผักสด</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=rice">
-                    <div class="cat-icon"><img src="assets/images/rice.png" alt="เธเนเธฒเธง/เธเธทเธเนเธฃเน"
+                    <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="rice_crops">เธเนเธฒเธง/เธเธทเธเนเธฃเน</span>
+                    <span data-i18n="rice_crops">ข้าว/พืชไร่</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=oil">
-                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="เธเนเธณเธกเธฑเธ"
+                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="oil">เธเนเธณเธกเธฑเธ</span>
+                    <span data-i18n="oil">น้ำมัน</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=organic">
-                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="เธญเธดเธเธ—เธฃเธตเธขเน"
+                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="organic">เธญเธดเธเธ—เธฃเธตเธขเน</span>
+                    <span data-i18n="organic">อินทรีย์</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=seedlings">
-                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="เธเธทเธเธเธฑเธเธเธธเน"
+                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์"
                             style="width:40px;height:40px;object-fit:contain;"></div>
-                    <span data-i18n="seedlings">เธเธทเธเธเธฑเธเธเธธเน</span>
+                    <span data-i18n="seedlings">พืชพันธุ์</span>
                 </a>
             </div>
         </section>
 
-        <!-- โ”€โ”€ Favorites (Farmer only - injected via JS) โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Favorites (Farmer only - injected via JS) ────────── -->
         <div id="favoritesPlaceholder"></div>
 
-        <!-- โ”€โ”€ Recommendations โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Recommendations ────────────────────────────────── -->
         <section class="products-section">
             <div class="container">
                 <div class="section-header" style="padding-left: 0; padding-right: 0;">
-                    <h2 class="section-title" data-i18n="recommend">เธฃเธฒเธขเธเธฒเธฃเนเธเธฐเธเธณ</h2>
+                    <h2 class="section-title" data-i18n="recommend">รายการแนะนำ</h2>
                 </div>
                 <div id="productCardsMount">
                     <!-- Skeleton Loading -->
@@ -122,14 +122,14 @@
                     <div class="shimmer" style="height: 120px; border-radius: 16px;"></div>
                 </div>
                 <button class="btn-load-more" id="loadMoreBtn" style="display: none;"
-                    data-i18n="load_more">เธ”เธนเน€เธเธดเนเธกเน€เธ•เธดเธก</button>
+                    data-i18n="load_more">ดูเพิ่มเติม</button>
             </div>
         </section>
 
-        <!-- โ”€โ”€ Announcements / Banners โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+        <!-- ── Announcements / Banners ────────────────────────── -->
         <section class="banner-section">
             <div class="section-header">
-                <h2 class="section-title" data-i18n="announcements_title">เธเนเธฒเธงเธชเธฒเธฃเนเธฅเธฐเธเธฃเธฐเธเธฒเธชเธฑเธกเธเธฑเธเธเน</h2>
+                <h2 class="section-title" data-i18n="announcements_title">ข่าวสารและประชาสัมพันธ์</h2>
             </div>
             <div class="banner-carousel" id="bannerCarousel">
                 <!-- Skeleton Loading -->
@@ -142,7 +142,7 @@
 
     </div>
 
-    <!-- โ”€โ”€ Bottom Nav โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Bottom Nav ────────────────────────────────────── -->
     <div id="bottomNavMount"></div>
 
     <script src="js/config.js" defer></script>

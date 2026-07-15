@@ -9,7 +9,7 @@
 
     <script src="../../../js/components/i18n.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_title_page">เธเธฒเธฃเธเธญเธ | AGRIPRICE</title>
+  <title data-i18n="booking_title_page">การจอง | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -36,21 +36,21 @@
 
     <!-- Header Section -->
     <section class="booking-header">
-      <h1 class="booking-title" data-i18n="booking_title">เธเธฒเธฃเธเธญเธ</h1>
-      <p class="booking-subtitle" data-i18n="booking_subtitle_buyer">เธฃเธฒเธขเธเธฒเธฃเธเธฒเธฃเธเธญเธ</p>
+      <h1 class="booking-title" data-i18n="booking_title">การจอง</h1>
+      <p class="booking-subtitle" data-i18n="booking_subtitle_buyer">รายการการจอง</p>
     </section>
 
     <section class="controls">
-      <div class="segmented" role="tablist" aria-label="เธ•เธฑเธงเธเธฃเธญเธเธเธฒเธฃเธเธญเธ" data-i18n-aria-label="booking_filter_label">
-        <button class="seg-btn active" data-filter="all" data-i18n="all">เธ—เธฑเนเธเธซเธกเธ”</button>
-        <button class="seg-btn" data-filter="waiting" data-i18n="waiting">เธฃเธญเธเธดเธง</button>
-        <button class="seg-btn" data-filter="success" data-i18n="success">เธชเธณเน€เธฃเนเธ</button>
-        <button class="seg-btn" data-filter="cancel" data-i18n="cancel">เธขเธเน€เธฅเธดเธ</button>
+      <div class="segmented" role="tablist" aria-label="ตัวกรองการจอง" data-i18n-aria-label="booking_filter_label">
+        <button class="seg-btn active" data-filter="all" data-i18n="all">ทั้งหมด</button>
+        <button class="seg-btn" data-filter="waiting" data-i18n="waiting">รอคิว</button>
+        <button class="seg-btn" data-filter="success" data-i18n="success">สำเร็จ</button>
+        <button class="seg-btn" data-filter="cancel" data-i18n="cancel">ยกเลิก</button>
       </div>
 
       <div class="searchbox">
         <span class="material-icons-outlined">search</span>
-        <input id="searchInput" type="text" placeholder="เธเนเธเธซเธฒเธ”เนเธงเธขเน€เธฅเธเธเธญเธ / เธฃเนเธฒเธ / เธเธดเธง" data-i18n-placeholder="booking_search_placeholder" />
+        <input id="searchInput" type="text" placeholder="ค้นหาด้วยเลขจอง / ร้าน / คิว" data-i18n-placeholder="booking_search_placeholder" />
       </div>
     </section>
 
@@ -62,14 +62,14 @@
     <div class="empty" id="emptyState" hidden>
       <div class="empty-card">
         <div class="empty-emoji"><span class="material-icons-outlined" aria-hidden="true">receipt_long</span></div>
-        <div class="empty-title" data-i18n="booking_empty_title">เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธฒเธฃเธเธญเธเธ—เธตเนเธ•เธฃเธเธเธฑเธเน€เธเธทเนเธญเธเนเธ</div>
-        <div class="empty-desc" data-i18n="booking_empty_desc">เธฅเธญเธเน€เธเธฅเธตเนเธขเธเธ•เธฑเธงเธเธฃเธญเธ เธซเธฃเธทเธญเธเธดเธกเธเนเธเนเธเธซเธฒเนเธซเธกเนเธญเธตเธเธเธฃเธฑเนเธ</div>
+        <div class="empty-title" data-i18n="booking_empty_title">ยังไม่มีรายการจองที่ตรงกับเงื่อนไข</div>
+        <div class="empty-desc" data-i18n="booking_empty_desc">ลองเปลี่ยนตัวกรอง หรือพิมพ์ค้นหาใหม่อีกครั้ง</div>
       </div>
     </div>
   </main>
 
   <!-- QR Scan Button (corner) -->
-  <button id="scanBtn" class="scan-btn" aria-label="เธชเนเธเธเธเธดเธง QR" data-i18n-aria-label="scan_qr_queue" data-i18n-title="scan_qr_queue">
+  <button id="scanBtn" class="scan-btn" aria-label="สแกนคิว QR" data-i18n-aria-label="scan_qr_queue" data-i18n-title="scan_qr_queue">
     <span class="material-icons-outlined">qr_code_scanner</span>
   </button>
 
@@ -77,8 +77,8 @@
   <div id="scanModal" class="scan-modal" aria-hidden="true">
     <div class="scan-viewfinder">
       <div class="scan-header">
-        <h2 data-i18n="scan_booking_qr">เธชเนเธเธ QR เธฃเธซเธฑเธชเธเธฒเธฃเธเธญเธ</h2>
-        <button id="closeScanBtn" class="scan-close-btn" aria-label="เธเธดเธ”"><span class="material-icons-outlined">close</span></button>
+        <h2 data-i18n="scan_booking_qr">สแกน QR รหัสการจอง</h2>
+        <button id="closeScanBtn" class="scan-close-btn" aria-label="ปิด"><span class="material-icons-outlined">close</span></button>
       </div>
 
       <div class="viewfinder-box">
@@ -92,14 +92,14 @@
       <div class="scan-footer">
         <button id="torchBtn" class="torch-btn">
           <span class="material-icons-outlined">flashlight_on</span>
-          <span data-i18n="torch">เน€เธเธดเธ”เนเธ</span>
+          <span data-i18n="torch">เปิดไฟ</span>
         </button>
-        <div class="scan-hint" data-i18n="scan_hint">เธงเธฒเธเธฃเธซเธฑเธช QR เนเธซเนเธญเธขเธนเนเนเธเธเธฃเธญเธเน€เธเธทเนเธญเธชเนเธเธ</div>
+        <div class="scan-hint" data-i18n="scan_hint">วางรหัส QR ให้อยู่ในกรอบเพื่อสแกน</div>
       </div>
 
       <div class="manual-input-box">
-        <input id="scanManualInput" placeholder="เธเธฃเธญเธเธฃเธซเธฑเธชเธเธฒเธฃเธเธญเธ" data-i18n-placeholder="manual_booking_code_placeholder" />
-        <button id="scanManualBtn" class="btn-manual" data-i18n="confirm">เธ•เธเธฅเธ</button>
+        <input id="scanManualInput" placeholder="กรอกรหัสการจอง" data-i18n-placeholder="manual_booking_code_placeholder" />
+        <button id="scanManualBtn" class="btn-manual" data-i18n="confirm">ตกลง</button>
       </div>
     </div>
   </div>
@@ -130,6 +130,7 @@
 
     <script src="../../../js/components.js"></script>
 
+    <script src="../../../js/utils/booking-search-guess.js"></script>
     <script src="../../../js/buyer/setbooking/booking.js"></script>
 
 

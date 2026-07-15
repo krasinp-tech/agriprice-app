@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
@@ -39,7 +39,7 @@
 <body data-active="account">
 
   <header class="sub-header">
-    <button class="back-btn" id="backBtn" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="back">
+    <button class="back-btn" id="backBtn" aria-label="ย้อนกลับ" data-i18n-aria-label="back">
       <span class="material-icons-outlined">arrow_back</span>
     </button>
   </header>
@@ -49,11 +49,13 @@
       <div class="icon-container">
         <span class="material-icons-outlined">storefront</span>
       </div>
-      <h1 data-i18n="subscription_plans_title">เนเธเธเธเธฒเธฃเธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ</h1>
-      <p data-i18n="perfect_plan_desc">เน€เธฅเธทเธญเธเนเธเธเธ—เธตเนเธชเธกเธเธนเธฃเธ“เนเนเธเธเธชเธณเธซเธฃเธฑเธเธเธธเธฃเธเธดเธเธเธญเธเธเธธเธ“</p>
+      <div class="title-wrap">
+        <h1 data-i18n="subscription_plans_title">แผนการสมัครสมาชิก</h1>
+        <p data-i18n="perfect_plan_desc">เลือกแผนที่เหมาะสมกับธุรกิจของคุณ</p>
+      </div>
     </div>
 
-    <p class="swipe-hint" data-i18n="swipe_hint">เธเธฑเธ”เน€เธเธทเนเธญเน€เธเธฃเธตเธขเธเน€เธ—เธตเธขเธเนเธเธ</p>
+    <p class="swipe-hint" data-i18n="swipe_hint">ปัดเพื่อเปรียบเทียบแผน</p>
 
     <div class="plans-carousel">
       <!-- Free Plan -->
@@ -61,33 +63,33 @@
         <div class="plan-badge" data-i18n="starter_badge">STARTER</div>
         <h2 class="plan-name" data-i18n="free_plan_name">FREE</h2>
         <div class="plan-price">
-          <span class="currency">เธฟ</span><span class="amount">0</span><span class="period" data-i18n="month_period">/เน€เธ”เธทเธญเธ</span>
+          <span class="currency">฿</span><span class="amount">0</span><span class="period" data-i18n="month_period">/เดือน</span>
         </div>
 
         <ul class="plan-features">
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon">check_circle</span>
-            <span data-i18n="up_to_3_products">เธชเธฃเนเธฒเธเธชเธดเธเธเนเธฒเนเธ”เนเธชเธนเธเธชเธธเธ” 3 เธฃเธฒเธขเธเธฒเธฃ</span>
+            <span data-i18n="up_to_3_products">สร้างสินค้าได้สูงสุด 3 รายการ</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon">check_circle</span>
-            <span data-i18n="edit_delete_products">เนเธเนเนเธเนเธฅเธฐเธฅเธเธชเธดเธเธเนเธฒเนเธ”เน</span>
+            <span data-i18n="edit_delete_products">แก้ไขและลบสินค้าได้</span>
           </li>
           <li class="feature-item excluded">
             <span class="material-icons-outlined cross-icon">cancel</span>
-            <span data-i18n="no_dashboard">เนเธกเนเธกเธตเนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅ</span>
+            <span data-i18n="no_dashboard">ไม่มีแดชบอร์ดวิเคราะห์ข้อมูล</span>
           </li>
           <li class="feature-item excluded">
             <span class="material-icons-outlined cross-icon">cancel</span>
-            <span data-i18n="no_revenue_tracking">เนเธกเนเธกเธตเธเธฒเธฃเธ•เธดเธ”เธ•เธฒเธกเธฃเธฒเธขเนเธ”เน</span>
+            <span data-i18n="no_revenue_tracking">ไม่มีการติดตามรายได้</span>
           </li>
           <li class="feature-item excluded">
             <span class="material-icons-outlined cross-icon">cancel</span>
-            <span data-i18n="no_product_boost">เนเธกเนเธกเธตเธเธฒเธฃเธเธนเธชเธ•เนเธชเธดเธเธเนเธฒ</span>
+            <span data-i18n="no_product_boost">ไม่มีการบูสต์สินค้า</span>
           </li>
         </ul>
 
-        <button class="plan-btn btn-current" disabled data-i18n="current_plan_btn">เนเธเนเธเน€เธเธเธเธฑเธเธเธธเธเธฑเธ</button>
+        <button class="plan-btn btn-current" disabled data-i18n="current_plan_btn">แพ็กเกจปัจจุบัน</button>
       </div>
 
       <!-- Pro Plan -->
@@ -95,43 +97,43 @@
         <div class="plan-badge premium" data-i18n="recommended_badge">RECOMMENDED</div>
         <h2 class="plan-name pro-text" data-i18n="pro_plan_name">PRO</h2>
         <div class="plan-price">
-          <span class="currency">เธฟ</span><span class="amount">499</span><span class="period" data-i18n="month_period">/เน€เธ”เธทเธญเธ</span>
+          <span class="currency">฿</span><span class="amount">499</span><span class="period" data-i18n="month_period">/เดือน</span>
         </div>
 
         <ul class="plan-features">
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="up_to_10_products">เธชเธฃเนเธฒเธเธชเธดเธเธเนเธฒเนเธ”เนเธชเธนเธเธชเธธเธ” 10 เธฃเธฒเธขเธเธฒเธฃ</span>
+            <span data-i18n="up_to_10_products">สร้างสินค้าได้สูงสุด 10 รายการ</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="dashboard_analytics">เนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅ</span>
+            <span data-i18n="dashboard_analytics">แดชบอร์ดวิเคราะห์ข้อมูล</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="view_product_performance">เธ”เธนเธเธฃเธฐเธชเธดเธ—เธเธดเธ เธฒเธเธเธญเธเธชเธดเธเธเนเธฒ</span>
+            <span data-i18n="view_product_performance">ดูประสิทธิภาพของสินค้า</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="monthly_booking_summary">เธชเธฃเธธเธเธขเธญเธ”เธเธญเธเธฃเธฒเธขเน€เธ”เธทเธญเธ</span>
+            <span data-i18n="monthly_booking_summary">สรุปยอดจองรายเดือน</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="monthly_revenue_summary">เธชเธฃเธธเธเธฃเธฒเธขเนเธ”เนเธฃเธฒเธขเน€เธ”เธทเธญเธ</span>
+            <span data-i18n="monthly_revenue_summary">สรุปรายได้รายเดือน</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="top_booked_ranking">เธญเธฑเธเธ”เธฑเธเธชเธดเธเธเนเธฒเธ—เธตเนเธ–เธนเธเธเธญเธเธชเธนเธเธชเธธเธ”</span>
+            <span data-i18n="top_booked_ranking">อันดับสินค้าที่ถูกจองสูงสุด</span>
           </li>
           <li class="feature-item included">
             <span class="material-icons-outlined check-icon pro">check_circle</span>
-            <span data-i18n="product_boosting">เธเธนเธชเธ•เนเธชเธดเธเธเนเธฒเน€เธเธดเนเธกเธเธฒเธฃเธกเธญเธเน€เธซเนเธ</span>
+            <span data-i18n="product_boosting">บูสต์สินค้าเพิ่มการมองเห็น</span>
           </li>
         </ul>
 
-        <button class="plan-btn btn-upgrade" id="upgradeBtn" data-i18n="upgrade_pro_btn">เธญเธฑเธเน€เธเธฃเธ”เน€เธเนเธ Pro</button>
+        <button class="plan-btn btn-upgrade" id="upgradeBtn" data-i18n="upgrade_pro_btn">อัปเกรดเป็น Pro</button>
         <div class="cancel-link-wrap" style="text-align: center; margin-top: 14px; display: none;" id="cancelSubWrap">
-          <a href="#" class="cancel-link" id="cancelSubLink" style="font-size: 13px; color: #ff3b30; font-weight: 700; text-decoration: underline;" data-i18n="cancel_sub_btn">เธขเธเน€เธฅเธดเธเธเธฒเธฃเธชเธกเธฑเธเธฃ PRO</a>
+          <a href="#" class="cancel-link" id="cancelSubLink" style="font-size: 13px; color: #ff3b30; font-weight: 700; text-decoration: underline;" data-i18n="cancel_sub_btn">ยกเลิกการสมัคร PRO</a>
         </div>
       </div>
     </div>
@@ -148,8 +150,8 @@
         <span class="material-icons-outlined">star</span>
       </div>
       <div class="why-content">
-        <h3 data-i18n="why_upgrade_title">เธ—เธณเนเธกเธ•เนเธญเธเธญเธฑเธเน€เธเธฃเธ”?</h3>
-        <p data-i18n="why_upgrade_desc">เน€เธเธดเนเธกเธเธฒเธฃเธกเธญเธเน€เธซเนเธ เธ•เธดเธ”เธ•เธฒเธกเธเธฃเธฐเธชเธดเธ—เธเธดเธ เธฒเธ เนเธฅเธฐเน€เธ•เธดเธเนเธ•เธเธธเธฃเธเธดเธเธเธฒเธฃเน€เธเธฉเธ•เธฃเธเธญเธเธเธธเธ“เธ”เนเธงเธขเน€เธเธฃเธทเนเธญเธเธกเธทเธญเธงเธดเน€เธเธฃเธฒเธฐเธซเนเธฃเธฐเธ”เธฑเธเธชเธนเธ</p>
+        <h3 data-i18n="why_upgrade_title">ทำไมต้องอัปเกรด?</h3>
+        <p data-i18n="why_upgrade_desc">เพิ่มการมองเห็น ติดตามประสิทธิภาพ และเติบโตธุรกิจการเกษตรของคุณด้วยเครื่องมือวิเคราะห์ระดับสูง</p>
       </div>
     </div>
 

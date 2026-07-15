@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>เนเธเนเนเธเธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เน | AGRIPRICE</title>
+  <title>แก้ไขหมายเลขโทรศัพท์ | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -36,37 +36,37 @@
   <main class="detail-page">
     <section class="detail-shell">
       <header class="detail-header">
-        <a class="detail-back" href="my-account.html" aria-label="เธขเนเธญเธเธเธฅเธฑเธเธซเธเนเธฒเธเธฑเธเธเธตเธเธญเธเธเธฑเธ">
+        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน">
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title">เธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เน</h1>
-          <p class="detail-subtitle">เนเธเนเนเธเธซเธกเธฒเธขเน€เธฅเธเธ—เธตเนเนเธเนเธชเธณเธซเธฃเธฑเธเธเธฒเธฃเธ•เธดเธ”เธ•เนเธญเนเธฅเธฐเธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ</p>
+          <h1 class="detail-title">หมายเลขโทรศัพท์</h1>
+          <p class="detail-subtitle">แก้ไขหมายเลขที่ใช้สำหรับการติดต่อและการแจ้งเตือน</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title">เธญเธฑเธเน€เธ”เธ•เธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เน</h2>
-        <p class="detail-note">เธซเธกเธฒเธขเน€เธฅเธเธเธฑเธเธเธธเธเธฑเธ: <strong id="currentPhoneValue">+66*******361</strong></p>
+        <h2 class="detail-section-title">อัปเดตหมายเลขโทรศัพท์</h2>
+        <p class="detail-note">หมายเลขปัจจุบัน: <strong id="currentPhoneValue">+66*******361</strong></p>
 
         <form id="phoneForm" class="detail-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="phoneInput">เธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เนเนเธซเธกเน</label>
+            <label class="field-label" for="phoneInput">หมายเลขโทรศัพท์ใหม่</label>
             <input
               class="field-input"
               id="phoneInput"
               name="phone"
               type="tel"
               autocomplete="tel"
-              placeholder="เน€เธเนเธ +66812345678"
+              placeholder="เช่น +66812345678"
               required
             />
-            <p class="field-hint">เธฃเธญเธเธฃเธฑเธเธฃเธนเธเนเธเธ +66XXXXXXXXX เธซเธฃเธทเธญเธฃเธนเธเนเธเธเธ—เธตเนเธกเธตเธเธตเธ”เธเธฑเนเธ</p>
+            <p class="field-hint">รองรับรูปแบบ +66XXXXXXXXX หรือรูปแบบที่มีขีดคั่น</p>
           </div>
 
           <div class="detail-actions">
-            <button type="submit" class="btn btn-primary">เธเธฑเธเธ—เธถเธเธเธฒเธฃเน€เธเธฅเธตเนเธขเธเนเธเธฅเธ</button>
-            <a class="btn btn-ghost" href="my-account.html">เธขเธเน€เธฅเธดเธ</a>
+            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+            <a class="btn btn-ghost" href="my-account.html">ยกเลิก</a>
           </div>
         </form>
 

@@ -8,7 +8,7 @@
     <script src="../../js/global-anim.js"></script>
     <script src="../../js/auth/guard.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="search_results_title_page">เธเธฅเธเธฒเธฃเธเนเธเธซเธฒ - AGRIPRICE</title>
+    <title data-i18n="search_results_title_page">ผลการค้นหา - AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -33,14 +33,15 @@
 </head>
 
 <body data-active="home">
-    <!-- โ”€โ”€ Search Header โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Search Header ─────────────────────────────────── -->
     <section class="search-header-section">
         <div class="search-header-container">
             <button class="back-btn" id="backBtn" data-back>
                 <span class="material-icons-outlined">arrow_back</span>
             </button>
             <div class="search-box-header">
-                <input type="text" placeholder="เธเนเธเธซเธฒเธเธนเนเธฃเธฑเธเธเธทเนเธญ" class="search-input-header" id="searchInput" data-i18n-placeholder="search_buyer">
+                <input type="text" placeholder="ค้นหาผู้รับซื้อ" class="search-input-header" id="searchInput" list="mainSearchSuggestions" data-i18n-placeholder="search_buyer">
+                <datalist id="mainSearchSuggestions"></datalist>
                 <button class="search-button-header" id="searchBtn">
                     <span class="material-icons-outlined" style="color: var(--primary); font-size: 24px;">search</span>
                 </button>
@@ -51,22 +52,22 @@
         <div class="filter-section">
             <button class="filter-chip" id="openDrawerBtn">
                 <span class="material-icons-outlined">tune</span>
-                <span data-i18n="filters">เธ•เธฑเธงเธเธฃเธญเธ</span>
+                <span data-i18n="filters">ตัวกรอง</span>
             </button>
-            <button class="filter-chip active" data-sort="all" data-i18n="filter_all">เธ—เธฑเนเธเธซเธกเธ”</button>
-            <button class="filter-chip" data-sort="recent" data-i18n="filter_recent">เธฅเนเธฒเธชเธธเธ”</button>
-            <button class="filter-chip" data-sort="nearest" data-i18n="filter_nearest">เนเธเธฅเนเธ—เธตเนเธชเธธเธ”</button>
-            <button class="filter-chip" data-sort="price-low" data-i18n="filter_price_low">เธฃเธฒเธเธฒเธ–เธนเธเธชเธธเธ”</button>
-            <button class="filter-chip" data-sort="price-high" data-i18n="filter_price_high">เธฃเธฒเธเธฒเธชเธนเธเธชเธธเธ”</button>
+            <button class="filter-chip active" data-sort="all" data-i18n="filter_all">ทั้งหมด</button>
+            <button class="filter-chip" data-sort="recent" data-i18n="filter_recent">ล่าสุด</button>
+            <button class="filter-chip" data-sort="nearest" data-i18n="filter_nearest">ใกล้ที่สุด</button>
+            <button class="filter-chip" data-sort="price-low" data-i18n="filter_price_low">ราคาถูกสุด</button>
+            <button class="filter-chip" data-sort="price-high" data-i18n="filter_price_high">ราคาสูงสุด</button>
         </div>
     </section>
 
-    <!-- โ”€โ”€ Filter Drawer (BottomSheet) โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Filter Drawer (BottomSheet) ─────────────────── -->
     <div class="filter-drawer" id="filterDrawer">
         <div class="filter-drawer-overlay" id="drawerOverlay"></div>
         <div class="filter-drawer-content">
             <div class="drawer-header">
-                <h3 class="drawer-title" data-i18n="filter">เธ•เธฑเธงเธเธฃเธญเธ</h3>
+                <h3 class="drawer-title" data-i18n="filter">ตัวกรอง</h3>
                 <button class="drawer-close" id="closeDrawerBtn">
                     <span class="material-icons-outlined">close</span>
                 </button>
@@ -75,33 +76,33 @@
 
 
             <div class="filter-group">
-                <label class="filter-label" data-i18n="buy_month">เน€เธ”เธทเธญเธเธ—เธตเนเธฃเธฑเธเธเธทเนเธญ</label>
+                <label class="filter-label" data-i18n="buy_month">เดือนที่รับซื้อ</label>
                 <div class="filter-grid" id="monthGrid">
                     <!-- JS will inject 1-12 months as chips/buttons -->
                 </div>
             </div>
 
             <div class="drawer-footer">
-                <button class="btn-reset" id="resetFiltersBtn" data-i18n="reset_all">เธฅเนเธฒเธเธ—เธฑเนเธเธซเธกเธ”</button>
-                <button class="btn-apply" id="applyFiltersBtn" data-i18n="apply_filters">เนเธเนเธ•เธฑเธงเธเธฃเธญเธ</button>
+                <button class="btn-reset" id="resetFiltersBtn" data-i18n="reset_all">ล้างทั้งหมด</button>
+                <button class="btn-apply" id="applyFiltersBtn" data-i18n="apply_filters">ใช้ตัวกรอง</button>
             </div>
         </div>
     </div>
 
-    <!-- โ”€โ”€ Results Summary โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Results Summary ───────────────────────────────── -->
     <section class="results-summary">
         <div class="container">
             <p class="results-title">
-                <span data-i18n="search_results_title">เธเธฅเธเธฒเธฃเธเนเธเธซเธฒ</span>
+                <span data-i18n="search_results_title">ผลการค้นหา</span>
                 <span class="results-count">
                     <span id="resultCount">0</span>
-                    <span data-i18n="results_count_suffix">เธฃเธฒเธขเธเธฒเธฃ</span>
+                    <span data-i18n="results_count_suffix">รายการ</span>
                 </span>
             </p>
         </div>
     </section>
 
-    <!-- โ”€โ”€ Results โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Results ───────────────────────────────────────── -->
     <section class="search-results-section">
         <div class="container">
             <div id="searchResultsMount">
@@ -113,7 +114,7 @@
         </div>
     </section>
 
-    <!-- โ”€โ”€ Bottom Nav โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€ -->
+    <!-- ── Bottom Nav ─────────────────────────────────────── -->
     <div id="bottomNavMount"></div>
 
     <!-- Core Scripts -->
@@ -143,18 +144,18 @@
             const monthGrid = document.getElementById('monthGrid');
             const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
             const months = [
-                t('mon_jan', 'เธก.เธ.'),
-                t('mon_feb', 'เธ.เธ.'),
-                t('mon_mar', 'เธกเธต.เธ.'),
-                t('mon_apr', 'เน€เธก.เธข.'),
-                t('mon_may', 'เธ.เธ.'),
-                t('mon_jun', 'เธกเธด.เธข.'),
-                t('mon_jul', 'เธ.เธ.'),
-                t('mon_aug', 'เธช.เธ.'),
-                t('mon_sep', 'เธ.เธข.'),
-                t('mon_oct', 'เธ•.เธ.'),
-                t('mon_nov', 'เธ.เธข.'),
-                t('mon_dec', 'เธ.เธ.')
+                t('mon_jan', 'ม.ค.'),
+                t('mon_feb', 'ก.พ.'),
+                t('mon_mar', 'มี.ค.'),
+                t('mon_apr', 'เม.ย.'),
+                t('mon_may', 'พ.ค.'),
+                t('mon_jun', 'มิ.ย.'),
+                t('mon_jul', 'ก.ค.'),
+                t('mon_aug', 'ส.ค.'),
+                t('mon_sep', 'ก.ย.'),
+                t('mon_oct', 'ต.ค.'),
+                t('mon_nov', 'พ.ย.'),
+                t('mon_dec', 'ธ.ค.')
             ];
             months.forEach((m, idx) => {
                 const btn = document.createElement('button');

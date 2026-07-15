@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="deactivate_account_title">เธเธดเธ”เนเธเนเธเธฒเธเธซเธฃเธทเธญเธฅเธเธเธฑเธเธเธต | AGRIPRICE</title>
+  <title data-i18n="deactivate_account_title">ปิดใช้งานหรือลบบัญชี | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -35,51 +35,51 @@
   <main class="detail-page">
     <section class="detail-shell">
       <header class="detail-header">
-        <a class="detail-back" href="my-account.html" aria-label="เธเธฅเธฑเธเนเธเธเธฑเธเธเธตเธเธญเธเธเธฑเธ" data-i18n-aria-label="back_to_account">
+        <a class="detail-back" href="my-account.html" aria-label="กลับไปบัญชีของฉัน" data-i18n-aria-label="back_to_account">
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title" data-i18n="deactivate_account_title">เธเธดเธ”เนเธเนเธเธฒเธเธซเธฃเธทเธญเธฅเธเธเธฑเธเธเธต</h1>
-          <p class="detail-subtitle" data-i18n="deactivate_account_subtitle">เธเธฑเธ”เธเธฒเธฃเธชเธ–เธฒเธเธฐเธเธฑเธเธเธต เธซเธฃเธทเธญเธเธญเธฅเธเธเธฑเธเธเธตเธเธญเธเธเธธเธ“</p>
+          <h1 class="detail-title" data-i18n="deactivate_account_title">ปิดใช้งานหรือลบบัญชี</h1>
+          <p class="detail-subtitle" data-i18n="deactivate_account_subtitle">จัดการสถานะบัญชี หรือขอลบบัญชีของคุณ</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title" data-i18n="account_status_title">เธชเธ–เธฒเธเธฐเธเธฑเธเธเธต</h2>
-        <p class="detail-note" id="statusDescription" data-i18n="account_status_desc">เธเธฑเธเธเธตเธเธญเธเธเธธเธ“เน€เธเธดเธ”เนเธเนเธเธฒเธเธญเธขเธนเน</p>
+        <h2 class="detail-section-title" data-i18n="account_status_title">สถานะบัญชี</h2>
+        <p class="detail-note" id="statusDescription" data-i18n="account_status_desc">บัญชีของคุณเปิดใช้งานอยู่</p>
 
         <div class="status-row">
-          <span data-i18n="current_status">เธชเธ–เธฒเธเธฐเธเธฑเธเธเธธเธเธฑเธ</span>
-          <span class="status-pill" id="statusPill" data-i18n="active_status">เนเธเนเธเธฒเธเธเธเธ•เธด</span>
+          <span data-i18n="current_status">สถานะปัจจุบัน</span>
+          <span class="status-pill" id="statusPill" data-i18n="active_status">ใช้งานปกติ</span>
         </div>
 
         <div class="checkbox-row">
           <input type="checkbox" id="confirmActionCheck" />
-          <label for="confirmActionCheck" data-i18n="confirm_account_action">เธเธฑเธเน€เธเนเธฒเนเธเธเธฅเธเธญเธเธเธฒเธฃเน€เธเธฅเธตเนเธขเธเธชเธ–เธฒเธเธฐเธเธฑเธเธเธตเธเธตเน</label>
+          <label for="confirmActionCheck" data-i18n="confirm_account_action">ฉันเข้าใจผลของการเปลี่ยนสถานะบัญชีนี้</label>
         </div>
 
         <div class="detail-actions">
-          <button type="button" class="btn btn-primary" id="deactivateBtn" data-i18n="deactivate_account_btn">เธเธดเธ”เนเธเนเธเธฒเธเธเธฑเธเธเธต</button>
-          <button type="button" class="btn btn-ghost" id="reactivateBtn" data-i18n="reactivate_account_btn">เน€เธเธดเธ”เนเธเนเธเธฒเธเธเธฑเธเธเธตเธญเธตเธเธเธฃเธฑเนเธ</button>
+          <button type="button" class="btn btn-primary" id="deactivateBtn" data-i18n="deactivate_account_btn">ปิดใช้งานบัญชี</button>
+          <button type="button" class="btn btn-ghost" id="reactivateBtn" data-i18n="reactivate_account_btn">เปิดใช้งานบัญชีอีกครั้ง</button>
         </div>
 
         <p id="statusMessage" class="page-message" aria-live="polite"></p>
       </section>
 
       <section class="detail-card">
-        <h2 class="detail-section-title" data-i18n="danger_zone">เธเธทเนเธเธ—เธตเนเธญเธฑเธเธ•เธฃเธฒเธข</h2>
-        <p class="detail-note" data-i18n="delete_account_warning">เธเธฒเธฃเธฅเธเธเธฑเธเธเธตเน€เธเนเธเธเธฒเธฃเธ”เธณเน€เธเธดเธเธเธฒเธฃเธ–เธฒเธงเธฃ เนเธเธฃเธ”เธ•เธฃเธงเธเธชเธญเธเธเนเธญเธเธ”เธณเน€เธเธดเธเธเธฒเธฃ</p>
+        <h2 class="detail-section-title" data-i18n="danger_zone">พื้นที่อันตราย</h2>
+        <p class="detail-note" data-i18n="delete_account_warning">การลบบัญชีเป็นการดำเนินการถาวร โปรดตรวจสอบก่อนดำเนินการ</p>
 
         <div class="divider"></div>
 
         <div class="danger-zone">
           <div class="field-group">
-            <label class="field-label" for="deleteKeywordInput" data-i18n="type_delete_confirm">เธเธดเธกเธเน DELETE เน€เธเธทเนเธญเธขเธทเธเธขเธฑเธ</label>
+            <label class="field-label" for="deleteKeywordInput" data-i18n="type_delete_confirm">พิมพ์ DELETE เพื่อยืนยัน</label>
             <input class="field-input" id="deleteKeywordInput" type="text" autocomplete="off" placeholder="DELETE" />
           </div>
 
           <div class="detail-actions">
-            <button type="button" class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_account">เธฅเธเธเธฑเธเธเธต</button>
+            <button type="button" class="btn btn-danger" id="deleteAccountBtn" data-i18n="delete_account">ลบบัญชี</button>
           </div>
         </div>
 

@@ -6,7 +6,7 @@
   <script src="../../js/auth/guard.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="otp_title">เธขเธทเธเธขเธฑเธเธ•เธฑเธงเธ•เธ OTP | Agriprice</title>
+  <title data-i18n="otp_title">ยืนยันตัวตน OTP | Agriprice</title>
   <meta name="theme-color" content="#0B853C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -53,33 +53,33 @@
       <!-- CONTENT SHEET -->
       <div class="content">
         <header class="head">
-          <h1 class="h1" data-i18n="otp_title">เธขเธทเธเธขเธฑเธเธ•เธฑเธงเธ•เธ OTP</h1>
-          <p class="subtitle" data-i18n="otp_subtitle_sms">เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธฃเธซเธฑเธชเธขเธทเธเธขเธฑเธเธ—เธตเนเธชเนเธเนเธเธขเธฑเธเธซเธกเธฒเธขเน€เธฅเธเนเธ—เธฃเธจเธฑเธเธ—เนเธเธญเธเธเธธเธ“</p>
+          <h1 class="h1" data-i18n="otp_title">ยืนยันตัวตน OTP</h1>
+          <p class="subtitle" data-i18n="otp_subtitle_sms">กรุณากรอกรหัสยืนยันที่ส่งไปยังหมายเลขโทรศัพท์ของคุณ</p>
           <p class="to" id="otpTo"></p>
         </header>
 
         <div class="timer" aria-live="polite">
-          <span class="timer-label" data-i18n="otp_expire_in">เธฃเธซเธฑเธชเธเธฐเธซเธกเธ”เธญเธฒเธขเธธเนเธ</span>
+          <span class="timer-label" data-i18n="otp_expire_in">รหัสจะหมดอายุใน</span>
           <span class="timer-value" id="timerText">02:00</span>
-          <span class="timer-label" data-i18n="minutes">เธเธฒเธ—เธต</span>
+          <span class="timer-label" data-i18n="minutes">นาที</span>
         </div>
 
         <!-- OTP BOXES -->
         <form class="otp-form" id="otpForm" novalidate>
-          <div class="otp" role="group" aria-label="เธเธฃเธญเธเธฃเธซเธฑเธช OTP 6 เธซเธฅเธฑเธ" data-i18n-aria-label="otp_code_group_label">
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="เธซเธฅเธฑเธเธ—เธตเน 1" data-i18n-aria-label="otp_digit_label" data-i18n-n="1" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="เธซเธฅเธฑเธเธ—เธตเน 2" data-i18n-aria-label="otp_digit_label" data-i18n-n="2" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="เธซเธฅเธฑเธเธ—เธตเน 3" data-i18n-aria-label="otp_digit_label" data-i18n-n="3" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="เธซเธฅเธฑเธเธ—เธตเน 4" data-i18n-aria-label="otp_digit_label" data-i18n-n="4" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="เธซเธฅเธฑเธเธ—เธตเน 5" data-i18n-aria-label="otp_digit_label" data-i18n-n="5" required />
-            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="เธซเธฅเธฑเธเธ—เธตเน 6" data-i18n-aria-label="otp_digit_label" data-i18n-n="6" required />
+          <div class="otp" role="group" aria-label="กรอกรหัส OTP 6 หลัก" data-i18n-aria-label="otp_code_group_label">
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="หลักที่ 1" data-i18n-aria-label="otp_digit_label" data-i18n-n="1" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 2" data-i18n-aria-label="otp_digit_label" data-i18n-n="2" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 3" data-i18n-aria-label="otp_digit_label" data-i18n-n="3" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 4" data-i18n-aria-label="otp_digit_label" data-i18n-n="4" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 5" data-i18n-aria-label="otp_digit_label" data-i18n-n="5" required />
+            <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="หลักที่ 6" data-i18n-aria-label="otp_digit_label" data-i18n-n="6" required />
           </div>
 
-          <button class="link" id="resendBtn" type="button" disabled data-i18n="resend_otp">เธเธญเธฃเธซเธฑเธชเนเธซเธกเน</button>
+          <button class="link" id="resendBtn" type="button" disabled data-i18n="resend_otp">ขอรหัสใหม่</button>
           <div class="error" id="formError" role="alert" aria-live="polite"></div>
 
           <button class="btn" id="nextBtn" type="submit">
-            <span class="btn-text" data-i18n="next_btn">เธ–เธฑเธ”เนเธ</span>
+            <span class="btn-text" data-i18n="next_btn">ถัดไป</span>
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
 

@@ -7,7 +7,7 @@
    
     <script src="../../../js/auth/guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>เธฃเธฐเธเธธเธ•เธณเนเธซเธเนเธเธฅเนเธ | AGRIPRICE</title>
+  <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -84,23 +84,23 @@
       <button class="back-btn" data-back>
         <span class="material-icons-outlined">chevron_left</span>
       </button>
-      <h1 class="title">เธเธฑเธเธซเธกเธธเธ”เธ•เธณเนเธซเธเนเธเธฅเนเธ</h1>
+      <h1 class="title">ปักหมุดตำแหน่งล้ง</h1>
     </header>
 
     <div id="map"></div>
 
     <div class="info-card">
-      <div class="info-label">เธเธดเธเธฑเธ”เธเธฑเธเธเธธเธเธฑเธเธ—เธตเนเน€เธฅเธทเธญเธ</div>
-      <div class="info-val" id="coordsText">เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธ•เธณเนเธซเธเนเธเธเธเนเธเธเธ—เธตเน</div>
+      <div class="info-label">พิกัดปัจจุบันที่เลือก</div>
+      <div class="info-val" id="coordsText">กรุณาเลือกตำแหน่งบนแผนที่</div>
     </div>
 
     <button class="btn-gps" onclick="useCurrentLocation()">
       <span class="material-icons-outlined">my_location</span>
-      เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธเธเธญเธเธเธฑเธ
+      ใช้ตำแหน่งปัจจุบันของฉัน
     </button>
 
     <button class="btn-save" id="saveBtn" onclick="saveLocation()" disabled>
-      เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธ—เธตเนเธ•เธฑเนเธ
+      บันทึกตำแหน่งที่ตั้ง
     </button>
   </main>
 
@@ -135,10 +135,10 @@
     let selectedLat = null, selectedLng = null;
 
     async function init() {
-      // เธฃเธญเธเธเธเธงเนเธฒ Config เธเธฐเธเธฃเนเธญเธก
+      // รอจนกว่า Config จะพร้อม
       await window.APP_CONFIG_READY;
       
-      // เธเธดเธเธฑเธ”เน€เธฃเธดเนเธกเธ•เนเธ (เธเธฃเธธเธเน€เธ—เธเธฏ เธซเธฃเธทเธญเธเนเธฒเธ—เธตเนเน€เธเธขเธเธฑเธเธ—เธถเธเนเธงเน)
+      // พิกัดเริ่มต้น (กรุงเทพฯ หรือค่าที่เคยบันทึกไว้)
       let initialLat = 13.7563, initialLng = 100.5018;
       
       const store = window.AccountManageStore;
@@ -158,7 +158,7 @@
         attribution: 'ยฉ OpenStreetMap contributors'
       }).addTo(map);
 
-      // เธชเธฃเนเธฒเธ Marker เธ–เนเธฒเธกเธตเธ•เธณเนเธซเธเนเธเน€เธ”เธดเธก
+      // สร้าง Marker ถ้ามีตำแหน่งเดิม
       if (selectedLat) {
         marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
         marker.on('dragend', function(e) {
@@ -169,7 +169,7 @@
         });
       }
 
-      // เธเธฅเธดเธเน€เธเธทเนเธญเธเธฑเธเธซเธกเธธเธ”
+      // คลิกเพื่อปักหมุด
       map.on('click', function(e) {
         const { lat, lng } = e.latlng;
         selectedLat = lat;
@@ -212,7 +212,7 @@
           }
           updateUI();
         }, err => {
-          const msg = 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธฅเธญเธเน€เธฅเธทเธญเธเนเธเนเธเธเธ—เธตเนเนเธ—เธ';
+          const msg = 'ไม่สามารถดึงตำแหน่งได้ กรุณาลองเลือกในแผนที่แทน';
           if (window.appNotify) window.appNotify(msg, 'error');
           else console.warn(msg);
         });
@@ -246,7 +246,7 @@
         }
         updateUI();
       } catch (_) {
-        const msg = 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธฅเธญเธเน€เธฅเธทเธญเธเนเธเนเธเธเธ—เธตเนเนเธ—เธ';
+        const msg = 'ไม่สามารถดึงตำแหน่งได้ กรุณาลองเลือกในแผนที่แทน';
         if (window.appNotify) window.appNotify(msg, 'error');
         else console.warn(msg);
       }
@@ -256,7 +256,7 @@
       if (!selectedLat || !selectedLng) return;
       
       const saveBtn = document.getElementById('saveBtn');
-      saveBtn.innerText = 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...';
+      saveBtn.innerText = 'กำลังบันทึก...';
       saveBtn.disabled = true;
 
       try {
@@ -277,21 +277,21 @@
         });
 
         if (res.ok) {
-          // เธญเธฑเธเน€เธ”เธ• store เธ—เธฑเธเธ—เธต
+          // อัปเดต store ทันที
           if (window.AccountManageStore) {
             await window.AccountManageStore.syncFromServer();
           }
-          const okMsg = 'เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธฅเนเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง';
+          const okMsg = 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
           if (window.appNotify) window.appNotify(okMsg, 'success');
           history.back();
         } else {
-          throw new Error('เธเธฑเธเธ—เธถเธเนเธกเนเธชเธณเน€เธฃเนเธ');
+          throw new Error('บันทึกไม่สำเร็จ');
         }
       } catch (err) {
-        const failMsg = 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”: ' + err.message;
+        const failMsg = 'เกิดข้อผิดพลาด: ' + err.message;
         if (window.appNotify) window.appNotify(failMsg, 'error');
         else console.error(failMsg);
-        saveBtn.innerText = 'เธเธฑเธเธ—เธถเธเธ•เธณเนเธซเธเนเธเธ—เธตเนเธ•เธฑเนเธ';
+        saveBtn.innerText = 'บันทึกตำแหน่งที่ตั้ง';
         saveBtn.disabled = false;
       }
     }

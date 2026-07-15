@@ -12,7 +12,7 @@
 
     <script src="../../../js/components/ui-common.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="booking_success">เธเธญเธเธเธดเธง - เธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ | AGRIPRICE</title>
+  <title data-i18n="booking_success">จองคิว - การจองสำเร็จ | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -57,16 +57,16 @@
       <div class="hero-bg"></div>
 
       <div class="hero-content">
-        <div class="hero-title" id="heroTitle" data-i18n="booking_success_title">เธเธญเธเธชเธณเน€เธฃเนเธ!</div>
-        <div class="hero-sub" id="heroSub" data-i18n="booking_confirmed_desc">เธเธฒเธฃเธเธญเธเธเธดเธงเธเธญเธเธเธธเธ“เนเธ”เนเธฃเธฑเธเธเธฒเธฃเธขเธทเธเธขเธฑเธเนเธฅเนเธง</div>
+        <div class="hero-title" id="heroTitle" data-i18n="booking_success_title">จองสำเร็จ!</div>
+        <div class="hero-sub" id="heroSub" data-i18n="booking_confirmed_desc">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
 
         <div class="big-card">
-          <div class="label" data-i18n="your_queue_no">เธซเธกเธฒเธขเน€เธฅเธเธเธดเธงเธเธญเธเธเธธเธ“</div>
+          <div class="label" data-i18n="your_queue_no">หมายเลขคิวของคุณ</div>
           <div class="queue" id="queueNo">-</div>
 
           <div class="subRow">
-            <div class="subLabel" data-i18n="queue_time">เน€เธงเธฅเธฒเน€เธเนเธฒเธเธดเธง</div>
-            <div class="subValue"><b id="timeText">-</b> <span data-i18n="time_unit">เธ.</span></div>
+            <div class="subLabel" data-i18n="queue_time">เวลาเข้าคิว</div>
+            <div class="subValue"><b id="timeText">-</b> <span data-i18n="time_unit">น.</span></div>
           </div>
 
           <div class="qrWrap">
@@ -74,12 +74,12 @@
           </div>
 
           <div class="idRow">
-            <div class="subLabel" data-i18n="booking_id_label">ID เธเธฒเธฃเธเธญเธ</div>
+            <div class="subLabel" data-i18n="booking_id_label">ID การจอง</div>
             <div class="subValue" id="bookingIdText">-</div>
           </div>
 
           <button class="btn-outline" id="btnToggleDetail">
-            <span data-i18n="view_booking_details">เนเธชเธ”เธเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธฒเธฃเธเธญเธ</span>
+            <span data-i18n="view_booking_details">แสดงรายละเอียดการจอง</span>
           </button>
 
           <div class="detailPanel" id="detailPanel" hidden></div>
@@ -91,10 +91,10 @@
     <section class="card info">
       <div class="card-title">
         <span class="material-icons-outlined">info</span>
-        <span data-i18n="important_message">เธเนเธญเธเธงเธฒเธกเธชเธณเธเธฑเธ</span>
+        <span data-i18n="important_message">ข้อความสำคัญ</span>
       </div>
       <div class="card-body" id="importantNote" data-i18n="checkin_30_mins_early">
-        เนเธเธฃเธ”เน€เธเนเธเธญเธดเธเธเนเธญเธเธ–เธถเธเธเธดเธงเธซเธเนเธฒ 30 เธเธฒเธ—เธต เน€เธเธทเนเธญเธขเธทเธเธขเธฑเธเธเธดเธงเธเธญเธเธเธธเธ“
+        โปรดเช็คอินก่อนถึงคิวหน้า 30 นาที เพื่อยืนยันคิวของคุณ
       </div>
     </section>
 
@@ -102,26 +102,26 @@
     <section class="card">
       <div class="card-title">
         <span class="material-icons-outlined">groups</span>
-        <span data-i18n="current_queue_status">เธชเธ–เธฒเธเธฐเธเธดเธงเธเธฑเธเธเธธเธเธฑเธ</span>
+        <span data-i18n="current_queue_status">สถานะคิวปัจจุบัน</span>
       </div>
 
       <div class="statusGrid">
         <div class="statusItem">
-          <div class="statusLabel" data-i18n="current_queue">เธเธดเธงเธเธฑเธเธเธธเธเธฑเธ</div>
+          <div class="statusLabel" data-i18n="current_queue">คิวปัจจุบัน</div>
           <div class="statusValue" id="currentQueue">-</div>
         </div>
         <div class="statusItem right">
-          <div class="statusLabel" data-i18n="my_queue">เธเธดเธงเธเธญเธเธเธฑเธ</div>
+          <div class="statusLabel" data-i18n="my_queue">คิวของฉัน</div>
           <div class="statusValue green" id="myQueue">-</div>
         </div>
 
         <div class="statusFoot">
           <div class="statusMini">
-            <div class="statusMiniLabel" data-i18n="queues_ahead">เธเธณเธเธงเธเธเธดเธงเธเนเธญเธเธซเธเนเธฒ</div>
+            <div class="statusMiniLabel" data-i18n="queues_ahead">จำนวนคิวก่อนหน้า</div>
             <div class="statusMiniValue" id="aheadCount">-</div>
           </div>
           <div class="statusMini">
-            <div class="statusMiniLabel" data-i18n="eta_label">เน€เธงเธฅเธฒเธเธฃเธฐเธกเธฒเธ“เธ—เธตเนเธเธฐเธ–เธถเธเธเธดเธง</div>
+            <div class="statusMiniLabel" data-i18n="eta_label">เวลาประมาณที่จะถึงคิว</div>
             <div class="statusMiniValue" id="eta">-</div>
           </div>
         </div>
@@ -132,7 +132,7 @@
     <section class="card">
       <div class="card-title">
         <span class="material-icons-outlined">place</span>
-        <span data-i18n="map_nav">เนเธเธเธ—เธตเนเธเธณเธ—เธฒเธ</span>
+        <span data-i18n="map_nav">แผนที่นำทาง</span>
       </div>
 
       <div class="placeBox">
@@ -142,14 +142,14 @@
           <iframe id="mapIframe" style="width:100%; height:100%; border:none;" loading="lazy"></iframe>
         </div>
         <button class="btn-map" type="button" id="openMapBtn" data-i18n="open_map">
-          เน€เธเธดเธ”เนเธเธเธ—เธตเนเธเธณเธ—เธฒเธ
+          เปิดแผนที่นำทาง
         </button>
       </div>
     </section>
 
     <!-- Cancel Button -->
     <button class="btn-cancel" id="btnCancelBooking" data-i18n="cancel_booking">
-      เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธ
+      ยกเลิกการจอง
     </button>
 
     </div>

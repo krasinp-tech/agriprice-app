@@ -7,7 +7,7 @@
    
     <script src="../../js/auth/guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title data-i18n="profile_buyer_title">เนเธเธฃเนเธเธฅเนเธเธนเนเธฃเธฑเธเธเธทเนเธญ - AGRIPRICE</title>
+<title data-i18n="profile_buyer_title">โปรไฟล์ผู้รับซื้อ - AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -113,10 +113,10 @@
 <body>
     <!-- HERO -->
 <section class="profile-hero-section">
-    <button class="profile-back-btn" data-back aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="back">
+    <button class="profile-back-btn" data-back aria-label="ย้อนกลับ" data-i18n-aria-label="back">
         <span class="material-icons-outlined">arrow_back</span>
     </button>
-    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="เนเธเธฃเนเธเธฅเนเธซเธเนเธฒเธเธ" data-i18n-alt="profile_hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';">
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="โปรไฟล์หน้าปก" data-i18n-alt="profile_hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';">
 </section>
 
 <!-- MAIN CONTENT CARD -->
@@ -124,14 +124,14 @@
 
     <!-- Avatar Squircle -->
     <div class="profile-avatar-box">
-        <img id="profileAvatar" src="../../assets/images/durian.png" alt="เธฃเธนเธเธฅเนเธ" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/durian.png';">
+        <img id="profileAvatar" src="../../assets/images/durian.png" alt="รูปล้ง" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/durian.png';">
     </div>
 
     <!-- Header Info -->
     <div class="profile-header-info">
         <h2 class="profile-name" id="profileName"><div class="shimmer" style="width: 140px; height: 24px; border-radius: 4px;"></div></h2>
         <div class="profile-status">
-            <span class="status-dot"></span> <span data-i18n="online">เธญเธญเธเนเธฅเธเน</span>
+            <span class="status-dot"></span> <span data-i18n="online">ออนไลน์</span>
         </div>
     </div>
 
@@ -139,11 +139,11 @@
     <div class="profile-stats-row">
         <div class="stat-item">
             <div class="stat-value" id="followersCount"><div class="shimmer" style="width: 30px; height: 20px; border-radius: 4px; margin: 0 auto;"></div></div>
-            <div class="stat-label" data-i18n="followers_label">เธเธนเนเธ•เธดเธ”เธ•เธฒเธก</div>
+            <div class="stat-label" data-i18n="followers_label">ผู้ติดตาม</div>
         </div>
         <div class="stat-item">
             <div class="stat-value" id="followingCount"><div class="shimmer" style="width: 30px; height: 20px; border-radius: 4px; margin: 0 auto;"></div></div>
-            <div class="stat-label" data-i18n="following_label">เธเธณเธฅเธฑเธเธ•เธดเธ”เธ•เธฒเธก</div>
+            <div class="stat-label" data-i18n="following_label">กำลังติดตาม</div>
         </div>
     </div>
 
@@ -151,20 +151,20 @@
     <div class="profile-action-row">
         <button class="btn-message" id="contactBtn">
             <span class="material-icons-outlined" style="font-size: 20px;">chat_bubble_outline</span>
-            <span data-i18n="nav_chat">เนเธเธ—</span>
+            <span data-i18n="nav_chat">แชท</span>
         </button>
         <button class="btn-follow" id="followBtn">
             <span class="material-icons-outlined" style="font-size: 20px;">person_add</span>
-            <span data-i18n="follow">เธ•เธดเธ”เธ•เธฒเธก</span>
+            <span data-i18n="follow">ติดตาม</span>
         </button>
     </div>
 
     <!-- Tabs Scroll -->
     <div class="profile-tabs-scroll">
-        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เน€เธเธตเนเธขเธงเธเธฑเธ</div>
-        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ</div>
-        <div class="profile-tab" data-tab="services" data-i18n="tab_services">เธเธฃเธดเธเธฒเธฃ</div>
-        <div class="profile-tab" data-tab="location" data-i18n="tab_location">เธ—เธตเนเธญเธขเธนเน</div>
+        <div class="profile-tab active" data-tab="about" data-i18n="tab_about">เกี่ยวกับ</div>
+        <div class="profile-tab" data-tab="contact" data-i18n="tab_contact">ข้อมูลติดต่อ</div>
+        <div class="profile-tab" data-tab="services" data-i18n="tab_services">บริการ</div>
+        <div class="profile-tab" data-tab="location" data-i18n="tab_location">ที่อยู่</div>
     </div>
 
     <!-- Tab Panels -->
@@ -196,14 +196,14 @@
     </div>
 
     <!-- Shared Purchase List (always visible across tabs) -->
-    <div class="products-list-title" data-i18n="purchase_list_title">เธฃเธฒเธขเธเธฒเธฃเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญ</div>
+    <div class="products-list-title" data-i18n="purchase_list_title">รายการการรับซื้อ</div>
     <div id="productListContainer">
         <div class="shimmer" style="height: 100px; border-radius: 16px; margin-bottom: 12px;"></div>
         <div class="shimmer" style="height: 100px; border-radius: 16px; margin-bottom: 12px;"></div>
     </div>
     <button id="profileLoadMoreBtn" class="btn-load-more profile-load-more-btn" type="button">
         <span class="material-icons-outlined" aria-hidden="true">expand_more</span>
-        <span data-i18n="load_more">เธ”เธนเน€เธเธดเนเธกเน€เธ•เธดเธก</span>
+        <span data-i18n="load_more">ดูเพิ่มเติม</span>
     </button>
 
 </div>

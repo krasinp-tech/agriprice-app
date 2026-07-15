@@ -6,7 +6,7 @@
   <script src="../../js/auth/guard.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="register_now">เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ | Agriprice</title>
+  <title data-i18n="register_now">สมัครสมาชิก | Agriprice</title>
   <meta name="theme-color" content="#0B853C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -54,12 +54,12 @@
       <!-- CONTENT SHEET -->
       <div class="content">
         <header class="head">
-          <h1 class="h1" data-i18n="select_role_title">เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเธฃเธฐเน€เธ เธ—เธเธนเนเนเธเนเธเธฒเธเธเธญเธเธเธธเธ“</h1>
-          <p class="subtitle" data-i18n="select_role_sub">เน€เธฅเธทเธญเธเธเธฃเธฐเน€เธ เธ—เธเธนเนเนเธเนเน€เธเธทเนเธญเนเธซเนเธฃเธฐเธเธเธ•เธฑเนเธเธเนเธฒเธเธฒเธฃเนเธเนเธเธฒเธเธ—เธตเนเน€เธซเธกเธฒเธฐเธชเธก</p>
+          <h1 class="h1" data-i18n="select_role_title">กรุณาเลือกประเภทผู้ใช้งานของคุณ</h1>
+          <p class="subtitle" data-i18n="select_role_sub">เลือกประเภทผู้ใช้เพื่อให้ระบบตั้งค่าการใช้งานที่เหมาะสม</p>
         </header>
 
         <!-- ROLE CARDS -->
-        <section class="role-grid" aria-label="เน€เธฅเธทเธญเธเธเธฃเธฐเน€เธ เธ—เธเธนเนเนเธเน" data-i18n-aria-label="select_role_title">
+        <section class="role-grid" aria-label="เลือกประเภทผู้ใช้" data-i18n-aria-label="select_role_title">
 
           <!-- Farmer -->
           <button class="role-card" type="button" data-role="farmer" aria-pressed="false" id="roleFarmer">
@@ -78,8 +78,8 @@
                 <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
               </video>
             </div>
-            <div class="role-name" data-i18n="role_farmer_name">เน€เธเธฉเธ•เธฃเธเธฃ</div>
-            <div class="role-desc" data-i18n="role_farmer_desc">เธชเธณเธซเธฃเธฑเธเธเธนเนเธเธฅเธดเธ•เธซเธฃเธทเธญเน€เธเนเธฒเธเธญเธเธเธฅเธเธฅเธดเธ•เธ—เธฒเธเธเธฒเธฃเน€เธเธฉเธ•เธฃ</div>
+            <div class="role-name" data-i18n="role_farmer_name">เกษตรกร</div>
+            <div class="role-desc" data-i18n="role_farmer_desc">สำหรับผู้ผลิตหรือเจ้าของผลผลิตทางการเกษตร</div>
           </button>
 
           <!-- Buyer -->
@@ -99,15 +99,15 @@
                 <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
               </video>
             </div>
-            <div class="role-name" data-i18n="role_buyer_name">เธเธนเนเธฃเธฑเธเธเธทเนเธญ</div>
-            <div class="role-desc" data-i18n="role_buyer_desc">เธชเธณเธซเธฃเธฑเธเธเธนเนเธฃเธฑเธเธเธทเนเธญเธซเธฃเธทเธญเธเธนเนเธเธฃเธฐเธเธญเธเธเธฒเธฃเธฃเธฑเธเธเธทเนเธญเธเธฅเธเธฅเธดเธ•</div>
+            <div class="role-name" data-i18n="role_buyer_name">ผู้รับซื้อ</div>
+            <div class="role-desc" data-i18n="role_buyer_desc">สำหรับผู้รับซื้อหรือผู้ประกอบการรับซื้อผลผลิต</div>
           </button>
 
         </section>
 
         <!-- ACTIONS -->
         <div class="actions">
-          <button class="btn" id="nextBtn" type="button" disabled data-i18n="next_btn">เธ–เธฑเธ”เนเธ</button>
+          <button class="btn" id="nextBtn" type="button" disabled data-i18n="next_btn">ถัดไป</button>
           <p class="hint" id="hintText" aria-live="polite"></p>
         </div>
 
@@ -123,12 +123,12 @@
         <span class="check"></span>
       </div>
 
-      <h2 class="modal-title" id="modalTitle" data-i18n="confirm_reg_title">เธขเธทเธเธขเธฑเธเธเธฒเธฃเธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ</h2>
-      <p class="modal-text" id="modalText" data-i18n="confirm_reg_text">เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธชเธกเธฑเธเธฃเน€เธเนเธโ€ฆ</p>
+      <h2 class="modal-title" id="modalTitle" data-i18n="confirm_reg_title">ยืนยันการสมัครสมาชิก</h2>
+      <p class="modal-text" id="modalText" data-i18n="confirm_reg_text">คุณต้องการสมัครเป็น…</p>
 
       <div class="modal-actions">
-        <button class="m-btn m-ghost" id="cancelBtn" type="button" data-i18n="cancel">เธขเธเน€เธฅเธดเธ</button>
-        <button class="m-btn m-primary" id="confirmBtn" type="button" data-i18n="confirm">เธขเธทเธเธขเธฑเธ</button>
+        <button class="m-btn m-ghost" id="cancelBtn" type="button" data-i18n="cancel">ยกเลิก</button>
+        <button class="m-btn m-primary" id="confirmBtn" type="button" data-i18n="confirm">ยืนยัน</button>
       </div>
     </div>
   </div>

@@ -9,7 +9,7 @@
   <script src="../../../js/auth/guard.js"></script>
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title data-i18n="nav_notifications">เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ | AGRIPRICE</title>
+  <title data-i18n="nav_notifications">การแจ้งเตือน | AGRIPRICE</title>
   <meta name="theme-color" content="#0B853C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -35,20 +35,20 @@
 <body>
   <main class="notify-page">
     <header class="notify-header">
-      <a class="notify-back" href="../account.html" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
+      <a class="notify-back" href="../account.html" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
         <span class="material-icons-outlined">chevron_left</span>
       </a>
-      <h1 class="notify-title" data-i18n="manage_notifications_title">เธเธฑเธ”เธเธฒเธฃเธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ</h1>
+      <h1 class="notify-title" data-i18n="manage_notifications_title">จัดการการแจ้งเตือน</h1>
     </header>
 
-    <section class="notify-card" aria-label="เธ•เธฑเนเธเธเนเธฒเธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธ">
+    <section class="notify-card" aria-label="ตั้งค่าการแจ้งเตือน">
       <form id="notifyForm" class="notify-form">
-        <!-- เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธเธญเธเธเธดเธง -->
+        <!-- การแจ้งเตือนจองคิว -->
         <div class="notify-toggle-row">
           <div>
-            <div class="notify-label" data-i18n="notify_booking_label">เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธเธฒเธฃเธเธญเธเธเธดเธง</div>
-            <div class="notify-desc" data-i18n="notify_booking_desc">เนเธเนเธเน€เธกเธทเนเธญเธกเธตเธเธฒเธฃเธเธญเธเธเธดเธงเนเธซเธกเน
-              เธซเธฃเธทเธญเธเธฒเธฃเธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเธเธดเธงเธฃเธฑเธเธเธทเนเธญ</div>
+            <div class="notify-label" data-i18n="notify_booking_label">การแจ้งเตือนการจองคิว</div>
+            <div class="notify-desc" data-i18n="notify_booking_desc">แจ้งเมื่อมีการจองคิวใหม่
+              หรือการอัปเดตสถานะคิวรับซื้อ</div>
           </div>
           <label class="notify-switch">
             <input type="checkbox" id="pushBooking" />
@@ -56,11 +56,11 @@
           </label>
         </div>
 
-        <!-- เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเนเธเธ— -->
+        <!-- การแจ้งเตือนแชท -->
         <div class="notify-toggle-row">
           <div>
-            <div class="notify-label" data-i18n="notify_chat_label">เธเนเธญเธเธงเธฒเธกเนเธเธ—</div>
-            <div class="notify-desc" data-i18n="notify_chat_desc">เนเธเนเธเน€เธกเธทเนเธญเธกเธตเธเนเธญเธเธงเธฒเธกเนเธเธ—เนเธซเธกเนเธเธฒเธเธเธนเนเนเธเนเธญเธทเนเธ</div>
+            <div class="notify-label" data-i18n="notify_chat_label">ข้อความแชท</div>
+            <div class="notify-desc" data-i18n="notify_chat_desc">แจ้งเมื่อมีข้อความแชทใหม่จากผู้ใช้อื่น</div>
           </div>
           <label class="notify-switch">
             <input type="checkbox" id="pushChat" />
@@ -68,11 +68,11 @@
           </label>
         </div>
 
-        <!-- เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธเนเธฒเธงเธชเธฒเธฃเนเธฅเธฐเนเธเธฃเนเธกเธเธฑเนเธ -->
+        <!-- การแจ้งเตือนข่าวสารและโปรโมชั่น -->
         <div class="notify-toggle-row">
           <div>
-            <div class="notify-label" data-i18n="notify_promo_label">เธเนเธฒเธงเธชเธฒเธฃเนเธฅเธฐเนเธเธฃเนเธกเธเธฑเนเธ</div>
-            <div class="notify-desc" data-i18n="notify_promo_desc">เนเธเนเธเน€เธ•เธทเธญเธเธเนเธฒเธงเธชเธฒเธฃ เนเธเธฃเนเธกเธเธฑเนเธเธเธดเน€เธจเธฉ เนเธฅเธฐเธญเธฑเธเน€เธ”เธ•เธฃเธฒเธเธฒเธเธฅเธฒเธ
+            <div class="notify-label" data-i18n="notify_promo_label">ข่าวสารและโปรโมชั่น</div>
+            <div class="notify-desc" data-i18n="notify_promo_desc">แจ้งเตือนข่าวสาร โปรโมชั่นพิเศษ และอัปเดตราคากลาง
             </div>
           </div>
           <label class="notify-switch">
@@ -81,12 +81,12 @@
           </label>
         </div>
 
-        <!-- เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธเธฒเธเธฃเธฐเธเธ -->
+        <!-- การแจ้งเตือนจากระบบ -->
         <div class="notify-toggle-row">
           <div>
-            <div class="notify-label" data-i18n="notify_system_label">เธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธฃเธฐเธเธ</div>
+            <div class="notify-label" data-i18n="notify_system_label">การแจ้งเตือนระบบ</div>
             <div class="notify-desc" data-i18n="notify_system_desc">
-              เนเธเนเธเธเนเธญเธกเธนเธฅเธชเธณเธเธฑเธเน€เธเธตเนเธขเธงเธเธฑเธเธชเธ–เธฒเธเธฐเธฃเธฐเธเธเนเธฅเธฐเธเธงเธฒเธกเธเธฅเธญเธ”เธ เธฑเธขเธเธญเธเธเธฑเธเธเธต</div>
+              แจ้งข้อมูลสำคัญเกี่ยวกับสถานะระบบและความปลอดภัยของบัญชี</div>
           </div>
           <label class="notify-switch">
             <input type="checkbox" id="pushSystem" />
