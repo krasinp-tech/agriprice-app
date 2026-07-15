@@ -442,6 +442,7 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
         .from('offer_impressions')
         .select('*', { count: 'exact', head: true })
         .in('offer_id', userProductIds)
+        .or(`viewer_id.is.null,viewer_id.neq.${userId}`)
         .gte('created_at', startDate.toISOString());
       if (!impErr) {
         totalImpressions = impCount || 0;

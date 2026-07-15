@@ -188,7 +188,7 @@ router.get('/', async (req, res) => {
     const viewerId = optionalUser?.id;
     if (products.length > 0) {
       const impressionsToInsert = products
-        .filter(p => p.user_id !== viewerId)
+        .filter(p => !viewerId || String(p.user_id) !== String(viewerId))
         .map(p => ({
           offer_id: getOfferId(p),
           viewer_id: viewerId || null
