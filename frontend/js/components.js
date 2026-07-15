@@ -759,40 +759,41 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
   /* ---------------------------
     Topbar helpers
   ---------------------------- */
+  window.goBackOrFallback = window.goBackOrFallback || function goBackOrFallback(fallbackUrl) {
+    const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
+    const cap = window.Capacitor;
+    const platform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+    const isNative = ['android', 'ios'].includes(platform)
+      || ['capacitor:', 'ionic:'].includes(window.location.protocol)
+      || cap?.isNative === true;
+    const fallback = fallbackUrl || (baseRoot + (isNative ? 'home.html' : 'index.html'));
+    const sameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
+    const navigationEntries = typeof window.navigation?.entries === 'function'
+      ? window.navigation.entries().length
+      : 0;
+    const canGoBack = window.history.length > 1 || navigationEntries > 1 || sameOriginReferrer;
+
+    if (canGoBack) {
+      window.history.back();
+      return true;
+    }
+    window.navigateWithTransition?.(fallback) || window.location.assign(fallback);
+    return false;
+  };
+
   window.initSmartBackButtons = function initSmartBackButtons() {
-    const backButtons = document.querySelectorAll('.back-btn, #btnBack, #backBtn, [data-back]');
+    const backButtons = document.querySelectorAll('[data-back]');
 
     backButtons.forEach(btn => {
-      // Remove inline onclick if it exists (HTML side should ideally have this removed)
+      if (btn.dataset.smartBackReady === 'true') return;
+      btn.dataset.smartBackReady = 'true';
       btn.removeAttribute('onclick');
-      // Clean up previous event listeners by cloning the node
-      const newBtn = btn.cloneNode(true);
-      if (btn.parentNode) {
-        btn.parentNode.replaceChild(newBtn, btn);
-      }
-
-      newBtn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (e) => {
+        if (e.defaultPrevented) return;
         e.preventDefault();
-        const fallbackUrl = newBtn.dataset.fallback || newBtn.getAttribute('data-back');
-        const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
-        const cap = window.Capacitor;
-        const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
-        const isNative = (
-          window.location.protocol === 'capacitor:' ||
-          window.location.protocol === 'ionic:' ||
-          (window.Capacitor && window.Capacitor.isNative) ||
-          capPlatform === 'android' ||
-          capPlatform === 'ios' ||
-          !!cap?.isNative ||
-          (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
-        );
-        const finalFallback = fallbackUrl || (baseRoot + (isNative ? 'home.html' : 'index.html'));
-
-        if (document.referrer && document.referrer.includes(window.location.host)) {
-          window.history.back();
-        } else {
-          window.location.href = finalFallback;
-        }
+        const dataBack = btn.getAttribute('data-back');
+        const fallbackUrl = btn.dataset.fallback || (dataBack && dataBack !== '' ? dataBack : '');
+        window.goBackOrFallback(fallbackUrl);
       });
     });
   };
@@ -811,23 +812,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
           window.navigateWithTransition(options.backTo);
         }
         else {
-           if (document.referrer && document.referrer.includes(window.location.host)) {
-             history.back();
-           } else {
-             const baseRoot = typeof getRelativePrefixToRoot === 'function' ? getRelativePrefixToRoot() : '../../';
-             const cap = window.Capacitor;
-             const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
-             const isNative = (
-               window.location.protocol === 'capacitor:' ||
-               window.location.protocol === 'ionic:' ||
-               (window.Capacitor && window.Capacitor.isNative) ||
-               capPlatform === 'android' ||
-               capPlatform === 'ios' ||
-               !!cap?.isNative ||
-               (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
-             );
-             window.location.href = baseRoot + (isNative ? 'home.html' : 'index.html');
-           }
+           window.goBackOrFallback();
         }
       });
     }

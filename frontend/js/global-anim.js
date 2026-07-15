@@ -5,6 +5,33 @@
   if (window.__AGRIPRICE_GLOBAL_ANIM_READY) return;
   window.__AGRIPRICE_GLOBAL_ANIM_READY = true;
 
+  window.goBackOrFallback = window.goBackOrFallback || function goBackOrFallback(fallbackUrl) {
+    const cap = window.Capacitor;
+    const platform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
+    const isNative = ['android', 'ios'].includes(platform)
+      || ['capacitor:', 'ionic:'].includes(window.location.protocol)
+      || cap?.isNative === true;
+    const path = (window.location.pathname || '').replace(/\\/g, '/');
+    const pagesIndex = path.lastIndexOf('/pages/');
+    const depth = pagesIndex >= 0
+      ? path.slice(pagesIndex + 7).split('/').filter(Boolean).length - 1
+      : 0;
+    const rootPrefix = pagesIndex >= 0 ? '../'.repeat(Math.max(1, depth + 1)) : './';
+    const fallback = fallbackUrl || rootPrefix + (isNative ? 'home.html' : 'index.html');
+    const sameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
+    const navigationEntries = typeof window.navigation?.entries === 'function'
+      ? window.navigation.entries().length
+      : 0;
+
+    if (window.history.length > 1 || navigationEntries > 1 || sameOriginReferrer) {
+      window.history.back();
+      return true;
+    }
+    if (window.navigateWithTransition) window.navigateWithTransition(fallback);
+    else window.location.assign(fallback);
+    return false;
+  };
+
   function normalizeTheme(theme) {
     return theme === 'dark' ? 'dark' : 'light';
   }

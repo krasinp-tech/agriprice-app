@@ -10,7 +10,7 @@
     const input = byId('slipInput'), picker = byId('slipPicker'), pickerText = byId('slipPickerText');
     const preview = byId('slipPreview'), submit = byId('checkoutBtn'), timerDigits = byId('timerDigits');
     let qrReady = false, remaining = 900;
-    document.querySelector('.back-btn')?.addEventListener('click', () => history.back());
+    document.querySelector('.back-btn')?.addEventListener('click', () => window.goBackOrFallback('account.html'));
     picker?.addEventListener('click', () => input.click());
     input?.addEventListener('change', () => {
       const file = input.files?.[0];

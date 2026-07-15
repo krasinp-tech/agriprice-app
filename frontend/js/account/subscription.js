@@ -19,11 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Go back
   if (backBtn) {
     backBtn.addEventListener('click', () => {
-      if (document.referrer && document.referrer.includes(window.location.host)) {
-        window.history.back();
-      } else {
-        window.location.href = '../buyer/Dashboard/Dashboard1.html';
-      }
+      window.goBackOrFallback('account.html');
     });
   }
 
