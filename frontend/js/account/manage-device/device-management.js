@@ -33,7 +33,7 @@
     const sessions = rows.map((s) => ({
       id: String(s.id || s.session_id || ""),
       name: s.deviceName || s.device_name || s.name || t("unknown_device", "Unknown device"),
-      icon: s.icon || s.device_type || "devices",
+      icon: s.icon || s.device_icon || s.device_type || "devices",
       location: s.location || s.ip_address || t("unknown_location", "Unknown location"),
       lastActiveText: s.last_active_text || s.lastActive || s.last_active || s.created_at || "",
       isCurrent: s.isCurrent === true || s.current === true,
@@ -143,13 +143,20 @@
     const otherEl = document.getElementById("deviceOther");
     if (!currentEl && !otherEl) return;
 
+    if (currentEl) {
+      currentEl.innerHTML = `<div class="device-state">${escapeHtml(t("loading_devices", "กำลังโหลดข้อมูลอุปกรณ์..."))}</div>`;
+    }
+    if (otherEl) otherEl.innerHTML = "";
+
     try {
       const sessions = await fetchSessions();
       const current = sessions.find((s) => s.isCurrent);
       const others = sessions.filter((s) => !s.isCurrent);
 
       if (currentEl) {
-        currentEl.innerHTML = current ? renderDevice(current) : "";
+        currentEl.innerHTML = current
+          ? renderDevice(current)
+          : `<div class="device-state">${escapeHtml(t("no_device_sessions", "ยังไม่พบข้อมูลอุปกรณ์ กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่หนึ่งครั้ง"))}</div>`;
       }
       if (otherEl) {
         otherEl.innerHTML = others.length
@@ -158,8 +165,8 @@
       }
     } catch (err) {
       console.error("[DeviceMgmt] Load failed:", err);
-      if (otherEl) {
-        otherEl.innerHTML = `<div class="modal-error">${escapeHtml(err.message || "Failed to load device sessions")}</div>`;
+      if (currentEl) {
+        currentEl.innerHTML = `<div class="modal-error device-state">${escapeHtml(err.message || t("load_devices_failed", "ไม่สามารถโหลดข้อมูลอุปกรณ์ได้"))}</div>`;
       }
     }
   }
@@ -187,4 +194,5 @@
     bindEvents();
     loadSessions();
   });
+  window.addEventListener("agriprice:realtime:session", loadSessions);
 })();

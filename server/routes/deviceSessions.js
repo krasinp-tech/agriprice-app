@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('device_sessions')
-      .select('session_id, device_name, device_type, ip_address, user_agent, last_active, created_at')
+      .select('session_id, device_name, device_icon, ip_address, user_agent, last_active, created_at')
       .eq('user_id', req.user.id)
       .order('last_active', { ascending: false })
       .limit(20);
@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
     const result = rows.map((d) => ({
       id: d.session_id,
       name: d.device_name || 'Unknown Device',
-      icon: d.device_type || 'devices_other',
+      icon: d.device_icon || 'devices_other',
       location: d.ip_address || 'Unknown location',
       last_active_text: formatLastActive(d.last_active),
       created_at: d.created_at,

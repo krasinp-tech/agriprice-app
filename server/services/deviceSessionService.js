@@ -30,7 +30,7 @@ async function recordDeviceSession(supabase, userId, req) {
     const { data, error } = await supabase.from('device_sessions').insert({
       user_id: userId,
       device_name: name,
-      device_type: icon,
+      device_icon: icon,
       ip_address: ip,
       user_agent: ua,
       last_active: new Date().toISOString(),

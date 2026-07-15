@@ -34,7 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_slot_status_time
   ON public.bookings (slot_id, status, scheduled_time);
 
 CREATE INDEX IF NOT EXISTS idx_bookings_buyer_status_created
-  ON public.bookings (buyer_id, status, created_at DESC);
+  ON public.bookings (farmer_id, status, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_booking_vehicles_booking_id
   ON public.booking_vehicles (booking_id);

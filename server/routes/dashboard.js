@@ -28,8 +28,8 @@ function normalizeDashboardBooking(row) {
   const slot = firstRelation(row?.slot);
   const product = normalizeOffer(firstRelation(slot?.product) || firstRelation(row?.product) || firstRelation(row?.products));
   const offerOwnerId = product?.user_id || row?.offer_owner_id || null;
-  const requester = firstRelation(row?.farmer) || firstRelation(row?.buyer) || null;
-  const requesterId = row?.farmer_id || row?.requester_id || row?.buyer_id || requester?.profile_id || null;
+  const requester = firstRelation(row?.farmer) || null;
+  const requesterId = row?.farmer_id || row?.requester_id || requester?.profile_id || null;
   return {
     ...row,
     slot,
@@ -71,9 +71,9 @@ async function fetchDashboardBookings(userId, role) {
       status,
       created_at,
       quantity,
-      buyer_id,
+      farmer_id,
       slot_id,
-      buyer:profiles!buyer_id(profile_id, first_name, last_name, avatar),
+      farmer:profiles!farmer_id(profile_id, first_name, last_name, avatar),
       slot:offer_slots!slot_id(
         slot_id,
         offer_id,
@@ -82,7 +82,7 @@ async function fetchDashboardBookings(userId, role) {
     `);
 
   if (role === 'farmer') {
-    query = query.eq('buyer_id', userId);
+    query = query.eq('farmer_id', userId);
   } else {
     const slotIds = await getSlotIdsForOfferOwner(userId);
     if (slotIds.length === 0) return [];

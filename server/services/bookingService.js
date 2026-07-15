@@ -8,7 +8,7 @@ const BOOKING_OFFER_SELECT = NORMALIZED_OFFER_SELECT;
 
 const BOOKING_SELECT = `
   *,
-  buyer:profiles!buyer_id(profile_id, first_name, last_name, phone, avatar, address_line1, address_line2, map_link),
+  farmer:profiles!farmer_id(profile_id, first_name, last_name, phone, avatar, address_line1, address_line2, map_link),
   slot:offer_slots!slot_id(
     slot_id,
     offer_id,
@@ -57,8 +57,8 @@ function normalizeBooking(row) {
   const vehicles = Array.isArray(row.booking_vehicles) ? row.booking_vehicles : [];
   const offerOwnerId = product?.user_id || slot?.product?.user_id || row.offer_owner_id || null;
   const offerOwner = firstRelation(product?.profiles) || firstRelation(slot?.product?.profiles) || row.offer_owner || null;
-  const requester = row.farmer || row.buyer || null;
-  const requesterId = row.farmer_id || row.requester_id || row.buyer_id || requester?.profile_id || null;
+  const requester = row.farmer || null;
+  const requesterId = row.farmer_id || row.requester_id || requester?.profile_id || null;
   return {
     ...row,
     slot,
@@ -279,7 +279,7 @@ async function createBookingWithQueueValidation(farmerId, bookingData) {
     .insert({
       booking_no,
       queue_no,
-      buyer_id: farmerId,
+      farmer_id: farmerId,
       slot_id: numericSlotId,
       scheduled_time,
       quantity: parseFloat(expected_qty) || 0,
@@ -324,7 +324,7 @@ class BookingService {
       .order('created_at', { ascending: false });
 
     if (role === 'farmer') {
-      query = query.eq('buyer_id', userId);
+      query = query.eq('farmer_id', userId);
     } else if (role === 'buyer') {
       const slotIds = await getSlotIdsForOfferOwner(userId);
       if (slotIds.length === 0) return [];
@@ -348,7 +348,7 @@ class BookingService {
     if (!data) throw new Error('ไม่พบข้อมูลการจอง');
 
     const normalized = normalizeBooking(data);
-    if (String(normalized.buyer_id) !== String(userId) && String(normalized.offer_owner_id) !== String(userId)) {
+    if (String(normalized.farmer_id) !== String(userId) && String(normalized.offer_owner_id) !== String(userId)) {
       throw createHttpError('Forbidden', 403);
     }
 
@@ -419,7 +419,7 @@ class BookingService {
       return booking; // already in this status
     }
 
-    const requesterId = booking.buyer_id;
+    const requesterId = booking.farmer_id;
     const offerOwnerId = booking.offer_owner_id;
 
     if (role === 'farmer' && nextStatus !== 'cancel') {
@@ -523,7 +523,7 @@ class BookingService {
     if (!data) throw createHttpError('สถานะการจองมีการเปลี่ยนแปลง กรุณาโหลดข้อมูลใหม่', 409);
 
     await notificationService.createNotification(
-      booking.buyer_id,
+      booking.farmer_id,
       'booking',
       'เช็คอินคิวสำเร็จ',
       `คิวเลขที่ ${booking.queue_no || '-'} (ใบจองเลขที่ ${booking.booking_no}) ได้รับการเช็คอินแล้ว`,
