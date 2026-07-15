@@ -69,8 +69,14 @@
     if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0f1115' : '#0B853C');
 
     if (options.persist) {
-      localStorage.setItem('agriprice_theme', nextTheme);
+      if (window.NativeRuntime?.setPreference) {
+        window.NativeRuntime.setPreference('agriprice_theme', nextTheme);
+      } else {
+        localStorage.setItem('agriprice_theme', nextTheme);
+      }
     }
+
+    window.NativeRuntime?.applySystemBars?.(nextTheme);
 
     if (options.broadcast && window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'agriprice:theme', theme: nextTheme }, '*');
@@ -84,6 +90,10 @@
     if (event.key === 'agriprice_theme') {
       applyTheme(event.newValue || getSystemTheme());
     }
+  });
+
+  window.addEventListener('agriprice:preferences-ready', () => {
+    applyTheme(getPreferredTheme());
   });
 
   if (window.matchMedia) {

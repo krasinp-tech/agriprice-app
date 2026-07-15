@@ -228,7 +228,7 @@
 
 .calendar-weekday {
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #666;
   padding: 4px 0;
@@ -246,7 +246,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   background: #fff;
-  min-height: 32px;
+  min-height: var(--tap-target-min);
 }
 
 .calendar-day:hover:not(.disabled):not(.other-month) {
@@ -477,7 +477,7 @@
   .calendar-day {
     font-size: 14px;
     border-radius: 10px;
-    min-height: 40px;
+    min-height: var(--tap-target-min);
   }
 
   .timeslots-container {

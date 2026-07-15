@@ -280,6 +280,11 @@ function init() {
   };
 
   if (window.initPullToRefresh) window.initPullToRefresh(handleRefresh);
+  let realtimeBookingTimer = null;
+  window.addEventListener('agriprice:realtime:booking', () => {
+    clearTimeout(realtimeBookingTimer);
+    realtimeBookingTimer = setTimeout(handleRefresh, 120);
+  });
 
   fetchBookings().then((data) => {
     all = Array.isArray(data) ? data.slice() : [];

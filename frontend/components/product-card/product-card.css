@@ -17,7 +17,6 @@
     margin: 0 auto 16px;
     cursor: pointer;
     transition: box-shadow 0.25s ease, transform 0.2s ease;
-    animation: fadeIn 0.3s ease forwards;
 }
 
 .product-card:hover {
@@ -53,7 +52,7 @@
 .status-badge {
     padding: 4px 10px;
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     height: max-content;
     white-space: nowrap;
@@ -114,6 +113,12 @@
     font-weight: 600;
     color: var(--text-main, #333333);
     margin-top: 2px;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+}
+
+.product-card :where(.pc-header, .pc-info, .pc-prices, .pc-actions) > * {
+    min-width: 0;
 }
 
 /* Favorite button */
@@ -275,7 +280,6 @@
 
 /* Animation */
 .product-card {
-    animation: fadeIn 0.3s ease forwards;
 }
 
 /* ================================
@@ -299,7 +303,7 @@
     }
 
     .seller-sub, .pc-sub {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .grade, .pc-grade-letter {
@@ -307,11 +311,11 @@
     }
 
     .price, .pc-grade-price {
-        font-size: 10px;
+        font-size: 12px;
     }
 
     .meta-row, .pc-footer {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .btn-contact, .pc-btn-contact,

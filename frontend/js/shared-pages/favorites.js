@@ -244,15 +244,7 @@
         if (kind === 'seller') {
           (async () => {
             try {
-              if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-              const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-              const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
-              if (currentBase && token) {
-                await fetch(currentBase + '/api/favorites/' + encodeURIComponent(id), {
-                  method: 'DELETE',
-                  headers: { 'Authorization': 'Bearer ' + token }
-                });
-              }
+              await helpers.removeSellerFavorite(id);
             } catch (err) {
               console.error('[FavoritesPage] Failed to delete from backend:', err);
             } finally {

@@ -45,8 +45,9 @@
     },
     "Keyboard": {
       "resize": "body",
-      "style": "DARK",
-      "resizeOnFullScreen": true
+      "style": "DEFAULT",
+      "resizeOnFullScreen": true,
+      "autoBackdropColor": "auto"
     },
     "FirebaseAuthentication": {
       "skipNativeAuth": false,

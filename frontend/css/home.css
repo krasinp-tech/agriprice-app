@@ -393,7 +393,14 @@
     font-weight: 600;
     color: var(--text-main, #333333);
     margin-top: 4px;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.25;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
     text-decoration: none !important;
     letter-spacing: -0.1px;
 }
@@ -533,7 +540,7 @@
 }
 
 .news-chip {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 8px;
@@ -566,7 +573,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted, #7e7e7e);
 }
 
@@ -751,7 +758,7 @@
 }
 
 .gov-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-muted);
 }
@@ -819,6 +826,14 @@
     padding: 20px 16px 10px;
 }
 
+/* Keep every Home section title on the same vertical rhythm. */
+.app-container .product-tabs-section,
+.app-container .products-section,
+.app-container .banner-section,
+.app-container .favorites-section {
+    padding-top: 0;
+}
+
 /* section ที่มี .container wrapper อยู่แล้ว → ล้าง horizontal padding ออก */
 .app-container .container > .section-header {
     padding-left: 0;
@@ -830,6 +845,11 @@
     font-weight: 800;
     color: var(--text-main);
     margin: 0;
+    letter-spacing: -0.4px;
+}
+
+.app-container .favorites-section .section-title {
+    font-size: 17px;
     letter-spacing: -0.4px;
 }
 
@@ -941,7 +961,7 @@
 }
 
 .gov-price-source {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-dim);
     margin: 0;
     text-align: right;

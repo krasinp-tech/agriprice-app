@@ -14,6 +14,9 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 - `migrations/zz-fix-chat-device-unique-constraints.sql`: Adds final chat-room and push-token uniqueness fixes used by verification.
 - `migrations/bug-freeze-booking-queue-sequence.sql`: Adds atomic queue sequence support for booking slots.
 - `migrations/add-booking-cancel-info-and-chat-deletions.sql`: Adds booking cancellation metadata and per-user chat deletion tracking.
+- `migrations/seed-thai-fruits-and-varieties.sql`: Seeds the reusable Thai fruit and variety catalog used by the buy-offer dropdown.
+- `migrations/normalize-compound-fruit-products.sql`: Separates legacy combined product/variety names without breaking existing offers.
+- `migrations/finalize-project-database.sql`: Final compatibility pass for PRO dates, follow counters, constraints, and indexes used by the current API.
 - `maintenance/SUPABASE_OPTIMIZE.sql`: Safe indexes and update timestamp triggers for the current normalized schema.
 - `maintenance/verify_submission_constraints.sql`: Final check for unique constraints required by normalized tables.
 
@@ -28,8 +31,15 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 3. Run `migrations/zz-fix-chat-device-unique-constraints.sql`.
 4. Run `migrations/bug-freeze-booking-queue-sequence.sql`.
 5. Run `migrations/add-booking-cancel-info-and-chat-deletions.sql`.
-6. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
-7. Run `maintenance/verify_submission_constraints.sql` and confirm the final SELECT returns all expected constraints.
-8. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
+6. Run `migrations/separate-profile-favorites-from-follows.sql`.
+7. Run `migrations/seed-thai-fruits-and-varieties.sql`.
+8. Run `migrations/normalize-compound-fruit-products.sql`.
+9. Run `migrations/create-payment-submissions.sql`.
+10. Run `migrations/add-pro-subscription-dates.sql`.
+11. Run `migrations/exclude-own-offer-impressions.sql`.
+12. Run `migrations/finalize-project-database.sql`.
+13. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
+14. Run `maintenance/verify_submission_constraints.sql` and confirm every returned status is `ok`.
+15. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
 
 The files in `schemas/` are references for documentation. For an existing Supabase project, use the migration files above instead of recreating all tables.

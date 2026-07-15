@@ -63,6 +63,20 @@
     }
   }
 
+  async function addSellerFavorite(id) {
+    const userId = resolveId(id);
+    if (!userId || !window.api?.call) return false;
+    await window.api.call('POST', '/api/favorites', { user_id: userId });
+    return true;
+  }
+
+  async function removeSellerFavorite(id) {
+    const userId = resolveId(id);
+    if (!userId || !window.api?.call) return false;
+    await window.api.call('DELETE', `/api/favorites/${encodeURIComponent(userId)}`);
+    return true;
+  }
+
   function loadFavoritesFromStore() {
     const store = window.FavoritesStore;
     const arr = store?.read?.() || [];
@@ -108,6 +122,8 @@
     getRole,
     getRelativePrefixToPages,
     fetchFavoritesFromApi,
+    addSellerFavorite,
+    removeSellerFavorite,
     loadFavoritesFromStore,
   };
 })();

@@ -93,10 +93,14 @@ router.post('/:userId', authMiddleware, async (req, res) => {
     }
 
     // อัปเดตตัวเลข followers_count และ following_count
-    try {
-      await supabaseAdmin.rpc('increment_follower_count', { target_id: followingId });
-      await supabaseAdmin.rpc('increment_following_count', { target_id: followerId });
-    } catch (e) { }
+    const [followerCountResult, followingCountResult] = await Promise.all([
+      supabaseAdmin.rpc('increment_follower_count', { target_id: followingId }),
+      supabaseAdmin.rpc('increment_following_count', { target_id: followerId }),
+    ]);
+    const counterError = followerCountResult.error || followingCountResult.error;
+    if (counterError) {
+      console.warn('[FollowAPI] Counter increment failed:', counterError.message);
+    }
 
     res.json(response.success('Follow สำเร็จ'));
   } catch (e) {
@@ -112,20 +116,27 @@ router.delete('/:userId', authMiddleware, async (req, res) => {
     const followerId = req.user.id;
     const followingId = req.params.userId;
 
-    const { error } = await supabaseAdmin
+    const { data: deletedRows, error } = await supabaseAdmin
       .from('follows')
       .delete()
       .eq('follower_id', followerId)
-      .eq('following_id', followingId);
+      .eq('following_id', followingId)
+      .select('follower_id');
 
     if (error) throw error;
 
+    if (!deletedRows?.length) {
+      return res.json(response.success('Unfollow เธชเธณเน€เธฃเนเธ'));
+    }
+
     // อัปเดตตัวเลขลดลง
-    try {
-      await supabaseAdmin.rpc('decrement_follower_count', { target_id: followingId });
-      await supabaseAdmin.rpc('decrement_following_count', { target_id: followerId });
-    } catch (e) {
-      console.warn('[FollowAPI] Counter decrement failed:', e.message);
+    const [followerCountResult, followingCountResult] = await Promise.all([
+      supabaseAdmin.rpc('decrement_follower_count', { target_id: followingId }),
+      supabaseAdmin.rpc('decrement_following_count', { target_id: followerId }),
+    ]);
+    const counterError = followerCountResult.error || followingCountResult.error;
+    if (counterError) {
+      console.warn('[FollowAPI] Counter decrement failed:', counterError.message);
     }
 
     res.json(response.success('Unfollow สำเร็จ'));

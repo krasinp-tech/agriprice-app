@@ -139,4 +139,116 @@
 		return '';
 	};
 	window.resolveProfileId = window.resolveUserId;
+
+	// --- CAPACITOR NATIVE RUNTIME ---
+	// Centralized optional enhancements. Every method safely falls back on web.
+	window.NativeRuntime = window.NativeRuntime || (() => {
+		const plugins = () => window.Capacitor?.Plugins || {};
+		const isNative = () => {
+			const cap = window.Capacitor;
+			if (!cap) return false;
+			if (typeof cap.isNativePlatform === 'function') return cap.isNativePlatform();
+			const platform = typeof cap.getPlatform === 'function' ? cap.getPlatform() : '';
+			return platform === 'android' || platform === 'ios' || !!cap.isNative;
+		};
+
+		const PREFERENCE_KEYS = ['agriprice_theme', 'lang', 'location'];
+		let initialized = false;
+
+		async function setPreference(key, value) {
+			if (value == null) localStorage.removeItem(key);
+			else localStorage.setItem(key, String(value));
+			if (!isNative() || !plugins().Preferences) return;
+			try {
+				if (value == null) await plugins().Preferences.remove({ key });
+				else await plugins().Preferences.set({ key, value: String(value) });
+			} catch (_) {}
+		}
+
+		async function hydratePreferences() {
+			if (!isNative() || !plugins().Preferences) return;
+			for (const key of PREFERENCE_KEYS) {
+				try {
+					const { value } = await plugins().Preferences.get({ key });
+					const webValue = localStorage.getItem(key);
+					if (value != null) localStorage.setItem(key, value);
+					else if (webValue != null) await plugins().Preferences.set({ key, value: webValue });
+				} catch (_) {}
+			}
+
+			const restoredTheme = localStorage.getItem('agriprice_theme');
+			if (restoredTheme) document.documentElement.setAttribute('data-theme', restoredTheme);
+			window.dispatchEvent(new CustomEvent('agriprice:preferences-ready'));
+		}
+
+		async function applySystemBars(theme) {
+			if (!isNative() || !plugins().StatusBar) return;
+			try {
+				await plugins().StatusBar.setStyle({ style: theme === 'dark' ? 'LIGHT' : 'DARK' });
+			} catch (_) {}
+		}
+
+		async function share(options = {}) {
+			const payload = {
+				title: options.title || 'AGRIPRICE',
+				text: options.text || '',
+				url: options.url || window.location.href,
+				dialogTitle: options.dialogTitle || 'แชร์ผ่าน'
+			};
+			if (plugins().Share) return plugins().Share.share(payload);
+			if (navigator.share) return navigator.share(payload);
+			if (navigator.clipboard && payload.url) {
+				await navigator.clipboard.writeText(payload.url);
+				return { activityType: 'clipboard' };
+			}
+			return null;
+		}
+
+		async function init() {
+			if (initialized) return;
+			initialized = true;
+			await hydratePreferences();
+
+			const { Network, Keyboard, SplashScreen } = plugins();
+			if (isNative() && Network) {
+				const applyNetwork = (status) => {
+					document.documentElement.classList.toggle('is-offline', !status.connected);
+					window.dispatchEvent(new CustomEvent('agriprice:native-network', { detail: status }));
+				};
+				try {
+					applyNetwork(await Network.getStatus());
+					await Network.addListener('networkStatusChange', applyNetwork);
+				} catch (_) {}
+			}
+
+			if (isNative() && Keyboard) {
+				try {
+					await Keyboard.addListener('keyboardWillShow', (info) => {
+						document.documentElement.classList.add('keyboard-open');
+						document.documentElement.style.setProperty('--keyboard-height', `${info.keyboardHeight || 0}px`);
+						setTimeout(() => document.activeElement?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }), 80);
+					});
+					await Keyboard.addListener('keyboardWillHide', () => {
+						document.documentElement.classList.remove('keyboard-open');
+						document.documentElement.style.setProperty('--keyboard-height', '0px');
+					});
+				} catch (_) {}
+			}
+
+			await applySystemBars(document.documentElement.getAttribute('data-theme') || 'light');
+			if (isNative() && SplashScreen) {
+				try { await SplashScreen.hide(); } catch (_) {}
+			}
+		}
+
+		return { init, isNative, setPreference, applySystemBars, share };
+	})();
+	window.shareAgriPrice = (options) => window.NativeRuntime.share(options);
+
+	const startNativeRuntime = () => window.NativeRuntime.init();
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', startNativeRuntime, { once: true });
+	} else {
+		startNativeRuntime();
+	}
 })();

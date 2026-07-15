@@ -1,11 +1,6 @@
-.ud-page, .device-card, .ud-card, .acc-content, .profile-card {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.38s cubic-bezier(.4,0,.2,1), transform 0.38s cubic-bezier(.4,0,.2,1);
-}
-.ud-page.show, .device-card.show, .ud-card.show, .acc-content.show, .profile-card.show {
+.ud-page, .device-card {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 .modal {
   opacity: 0;
@@ -40,6 +35,16 @@
   font-size: 15px;
   color: #888;
   margin-bottom: 18px;
+}
+.device-state {
+  padding: 18px 12px;
+  border-radius: 12px;
+  background: var(--bg-page, #f7f7f8);
+  color: var(--text-muted, #777);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.55;
+  text-align: center;
 }
 .device-other-title {
   font-size: 16px;

@@ -95,6 +95,9 @@
   }
   window.addEventListener('online', () => setOfflineState(false));
   window.addEventListener('offline', () => setOfflineState(true));
+  window.addEventListener('agriprice:native-network', (event) => {
+    setOfflineState(event.detail?.connected === false);
+  });
 
   async function fetchWithRetry(url, opts, attempts) {
     let lastError;

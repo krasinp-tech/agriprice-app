@@ -325,11 +325,173 @@ document.addEventListener("DOMContentLoaded", function () {
     const aboutEditor = document.getElementById('aboutEditor');
     const phoneEditor = document.getElementById('phoneEditor');
     const emailEditor = document.getElementById('emailEditor');
+    const linkTypeEditor = document.getElementById('linkTypeEditor');
     const linkEditor = document.getElementById('linkEditor');
+    const linkEditorHint = document.getElementById('linkEditorHint');
     const addr1Editor = document.getElementById('addr1Editor');
     const addr2Editor = document.getElementById('addr2Editor');
     const mapLatEditor = document.getElementById('mapLatEditor');
     const mapLngEditor = document.getElementById('mapLngEditor');
+
+    function setupAddressAutocomplete(input) {
+        if (!input) return;
+
+        let geography = null;
+        let loadPromise = null;
+        let activeIndex = -1;
+        let debounceTimer = null;
+
+        const normalize = value => String(value || '')
+            .toLocaleLowerCase('th-TH')
+            .replace(/(ตำบล|ต\.|แขวง|อำเภอ|อ\.|เขต|จังหวัด|จ\.)/g, '')
+            .replace(/\s+/g, '')
+            .trim();
+
+        const loadGeography = () => {
+            if (geography) return Promise.resolve(geography);
+            if (!loadPromise) {
+                loadPromise = fetch('../../assets/data/thai-geography.json')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Unable to load Thai geography data');
+                        return response.json();
+                    })
+                    .then(rows => (geography = Array.isArray(rows) ? rows : []))
+                    .catch(error => {
+                        loadPromise = null;
+                        console.error('[MyProfile] Geography load failed:', error);
+                        return [];
+                    });
+            }
+            return loadPromise;
+        };
+
+        const closeSuggestions = () => {
+            input.parentElement.querySelector('.profile-address-suggestions')?.remove();
+            input.setAttribute('aria-expanded', 'false');
+            input.removeAttribute('aria-activedescendant');
+            activeIndex = -1;
+        };
+
+        const selectSuggestion = row => {
+            const isBangkok = Number(row.provinceCode) === 10;
+            const subdistrictPrefix = isBangkok ? 'แขวง' : 'ตำบล';
+            const districtPrefix = isBangkok ? 'เขต' : 'อำเภอ';
+            const provinceText = isBangkok ? row.provinceNameTh : `จังหวัด${row.provinceNameTh}`;
+            input.value = `${subdistrictPrefix}${row.subdistrictNameTh} ${districtPrefix}${row.districtNameTh} ${provinceText} ${row.postalCode}`;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            closeSuggestions();
+        };
+
+        const renderSuggestions = async () => {
+            const query = normalize(input.value);
+            closeSuggestions();
+            if (!query) return;
+
+            const rows = await loadGeography();
+            if (normalize(input.value) !== query) return;
+
+            const matches = rows.map(row => {
+                const fields = [
+                    normalize(row.subdistrictNameTh),
+                    normalize(row.districtNameTh),
+                    normalize(row.provinceNameTh),
+                    normalize(row.subdistrictNameEn),
+                    normalize(row.districtNameEn),
+                    normalize(row.provinceNameEn),
+                    String(row.postalCode || '')
+                ];
+                const exact = fields.findIndex(value => value === query);
+                const prefix = fields.findIndex(value => value.startsWith(query));
+                const includes = fields.findIndex(value => value.includes(query));
+                const score = exact >= 0 ? exact : prefix >= 0 ? 10 + prefix : includes >= 0 ? 30 + includes : 999;
+                return { row, score };
+            })
+                .filter(item => item.score < 999)
+                .sort((a, b) => a.score - b.score || a.row.subdistrictNameTh.localeCompare(b.row.subdistrictNameTh, 'th'))
+                .slice(0, 12);
+
+            if (!matches.length) return;
+
+            const list = document.createElement('div');
+            list.id = 'profileAddressSuggestions';
+            list.className = 'profile-address-suggestions';
+            list.setAttribute('role', 'listbox');
+
+            matches.forEach(({ row }, index) => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.id = `profileAddressOption${index}`;
+                option.className = 'profile-address-suggestion';
+                option.setAttribute('role', 'option');
+                option.innerHTML = `<strong></strong><small></small>`;
+                option.querySelector('strong').textContent = `${row.subdistrictNameTh}, ${row.districtNameTh}`;
+                option.querySelector('small').textContent = `${row.provinceNameTh} · ${row.postalCode}`;
+                option.addEventListener('pointerdown', event => event.preventDefault());
+                option.addEventListener('click', () => selectSuggestion(row));
+                list.appendChild(option);
+            });
+
+            input.parentElement.appendChild(list);
+            input.setAttribute('aria-expanded', 'true');
+        };
+
+        const updateActiveOption = options => {
+            options.forEach((option, index) => {
+                const active = index === activeIndex;
+                option.classList.toggle('active', active);
+                option.setAttribute('aria-selected', String(active));
+            });
+            const active = options[activeIndex];
+            if (active) {
+                input.setAttribute('aria-activedescendant', active.id);
+                active.scrollIntoView({ block: 'nearest' });
+            }
+        };
+
+        input.addEventListener('focus', loadGeography);
+        input.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(renderSuggestions, 120);
+        });
+        input.addEventListener('keydown', event => {
+            const options = [...input.parentElement.querySelectorAll('.profile-address-suggestion')];
+            if (!options.length) return;
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                activeIndex = event.key === 'ArrowDown'
+                    ? (activeIndex + 1) % options.length
+                    : (activeIndex - 1 + options.length) % options.length;
+                updateActiveOption(options);
+            } else if (event.key === 'Enter' && activeIndex >= 0) {
+                event.preventDefault();
+                options[activeIndex].click();
+            } else if (event.key === 'Escape') {
+                closeSuggestions();
+            }
+        });
+        input.addEventListener('blur', () => setTimeout(closeSuggestions, 100));
+    }
+
+    setupAddressAutocomplete(addr2Editor);
+
+    const contactTypeConfig = {
+        line: { placeholder: 'กรอก LINE ID', hint: 'กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์', inputMode: 'text' },
+        facebook: { placeholder: 'ชื่อเพจ ชื่อผู้ใช้ หรือลิงก์ Facebook', hint: 'ใส่ชื่อเพจหรือชื่อผู้ใช้ได้', inputMode: 'text' },
+        website: { placeholder: 'example.com', hint: 'กรอกชื่อเว็บไซต์หรือลิงก์', inputMode: 'url' },
+        email: { placeholder: 'name@example.com', hint: 'กรอกอีเมลสำหรับติดต่อเพิ่มเติม', inputMode: 'email' },
+        phone: { placeholder: '0812345678', hint: 'กรอกเบอร์โทรศัพท์เพิ่มเติม', inputMode: 'tel' }
+    };
+
+    function updateContactEditor() {
+        if (!linkTypeEditor || !linkEditor) return;
+        const config = contactTypeConfig[linkTypeEditor.value] || contactTypeConfig.line;
+        linkEditor.placeholder = config.placeholder;
+        linkEditor.inputMode = config.inputMode;
+        if (linkEditorHint) linkEditorHint.textContent = config.hint;
+    }
+
+    linkTypeEditor?.addEventListener('change', updateContactEditor);
+    updateContactEditor();
 
     function openEditModal() {
         if (!editAboutModal) return;
@@ -341,6 +503,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (linkEditor) {
             const firstLink = Array.isArray(profileData.links) ? profileData.links[0] : null;
             linkEditor.value = firstLink ? (firstLink.url || firstLink.href || firstLink) : '';
+            if (linkTypeEditor) linkTypeEditor.value = firstLink?.link_type || firstLink?.type || 'line';
+            updateContactEditor();
         }
         addr1Editor.value = profileData.location?.line1 || '';
         addr2Editor.value = profileData.location?.line2 || '';
@@ -364,10 +528,22 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         editAboutModal.hidden = false;
+        document.body.classList.add('profile-editor-open');
     }
 
     if (editAboutBtn) editAboutBtn.addEventListener("click", openEditModal);
-    if (cancelAboutBtn) cancelAboutBtn.addEventListener("click", () => { editAboutModal.hidden = true; });
+    function closeEditModal() {
+        if (!editAboutModal) return;
+        editAboutModal.hidden = true;
+        document.body.classList.remove('profile-editor-open');
+    }
+
+    if (cancelAboutBtn) cancelAboutBtn.addEventListener("click", closeEditModal);
+    editAboutModal?.querySelectorAll('[data-close-profile-modal]').forEach(button => button.addEventListener('click', closeEditModal));
+    editAboutModal?.querySelector('.modal-backdrop')?.addEventListener('click', closeEditModal);
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && editAboutModal && !editAboutModal.hidden) closeEditModal();
+    });
 
     // Modal tab switching logic
     document.querySelectorAll('.modal-tab-btn').forEach(btn => {
@@ -384,9 +560,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (saveAboutBtn) {
         saveAboutBtn.addEventListener("click", async () => {
             const btn = saveAboutBtn;
-            const originalText = btn.textContent;
+            const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.textContent = 'กำลังบันทึก...';
+            btn.innerHTML = '<span class="material-icons-outlined">hourglass_top</span><span>กำลังบันทึก...</span>';
 
             const selectedServices = Array.from(document.querySelectorAll('#servicesEditor input[type="checkbox"]:checked')).map(cb => cb.value);
 
@@ -400,7 +576,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 phone: phoneEditor.value || '',
                 email: emailEditor.value || '',
                 links: JSON.stringify((linkEditor && linkEditor.value.trim())
-                    ? [{ link_type: 'website', url: linkEditor.value.trim() }]
+                    ? [{ link_type: linkTypeEditor?.value || 'line', url: linkEditor.value.trim() }]
                     : []),
                 lat: mapLatEditor.value ? parseFloat(mapLatEditor.value) : null,
                 lng: mapLngEditor.value ? parseFloat(mapLngEditor.value) : null,
@@ -411,7 +587,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await api.updateProfile(fields);
                 if (res) {
                     await syncProfile();
-                    editAboutModal.hidden = true;
+                    closeEditModal();
                     if (window.showToast) window.showToast('บันทึกข้อมูลเรียบร้อยแล้ว');
                 } else {
                     throw new Error('Update failed');
@@ -421,7 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (window.showToast) window.showToast('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่');
             } finally {
                 btn.disabled = false;
-                btn.textContent = originalText;
+                btn.innerHTML = originalHtml;
             }
         });
     }
@@ -572,5 +748,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Initial load
+    let realtimeOfferTimer = null;
+    window.addEventListener('agriprice:realtime:offer', () => {
+        clearTimeout(realtimeOfferTimer);
+        realtimeOfferTimer = setTimeout(loadProducts, 120);
+    });
+
     init();
 });

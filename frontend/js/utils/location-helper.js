@@ -46,12 +46,18 @@
     async function getUserLocation(options = {}) {
         const DEBUG = !!window.AGRIPRICE_DEBUG;
         const prompt = options.prompt !== false;
+        const allowDefault = options.allowDefault !== false;
         const timeoutMs = Number(options.timeoutMs || 5000);
 
         const saveLoc = (loc) => {
             if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
                 try {
-                    localStorage.setItem('location', JSON.stringify(loc));
+                    const value = JSON.stringify(loc);
+                    if (window.NativeRuntime?.setPreference) {
+                        window.NativeRuntime.setPreference('location', value);
+                    } else {
+                        localStorage.setItem('location', value);
+                    }
                 } catch (_) { }
             }
             return loc;
@@ -72,6 +78,12 @@
                         const pos = await Geo.getCurrentPosition({ enableHighAccuracy: false, timeout: 10000 });
                         return saveLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
                     }
+                }
+
+                // AgriPermission already performed the platform/browser request.
+                // Do not immediately trigger a duplicate geolocation prompt after denial.
+                if (!res.granted) {
+                    return allowDefault ? saveLoc({ lat: 13.7563, lng: 100.5018 }) : null;
                 }
             }
 
@@ -119,11 +131,11 @@
                 if (loc) return saveLoc(loc);
             }
 
-            // 3. DEFAULT FALLBACK: Bangkok, Thailand (guarantees coordinates without another network request)
-            return saveLoc({ lat: 13.7563, lng: 100.5018 });
+            // 3. Optional map fallback. Feeds can opt out to avoid false distances.
+            return allowDefault ? saveLoc({ lat: 13.7563, lng: 100.5018 }) : null;
         } catch (err) {
             if (DEBUG) console.warn("[LocationHelper] Error:", err);
-            return prompt ? saveLoc({ lat: 13.7563, lng: 100.5018 }) : null;
+            return prompt && allowDefault ? saveLoc({ lat: 13.7563, lng: 100.5018 }) : null;
         }
     }
 

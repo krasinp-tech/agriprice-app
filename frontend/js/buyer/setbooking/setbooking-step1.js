@@ -190,7 +190,11 @@
         if (res.ok) {
           const json = await res.json();
           if ((json.data || []).length > 0) {
-            items = json.data.map(p => ({ id: p.fruit_id || p.name, fruit_id: p.fruit_id, name: p.name }));
+            items = json.data.map(p => ({
+              id: p.product_id || p.fruit_id || p.id || p.name,
+              fruit_id: p.product_id || p.fruit_id || p.id,
+              name: p.name || p.product_name
+            }));
           }
         }
       } catch (e) {
@@ -367,7 +371,8 @@
   // ===================== VARIETY COMBO EVENTS =====================
   async function refreshVarietyMenu() {
     if (!state.selectedProduct?.name) return;
-    const items = await loadVarieties(state.selectedProduct.name, varietyInput.value || "");
+    const productKey = state.selectedProduct.fruit_id || state.selectedProduct.id || state.selectedProduct.name;
+    const items = await loadVarieties(String(productKey), varietyInput.value || "");
     renderMenu(varietyMenu, items, (it) => {
       state.selectedVariety = { id: it.id, variety_id: it.variety_id || it.id, name: it.name };
       const displayName = window.i18nT ? window.i18nT(it.name, it.name) : it.name;
@@ -543,16 +548,16 @@
                     if (agreed) {
                       window.location.href = '../../../pages/account/subscription.html';
                     } else {
-                      window.history.back();
+                      window.location.href = '../myprofile.html';
                     }
                   });
                 } else {
                   window.showAlert?.(confirmMsg, 'info');
-                  window.history.back();
+                  window.location.href = '../myprofile.html';
                 }
               } else {
                 alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));
-                window.history.back();
+                window.location.href = '../myprofile.html';
               }
               return; // หยุดการแสดงผล step1
             }

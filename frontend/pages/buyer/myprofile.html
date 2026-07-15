@@ -149,8 +149,14 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content premium-modal">
         <div class="modal-header-premium">
-            <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
-            <button type="button" class="modal-close-btn" onclick="document.getElementById('editAboutModal').hidden = true;">
+            <div class="edit-profile-heading">
+                <span class="edit-profile-heading-icon material-icons-outlined">manage_accounts</span>
+                <div>
+                    <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
+                    <p>ทำให้ข้อมูลร้านครบ เพื่อให้เกษตรกรติดต่อได้ง่ายขึ้น</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" data-close-profile-modal aria-label="ปิดหน้าแก้ไขโปรไฟล์">
                 <span class="material-icons-outlined">close</span>
             </button>
         </div>
@@ -158,27 +164,32 @@
         <!-- Tab Buttons inside Modal -->
         <div class="modal-tab-bar">
             <button type="button" class="modal-tab-btn active" data-modal-tab="general">
-                <span class="material-icons-outlined">storefront</span>
-                <span>ข้อมูลร้าน</span>
+                <span class="modal-step-number">1</span>
+                <span class="modal-step-copy"><strong>ข้อมูลร้าน</strong><small>ชื่อและรายละเอียด</small></span>
             </button>
             <button type="button" class="modal-tab-btn" data-modal-tab="contact">
-                <span class="material-icons-outlined">contact_mail</span>
-                <span>ติดต่อ</span>
+                <span class="modal-step-number">2</span>
+                <span class="modal-step-copy"><strong>การติดต่อ</strong><small>โทรและช่องทางอื่น</small></span>
             </button>
             <button type="button" class="modal-tab-btn" data-modal-tab="services">
-                <span class="material-icons-outlined">room_service</span>
-                <span>บริการ & ที่อยู่</span>
+                <span class="modal-step-number">3</span>
+                <span class="modal-step-copy"><strong>ที่อยู่</strong><small>บริการและพิกัด</small></span>
             </button>
         </div>
 
         <div class="modal-form-body">
             <!-- Section 1: General -->
             <div class="modal-tab-panel active" id="modal-panel-general">
+                <div class="profile-form-intro">
+                    <span class="material-icons-outlined">storefront</span>
+                    <div><h4>ข้อมูลร้านของคุณ</h4><p>ข้อมูลนี้จะแสดงบนหน้าโปรไฟล์และรายการรับซื้อ</p></div>
+                </div>
                 <div class="form-group-premium">
                     <label data-i18n="shop_name">
                         <span class="material-icons-outlined">store</span> ชื่อร้าน
                     </label>
                     <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
+                    <small class="profile-field-help">ใช้ชื่อร้านหรือชื่อที่ลูกค้าจดจำได้ง่าย</small>
                 </div>
 
                 <div class="form-group-premium">
@@ -198,6 +209,10 @@
 
             <!-- Section 2: Contact -->
             <div class="modal-tab-panel" id="modal-panel-contact">
+                <div class="profile-form-intro">
+                    <span class="material-icons-outlined">contact_phone</span>
+                    <div><h4>ช่องทางติดต่อ</h4><p>เลือกข้อมูลที่สะดวกสำหรับให้เกษตรกรติดต่อ</p></div>
+                </div>
                 <div class="form-group-premium">
                     <label data-i18n="phone_label">
                         <span class="material-icons-outlined">phone</span> โทรศัพท์
@@ -213,15 +228,29 @@
                 </div>
 
                 <div class="form-group-premium">
-                    <label data-i18n="profile_link_label">
-                        <span class="material-icons-outlined">link</span> ลิงก์ติดต่ออื่นๆ
+                    <label>
+                        <span class="material-icons-outlined">contact_page</span> ช่องทางติดต่อเพิ่มเติม
                     </label>
-                    <input id="linkEditor" type="url" placeholder="เว็บไซต์, Facebook หรือ LINE OA" data-i18n-placeholder="profile_link_placeholder">
+                    <div class="contact-channel-editor">
+                        <select id="linkTypeEditor" aria-label="ประเภทช่องทางติดต่อ">
+                            <option value="line">LINE ID</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="website">เว็บไซต์</option>
+                            <option value="email">อีเมล</option>
+                            <option value="phone">เบอร์โทรเพิ่มเติม</option>
+                        </select>
+                        <input id="linkEditor" type="text" placeholder="กรอก LINE ID" autocomplete="off">
+                    </div>
+                    <small class="contact-channel-hint" id="linkEditorHint">กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์</small>
                 </div>
             </div>
 
             <!-- Section 3: Services & Location -->
             <div class="modal-tab-panel" id="modal-panel-services">
+                <div class="profile-form-intro">
+                    <span class="material-icons-outlined">location_on</span>
+                    <div><h4>บริการและสถานที่</h4><p>ที่อยู่และพิกัดจะช่วยคำนวณระยะทางในรายการแนะนำ</p></div>
+                </div>
                 <div class="form-group-premium">
                     <label data-i18n="address_label">
                         <span class="material-icons-outlined">location_on</span> ที่อยู่
@@ -233,7 +262,9 @@
                     <label data-i18n="address_cont_label">
                         <span class="material-icons-outlined">map</span> ที่อยู่ (ต่อ)
                     </label>
-                    <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder">
+                    <input id="addr2Editor" type="text" placeholder="ตำบล อำเภอ จังหวัด" data-i18n-placeholder="address_cont_placeholder"
+                        autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                        aria-controls="profileAddressSuggestions">
                 </div>
 
                 <div class="form-group-premium">
@@ -294,8 +325,11 @@
         </div>
 
         <div class="modal-actions-premium">
-            <button id="cancelAboutBtn" class="modal-btn-cancel" data-i18n="cancel_btn">ยกเลิก</button>
-            <button id="saveAboutBtn" class="modal-btn-save" data-i18n="save_btn">บันทึก</button>
+            <button id="cancelAboutBtn" class="modal-btn-cancel" type="button" data-i18n="cancel_btn">ยกเลิก</button>
+            <button id="saveAboutBtn" class="modal-btn-save" type="button">
+                <span class="material-icons-outlined">check_circle</span>
+                <span data-i18n="save_btn">บันทึกโปรไฟล์</span>
+            </button>
         </div>
     </div>
 </div>
@@ -726,6 +760,7 @@
 <script src="../../js/utils/profile-helpers.js"></script>
 <script src="../../components/product-grade/product-grade.js"></script>
 <script src="../../components/product-card/product-card.js"></script>
+    <script src="../../js/realtime-client.js"></script>
     <script src="../../js/buyer/myprofile.js"></script>
 
 <script>
@@ -764,25 +799,255 @@ function escapeContactHtml(value) {
         .replaceAll("'", '&#039;');
 }
 
-function normalizeProfileLink(value) {
-    const rawValue = value && typeof value === 'object'
-        ? (value.url || value.href || '')
-        : value;
-    const raw = String(rawValue || '').trim();
-    if (!raw) return '';
-    try {
-        const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
-        return /^https?:$/i.test(url.protocol) ? url.href : '';
-    } catch (_) {
-        return '';
-    }
+function getContactChannel(value) {
+    const type = String(value?.link_type || value?.type || 'website').toLowerCase();
+    const raw = String(value?.url || value?.href || value || '').trim();
+    const meta = {
+        line: { icon: 'chat', label: 'LINE ID' },
+        facebook: { icon: 'public', label: 'Facebook' },
+        website: { icon: 'language', label: 'เว็บไซต์' },
+        email: { icon: 'email', label: 'อีเมล' },
+        phone: { icon: 'phone', label: 'เบอร์โทร' }
+    }[type] || { icon: 'contact_page', label: 'ช่องทางติดต่อ' };
+
+    let href = '';
+    if (type === 'email' && raw) href = `mailto:${raw}`;
+    else if (type === 'phone' && raw) href = `tel:${raw.replace(/[^\d+]/g, '')}`;
+    else if (type === 'website' && raw) href = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    else if (type === 'facebook' && /^https?:\/\//i.test(raw)) href = raw;
+
+    return { type, raw, href, ...meta };
 }
 
-function getProfileLinkLabel(value, href) {
-    if (value && typeof value === 'object') {
-        return value.label || value.title || value.link_type || value.type || value.url || value.href || href;
-    }
-    return value || href;
+/* Profile editor redesign — mobile bottom sheet + compact desktop dialog */
+#editAboutModal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5000 !important;
+  display: grid !important;
+  place-items: end center !important;
+  padding: 0 !important;
+}
+
+#editAboutModal[hidden] { display: none !important; }
+
+#editAboutModal .modal-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(10, 24, 17, .58) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+#editAboutModal .premium-modal {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  max-width: 620px !important;
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top))) !important;
+  border-radius: 26px 26px 0 0 !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border-light)) !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 -18px 55px rgba(4, 40, 20, .22) !important;
+  overflow: hidden !important;
+}
+
+#editAboutModal .premium-modal::before {
+  content: "";
+  width: 42px;
+  height: 4px;
+  margin: 9px auto 0;
+  border-radius: 99px;
+  background: var(--border-medium);
+  flex: 0 0 auto;
+}
+
+#editAboutModal .modal-header-premium {
+  padding: 11px 18px 15px !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card)), var(--bg-card) 68%) !important;
+}
+
+.edit-profile-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+
+.edit-profile-heading-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 22px !important;
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.edit-profile-heading p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+#editAboutModal .modal-close-btn {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  background: color-mix(in srgb, var(--text-main) 6%, transparent) !important;
+}
+
+#editAboutModal .modal-tab-bar {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  padding: 10px 14px !important;
+  background: var(--bg-card) !important;
+}
+
+#editAboutModal .modal-tab-btn {
+  position: relative !important;
+  min-height: 58px !important;
+  padding: 6px 4px !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  border-radius: 14px !important;
+}
+
+#editAboutModal .modal-tab-btn:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 10px;
+  height: 1px;
+  background: var(--border-medium);
+}
+
+.modal-step-number {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.modal-tab-btn.active .modal-step-number {
+  background: var(--primary);
+  color: #fff;
+}
+
+.modal-step-copy { display: flex; min-width: 0; flex-direction: column; text-align: left; }
+.modal-step-copy strong { color: inherit; font-size: 12px; line-height: 1.2; }
+.modal-step-copy small { margin-top: 2px; color: var(--text-muted); font-size: 9px; line-height: 1.2; }
+
+#editAboutModal .modal-form-body {
+  padding: 14px 16px 24px !important;
+  background: color-mix(in srgb, var(--bg-page) 65%, var(--bg-card)) !important;
+  overscroll-behavior: contain;
+}
+
+.profile-form-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border-light));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-card));
+}
+
+.profile-form-intro > .material-icons-outlined { color: var(--primary); font-size: 21px; }
+.profile-form-intro h4 { margin: 0; color: var(--text-main); font-size: 14px; }
+.profile-form-intro p { margin: 2px 0 0; color: var(--text-muted); font-size: 11.5px; line-height: 1.4; }
+
+#editAboutModal .form-group-premium {
+  margin-bottom: 13px !important;
+  padding: 13px !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 17px !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 3px 12px rgba(15, 42, 26, .035) !important;
+}
+
+#editAboutModal .form-group-premium label {
+  margin-bottom: 7px !important;
+  color: var(--text-main) !important;
+}
+
+#editAboutModal .form-group-premium input[type="text"],
+#editAboutModal .form-group-premium input[type="email"],
+#editAboutModal .form-group-premium input[type="url"],
+#editAboutModal .form-group-premium textarea,
+#editAboutModal .contact-channel-editor select {
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  background: var(--bg-input) !important;
+}
+
+#editAboutModal .form-group-premium textarea { min-height: 110px !important; resize: vertical; }
+.profile-field-help { display: block; margin-top: 6px; color: var(--text-muted); font-size: 11px; }
+
+#editAboutModal .pill-box {
+  min-height: 58px !important;
+  justify-content: flex-start !important;
+  background: var(--bg-input) !important;
+}
+
+#editAboutModal .service-checkbox-pill input:focus-visible + .pill-box {
+  outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+#editAboutModal .modal-actions-premium {
+  position: sticky !important;
+  bottom: 0 !important;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 -8px 24px rgba(15, 42, 26, .07) !important;
+}
+
+#editAboutModal .modal-btn-cancel,
+#editAboutModal .modal-btn-save {
+  min-height: 50px !important;
+  border-radius: 15px !important;
+}
+
+#editAboutModal .modal-btn-save {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  background: var(--primary) !important;
+}
+
+#editAboutModal .modal-btn-save .material-icons-outlined { font-size: 19px; }
+
+body.profile-editor-open { overflow: hidden !important; }
+
+@media (max-width: 430px) {
+  .modal-step-copy small { display: none; }
+  #editAboutModal .modal-tab-btn { flex-direction: column !important; gap: 3px !important; }
+  .modal-step-copy { text-align: center; }
+  .edit-profile-heading p { max-width: 245px; }
+  #editAboutModal .services-editor-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+}
+
+@media (min-width: 640px) {
+  #editAboutModal { place-items: center !important; padding: 24px !important; }
+  #editAboutModal .premium-modal { max-height: min(820px, calc(100dvh - 48px)) !important; border-radius: 28px !important; }
+  #editAboutModal .premium-modal::before { display: none; }
 }
 
 // Called by myprofile.js after profile data is loaded
@@ -805,17 +1070,33 @@ window.onProfileDataReady = function(profileData) {
             </div>`);
         if (profileData.links && profileData.links.length) {
             profileData.links.forEach(l => {
-                const safeHref = normalizeProfileLink(l);
-                if (!safeHref) return;
-                const linkLabel = getProfileLinkLabel(l, safeHref);
+                const channel = getContactChannel(l);
+                if (!channel.raw) return;
+                const valueHtml = channel.href
+                    ? `<a href="${escapeContactHtml(channel.href)}" target="${channel.type === 'website' || channel.type === 'facebook' ? '_blank' : '_self'}" rel="noopener noreferrer">${escapeContactHtml(channel.raw)}</a>`
+                    : `<span>${escapeContactHtml(channel.raw)}</span>`;
                 items.push(`
                     <div class="contact-item-row">
-                        <span class="material-icons-outlined">language</span>
-                        <a href="${escapeContactHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${escapeContactHtml(linkLabel)}</a>
+                        <span class="material-icons-outlined">${channel.icon}</span>
+                        <div class="contact-channel-value"><small>${channel.label}</small>${valueHtml}</div>
+                        <button type="button" class="copy-contact-btn" data-copy-contact="${escapeContactHtml(channel.raw)}" aria-label="คัดลอก ${channel.label}">
+                            <span class="material-icons-outlined">content_copy</span>
+                        </button>
                     </div>`);
             });
         }
         contactList.innerHTML = items.length ? items.join('') : `<p style="color:#aaa;font-size:14px;padding:16px 0;" data-i18n="no_contact_info">${window.i18nT ? window.i18nT('no_contact_info', 'ยังไม่มีข้อมูลติดต่อ') : 'ยังไม่มีข้อมูลติดต่อ'}</p>`;
+        contactList.querySelectorAll('[data-copy-contact]').forEach(button => {
+            button.addEventListener('click', async () => {
+                const value = button.dataset.copyContact || '';
+                try {
+                    await navigator.clipboard.writeText(value);
+                    if (window.showToast) window.showToast('คัดลอกข้อมูลติดต่อแล้ว', 'success');
+                } catch (_) {
+                    window.prompt('คัดลอกข้อมูลติดต่อ', value);
+                }
+            });
+        });
     }
 
     // --- Render services tab (Frame 16) ---

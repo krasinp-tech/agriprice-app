@@ -1,4 +1,3 @@
-/* Under development page */
 .ud-page{
   min-height: 100vh;
   background: var(--bg-page);
@@ -32,11 +31,12 @@
   border: 1px solid var(--border-light);
   border-radius: 16px;
   padding: 18px 14px;
-  text-align:center;
+  text-align:left;
   box-shadow: var(--shadow-sm);
 }
 .ud-icon{
-  font-size: 34px;
+  width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;
+  color:var(--primary);background:color-mix(in srgb, var(--primary) 12%, transparent);
 }
 .ud-text{
   margin-top: 8px;
@@ -49,3 +49,11 @@
   font-weight: 600;
   color: var(--text-muted);
 }
+.ud-intro{display:flex;align-items:center;gap:12px;padding:2px 2px 16px}
+.ud-action{display:flex;align-items:center;gap:12px;padding:15px 2px;border-top:1px solid var(--border-light);color:var(--text-main);text-decoration:none;min-height:72px}
+.ud-action-icon{width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;background:var(--bg-page);color:var(--primary)}
+.ud-action-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.ud-action-copy strong{font-size:15px;font-weight:800}
+.ud-action-copy small{font-size:12px;font-weight:600;color:var(--text-muted);line-height:1.45}
+.ud-chevron{color:var(--text-muted)}
+.ud-action:focus-visible{outline:3px solid color-mix(in srgb, var(--primary) 25%, transparent);outline-offset:2px;border-radius:12px}

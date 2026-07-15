@@ -68,6 +68,7 @@ router.get('/fruits', async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from('products')
       .select('product_id, product_name')
+      .eq('category', 'ผลไม้')
       .order('product_name');
 
     if (error) throw error;
@@ -75,6 +76,8 @@ router.get('/fruits', async (req, res) => {
     // Remove duplicates
     const uniqueFruits = (data || []).map((item) => ({
       id: String(item.product_id),
+      product_id: String(item.product_id),
+      fruit_id: String(item.product_id),
       name: item.product_name
     }));
 

@@ -563,23 +563,10 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         favBtn.classList.toggle("active", active);
 
         if (favoriteKind === "seller") {
-          if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-          const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-          const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
-          if (currentBase && token) {
-            if (active) {
-              fetch(currentBase + '/api/favorites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ user_id: id }),
-              }).catch(() => { });
-            } else {
-              fetch(currentBase + '/api/favorites/' + encodeURIComponent(id), {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + token },
-              }).catch(() => { });
-            }
-          }
+          const syncFavorite = active
+            ? window.FavoritesHelpers?.addSellerFavorite
+            : window.FavoritesHelpers?.removeSellerFavorite;
+          if (syncFavorite) syncFavorite(id).catch(() => { });
         }
 
         return;
@@ -883,25 +870,24 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       if (!role || role === "buyer") return;
 
       const sync = async () => {
-        if (!window.api || typeof window.api.call !== 'function') return;
+        if (!window.FavoritesHelpers?.fetchFavoritesFromApi) return;
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
         if (!token) return;
         try {
-          const json = await window.api.call('GET', '/api/favorites');
-          if (!json) return;
-          const arr = Array.isArray(json) ? json : (json.data || []);
+          const arr = await window.FavoritesHelpers.fetchFavoritesFromApi();
+          if (!Array.isArray(arr)) return;
           const store = window.FavoritesStore;
           if (!store) return;
-          const apiIds = new Set(arr.map(item => String(item.target_user_id || item.user_id || item.id || '')).filter(Boolean));
+          const apiIds = new Set(arr.map(item => String(item.sellerId || item.profileId || item.id || '')).filter(Boolean));
           const local = store.read().filter(item => {
             const kind = String(item?.kind || 'seller');
             if (kind !== 'seller') return true;
             return apiIds.has(String(item?.id || ''));
           });
           arr.forEach(item => {
-            const id = String(item.target_user_id || item.user_id || item.id || '');
+            const id = String(item.sellerId || item.profileId || item.id || '');
             if (id && !local.find(x => String(x.id) === id && String(x.kind || 'seller') === 'seller')) {
-              local.push({ id, kind: 'seller', name: `${item.first_name || ''} ${item.last_name || ''}`.trim(), sub: item.tagline || '', avatar: item.avatar || '' });
+              local.push({ id, kind: 'seller', name: item.title || 'ไม่ทราบชื่อ', sub: item.subtitle || '', avatar: item.avatar || '' });
             }
           });
           store.write(local);

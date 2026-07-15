@@ -483,6 +483,11 @@
     }
 
     loadData();
+    let realtimeBookingTimer = null;
+    window.addEventListener('agriprice:realtime:booking', () => {
+      clearTimeout(realtimeBookingTimer);
+      realtimeBookingTimer = setTimeout(loadData, 120);
+    });
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -6,26 +6,7 @@
 
 const express = require('express');
 const router  = express.Router();
-const multer  = require('multer');
-const path    = require('path');
-const xlsx    = require('xlsx');
 const { supabaseAdmin } = require('../utils/supabase');
-const verifyToken = require('../middlewares/auth');
-
-// ตั้งค่า multer สำหรับอัปโหลดไฟล์ Excel เข้าหน่วยความจำชั่วคราว (In-Memory Buffer)
-const excelStorage = multer.memoryStorage();
-const excelUpload = multer({
-  storage: excelStorage,
-  fileFilter: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (ext === '.xlsx' || ext === '.xls') {
-      cb(null, true);
-    } else {
-      cb(new Error('กรุณาอัปโหลดไฟล์ Excel (.xlsx หรือ .xls) เท่านั้น'));
-    }
-  },
-  limits: { fileSize: 10 * 1024 * 1024 }
-});
 
 // ฟังก์ชันจำแนกหมวดหมู่สินค้าเกษตรแบบไดนามิกจากชื่อสินค้า (ไม่ต้องมีคอลัมน์ category ในฐานข้อมูล)
 function getCategoryByCommodity(commodity) {
@@ -51,23 +32,6 @@ function getCategoryByCommodity(commodity) {
     return 'ปศุสัตว์';
   }
   return 'สินค้าเกษตร';
-}
-
-// ฟังก์ชันแปลงวันที่จาก Excel เป็นรูปแบบ YYYY-MM-DD
-function parseExcelDate(val) {
-  if (!val) return '';
-  if (val instanceof Date) return val.toISOString().split('T')[0];
-  if (typeof val === 'number') {
-    const date = new Date(Math.round((val - 25569) * 86400) * 1000);
-    return date.toISOString().split('T')[0];
-  }
-  if (typeof val === 'string') {
-    const match = val.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-    if (match) return `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
-  }
-  return String(val);
 }
 
 function calcStaleDays(dateStr) {
@@ -243,83 +207,6 @@ router.get('/:commodity', async (req, res) => {
   } catch (e) {
     console.error(`[govPrices] GET /${req.params.commodity}:`, e.message);
     res.status(500).json({ success: false, error: e.message });
-  }
-});
-
-// ─── POST /api/gov-prices/upload ──────────────────────────────────────────
-// อัปโหลดไฟล์ Excel เพื่อนำเข้า (Upsert แบบปลอดภัย) ลงสู่ Supabase
-router.post('/upload', verifyToken, excelUpload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์ Excel ที่ต้องการอัปโหลด' });
-    }
-
-    // อ่านไฟล์จาก buffer
-    const workbook = xlsx.read(req.file.buffer, { type: 'buffer', cellDates: true });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const rawData = xlsx.utils.sheet_to_json(worksheet);
-
-    if (rawData.length === 0) {
-      return res.status(400).json({ success: false, message: 'ไม่พบข้อมูลแถวในไฟล์ Excel' });
-    }
-
-    // แปลงข้อมูลแถวให้สอดคล้องกับคอลัมน์ในตารางของ Supabase (ตัด category ออกเนื่องจากใน DB ของผู้ใช้งานไม่มีคอลัมน์นี้)
-    const dbRows = rawData.map(row => {
-      const commodity = String(row['ชนิดสินค้า'] || row.Commodity || '').trim();
-      const variety = String(row['สายพันธุ์'] || row.Variety || `${commodity} (คละ)`).trim();
-      const unit = String(row['หน่วย'] || row.Unit || 'กก.').trim();
-
-      const minRaw = row['ราคาขั้นต่ำ'] !== undefined ? row['ราคาขั้นต่ำ'] : row.MinPrice;
-      const min_price = typeof minRaw === 'number' ? minRaw : parseFloat(minRaw) || 0;
-
-      const maxRaw = row['ราคาสูงสุด'] !== undefined ? row['ราคาสูงสุด'] : row.MaxPrice;
-      const max_price = typeof maxRaw === 'number' ? maxRaw : (parseFloat(maxRaw) || min_price);
-
-      const avgRaw = row['ราคาเฉลี่ย'] !== undefined ? row['ราคาเฉลี่ย'] : row.AvgPrice;
-      const avg_price = typeof avgRaw === 'number' ? avgRaw : (parseFloat(avgRaw) || min_price);
-
-      const dateRaw = row['วันที่อัพเดท'] || row['วันที่'] || row.PriceDate;
-      const price_date = parseExcelDate(dateRaw);
-
-      return {
-        commodity,
-        variety,
-        unit,
-        min_price,
-        max_price,
-        avg_price,
-        price_date,
-        source: 'excel-upload'
-      };
-    }).filter(r => r.commodity && r.price_date);
-
-    if (dbRows.length === 0) {
-      return res.status(400).json({ success: false, message: 'ไม่มีข้อมูลชนิดสินค้าเกษตรหรือวันที่บันทึกที่ถูกต้อง' });
-    }
-
-    // เพื่อเลี่ยงการใช้ ON CONFLICT (เพราะ DB ไม่มี UNIQUE index ในตอนแรก)
-    // เราจะใช้การเคลียร์ค่าเก่าก่อน แล้ว Insert แถวใหม่เข้าไปทดแทนตามชุดข้อมูลที่ส่งขึ้นมา
-    for (const row of dbRows) {
-      await supabaseAdmin
-        .from('gov_prices')
-        .delete()
-        .eq('commodity', row.commodity)
-        .eq('variety', row.variety)
-        .eq('price_date', row.price_date);
-    }
-
-    // บันทึกแถวใหม่ทั้งหมด
-    const { error: insertErr } = await supabaseAdmin
-      .from('gov_prices')
-      .insert(dbRows);
-
-    if (insertErr) throw insertErr;
-
-    res.json({ success: true, message: `อิมพอร์ตข้อมูลเรียบร้อยแล้ว จำนวน ${dbRows.length} รายการเข้าสู่ Supabase` });
-  } catch (error) {
-    console.error('[govPrices] DB upload error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
   }
 });
 

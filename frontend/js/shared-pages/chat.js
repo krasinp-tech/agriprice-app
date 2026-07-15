@@ -487,7 +487,7 @@
         loadMessages(chatId);
         loadConversations(); // Update list unreads
       }
-    }, 4000);
+    }, 30000);
   }
 
   function stopPolling() {
@@ -496,6 +496,15 @@
       POLLING_INTERVAL = null;
     }
   }
+
+  let realtimeChatTimer = null;
+  window.addEventListener('agriprice:realtime:chat', () => {
+    clearTimeout(realtimeChatTimer);
+    realtimeChatTimer = setTimeout(() => {
+      loadConversations();
+      if (ACTIVE_ROOM_ID) loadMessages(ACTIVE_ROOM_ID);
+    }, 120);
+  });
 
   function handleSearch(q) {
     const term = q.trim().toLowerCase();

@@ -1,76 +1,90 @@
 # AgriPrice
 
-AgriPrice is an agricultural buy-offer and queue-booking platform. It connects farmers with buying centers, supports offer discovery, booking slots, queue tracking, chat, notifications, government price lookup, favorites, and app reviews.
+AgriPrice is a mobile marketplace for farmers and agricultural buyers. It supports nearby offer discovery, booking and queue tracking, chat, notifications, favorites, payments, reviews, and government price data.
 
-## Project Structure
+## Project structure
 
-- `frontend/` - HTML, CSS, and vanilla JavaScript client used by Capacitor.
-- `server/` - Node.js and Express API server.
-- `infrastructure/database/` - Supabase schema references, migrations, and maintenance SQL.
+- `frontend/` — vanilla HTML, CSS, and JavaScript app packaged with Capacitor.
+- `server/` — Node.js and Express API.
+- `infrastructure/database/` — Supabase schema reference, migrations, maintenance, and verification SQL.
+- `docs/FINAL_CHECKLIST.md` — final deployment and handoff checklist.
 
-## Backend
+Generated folders such as `node_modules`, `frontend/www`, Android build output, APK files, logs, and local secrets are intentionally excluded from Git.
 
-```bash
+## Requirements
+
+- Node.js 18 or newer
+- npm
+- Android Studio and a compatible JDK for Android builds
+- A Supabase project
+- A Firebase project when using authentication and push notifications
+
+## Local setup
+
+Create the backend environment file from the tracked template:
+
+```powershell
+Copy-Item server/.env.example server/.env
+```
+
+Fill in the real values in `server/.env`, then install dependencies:
+
+```powershell
 cd server
 npm install
 npm run dev
 ```
 
-Required environment values are configured in `server/.env`.
+In another terminal, prepare the mobile frontend:
 
-Common values:
-
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `JWT_SECRET`
-- Optional Firebase values for push notifications.
-
-## Frontend
-
-The mobile app uses Capacitor. The generated web bundle lives in `frontend/www`.
-
-```bash
+```powershell
 cd frontend
 npm install
 npm run cap:sync
 ```
 
-The frontend source is written with vanilla JavaScript and reusable components. The shared API client is in `frontend/js/api-client.js`.
+The generated web bundle is written to `frontend/www`. To open the native project, run `npm run cap:open:android`.
 
-## Database Setup
+## Android build
 
-For an existing Supabase project, run these files in Supabase SQL Editor:
+After changing frontend source or Capacitor plugins, sync before building:
 
-1. `infrastructure/database/migrations/final_teacher_normalization_migration.sql`
-2. `infrastructure/database/migrations/create-reviews-and-notification-link.sql`
-3. `infrastructure/database/migrations/zz-fix-chat-device-unique-constraints.sql`
-4. `infrastructure/database/migrations/bug-freeze-booking-queue-sequence.sql`
-5. `infrastructure/database/migrations/add-booking-cancel-info-and-chat-deletions.sql`
-6. `infrastructure/database/maintenance/SUPABASE_OPTIMIZE.sql`
-7. `infrastructure/database/maintenance/verify_submission_constraints.sql`
+```powershell
+cd frontend
+npm run cap:sync
+cd android
+.\gradlew.bat assembleDebug
+```
 
-Reference documentation:
+The debug APK is generated under `frontend/android/app/build/outputs/apk/debug/`. A production release requires a release signing key and release build configuration.
 
-- `infrastructure/database/schemas/schema_v3.sql`
+`google-services.json` must be placed locally where the Android/Firebase setup expects it. It contains project-specific configuration and is not committed.
 
-## Final Normalization Notes
+## Database
 
-- `offer_slots.booked_count` is derived from `bookings`; it is not stored.
-- `bookings` stores `slot_id`; offer and product details are derived through `offer_slots.offer_id`.
-- Vehicle plates are stored in `booking_vehicles`.
-- Profile links and services are stored in `profile_links` and `profile_services`.
-- Product catalog data is stored in `products` and `varieties`; `buy_offers` references `variety_id`.
-- Offer grade prices are stored in `offer_grades`.
+For an existing Supabase project, apply migrations rather than recreating the schema. The authoritative migration order is documented in [`infrastructure/database/README.md`](infrastructure/database/README.md).
+
+Before final submission, make sure the queue sequence, own-impression exclusion, final compatibility migration, optimization script, and verification script have been run. Every row returned by `maintenance/verify_submission_constraints.sql` must report `ok`.
+
+`infrastructure/database/schemas/schema_v3.sql` is a reference snapshot; it is not a replacement for applying migrations to an existing database.
 
 ## Verification
 
-```bash
+Check backend JavaScript syntax:
+
+```powershell
 cd server
 npm run lint
 ```
 
-Expected output:
+Expected result:
 
 ```text
-Syntax check passed (43 files).
+Syntax check passed (44 files).
 ```
+
+Then sync Capacitor and build Android using the commands above. Complete the manual scenarios in [`docs/FINAL_CHECKLIST.md`](docs/FINAL_CHECKLIST.md) before delivery.
+
+## Secrets and deployment
+
+Never commit `server/.env`, Firebase service-account JSON, signing keys, database credentials, or generated APKs. Configure production values in the deployment provider. `render.yaml` declares the required server variables without embedding their values.

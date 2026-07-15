@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
 
+  <script src="../../../js/config.js"></script>
   <script src="../../../js/api-client.js"></script>
-
   <script src="../../../js/auth/guard.js"></script>
   <script src="../../../js/components/i18n.js"></script>
   <meta name="viewport"
@@ -34,11 +34,11 @@
 
   <script>
     window.AuthGuard.requireLogin();
-    // ตรวจสอบ role — เฉพาะ buyer เท่านั้น
+    // ตรวจสอบ role จาก storage ชุดปัจจุบัน — เฉพาะ buyer เท่านั้น
     (function () {
       try {
-        var u = JSON.parse(localStorage.getItem('user') || 'null');
-        var role = (u && u.role) ? u.role.toLowerCase() : (localStorage.getItem('role') || '').toLowerCase();
+        var u = JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || 'null');
+        var role = String((u && u.role) || localStorage.getItem(window.AUTH_ROLE_KEY || 'role') || '').toLowerCase();
         if (role && role !== 'buyer') { window.location.href = '../../../index.html'; }
       } catch (_) { }
     })();
@@ -189,10 +189,6 @@
   </div>
 
   <!-- JS -->
-
-  <script src="../../../js/config.js"></script>
-
-  <script src="../../../js/api-client.js"></script>
 
   <script src="../../../js/components/ui-common.js"></script>
 

@@ -3231,3 +3231,21 @@ html[data-theme="dark"] body::selection,
 [data-theme="dark"] :is(input[type="date"], input[type="time"], input[type="datetime-local"]) {
   color-scheme: dark;
 }
+
+/* login1.css welcome screen titles and subtitle overrides */
+[data-theme="dark"] .title-th {
+  color: var(--text-main, #ffffff) !important;
+}
+
+[data-theme="dark"] .title-brand {
+  color: var(--brand, #0B66FF) !important;
+}
+
+[data-theme="dark"] .subtitle {
+  color: var(--text-muted, rgba(255, 255, 255, 0.6)) !important;
+}
+
+[data-theme="dark"] .segmented {
+  background: var(--bg-input, #252830) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}

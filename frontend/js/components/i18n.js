@@ -500,6 +500,15 @@
       manage_account: 'จัดการบัญชี',
       my_account: 'บัญชีของฉัน',
       manage_profile: 'จัดการข้อมูลส่วนตัว',
+      account_security_info: 'ข้อมูลบัญชีและความปลอดภัย',
+      account_security_info_desc: 'เบอร์ อีเมล รหัสผ่าน และการเข้าสู่ระบบ',
+      notification_settings_menu: 'ตั้งค่าการแจ้งเตือน',
+      security_center_desc: 'รหัสผ่านและอุปกรณ์ที่เข้าสู่ระบบ',
+      security_center_title: 'ดูแลบัญชีให้ปลอดภัย',
+      security_center_hint: 'จัดการรหัสผ่านและตรวจสอบอุปกรณ์ที่เข้าสู่ระบบ',
+      loading_devices: 'กำลังโหลดข้อมูลอุปกรณ์...',
+      no_device_sessions: 'ยังไม่พบข้อมูลอุปกรณ์ กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่หนึ่งครั้ง',
+      load_devices_failed: 'ไม่สามารถโหลดข้อมูลอุปกรณ์ได้',
       dark_mode: 'โหมดมืด',
       upgrade_pro: 'อัปเกรดเป็นโปร',
       upgrade_pro_desc: 'ปลดล็อกฟีเจอร์พรีเมียม',
@@ -618,9 +627,9 @@
       no_notifications_sub: 'ระบบจะแจ้งเตือนเมื่อมีความเคลื่อนไหวที่นี่',
       notifications_title_page: 'แจ้งเตือน',
       notifications_heading: 'การแจ้งเตือน',
-      favorites_page_title: 'รายการที่บันทึกไว้',
-      favorites_title: 'รายการที่บันทึกไว้',
-      no_favorites_yet: 'ยังไม่มีรายการที่บันทึก',
+      favorites_page_title: 'รายการโปรด',
+      favorites_title: 'รายการโปรด',
+      no_favorites_yet: 'ยังไม่มีรายการโปรด',
       no_favorites_desc: 'คุณสามารถกดติดตาม้านค้าหรือถูกใจสินค้าได้จากหน้าหลัก',
       announcement: 'ประชาสัมพันธ์',
       
@@ -1355,6 +1364,15 @@
       manage_account: 'Manage Account',
       my_account: 'My Account',
       manage_profile: 'Manage Profile',
+      account_security_info: 'Account & Security',
+      account_security_info_desc: 'Phone, email, password, and sign-in',
+      notification_settings_menu: 'Notification Settings',
+      security_center_desc: 'Password and signed-in devices',
+      security_center_title: 'Keep your account secure',
+      security_center_hint: 'Manage your password and review signed-in devices',
+      loading_devices: 'Loading devices...',
+      no_device_sessions: 'No device found. Please sign out and sign in again once.',
+      load_devices_failed: 'Unable to load device information',
       dark_mode: 'Dark Mode',
       upgrade_pro: 'Upgrade to Pro',
       upgrade_pro_desc: 'Unlock premium features',
@@ -2205,6 +2223,15 @@
       manage_account: '账户管理',
       my_account: '我的账户',
       manage_profile: '管理个人资料',
+      account_security_info: '账户与安全',
+      account_security_info_desc: '手机号、邮箱、密码和登录信息',
+      notification_settings_menu: '通知设置',
+      security_center_desc: '密码和已登录设备',
+      security_center_title: '保护您的账户安全',
+      security_center_hint: '管理密码并检查已登录设备',
+      loading_devices: '正在加载设备...',
+      no_device_sessions: '尚未找到设备，请退出并重新登录一次。',
+      load_devices_failed: '无法加载设备信息',
       dark_mode: '深色模式',
       upgrade_pro: '升级到专业版',
       upgrade_pro_desc: '解锁高级功能',
@@ -2585,7 +2612,11 @@
 
   function setCurrentLang(lang) {
     if (!LANGUAGES.includes(lang)) lang = 'th';
-    localStorage.setItem('lang', lang);
+    if (window.NativeRuntime?.setPreference) {
+      window.NativeRuntime.setPreference('lang', lang);
+    } else {
+      localStorage.setItem('lang', lang);
+    }
     window.dispatchEvent(new StorageEvent('storage', { key: 'lang', newValue: lang }));
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'agriprice:language', lang }, '*');
@@ -2865,6 +2896,8 @@
   window.addEventListener('storage', function(e) {
     if (e.key === 'lang') window.i18nInit();
   });
+
+  window.addEventListener('agriprice:preferences-ready', window.i18nInit);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', window.i18nInit);

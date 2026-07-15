@@ -96,7 +96,8 @@ WITH expected(table_name, constraint_name) AS (
     ('profile_services', 'profile_services_profile_id_service_name_key'),
     ('reviews', 'reviews_user_id_reviewer_id_key'),
     ('chat_rooms', 'chat_rooms_user1_id_user2_id_key'),
-    ('device_sessions', 'unique_user_push_token')
+    ('device_sessions', 'unique_user_push_token'),
+    ('follows', 'follows_not_self')
 )
 SELECT
   e.table_name,
@@ -114,7 +115,11 @@ ORDER BY e.table_name, e.constraint_name;
 
 WITH expected_functions(function_name, identity_arguments) AS (
   VALUES
-    ('next_queue_sequence', 'p_slot_id bigint, p_date date')
+    ('next_queue_sequence', 'p_slot_id bigint, p_date date'),
+    ('increment_follower_count', 'target_id uuid'),
+    ('increment_following_count', 'target_id uuid'),
+    ('decrement_follower_count', 'target_id uuid'),
+    ('decrement_following_count', 'target_id uuid')
 )
 SELECT
   e.function_name,
@@ -129,7 +134,13 @@ ORDER BY e.function_name;
 
 WITH expected_indexes(table_name, index_name) AS (
   VALUES
-    ('chat_rooms', 'chat_rooms_unordered_user_pair_idx')
+    ('chat_rooms', 'chat_rooms_unordered_user_pair_idx'),
+    ('profiles', 'profiles_pro_expires_idx'),
+    ('follows', 'idx_follows_following_id'),
+    ('profile_favorites', 'idx_profile_favorites_target'),
+    ('payment_submissions', 'payment_submissions_trans_ref_unique'),
+    ('payment_submissions', 'payment_submissions_user_created_idx'),
+    ('offer_impressions', 'idx_offer_impressions_viewer_created')
 )
 SELECT
   e.table_name,
@@ -142,3 +153,40 @@ LEFT JOIN pg_indexes i
  AND i.tablename = e.table_name
  AND i.indexname = e.index_name
 ORDER BY e.table_name, e.index_name;
+
+WITH expected_columns(table_name, column_name) AS (
+  VALUES
+    ('profiles', 'pro_started_at'),
+    ('profiles', 'pro_expires_at'),
+    ('notifications', 'link'),
+    ('bookings', 'cancel_by'),
+    ('bookings', 'cancel_reason')
+)
+SELECT
+  e.table_name,
+  e.column_name,
+  CASE WHEN c.column_name IS NULL THEN 'missing' ELSE 'ok' END AS status,
+  c.data_type
+FROM expected_columns e
+LEFT JOIN information_schema.columns c
+  ON c.table_schema = 'public'
+ AND c.table_name = e.table_name
+ AND c.column_name = e.column_name
+ORDER BY e.table_name, e.column_name;
+
+WITH expected_triggers(table_name, trigger_name) AS (
+  VALUES
+    ('offer_impressions', 'prevent_own_offer_impression'),
+    ('profiles', 'tr_profiles_updated_at'),
+    ('buy_offers', 'tr_buy_offers_updated_at')
+)
+SELECT
+  e.table_name,
+  e.trigger_name,
+  CASE WHEN t.trigger_name IS NULL THEN 'missing' ELSE 'ok' END AS status
+FROM expected_triggers e
+LEFT JOIN information_schema.triggers t
+  ON t.event_object_schema = 'public'
+ AND t.event_object_table = e.table_name
+ AND t.trigger_name = e.trigger_name
+ORDER BY e.table_name, e.trigger_name;

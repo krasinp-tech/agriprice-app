@@ -15,6 +15,9 @@
 
   let ALL_PRODUCTS = [];
   let FILTERED_SELLER_ID = null;
+  let ACTIVE_USER_LOCATION = null;
+  let FARMER_GPS_PROMPTED = false;
+  let BUYER_PROFILE_REQUEST = null;
 
   function setLoadMoreVisible(show) {
     const btn = document.querySelector('.btn-load-more');
@@ -33,22 +36,51 @@
     `;
   }
 
-  // ── Simple session cache (TTL = 5 min) ────────────────────────
-  const PRODUCTS_CACHE_KEY = '__agri_products_cache';
-  const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  // Persistent read-through cache: render immediately on later app launches,
+  // then refresh silently from the API. Transactional data is never cached here.
+  const PRODUCTS_CACHE_KEY = '__agri_products_cache_v2';
+  const CATEGORIES_CACHE_KEY = '__agri_categories_cache_v1';
+  const ANNOUNCEMENTS_CACHE_KEY = '__agri_announcements_cache_v1';
+  const PRODUCTS_CACHE_TTL = 15 * 60 * 1000;
+  const CATEGORIES_CACHE_TTL = 24 * 60 * 60 * 1000;
+  const ANNOUNCEMENTS_CACHE_TTL = 15 * 60 * 1000;
 
-  function getCachedProducts() {
+  function getProductsCacheKey() {
+    let userId = 'guest';
     try {
-      const raw = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+      const user = JSON.parse(localStorage.getItem('user_data') || 'null');
+      userId = window.resolveProfileId?.(user?.profile_id, user?.id, user?.userId) || 'guest';
+    } catch (_) {}
+    const role = String(localStorage.getItem('role') || 'guest').toLowerCase();
+    return `${PRODUCTS_CACHE_KEY}:${role}:${userId}`;
+  }
+
+  function readHomeCache(key, ttl) {
+    try {
+      const raw = localStorage.getItem(key);
       if (!raw) return null;
       const { ts, data } = JSON.parse(raw);
-      if (Date.now() - ts > PRODUCTS_CACHE_TTL) { sessionStorage.removeItem(PRODUCTS_CACHE_KEY); return null; }
+      if (!Array.isArray(data) || Date.now() - Number(ts || 0) > ttl) {
+        localStorage.removeItem(key);
+        return null;
+      }
       return data;
-    } catch { return null; }
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function writeHomeCache(key, data) {
+    if (!Array.isArray(data)) return;
+    try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch (_) {}
+  }
+
+  function getCachedProducts() {
+    return readHomeCache(getProductsCacheKey(), PRODUCTS_CACHE_TTL);
   }
 
   function setCachedProducts(data) {
-    try { sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch { }
+    writeHomeCache(getProductsCacheKey(), data);
   }
 
   const categoryImageMap = {
@@ -157,12 +189,16 @@
     if (!track || !dotsWrap) return;
 
     async function loadCategories() {
+      const cached = readHomeCache(CATEGORIES_CACHE_KEY, CATEGORIES_CACHE_TTL);
+      if (cached) return cached;
       try {
         if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
         const res = await fetch(getApiBase() + '/api/product-types');
         if (!res.ok) throw new Error('Load product-types failed');
         const json = await res.json();
-        return json.data || [];
+        const rows = json.data || [];
+        writeHomeCache(CATEGORIES_CACHE_KEY, rows);
+        return rows;
       } catch (err) {
         if (DEBUG_HOME) console.error('[ProductTabs] Load error:', err);
         return [];
@@ -237,55 +273,90 @@
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const currentBase = getApiBase();
 
-    function readStoredLocation() {
-      try {
-        const rawLoc = localStorage.getItem("location");
-        if (!rawLoc) return null;
-        const loc = JSON.parse(rawLoc);
-        const lat = parseFloat(loc?.lat || loc?.latitude);
-        const lng = parseFloat(loc?.lng || loc?.longitude);
-        if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-      } catch (_) {}
-      return null;
+    function parseLocation(value) {
+      const rawLat = value?.lat ?? value?.latitude;
+      const rawLng = value?.lng ?? value?.longitude;
+      if (rawLat === '' || rawLng === '' || rawLat == null || rawLng == null) return null;
+      const lat = Number(rawLat);
+      const lng = Number(rawLng);
+      return Number.isFinite(lat) && Number.isFinite(lng)
+        && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+        ? { lat, lng }
+        : null;
     }
 
-    // [NEW] Reusable location fetching
+    function readJson(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function getCurrentRole() {
+      const user = readJson(window.AUTH_USER_KEY || "user_data");
+      return String(user?.role || localStorage.getItem("role") || "guest").toLowerCase();
+    }
+
+    function readBuyerPinnedLocation() {
+      const profile = readJson('myprofile_data_buyer');
+      return parseLocation(profile?.location) || parseLocation(profile);
+    }
+
+    function readFarmerLastGps() {
+      return parseLocation(readJson('agriprice_last_gps_farmer'));
+    }
+
+    function saveFarmerLastGps(loc) {
+      if (!loc) return;
+      try { localStorage.setItem('agriprice_last_gps_farmer', JSON.stringify(loc)); } catch (_) {}
+    }
+
+    async function fetchBuyerPinnedLocation() {
+      const localPinned = readBuyerPinnedLocation();
+      if (localPinned) return localPinned;
+
+      const userPinned = parseLocation(readJson(window.AUTH_USER_KEY || "user_data"));
+      if (userPinned) return userPinned;
+
+      if (!window.api?.getProfile) return null;
+      if (!BUYER_PROFILE_REQUEST) {
+        BUYER_PROFILE_REQUEST = window.api.getProfile()
+          .then((profile) => parseLocation(profile))
+          .catch(() => null);
+      }
+      return BUYER_PROFILE_REQUEST;
+    }
+
+    // Farmer uses current GPS; buyer uses the pin saved in My Profile.
     async function fetchUserLocation() {
       try {
-        const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-        const user = rawUser ? JSON.parse(rawUser) : null;
-        const role = (user?.role || localStorage.getItem("role") || "").toLowerCase();
-        
-        // 1. Try profile location from myprofile.html (stored in myprofile_data_${role})
-        if (role) {
-          const rawProfile = localStorage.getItem(`myprofile_data_${role}`);
-          if (rawProfile) {
-            const profile = JSON.parse(rawProfile);
-            const lat = parseFloat(profile.location?.lat || profile.lat || null);
-            const lng = parseFloat(profile.location?.lng || profile.lng || null);
-            if (!isNaN(lat) && !isNaN(lng)) {
-              return { lat, lng };
-            }
-          }
+        const role = getCurrentRole();
+
+        if (role === 'buyer') {
+          const pinned = await fetchBuyerPinnedLocation();
+          if (pinned) return pinned;
+          return await window.LocationHelper?.getUserLocation?.({
+            prompt: false,
+            allowDefault: false,
+            timeoutMs: 3000
+          }) || null;
         }
 
-        // 2. Try coordinates from user_data
-        if (user && (user.lat || user.latitude)) {
-          const lat = parseFloat(user.lat || user.latitude);
-          const lng = parseFloat(user.lng || user.longitude);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            return { lat, lng };
+        if (role === 'farmer') {
+          const shouldPrompt = !FARMER_GPS_PROMPTED;
+          FARMER_GPS_PROMPTED = true;
+          const gps = await window.LocationHelper?.getUserLocation?.({
+            prompt: shouldPrompt,
+            allowDefault: false,
+            timeoutMs: 5000
+          });
+          if (gps) {
+            saveFarmerLastGps(gps);
+            return gps;
           }
-        }
-        
-        // 3. Try coordinates from location key
-        const storedLoc = readStoredLocation();
-        if (storedLoc) return storedLoc;
-
-        // 4. Try already-granted GPS only. Home should not block first render or trigger permission prompts.
-        if (window.LocationHelper?.getUserLocation) {
-          const loc = await window.LocationHelper.getUserLocation({ prompt: false, timeoutMs: 3000 });
-          if (loc) return loc;
+          return readFarmerLastGps();
         }
       } catch (e) { console.warn("[Home] fetchUserLocation failed:", e); }
       return null;
@@ -293,7 +364,8 @@
 
     window.refreshDistances = async () => {
       const userLoc = await fetchUserLocation();
-      renderProducts(ALL_PRODUCTS, userLoc || readStoredLocation(), mount);
+      ACTIVE_USER_LOCATION = userLoc;
+      renderProducts(ALL_PRODUCTS, userLoc, mount);
     };
 
     window.filterProductsBySeller = async (sellerId, sellerName) => {
@@ -330,27 +402,31 @@
       }
 
       const userLoc = await fetchUserLocation();
+      ACTIVE_USER_LOCATION = userLoc;
       renderProducts(ALL_PRODUCTS, userLoc, mount);
     };
 
-    try {
-      const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-      const user = rawUser ? JSON.parse(rawUser) : null;
+    // Start resolving the role-specific location as soon as Home initializes.
+    // Product loading continues in parallel, so a permission prompt never blocks the feed.
+    const initialLocationPromise = fetchUserLocation();
 
+    try {
       // ── ใช้ cache ถ้ายังไม่หมดอายุ ──
       const cachedRows = getCachedProducts();
       if (cachedRows) {
         if (DEBUG_HOME) console.log('[ProductCards] Serving from cache, rows:', cachedRows.length);
         ALL_PRODUCTS = cachedRows; // Update global state
-        renderProducts(cachedRows, readStoredLocation(), mount);
-        fetchUserLocation().then((userLoc) => {
+        renderProducts(cachedRows, null, mount);
+        window._loc_found = false;
+        initialLocationPromise.then((userLoc) => {
           if (userLoc) {
             window._loc_found = true;
+            ACTIVE_USER_LOCATION = userLoc;
             renderProducts(ALL_PRODUCTS, userLoc, mount);
           }
         }).catch(() => {});
 
-        // Background-refresh silently after 1s (no skeleton shown)
+        // Background-refresh silently without holding the cached first paint.
         setTimeout(async () => {
           const apiRes = await fetch(currentBase + '/api/products?limit=50', { headers: getAuthHeaders() }).catch(() => null);
           if (apiRes?.ok) {
@@ -358,9 +434,9 @@
             const rows = json.data || [];
             ALL_PRODUCTS = rows; // Update global state
             setCachedProducts(rows);
-            renderProducts(rows, readStoredLocation(), mount);
+            renderProducts(rows, ACTIVE_USER_LOCATION, mount);
           }
-        }, 1500);
+        }, 200);
         return;
       }
 
@@ -371,12 +447,13 @@
         const json = await apiRes.json();
         const rows = json.data || [];
         ALL_PRODUCTS = rows; // Save to global
-        window._loc_found = !!readStoredLocation();
+        window._loc_found = false;
         setCachedProducts(rows); // บันทึก cache
-        renderProducts(rows, readStoredLocation(), mount);
-        fetchUserLocation().then((userLoc) => {
+        renderProducts(rows, null, mount);
+        initialLocationPromise.then((userLoc) => {
           if (userLoc) {
             window._loc_found = true;
+            ACTIVE_USER_LOCATION = userLoc;
             renderProducts(ALL_PRODUCTS, userLoc, mount);
           }
         }).catch(() => {});
@@ -488,7 +565,12 @@
         };
       });
 
-    if (userLoc) products.sort((a, b) => (a._distKm ?? 999) - (b._distKm ?? 999));
+    if (userLoc) {
+      products.sort((a, b) =>
+        (a._distKm ?? Number.POSITIVE_INFINITY) -
+        (b._distKm ?? Number.POSITIVE_INFINITY)
+      );
+    }
 
     mount.innerHTML = '';
     if (products.length === 0) {
@@ -584,14 +666,8 @@
     const track = document.getElementById("bannerCarousel");
     if (!track) return;
 
-    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
-    try {
-      const res = await fetch(getApiBase() + '/api/announcements?limit=8');
-      if (!res.ok) return;
-      const json = await res.json();
-      const list = json.data || [];
-      if (!list.length) return;
-
+    const renderBanners = (list) => {
+      if (!Array.isArray(list) || !list.length) return;
       const helper = window.AgriPriceUI;
       track.innerHTML = list.map(item => `
         <a class="banner-item news-item" href="${(item.link || '#').replace(/^http:/, 'https:')}" rel="noopener noreferrer">
@@ -606,6 +682,20 @@
           </div>
         </a>
       `).join('');
+    };
+
+    const cached = readHomeCache(ANNOUNCEMENTS_CACHE_KEY, ANNOUNCEMENTS_CACHE_TTL);
+    if (cached) renderBanners(cached);
+
+    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
+    try {
+      const res = await fetch(getApiBase() + '/api/announcements?limit=8');
+      if (!res.ok) return;
+      const json = await res.json();
+      const list = json.data || [];
+      if (!list.length) return;
+      writeHomeCache(ANNOUNCEMENTS_CACHE_KEY, list);
+      renderBanners(list);
     } catch (_) { }
   }
 
@@ -634,6 +724,11 @@
   window.__AGRIPRICE_REFRESH_HOME = async () => {
     await Promise.allSettled([initProductCards(), initBanners()]);
   };
+  let realtimeOfferTimer = null;
+  window.addEventListener('agriprice:realtime:offer', () => {
+    clearTimeout(realtimeOfferTimer);
+    realtimeOfferTimer = setTimeout(window.__AGRIPRICE_REFRESH_HOME, 150);
+  });
 
   // --- Initialize All ---
   // --- 4. Initialization ---

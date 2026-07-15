@@ -32,10 +32,24 @@
       <h1 class="ud-title" data-i18n="security_title">ความปลอดภัย</h1>
     </header>
 
-    <section class="ud-card fade-slide">
-      <div class="ud-icon"><span class="material-icons-outlined">security</span></div>
-      <div class="ud-text" data-i18n="security_coming_soon">ฟีเจอร์ความปลอดภัยกำลังจะมา</div>
-      <div class="ud-sub" data-i18n="security_coming_soon_desc">คุณจะสามารถจัดการความปลอดภัยของบัญชีได้ที่นี่</div>
+    <section class="ud-card fade-slide" aria-label="เมนูความปลอดภัย">
+      <div class="ud-intro">
+        <div class="ud-icon"><span class="material-icons-outlined">verified_user</span></div>
+        <div>
+          <div class="ud-text" data-i18n="security_center_title">ดูแลบัญชีให้ปลอดภัย</div>
+          <div class="ud-sub" data-i18n="security_center_hint">จัดการรหัสผ่านและตรวจสอบอุปกรณ์ที่เข้าสู่ระบบ</div>
+        </div>
+      </div>
+      <a class="ud-action" href="../manage-accounts/change-password.html">
+        <span class="ud-action-icon material-icons-outlined">lock_reset</span>
+        <span class="ud-action-copy"><strong data-i18n="change_password">เปลี่ยนรหัสผ่าน</strong><small data-i18n="change_password_subtitle">อัปเดตรหัสผ่านของคุณเพื่อความปลอดภัยของบัญชี</small></span>
+        <span class="material-icons-outlined ud-chevron">chevron_right</span>
+      </a>
+      <a class="ud-action" href="../manage-device/device-management.html">
+        <span class="ud-action-icon material-icons-outlined">devices</span>
+        <span class="ud-action-copy"><strong data-i18n="device_title">อุปกรณ์ที่เข้าสู่ระบบ</strong><small data-i18n="device_list_title">ตรวจสอบและออกจากระบบอุปกรณ์อื่น</small></span>
+        <span class="material-icons-outlined ud-chevron">chevron_right</span>
+      </a>
     </section>
   </main>
 
