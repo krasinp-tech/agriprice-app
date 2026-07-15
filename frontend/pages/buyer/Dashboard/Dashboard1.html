@@ -1,303 +1,53 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-
-    <script src="../../../js/api-client.js"></script>
-
-    <script src="../../../js/auth/guard.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Dashboard | AGRIPRICE</title>
-  <script>
-    (function () {
-      const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-  </script>
-    <meta name="theme-color" content="#0B853C">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>แดชบอร์ด | AGRIPRICE</title>
+  <script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('agriprice_theme')||'light')})();</script>
+  <meta name="theme-color" content="#08783a">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="../../../css/global.css" />
-  <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css" />
-  <link rel="stylesheet" href="../../../css/buyer/Dashboard/Dashboard1.css" />
-
-    <script src="../../../js/config.js"></script>
-
-    <script src="../../../js/global-anim.js"></script>
-
-    <script src="../../../js/permission-manager.js"></script>
-
+  <link rel="stylesheet" href="../../../css/global.css">
+  <link rel="stylesheet" href="../../../components/bottom-nav/bottom-nav.css">
+  <link rel="stylesheet" href="../../../css/buyer/Dashboard/Dashboard1.css">
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css">
+  <script src="../../../js/config.js"></script>
+  <script src="../../../js/api-client.js"></script>
+  <script src="../../../js/auth/guard.js"></script>
 </head>
-
 <body data-active="account" data-auth="required">
-
-  <!-- Header with Blue Background -->
-  <header class="dashboard-header-bg">
-    <button class="back-btn-light" id="backBtn" aria-label="เธขเนเธญเธเธเธฅเธฑเธ" data-i18n-aria-label="profile_back">
-      <span class="material-icons-outlined">chevron_left</span>
-    </button>
-    <div class="header-titles">
-      <h1 data-i18n="dashboard">เนเธ”เธเธเธญเธฃเนเธ”</h1>
-      <p id="welcomeMsg" data-i18n="welcome_back">เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเธเธฅเธฑเธเธกเธฒ, เธเธนเนเนเธเนเธเธฒเธ</p>
-    </div>
+  <header class="dash-hero">
+    <div class="hero-top"><button id="backBtn" class="icon-btn" aria-label="ย้อนกลับ"><span class="material-icons-outlined">chevron_left</span></button><div class="hero-copy"><p id="welcomeMsg">ภาพรวมกิจการของคุณ</p><h1>แดชบอร์ด</h1></div><span class="live-dot"><i></i>ข้อมูลจริง</span></div>
+    <div class="period-selector" role="tablist"><button class="period-tab active" data-period="today">วันนี้</button><button class="period-tab" data-period="week">7 วัน</button><button class="period-tab" data-period="month">30 วัน</button></div>
   </header>
 
-  <!-- Main Content Area -->
-  <main class="dash-main-pro">
+  <main class="dashboard-shell" id="dashboardShell" aria-busy="true">
+    <section class="updated-row"><span id="periodLabel">ภาพรวมวันนี้</span><span id="updatedAt">กำลังอัปเดต...</span></section>
 
-    <!-- Period Filter (Today, Week, Month) -->
-    <section class="period-selector-pro">
-      <button class="period-tab active" data-period="today" data-i18n="today">เธงเธฑเธเธเธตเน</button>
-      <button class="period-tab" data-period="week" data-i18n="week">เธชเธฑเธเธ”เธฒเธซเน</button>
-      <button class="period-tab" data-period="month" data-i18n="month">เน€เธ”เธทเธญเธ</button>
+    <section class="kpi-grid" aria-label="ตัวเลขสำคัญ">
+      <button class="kpi-card blue" data-go="bookings"><span class="kpi-icon material-icons-outlined">event_note</span><span class="kpi-label">การจอง</span><strong id="bookingsVal">—</strong><small id="bookingsTrend">—</small></button>
+      <button class="kpi-card green" data-go="bookings"><span class="kpi-icon material-icons-outlined">task_alt</span><span class="kpi-label">สำเร็จ</span><strong id="successRateVal">—</strong><small id="successRateTrend">—</small></button>
+      <button class="kpi-card orange" data-go="products"><span class="kpi-icon material-icons-outlined">visibility</span><span class="kpi-label">คนเห็นประกาศ</span><strong id="viewsVal">—</strong><small id="viewsTrend">—</small></button>
+      <button class="kpi-card teal" data-go="followers"><span class="kpi-icon material-icons-outlined">group_add</span><span class="kpi-label">ผู้ติดตามทั้งหมด</span><strong id="followersVal">—</strong><small id="followersTrend">—</small></button>
     </section>
 
-    <!-- KPI Grid (2x2 Cards) -->
-    <section class="kpi-grid">
-      <!-- Total Bookings -->
-      <div class="kpi-card">
-        <div class="icon-circle icon-blue">
-          <span class="material-icons-outlined">shopping_bag</span>
-        </div>
-        <div class="kpi-label" data-i18n="total_bookings_label">เธเธณเธเธงเธเธขเธญเธ”เธเธญเธเธฃเธงเธก</div>
-        <div class="kpi-value" id="bookingsVal">0</div>
-        <div class="kpi-trend trend-blue" id="bookingsTrend">-</div>
-      </div>
+    <section class="panel action-panel"><div class="panel-heading"><div><span class="eyebrow">สิ่งที่ควรทำ</span><h2>คำแนะนำสำหรับคุณ</h2></div><span class="material-icons-outlined heading-icon">auto_awesome</span></div><div id="recommendationList" class="recommendation-list"></div></section>
 
-      <!-- Success Rate -->
-      <div class="kpi-card">
-        <div class="icon-circle icon-green">
-          <span class="material-icons-outlined">check_circle</span>
-        </div>
-        <div class="kpi-label" data-i18n="success_rate">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเธเธญเธเธชเธณเน€เธฃเนเธ</div>
-        <div class="kpi-value" id="successRateVal">0%</div>
-        <div class="kpi-trend trend-up" id="successRateTrend">-</div>
-      </div>
+    <section class="panel chart-panel"><div class="panel-heading"><div><span class="eyebrow">แนวโน้ม</span><h2>ผลงานตามช่วงเวลา</h2></div><div class="chart-legend"><span><i class="booking"></i>จอง</span><span><i class="view"></i>เห็น</span></div></div><div id="trendChart" class="trend-chart"></div></section>
 
-      <!-- Feed Impressions -->
-      <div class="kpi-card">
-        <div class="icon-circle icon-orange">
-          <span class="material-icons-outlined">visibility</span>
-        </div>
-        <div class="kpi-label" data-i18n="impressions_feed">เธเธณเธเธงเธเธเธฃเธฐเธเธฒเธจเธ—เธตเนเธ–เธนเธเนเธชเธ”เธเธเธ Feed</div>
-        <div class="kpi-value" id="viewsVal">0</div>
-        <div class="kpi-trend trend-orange" id="viewsTrend">-</div>
-      </div>
+    <section class="panel funnel-panel"><div class="panel-heading"><div><span class="eyebrow">Conversion</span><h2>จากการมองเห็นสู่การจอง</h2></div><strong id="conversionRate">0%</strong></div><div class="funnel" id="conversionFunnel"><div class="funnel-step"><span class="material-icons-outlined">visibility</span><div><b id="funnelViews">0</b><small>เห็นประกาศ</small></div></div><span class="funnel-arrow material-icons-outlined">arrow_forward</span><div class="funnel-step"><span class="material-icons-outlined">event_available</span><div><b id="funnelBookings">0</b><small>กดจอง</small></div></div><span class="funnel-arrow material-icons-outlined">arrow_forward</span><div class="funnel-step"><span class="material-icons-outlined">verified</span><div><b id="funnelSuccess">0</b><small>สำเร็จ</small></div></div></div></section>
 
-      <!-- Total Followers -->
-      <div class="kpi-card">
-        <div class="icon-circle icon-teal">
-          <span class="material-icons-outlined">people</span>
-        </div>
-        <div class="kpi-label" data-i18n="new_followers">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเธ—เธฑเนเธเธซเธกเธ”</div>
-        <div class="kpi-value" id="followersVal">0</div>
-        <div class="kpi-trend trend-teal" id="followersTrend">-</div>
-      </div>
-    </section>
+    <section class="panel"><div class="panel-heading"><div><span class="eyebrow">สถานะงาน</span><h2>สรุปการจอง</h2></div><span class="total-pill">รวม <b id="centerValue">0</b></span></div><div class="status-list"><div class="status-row"><div><i class="success"></i><span>สำเร็จ</span><b id="completedVal">0</b></div><div class="track"><span id="completedFill"></span></div><small id="completedPercentVal">0%</small></div><div class="status-row"><div><i class="waiting"></i><span>รอดำเนินการ</span><b id="waitingVal">0</b></div><div class="track"><span id="waitingFill"></span></div><small id="waitingPercentVal">0%</small></div><div class="status-row"><div><i class="cancel"></i><span>ยกเลิก</span><b id="cancelVal">0</b></div><div class="track"><span id="cancelFill"></span></div><small id="cancelPercentVal">0%</small></div></div></section>
 
-    <!-- Booking Summary (Progress Bars) -->
-    <section class="summary-section">
-      <div class="section-header">
-        <h2 data-i18n="booking_summary">เธชเธฃเธธเธเธเธฒเธฃเธเธญเธ</h2>
-        <div class="total-bookings-badge">
-          <span data-i18n="total">เธฃเธงเธก</span>
-          <strong id="centerValue">0</strong>
-          <span data-i18n="bookings">เธขเธญเธ”เธเธญเธ</span>
-        </div>
-      </div>
+    <section class="panel insight-panel"><div class="panel-heading"><div><span class="eyebrow">ข้อมูลเชิงลึก</span><h2>พฤติกรรมการจอง</h2></div></div><div class="insight-grid"><div><span class="material-icons-outlined">schedule</span><small>ช่วงยอดนิยม</small><b id="peakTimeVal">—</b></div><div><span class="material-icons-outlined">emoji_events</span><small>ประกาศเด่น</small><b id="mostBookedVal">—</b></div><div><span class="material-icons-outlined">speed</span><small>เฉลี่ยต่อวัน</small><b id="dailyAvgVal">—</b></div><div><span class="material-icons-outlined">person_add</span><small>ผู้ติดตามใหม่</small><b id="newFollowersVal">—</b></div></div></section>
 
-      <div class="progress-bars-container">
-        <!-- Success/Completed -->
-        <div class="progress-bar-row">
-          <div class="progress-bar-info">
-            <div class="progress-bar-label">
-              <span class="legend-color" style="background: var(--primary, #0B853C);"></span>
-              <span data-i18n="completed">เธชเธณเน€เธฃเนเธเนเธฅเนเธง</span>
-            </div>
-            <div class="progress-bar-values">
-              <span class="progress-count" id="completedVal">0</span>
-              <span class="progress-percent" id="completedPercentVal">(0%)</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="completedFill" style="background: var(--primary, #0B853C); width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- Waiting/Pending -->
-        <div class="progress-bar-row">
-          <div class="progress-bar-info">
-            <div class="progress-bar-label">
-              <span class="legend-color" style="background: #F59E0B;"></span>
-              <span data-i18n="waiting">เธฃเธญเธ”เธณเน€เธเธดเธเธเธฒเธฃ</span>
-            </div>
-            <div class="progress-bar-values">
-              <span class="progress-count" id="waitingVal">0</span>
-              <span class="progress-percent" id="waitingPercentVal">(0%)</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="waitingFill" style="background: #F59E0B; width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- Cancelled -->
-        <div class="progress-bar-row">
-          <div class="progress-bar-info">
-            <div class="progress-bar-label">
-              <span class="legend-color" style="background: #EF4444;"></span>
-              <span data-i18n="cancel">เธขเธเน€เธฅเธดเธ</span>
-            </div>
-            <div class="progress-bar-values">
-              <span class="progress-count" id="cancelVal">0</span>
-              <span class="progress-percent" id="cancelPercentVal">(0%)</span>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="cancelFill" style="background: #EF4444; width: 0%;"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Booking Deep Details Card -->
-    <section class="detail-card" id="bookingAnalyticsCard">
-      <div class="detail-card-header">
-        <span class="material-icons-outlined text-blue">bar_chart</span>
-        <h3 data-i18n="booking_analytics">เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธฒเธฃเธเธญเธ</h3>
-      </div>
-      <div class="detail-rows">
-        <div class="detail-row">
-          <span class="detail-label" data-i18n="peak_time">เธเนเธงเธเธ—เธตเนเธกเธตเธเธฒเธฃเธเธญเธเธกเธฒเธเธ—เธตเนเธชเธธเธ”</span>
-          <span class="detail-value" id="peakTimeVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label" data-i18n="most_booked">เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธเธญเธเธกเธฒเธเธชเธธเธ”</span>
-          <span class="detail-value text-green" id="mostBookedVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label" data-i18n="least_booked">เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธเธญเธเธเนเธญเธขเธชเธธเธ”</span>
-          <span class="detail-value text-orange" id="leastBookedVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">เน€เธเธฅเธตเนเธขเธ•เนเธญเธงเธฑเธ (เธเนเธงเธเน€เธงเธฅเธฒเธเธตเน)</span>
-          <span class="detail-value" id="dailyAvgVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">เน€เธเธฅเธตเนเธขเธ•เนเธญเน€เธ”เธทเธญเธ (เธเนเธงเธเน€เธงเธฅเธฒเธเธตเน)</span>
-          <span class="detail-value" id="monthlyAvgVal">-</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Follower Growth Details Card -->
-    <section class="detail-card" id="followerGrowthCard">
-      <div class="detail-card-header">
-        <span class="material-icons-outlined text-teal">trending_up</span>
-        <h3 data-i18n="follower_growth">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเน€เธ•เธดเธเนเธ•เธเธญเธเธเธนเนเธ•เธดเธ”เธ•เธฒเธก</h3>
-      </div>
-      <div class="detail-rows">
-        <div class="detail-row">
-          <span class="detail-label">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเธ—เธฑเนเธเธซเธกเธ”</span>
-          <span class="detail-value" id="totalFollowersVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">เธเธนเนเธ•เธดเธ”เธ•เธฒเธกเน€เธเธดเนเธกเธเธถเนเธ (30 เธงเธฑเธ)</span>
-          <span class="detail-value text-green" id="newFollowers30dVal">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">เธญเธฑเธ•เธฃเธฒเธเธฒเธฃเน€เธ•เธดเธเนเธ• (%)</span>
-          <span class="detail-value text-green" id="growthRateVal">-</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Competitors Analytics Card -->
-    <section class="detail-card" id="competitorAnalyticsCard">
-      <div class="detail-card-header">
-        <span class="material-icons-outlined text-purple">storefront</span>
-        <h3 id="competitorsHeaderTitle" data-i18n="competitor_count_label">เธฅเนเธเธเธนเนเนเธเนเธเนเธเธเธทเนเธเธ—เธตเน</h3>
-      </div>
-      <div class="competitor-summary-box">
-        <div class="comp-icon-box">
-          <span class="material-icons-outlined">storefront</span>
-        </div>
-        <div class="comp-meta">
-          <div class="comp-count" id="competitorTotalVal">0 เธฃเธฒเธข</div>
-          <div class="comp-desc">เนเธเธเธทเนเธเธ—เธตเนเธเธญเธเธ—เนเธฒเธ</div>
-        </div>
-      </div>
-      <div class="competitor-list" id="competitorList">
-        <!-- Dyn rendered categories -->
-      </div>
-    </section>
-
-    <!-- Price Rankings Card -->
-    <section class="detail-card" id="priceRankingsCard">
-      <div class="detail-card-header">
-        <span class="material-icons-outlined text-orange">payments</span>
-        <h3 data-i18n="price_comparison">เธญเธฑเธเธ”เธฑเธเธฃเธฒเธเธฒเธฃเธฑเธเธเธทเนเธญเธเธญเธเน€เธฃเธฒเน€เธ—เธตเธขเธเธเธฑเธเธ•เธฅเธฒเธ”</h3>
-      </div>
-      <div class="price-compare-list" id="priceCompareList">
-        <!-- Dyn rendered listings price rankings -->
-      </div>
-    </section>
-
+    <section class="panel"><div class="panel-heading"><div><span class="eyebrow">ตลาด</span><h2 id="competitorsHeaderTitle">คู่แข่งในพื้นที่</h2></div><strong id="competitorTotalVal">0 ราย</strong></div><div id="competitorList" class="simple-list"></div></section>
+    <section class="panel"><div class="panel-heading"><div><span class="eyebrow">ราคา</span><h2>ราคาเราเทียบกับตลาด</h2></div></div><div id="priceCompareList" class="price-list"></div></section>
   </main>
 
-  <!-- PRO Lock Overlay (shown for Free tier users) -->
-  <div id="proLockedOverlay" class="pro-lock-overlay" hidden>
-    <div class="pro-lock-card">
-      <div class="pro-lock-icon">
-        <span class="material-icons-outlined">lock</span>
-      </div>
-      <h2 class="pro-lock-title" data-i18n="pro_feature_locked">เธเธตเน€เธเธญเธฃเนเธชเธณเธซเธฃเธฑเธ PRO</h2>
-      <p class="pro-lock-desc" data-i18n="pro_lock_desc">เนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅเนเธซเนเธเธฃเธดเธเธฒเธฃเน€เธเธเธฒเธฐเธชเธกเธฒเธเธดเธ PRO เน€เธ—เนเธฒเธเธฑเนเธ เธญเธฑเธเน€เธเธฃเธ”เน€เธเธทเนเธญเธ”เธนเธชเธ–เธดเธ•เธดเธขเธญเธ”เธเธญเธ เธฃเธฒเธขเนเธ”เน เนเธฅเธฐเธเธฃเธฐเธชเธดเธ—เธเธดเธ เธฒเธเธชเธดเธเธเนเธฒเธเธญเธเธเธธเธ“</p>
-      <ul class="pro-lock-features">
-        <li><span class="material-icons-outlined">bar_chart</span><span data-i18n="dashboard_analytics">เนเธ”เธเธเธญเธฃเนเธ”เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเนเธญเธกเธนเธฅ</span></li>
-        <li><span class="material-icons-outlined">attach_money</span><span data-i18n="monthly_revenue_summary">เธชเธฃเธธเธเธฃเธฒเธขเนเธ”เนเธฃเธฒเธขเน€เธ”เธทเธญเธ</span></li>
-        <li><span class="material-icons-outlined">trending_up</span><span data-i18n="top_booked_ranking">เธญเธฑเธเธ”เธฑเธเธชเธดเธเธเนเธฒเธ—เธตเนเธ–เธนเธเธเธญเธเธชเธนเธเธชเธธเธ”</span></li>
-      </ul>
-      <button class="pro-lock-btn" id="goUpgradeBtn" data-i18n="upgrade_pro_btn">เธญเธฑเธเน€เธเธฃเธ”เน€เธเนเธ PRO</button>
-      <button class="pro-lock-back" id="lockBackBtn" data-i18n="back">เธขเนเธญเธเธเธฅเธฑเธ</button>
-    </div>
-  </div>
-
-  <!-- Bottom Nav -->
+  <div id="proLockedOverlay" class="pro-lock-overlay" hidden><div class="pro-lock-card"><span class="material-icons-outlined lock-icon">workspace_premium</span><h2>แดชบอร์ดสำหรับ PRO</h2><p>ดูแนวโน้ม การมองเห็น Conversion และคำแนะนำเพื่อเพิ่มยอดจอง</p><button id="goUpgradeBtn">อัปเกรดเป็น PRO</button><button id="lockBackBtn" class="ghost">ย้อนกลับ</button></div></div>
   <div id="bottomNavMount"></div>
-
-  <!-- Scripts -->
-
-    <script src="../../../js/utils/storage-keys.js"></script>
-  <script>window.AuthGuard.requireLogin();</script>
-
-
-    <script src="../../../js/components.js"></script>
-
-    <script src="../../../js/components/i18n.js"></script>
-
-    <script src="../../../js/buyer/Dashboard/Dashboard1.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.i18nInit) window.i18nInit();
-
-        // ๐“ฑ Native Permissions handled Just-in-Time (JIT)
-    });
-
-
-  </script>
+  <script src="../../../js/global-anim.js"></script><script src="../../../js/utils/storage-keys.js"></script><script>window.AuthGuard.requireLogin();</script><script src="../../../js/components.js"></script><script src="../../../js/components/i18n.js"></script><script src="../../../js/buyer/Dashboard/Dashboard1.js"></script>
 </body>
 </html>
-
-
-
-

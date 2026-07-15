@@ -319,11 +319,15 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     // ── Tier Guard: เฉพาะ PRO เท่านั้น ─────────────────────────
     const { data: profileCheck } = await supabaseAdmin
       .from('profiles')
-      .select('tier')
+      .select('tier, pro_expires_at')
       .eq('profile_id', userId)
       .single();
 
-    const userTier = (profileCheck?.tier || 'free').toLowerCase();
+    let userTier = (profileCheck?.tier || 'free').toLowerCase();
+    if (userTier === 'pro' && profileCheck?.pro_expires_at && new Date(profileCheck.pro_expires_at) <= new Date()) {
+      userTier = 'free';
+      await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('profile_id', userId);
+    }
     if (userTier !== 'pro') {
       return res.status(403).json({
         success: false,
@@ -343,12 +347,23 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     } else { // 'month'
       startDate.setDate(now.getDate() - 30); // last 30 days
     }
+    const periodDays = period === 'today' ? 1 : (period === 'week' ? 7 : 30);
+    const previousStartDate = new Date(startDate.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const previousEndDate = new Date(startDate);
+    const percentChange = (current, previous) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 1000) / 10;
+    };
 
     // [REAL DATA] 1. ดึงข้อมูลการจองจริง
     const bookingsData = await fetchDashboardBookings(userId, role);
 
     // กรองข้อมูลการจองตามช่วงเวลาที่เลือก
     const periodBookings = (bookingsData || []).filter(b => new Date(b.created_at) >= startDate);
+    const previousBookings = (bookingsData || []).filter(b => {
+      const createdAt = new Date(b.created_at);
+      return createdAt >= previousStartDate && createdAt < previousEndDate;
+    });
     const totalBookings = periodBookings.length;
     const successBookings = periodBookings.filter(b => b.status === 'success');
     const waitingBookingsCount = periodBookings.filter(b => b.status === 'waiting').length;
@@ -374,7 +389,7 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
       : '-';
 
     // คำนวณความถี่การจองเฉลี่ยรายวัน/รายเดือน
-    const totalDays = period === 'today' ? 1 : (period === 'week' ? 7 : 30);
+    const totalDays = periodDays;
     const dailyMap = {};
     const monthlyMap = {};
     periodBookings.forEach(b => {
@@ -420,14 +435,18 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
       .single();
 
     const totalFollowers = profileData?.followers_count || 0;
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
     const { count: newFollowersCount } = await supabaseAdmin
       .from('follows')
       .select('*', { count: 'exact', head: true })
       .eq('following_id', userId)
-      .gte('created_at', thirtyDaysAgo.toISOString());
+      .gte('created_at', startDate.toISOString());
+
+    const { count: previousFollowersCount } = await supabaseAdmin
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', userId)
+      .gte('created_at', previousStartDate.toISOString())
+      .lt('created_at', previousEndDate.toISOString());
 
     const initialFollowers = totalFollowers - (newFollowersCount || 0);
     const followerGrowthRate = initialFollowers > 0 
@@ -437,17 +456,64 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
     // [REAL DATA] 3. คำนวณยอดแสดงผล Feed (Impressions)
     const userProductIds = normalizedUserProducts ? normalizedUserProducts.map(p => getOfferId(p)).filter(Boolean) : [];
     let totalImpressions = 0;
+    let previousImpressions = 0;
+    let impressionRows = [];
     if (userProductIds.length > 0) {
-      const { count: impCount, error: impErr } = await supabaseAdmin
+      const { data: impRows, count: impCount, error: impErr } = await supabaseAdmin
         .from('offer_impressions')
-        .select('*', { count: 'exact', head: true })
+        .select('created_at', { count: 'exact' })
         .in('offer_id', userProductIds)
         .or(`viewer_id.is.null,viewer_id.neq.${userId}`)
         .gte('created_at', startDate.toISOString());
       if (!impErr) {
         totalImpressions = impCount || 0;
+        impressionRows = impRows || [];
       }
+
+      const { count: previousImpCount } = await supabaseAdmin
+        .from('offer_impressions')
+        .select('*', { count: 'exact', head: true })
+        .in('offer_id', userProductIds)
+        .or(`viewer_id.is.null,viewer_id.neq.${userId}`)
+        .gte('created_at', previousStartDate.toISOString())
+        .lt('created_at', previousEndDate.toISOString());
+      previousImpressions = previousImpCount || 0;
     }
+
+    const chartDays = period === 'today' ? 1 : periodDays;
+    const trendLabels = [];
+    const bookingTrend = [];
+    const impressionTrend = [];
+    for (let offset = chartDays - 1; offset >= 0; offset--) {
+      const day = new Date(now);
+      day.setHours(0, 0, 0, 0);
+      day.setDate(day.getDate() - offset);
+      const nextDay = new Date(day.getTime() + 24 * 60 * 60 * 1000);
+      trendLabels.push(period === 'today' ? 'วันนี้' : day.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }));
+      bookingTrend.push(periodBookings.filter(item => {
+        const value = new Date(item.created_at);
+        return value >= day && value < nextDay;
+      }).length);
+      impressionTrend.push(impressionRows.filter(item => {
+        const value = new Date(item.created_at);
+        return value >= day && value < nextDay;
+      }).length);
+    }
+
+    const bookingChange = percentChange(totalBookings, previousBookings.length);
+    const viewChange = percentChange(totalImpressions, previousImpressions);
+    const followerChange = percentChange(newFollowersCount || 0, previousFollowersCount || 0);
+    const previousSuccessRate = previousBookings.length
+      ? (previousBookings.filter(item => item.status === 'success').length / previousBookings.length) * 100
+      : 0;
+    const successRateChange = Math.round((successRate - previousSuccessRate) * 10) / 10;
+    const conversionRate = totalImpressions > 0 ? Math.round((totalBookings / totalImpressions) * 1000) / 10 : 0;
+    const recommendations = [];
+    if (waitingBookingsCount > 0) recommendations.push({ icon: 'pending_actions', tone: 'warning', title: `มี ${waitingBookingsCount} รายการรอดำเนินการ`, detail: 'ตรวจสอบและจัดการการจองเพื่อไม่ให้ลูกค้ารอนาน', action: 'bookings' });
+    if (totalImpressions >= 10 && totalBookings === 0) recommendations.push({ icon: 'visibility', tone: 'warning', title: 'มีคนเห็นประกาศแต่ยังไม่มีการจอง', detail: 'ลองปรับรูป ราคา หรือรายละเอียดให้ชัดเจนขึ้น', action: 'products' });
+    if (cancelBookingsCount > successBookings.length && totalBookings > 0) recommendations.push({ icon: 'report_problem', tone: 'danger', title: 'ยอดยกเลิกสูงกว่ายอดสำเร็จ', detail: 'ตรวจเหตุผลการยกเลิกและปรับช่วงเวลารับสินค้า', action: 'bookings' });
+    if (mostBooked) recommendations.push({ icon: 'trending_up', tone: 'success', title: `${mostBooked.name} ทำผลงานดีที่สุด`, detail: `ได้รับการจอง ${mostBooked.count} ครั้งในช่วงที่เลือก`, action: 'products' });
+    if (!recommendations.length) recommendations.push({ icon: 'task_alt', tone: 'success', title: 'สถานะโดยรวมเรียบร้อย', detail: 'ยังไม่มีรายการเร่งด่วนที่ต้องจัดการในช่วงนี้', action: null });
 
     // [REAL DATA] 4. จำนวนล้งคู่แข่งในพื้นที่เดียวกัน
     let competitorsCount = 0;
@@ -550,10 +616,15 @@ router.get('/pro-stats', verifyToken, async (req, res) => {
         monthlyRevenue: 0, // skip monetary values
         trends: {
           monthlyRevenue: "0%",
-          totalBookings: "0%",
-          totalViews: "0%",
-          newFollowers: "0%"
+          totalBookings: bookingChange,
+          successRate: successRateChange,
+          totalViews: viewChange,
+          newFollowers: followerChange
         },
+        trendChart: { labels: trendLabels, bookings: bookingTrend, impressions: impressionTrend },
+        funnel: { impressions: totalImpressions, bookings: totalBookings, success: successBookings.length, conversionRate },
+        recommendations: recommendations.slice(0, 3),
+        updatedAt: new Date().toISOString(),
         bookingSummary: {
           total: totalBookings,
           success: successBookings.length,
