@@ -3115,3 +3115,56 @@ html[data-theme="dark"] body::selection,
 [data-theme="dark"] #leafletMapDiv {
   filter: invert(90%) hue-rotate(180deg) brightness(82%) contrast(90%) saturate(0.85) !important;
 }
+
+/* Final contrast guard: legacy pages still contain hard-coded light-theme text. */
+[data-theme="dark"] :is(
+  .profile-name, .stat-value, .products-list-title, .pc-sub,
+  .about-desc, .about-contact .contact-item, .about-contact a,
+  .location-address, .services-title, .service-name,
+  .reviewer-name, .review-text, .device-list-title, .device-other-title,
+  .device-name, .modal-title, .ud-title, .ud-text,
+  .status-followers, .profile-hamburger span, .avatar-edit-btn span,
+  .modal .btn-outline,
+  .section-title, .card-title, .form-title, .field-label,
+  .summary-title, .detail-title, .vehicle-title, .queue-title,
+  .calendar-title, .timeslot-title, .contact-name
+) {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] :is(
+  .profile-tagline, .stat-label, .profile-about-text, .profile-tab,
+  .pc-subtitle, .location-sub, .service-desc, .reviewer-date,
+  .device-list-desc, .device-meta, .modal-desc, .ud-sub,
+  .helper-text, .field-hint, .card-subtitle, .summary-sub,
+  .detail-label, .vehicle-sub, .queue-sub, .empty-state p
+) {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] :is(
+  .btn-follow, .btn-edit-about, .location-card, .service-item,
+  .device-item, .ud-back, .modal-btn, .profile-tabs,
+  .profile-hamburger, .avatar-edit-btn
+) {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] :is(input, textarea, select, option) {
+  color: var(--text-main) !important;
+  caret-color: #4ade80;
+}
+
+[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
+}
+
+[data-theme="dark"] :is(input, textarea, select):-webkit-autofill,
+[data-theme="dark"] :is(input, textarea, select):-webkit-autofill:hover,
+[data-theme="dark"] :is(input, textarea, select):-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-main) !important;
+  box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+}
