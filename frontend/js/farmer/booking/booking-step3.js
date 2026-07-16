@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         offer_id:      step1Data.offer_id   || step1Data.product_id || null,
         product_id:    step1Data.offer_id   || step1Data.product_id || null,
         buyer_id:      step1Data.buyer_id   || null,
-        farmer_id:     step1Data.farmer_id  || (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY||'user')||'null')?.id||null; } catch(_){return null;} })(),
+        farmer_id:     step1Data.farmer_id  || (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || 'null')?.id || null; } catch(_){return null;} })(),
         farmerName:    step1Data.farmerName || localStorage.getItem('bookingFarmerName') || '',
         productName:   step1Data.productName || '',
 
@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // [FIX] ลบ status:"confirmed" ออก เพราะ Server กำหนด status='waiting' เสมอ
         // การระบุ "confirmed" ที่นี่ทำให้ Frontend logic สับสน
         confirmedAt:  new Date().toISOString(),
-        userId:       (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY||'user')||'null')?.id||null; } catch(_){return null;} })(),
+        userId:       (() => { try { return JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || 'null')?.id || null; } catch(_){return null;} })(),
         step: 3
       };
 

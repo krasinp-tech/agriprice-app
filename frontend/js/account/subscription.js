@@ -128,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   const rawUser = localStorage.getItem("user_data");
                   if (rawUser) {
                     const user = JSON.parse(rawUser);
-                    user.tier = 'free';
+                    user.tier = res.data.tier || currentTier;
                     localStorage.setItem("user_data", JSON.stringify(user));
                   }
                 }
-                alert(t('cancel_success', 'ยกเลิกการสมัครเรียบร้อยแล้ว แพ็กเกจของคุณเป็น FREE'));
+                alert(res.message || t('cancel_success', 'ยกเลิกการต่ออายุแล้ว คุณยังใช้ PRO ได้จนถึงวันหมดอายุ'));
                 window.location.reload();
               } else {
                 throw new Error(res?.error || res?.message || 'Cancel rejected');

@@ -159,11 +159,33 @@ router.get('/promptpay/status', authMiddleware, async (req, res) => {
 
 router.post('/cancel', authMiddleware, async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin.from('profiles').update({ tier: 'free', pro_expires_at: null })
-      .eq('profile_id', req.user.id).select('profile_id, phone, role').single();
+    const { data, error } = await supabaseAdmin.from('profiles')
+      .select('profile_id, phone, role, tier, pro_expires_at')
+      .eq('profile_id', req.user.id)
+      .single();
     if (error || !data) throw new Error(error?.message || 'User not found');
-    const token = signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'free' });
-    res.json({ success: true, message: 'ยกเลิกสมาชิกแล้ว', data: { tier: 'free', token } });
+
+    const expiresAt = data.pro_expires_at ? new Date(data.pro_expires_at) : null;
+    const isActive = String(data.tier || '').toLowerCase() === 'pro'
+      && (!expiresAt || expiresAt > new Date());
+    const tier = isActive ? 'pro' : 'free';
+
+    if (!isActive && String(data.tier || '').toLowerCase() !== 'free') {
+      await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('profile_id', req.user.id);
+    }
+
+    const token = signToken({
+      id: data.profile_id,
+      phone: data.phone,
+      role: data.role,
+      tier,
+      session_id: req.user.sessionId,
+    });
+    res.json({
+      success: true,
+      message: isActive ? 'ยกเลิกการต่ออายุแล้ว คุณยังใช้ PRO ได้จนถึงวันหมดอายุ' : 'แพ็กเกจ PRO หมดอายุแล้ว',
+      data: { tier, token, pro_expires_at: data.pro_expires_at },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
