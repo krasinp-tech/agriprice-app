@@ -56,7 +56,7 @@ window.appNotify = window.appNotify || function (message, type = 'info') {
   }, 3500);
 };
 
-window.showAlert = function(msg, type = 'info', timeout = 3000) {
+window.showAlert = window.showAlert || function(msg, type = 'info', timeout = 3000) {
   if (window.appNotify) {
     window.appNotify(msg, type);
     return;
@@ -107,13 +107,13 @@ window.hideEmptyState = function(container) {
 };
 
 // Confirm Modal
-window.showConfirm = function(msg, onConfirm) {
+window.showConfirm = window.showConfirm || function(msg, onConfirm) {
   let el = document.getElementById('globalConfirm');
   if (!el) {
     el = document.createElement('div');
     el.id = 'globalConfirm';
     el.className = 'global-confirm';
-    el.innerHTML = '<div class="modal"><div class="msg"></div><div class="actions"><button id="confirmYes">ตกลง</button><button id="confirmNo">ยกเลิก</button></div></div>';
+    el.innerHTML = '<div class="global-confirm-modal"><div class="msg"></div><div class="actions"><button id="confirmYes">ตกลง</button><button id="confirmNo">ยกเลิก</button></div></div>';
     document.body.appendChild(el);
   }
   el.querySelector('.msg').textContent = msg;
@@ -135,14 +135,14 @@ window.showConfirm = function(msg, onConfirm) {
 @keyframes spin { 100% { transform:rotate(360deg); } }
 .empty-state { text-align:center;color:#888;padding:24px;font-size:18px; }
 .global-confirm { position:fixed;top:0;left:0;width:100vw;height:100vh;display:none;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,0.2); }
-.global-confirm .modal { background:#fff;padding:24px 20px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.16); width:min(92vw,360px); }
+.global-confirm .global-confirm-modal { background:#fff;padding:24px 20px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.16); width:min(92vw,360px); }
 .global-confirm .msg { font-size:16px; line-height:1.5; }
 .global-confirm .actions { margin-top:18px;text-align:right; }
 .global-confirm button { margin-left:8px;padding:8px 18px;border:none;border-radius:6px;background:#333;color:#fff;font-size:16px;cursor:pointer; }
 .global-confirm button#confirmYes { background:#2ecc40; }
 .global-confirm button#confirmNo { background:#e74c3c; }
 @media (max-width: 480px) {
-  .global-confirm .modal { width:calc(100vw - 24px); padding:20px 16px; }
+  .global-confirm .global-confirm-modal { width:calc(100vw - 24px); padding:20px 16px; }
   .global-confirm .actions { display:flex; gap:8px; }
   .global-confirm button { flex:1; margin-left:0; }
   .global-alert { left:12px; right:12px; bottom:12px; max-width:none; }
