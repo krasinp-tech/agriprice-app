@@ -34,7 +34,7 @@ function parseSearchDate(value) {
   return isNaN(dateObj.getTime()) ? null : dateObj;
 }
 
-async function assertTierLimit(userId) {
+async function getTierUsage(userId) {
   const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('tier')
@@ -45,17 +45,35 @@ async function assertTierLimit(userId) {
 
   const tier = (profile?.tier || 'free').toLowerCase();
   const limit = tier === 'pro' ? 10 : 3;
-  const { count, error: countError } = await supabaseAdmin
+  const { data: activeRows, error: offersError } = await supabaseAdmin
     .from('buy_offers')
-    .select('*', { count: 'exact', head: true })
+    .select(NORMALIZED_OFFER_SELECT)
     .eq('user_id', userId)
     .eq('is_active', true);
 
-  if (countError) throw countError;
-  if ((count || 0) >= limit) {
-    throw Object.assign(new Error(tier === 'pro'
+  if (offersError) throw offersError;
+  const visibleActiveOffers = (activeRows || [])
+    .map(normalizeOffer)
+    .filter((offer) => String(offer?.name || offer?.category || '').trim());
+  const activeCount = visibleActiveOffers.length;
+  return {
+    tier,
+    limit,
+    activeCount,
+    remaining: Math.max(0, limit - activeCount),
+  };
+}
+
+async function assertTierLimit(userId) {
+  const usage = await getTierUsage(userId);
+  if (usage.activeCount >= usage.limit) {
+    throw Object.assign(new Error(usage.tier === 'pro'
       ? 'PRO accounts can create up to 10 active buy offers'
-      : 'FREE accounts can create up to 3 active buy offers'), { statusCode: 403 });
+      : 'FREE accounts can create up to 3 active buy offers'), {
+      statusCode: 403,
+      code: 'TIER_OFFER_LIMIT',
+      data: usage,
+    });
   }
 }
 
@@ -392,13 +410,26 @@ const requireBuyer = (req, res, next) => {
   next();
 };
 
+buyerRouter.get('/limits', authMiddleware, requireBuyer, async (req, res) => {
+  try {
+    const usage = await getTierUsage(req.user.id);
+    res.json(response.success('OK', usage));
+  } catch (e) {
+    res.status(e.statusCode || 500).json(response.error(e.message));
+  }
+});
+
 buyerRouter.post('/', authMiddleware, requireBuyer, upload.single('image'), upload.handleMulterError, async (req, res) => {
   try {
     await assertTierLimit(req.user.id);
     const data = await createOffer(req.user.id, req.body, req.file);
     res.status(201).json(response.success('Created', data));
   } catch (e) {
-    res.status(e.statusCode || 500).json(response.error(e.message));
+    res.status(e.statusCode || 500).json({
+      ...response.error(e.message),
+      ...(e.code ? { code: e.code } : {}),
+      ...(e.data ? { data: e.data } : {}),
+    });
   }
 });
 
