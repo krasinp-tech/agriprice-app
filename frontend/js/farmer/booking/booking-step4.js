@@ -320,6 +320,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!bookingData) throw new Error("ไม่พบข้อมูลการจอง");
     setCancellationAvailable(bookingData.status);
 
+    const isCanceled = ['cancel', 'cancelled', 'canceled', 'rejected'].includes(String(bookingData.status || '').toLowerCase());
+    if (isCanceled) {
+      document.querySelector('.booking-step4')?.classList.add('is-canceled');
+      const titleEl = document.getElementById('heroTitle');
+      const subEl = document.getElementById('heroSub');
+      if (titleEl) {
+        titleEl.textContent = bookingData.status === 'rejected' 
+          ? (window.i18nT ? window.i18nT('booking_rejected_title', 'การจองถูกปฏิเสธ') : 'การจองถูกปฏิเสธ')
+          : (window.i18nT ? window.i18nT('booking_canceled_title', 'การจองถูกยกเลิก') : 'การจองถูกยกเลิก');
+      }
+      if (subEl) {
+        subEl.textContent = bookingData.status === 'rejected'
+          ? (window.i18nT ? window.i18nT('booking_rejected_desc', 'การจองคิวของคุณถูกปฏิเสธโดยผู้รับซื้อ') : 'การจองคิวของคุณถูกปฏิเสธโดยผู้รับซื้อ')
+          : (window.i18nT ? window.i18nT('booking_canceled_desc', 'การจองคิวของคุณได้รับการยกเลิกแล้ว') : 'การจองคิวของคุณได้รับการยกเลิกแล้ว');
+      }
+    }
+
     const queueLabel = bookingData.queueNo
       || bookingData.queue_no
       || bookingData.booking_no
