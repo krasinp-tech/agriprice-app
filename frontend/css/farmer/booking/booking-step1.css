@@ -247,6 +247,22 @@
   transition: all 0.2s ease;
   background: #fff;
   min-height: var(--tap-target-min);
+  position: relative;
+}
+
+.has-slots-dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #0B853C;
+  border-radius: 50%;
+}
+
+.calendar-day.selected .has-slots-dot {
+  background-color: #fff;
 }
 
 .calendar-day:hover:not(.disabled):not(.other-month) {
