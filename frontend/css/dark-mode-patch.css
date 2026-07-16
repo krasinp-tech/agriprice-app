@@ -3174,6 +3174,30 @@ html[data-theme="dark"] body::selection,
   color: var(--text-muted) !important;
 }
 
+/* The cancellation-reason dialog keeps a white surface in both themes. */
+[data-theme="dark"] .cancel-reason-card {
+  color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .cancel-reason-card h3 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .cancel-reason-card p {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .cancel-reason-card textarea {
+  background: #fff !important;
+  color: #1a1a1a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .cancel-reason-card textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+
 /* Text nodes commonly rendered as spans/divs inside neutral cards. */
 [data-theme="dark"] :is(
   .card, .product-card, .booking-card, .profile-card, .profile-content-card,

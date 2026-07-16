@@ -475,6 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = document.createElement("div");
         overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
         const card = document.createElement("div");
+        card.className = "cancel-reason-card";
         card.style.cssText = "background:#fff;border-radius:20px;padding:24px 20px;max-width:380px;width:100%;font-family:'Outfit',sans-serif;";
         card.innerHTML = `
           <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#1a1a1a">${t("cancel_reason_title", "กรุณาระบุเหตุผลการยกเลิก")}</h3>

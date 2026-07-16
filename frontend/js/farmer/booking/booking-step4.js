@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.i18nT) return window.i18nT(key, fallback);
     return fallback || key;
   }
+  const currentLocale = () => ({ en: 'en-US', zh: 'zh-CN', th: 'th-TH' }[localStorage.getItem('lang')] || 'th-TH');
   // ================================
   // Elements
   // ================================
@@ -213,8 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
           queueNo:      d.queue_no || '',
           queue_no:     d.queue_no || '',
           slot_id:      d.slot_id || null,
-          time:         d.scheduled_time ? new Date(d.scheduled_time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '',
-          date:         d.scheduled_time ? new Date(d.scheduled_time).toLocaleDateString('th-TH') : '',
+          time:         d.scheduled_time ? new Date(d.scheduled_time).toLocaleTimeString(currentLocale(),{hour:'2-digit',minute:'2-digit'}) : '',
+          date:         d.scheduled_time ? new Date(d.scheduled_time).toLocaleDateString(currentLocale()) : '',
           productName:  d.product?.name || '',
           vehicleCount: vehicles.length || d.vehicle_count || 1,
           productAmount,
@@ -473,9 +474,9 @@ document.addEventListener("DOMContentLoaded", () => {
       <div style="width:72px;height:72px;border-radius:50%;background:rgba(11, 133, 60, 0.15);color:var(--primary,#0B853C);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
         <span class="material-icons-outlined" style="font-size:40px;">check_circle</span>
       </div>
-      <h3 style="margin:0 0 12px;font-size:22px;font-weight:900;color:var(--text-main,#111);">สำเร็จ!</h3>
+      <h3 style="margin:0 0 12px;font-size:22px;font-weight:900;color:var(--text-main,#111);">${t('checkin_success_title', 'สำเร็จ!')}</h3>
       <p style="margin:0 0 24px;font-size:15px;color:var(--text-muted,#666);line-height:1.5;">${msg}</p>
-      <button style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg, var(--primary,#0B853C) 0%, #00C853 100%);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(11, 133, 60, 0.3);">ตกลง (OK)</button>
+      <button style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg, var(--primary,#0B853C) 0%, #00C853 100%);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(11, 133, 60, 0.3);">${t('confirm', 'ตกลง')}</button>
     `;
     
     const btn = card.querySelector('button');
@@ -513,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (window.Capacitor?.Plugins?.Haptics) {
             try { await window.Capacitor.Plugins.Haptics.impact({ style: 'heavy' }); } catch(e){}
           }
-          showBeautifulSuccessPopup('ล้งยืนยันรับคิวและเช็คอินสำเร็จแล้ว!');
+          showBeautifulSuccessPopup(t('checkin_success_subtitle', 'ยืนยันรับคิวและเช็คอินสำเร็จแล้ว!'));
         }
         
         clearInterval(statusPollTimer);
@@ -591,6 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = document.createElement("div");
         overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
         const card = document.createElement("div");
+        card.className = "cancel-reason-card";
         card.style.cssText = "background:#fff;border-radius:20px;padding:24px 20px;max-width:380px;width:100%;font-family:'Outfit',sans-serif;";
         card.innerHTML = `
           <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#1a1a1a">${t("cancel_reason_title", "กรุณาระบุเหตุผลการยกเลิก")}</h3>
@@ -636,7 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.appNotify) window.appNotify(t('cancel_success', "ยกเลิกการจองสำเร็จ"), "success");
       window.location.href = resolveToRootUrl("pages/farmer/booking/booking.html?filter=cancel");
     } else {
-      if (window.appNotify) window.appNotify(result.message || t('cancel_error', "ยกเลิกการจองไม่สำเร็จ"), "error");
+      if (window.appNotify) window.appNotify(window.i18nApiMessage?.(result.message, 'cancel_error') || t('cancel_error', "ยกเลิกการจองไม่สำเร็จ"), "error");
     }
   }
 
