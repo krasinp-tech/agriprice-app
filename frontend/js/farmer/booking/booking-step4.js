@@ -25,12 +25,71 @@ document.addEventListener("DOMContentLoaded", () => {
   const myQueue = document.getElementById("myQueue");
   const aheadCount = document.getElementById("aheadCount");
 
-  function setCancellationAvailable(status) {
-    if (!btnCancelBooking) return;
-    const normalizedStatus = String(status || '').toLowerCase();
-    const isTerminal = ['success', 'completed', 'cancel', 'cancelled', 'canceled', 'rejected'].includes(normalizedStatus);
-    btnCancelBooking.hidden = isTerminal;
-    btnCancelBooking.disabled = isTerminal;
+  const heroBg = document.getElementById("heroBg");
+  const heroStatusIcon = document.getElementById("heroStatusIcon");
+  const heroSub = document.getElementById("heroSub");
+  const statusPill = document.getElementById("statusPill");
+
+  function normalizeUiStatus(status) {
+    const value = String(status || "waiting").toLowerCase();
+    if (value === "success" || value === "completed" || value === "complete") return "completed";
+    if (value === "cancel" || value === "cancelled" || value === "canceled") return "cancelled";
+    if (value === "confirmed") return "confirmed";
+    if (value === "in_progress" || value === "processing") return "in_progress";
+    if (value === "rejected") return "rejected";
+    return "waiting";
+  }
+
+  function applyStatusUi(status) {
+    const uiStatus = normalizeUiStatus(status);
+    const config = {
+      waiting: {
+        icon: "hourglass_top",
+        label: t("status_waiting", "รอคิว"),
+        message: t("status_msg_waiting", "การจองของคุณอยู่ในคิวรอ"),
+      },
+      confirmed: {
+        icon: "check_circle",
+        label: t("status_confirmed", "ยืนยันแล้ว"),
+        message: t("status_msg_confirmed", "การจองของคุณได้รับการยืนยันแล้ว"),
+      },
+      in_progress: {
+        icon: "sync",
+        label: t("status_in_progress", "กำลังดำเนินการ"),
+        message: t("status_msg_in_progress", "กำลังดำเนินการรับสินค้าของคุณ"),
+      },
+      completed: {
+        icon: "task_alt",
+        label: t("status_completed", "เสร็จสิ้น"),
+        message: t("status_msg_completed", "การรับสินค้าเสร็จสิ้นแล้ว"),
+      },
+      cancelled: {
+        icon: "cancel",
+        label: t("status_cancelled", "ยกเลิกแล้ว"),
+        message: t("status_msg_cancelled", "การจองนี้ถูกยกเลิกแล้ว"),
+      },
+      rejected: {
+        icon: "block",
+        label: t("status_rejected", "ถูกปฏิเสธ"),
+        message: t("status_msg_rejected", "การจองนี้ถูกปฏิเสธโดยร้านล้ง"),
+      },
+    }[uiStatus];
+
+    if (heroBg) {
+      heroBg.className = 'hero-bg';
+      heroBg.classList.add(`status-${uiStatus}`);
+      if (uiStatus === 'cancelled' || uiStatus === 'rejected') {
+        document.querySelector('.booking-step4')?.classList.add('is-canceled');
+      } else {
+        document.querySelector('.booking-step4')?.classList.remove('is-canceled');
+      }
+    }
+    if (heroStatusIcon) heroStatusIcon.textContent = config.icon;
+    if (heroSub) heroSub.textContent = config.message;
+    if (statusPill) statusPill.textContent = config.label;
+    if (btnCancelBooking) {
+      btnCancelBooking.style.display = ["completed", "cancelled", "rejected"].includes(uiStatus) ? "none" : "";
+    }
   }
   const eta = document.getElementById("eta");
   const shopName = document.getElementById("shopName");
@@ -318,24 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadSuccessData() {
     const bookingData = await BookingAPI.loadConfirmedBooking();
     if (!bookingData) throw new Error("ไม่พบข้อมูลการจอง");
-    setCancellationAvailable(bookingData.status);
-
-    const isCanceled = ['cancel', 'cancelled', 'canceled', 'rejected'].includes(String(bookingData.status || '').toLowerCase());
-    if (isCanceled) {
-      document.querySelector('.booking-step4')?.classList.add('is-canceled');
-      const titleEl = document.getElementById('heroTitle');
-      const subEl = document.getElementById('heroSub');
-      if (titleEl) {
-        titleEl.textContent = bookingData.status === 'rejected' 
-          ? (window.i18nT ? window.i18nT('booking_rejected_title', 'การจองถูกปฏิเสธ') : 'การจองถูกปฏิเสธ')
-          : (window.i18nT ? window.i18nT('booking_canceled_title', 'การจองถูกยกเลิก') : 'การจองถูกยกเลิก');
-      }
-      if (subEl) {
-        subEl.textContent = bookingData.status === 'rejected'
-          ? (window.i18nT ? window.i18nT('booking_rejected_desc', 'การจองคิวของคุณถูกปฏิเสธโดยผู้รับซื้อ') : 'การจองคิวของคุณถูกปฏิเสธโดยผู้รับซื้อ')
-          : (window.i18nT ? window.i18nT('booking_canceled_desc', 'การจองคิวของคุณได้รับการยกเลิกแล้ว') : 'การจองคิวของคุณได้รับการยกเลิกแล้ว');
-      }
-    }
+    applyStatusUi(bookingData.status);
 
     const queueLabel = bookingData.queueNo
       || bookingData.queue_no

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -52,12 +52,19 @@
 
 
     <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-bg"></div>
+    <section class="hero" id="heroSection">
+      <div class="hero-bg" id="heroBg"></div>
 
       <div class="hero-content">
-        <div class="hero-title" id="heroTitle" data-i18n="booking_success_title">จองสำเร็จ!</div>
-        <div class="hero-sub" id="heroSub" data-i18n="booking_confirmed_desc">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+        <!-- Status Icon + Message -->
+        <div class="hero-status-row">
+          <span class="material-icons-outlined hero-status-icon" id="heroStatusIcon">check_circle</span>
+          <div class="hero-sub" id="heroSub">การจองคิวของคุณได้รับการยืนยันแล้ว</div>
+        </div>
+        <!-- Status Pill -->
+        <div class="status-pill-wrap">
+          <span class="status-pill" id="statusPill">ยืนยันแล้ว</span>
+        </div>
 
         <div class="big-card">
           <div class="label" data-i18n="your_queue_no">หมายเลขคิวของคุณ</div>
