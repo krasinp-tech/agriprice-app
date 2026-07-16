@@ -3,6 +3,7 @@
 
   const store = window.AccountManageStore;
   if (!store) return;
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
 
   const phoneForm = document.getElementById("phoneForm");
   const phoneInput = document.getElementById("phoneInput");
@@ -42,23 +43,23 @@
 
     const value = phoneInput.value.trim();
     if (!value) {
-      showMessage("กรุณากรอกหมายเลขโทรศัพท์", "error");
+      showMessage(t('phone_required', "กรุณากรอกหมายเลขโทรศัพท์"), "error");
       phoneInput.focus();
       return;
     }
 
     const isValid = /^\+?[0-9*][0-9*\s-]{7,20}$/.test(value);
     if (!isValid) {
-      showMessage("รูปแบบหมายเลขโทรศัพท์ไม่ถูกต้อง", "error");
+      showMessage(t('invalid_phone_format', "รูปแบบหมายเลขโทรศัพท์ไม่ถูกต้อง"), "error");
       phoneInput.focus();
       return;
     }
 
     try {
       await store.updatePhone(value);
-      showMessage("บันทึกหมายเลขโทรศัพท์เรียบร้อย", "success");
+      showMessage(t('phone_saved', "บันทึกหมายเลขโทรศัพท์เรียบร้อย"), "success");
     } catch (err) {
-      const msg = err.message || "บันทึกหมายเลขโทรศัพท์ไม่สำเร็จ";
+      const msg = err.message || t('phone_save_failed', "บันทึกหมายเลขโทรศัพท์ไม่สำเร็จ");
       showMessage(msg, "error");
       return;
     }
@@ -68,4 +69,3 @@
     }, 650);
   });
 })();
-

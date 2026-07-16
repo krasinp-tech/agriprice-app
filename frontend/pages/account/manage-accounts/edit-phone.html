@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>แก้ไขหมายเลขโทรศัพท์ | AGRIPRICE</title>
+  <title data-i18n="edit_phone_title">แก้ไขหมายเลขโทรศัพท์ | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -40,18 +40,18 @@
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title">หมายเลขโทรศัพท์</h1>
-          <p class="detail-subtitle">แก้ไขหมายเลขที่ใช้สำหรับการติดต่อและการแจ้งเตือน</p>
+          <h1 class="detail-title" data-i18n="phone_number">หมายเลขโทรศัพท์</h1>
+          <p class="detail-subtitle" data-i18n="phone_contact_notification_desc">แก้ไขหมายเลขที่ใช้สำหรับการติดต่อและการแจ้งเตือน</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title">อัปเดตหมายเลขโทรศัพท์</h2>
-        <p class="detail-note">หมายเลขปัจจุบัน: <strong id="currentPhoneValue">+66*******361</strong></p>
+        <h2 class="detail-section-title" data-i18n="update_phone">อัปเดตหมายเลขโทรศัพท์</h2>
+        <p class="detail-note"><span data-i18n="current_phone">หมายเลขปัจจุบัน:</span> <strong id="currentPhoneValue">+66*******361</strong></p>
 
         <form id="phoneForm" class="detail-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="phoneInput">หมายเลขโทรศัพท์ใหม่</label>
+            <label class="field-label" for="phoneInput" data-i18n="new_phone">หมายเลขโทรศัพท์ใหม่</label>
             <input
               class="field-input"
               id="phoneInput"
@@ -61,12 +61,12 @@
               placeholder="เช่น +66812345678"
               required
             />
-            <p class="field-hint">รองรับรูปแบบ +66XXXXXXXXX หรือรูปแบบที่มีขีดคั่น</p>
+            <p class="field-hint" data-i18n="phone_format_hint">รองรับรูปแบบ +66XXXXXXXXX หรือรูปแบบที่มีขีดคั่น</p>
           </div>
 
           <div class="detail-actions">
-            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
-            <a class="btn btn-ghost" href="my-account.html">ยกเลิก</a>
+            <button type="submit" class="btn btn-primary" data-i18n="save_changes">บันทึกการเปลี่ยนแปลง</button>
+            <a class="btn btn-ghost" href="my-account.html" data-i18n="cancel">ยกเลิก</a>
           </div>
         </form>
 

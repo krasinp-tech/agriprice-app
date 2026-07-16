@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>แก้ไขอีเมล | AGRIPRICE</title>
+  <title data-i18n="edit_email_title">แก้ไขอีเมล | AGRIPRICE</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -40,18 +40,18 @@
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
-          <h1 class="detail-title">อีเมล</h1>
-          <p class="detail-subtitle">ตั้งค่าอีเมลสำหรับการติดต่อและการกู้คืนบัญชี</p>
+          <h1 class="detail-title" data-i18n="email">อีเมล</h1>
+          <p class="detail-subtitle" data-i18n="email_contact_recovery_desc">ตั้งค่าอีเมลสำหรับการติดต่อและการกู้คืนบัญชี</p>
         </div>
       </header>
 
       <section class="detail-card">
-        <h2 class="detail-section-title">จัดการอีเมล</h2>
-        <p class="detail-note">เพิ่มอีเมลเพื่อเพิ่มความปลอดภัยให้บัญชีของคุณ</p>
+        <h2 class="detail-section-title" data-i18n="manage_email">จัดการอีเมล</h2>
+        <p class="detail-note" data-i18n="email_security_hint">เพิ่มอีเมลเพื่อเพิ่มความปลอดภัยให้บัญชีของคุณ</p>
 
         <form id="emailForm" class="detail-form" novalidate>
           <div class="field-group">
-            <label class="field-label" for="emailInput">อีเมล</label>
+            <label class="field-label" for="emailInput" data-i18n="email">อีเมล</label>
             <input
               class="field-input"
               id="emailInput"
@@ -60,13 +60,13 @@
               autocomplete="email"
               placeholder="name@example.com"
             />
-            <p class="field-hint">หากยังไม่ต้องการตั้งค่า สามารถปล่อยว่างได้</p>
+            <p class="field-hint" data-i18n="email_optional_hint">หากยังไม่ต้องการตั้งค่า สามารถปล่อยว่างได้</p>
           </div>
 
           <div class="detail-actions">
-            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
-            <button type="button" class="btn btn-muted" id="clearEmailBtn">ลบอีเมล</button>
-            <a class="btn btn-ghost" href="my-account.html">ยกเลิก</a>
+            <button type="submit" class="btn btn-primary" data-i18n="save_changes">บันทึกการเปลี่ยนแปลง</button>
+            <button type="button" class="btn btn-muted" id="clearEmailBtn" data-i18n="remove_email">ลบอีเมล</button>
+            <a class="btn btn-ghost" href="my-account.html" data-i18n="cancel">ยกเลิก</a>
           </div>
         </form>
 

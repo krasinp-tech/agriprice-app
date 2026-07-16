@@ -3,6 +3,7 @@
 
   const store = window.AccountManageStore;
   if (!store) return;
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
 
   const emailForm = document.getElementById("emailForm");
   const emailInput = document.getElementById("emailInput");
@@ -37,7 +38,7 @@
   if (clearEmailBtn && emailInput) {
     clearEmailBtn.addEventListener("click", function () {
       emailInput.value = "";
-      showMessage("ลบอีเมลแล้ว กดบันทึกเพื่อยืนยัน", "success");
+      showMessage(t('email_cleared_save_hint', "ลบอีเมลแล้ว กดบันทึกเพื่อยืนยัน"), "success");
       emailInput.focus();
     });
   }
@@ -51,7 +52,7 @@
     if (value) {
       const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       if (!isValid) {
-        showMessage("รูปแบบอีเมลไม่ถูกต้อง", "error");
+        showMessage(t('invalid_email_format', "รูปแบบอีเมลไม่ถูกต้อง"), "error");
         emailInput.focus();
         return;
       }
@@ -59,9 +60,9 @@
 
     try {
       await store.updateEmail(value);
-      showMessage("บันทึกอีเมลเรียบร้อย", "success");
+      showMessage(t('email_saved', "บันทึกอีเมลเรียบร้อย"), "success");
     } catch (err) {
-      showMessage(err.message || "บันทึกอีเมลไม่สำเร็จ", "error");
+      showMessage(err.message || t('email_save_failed', "บันทึกอีเมลไม่สำเร็จ"), "error");
       return;
     }
 
@@ -70,4 +71,3 @@
     }, 650);
   });
 })();
-
