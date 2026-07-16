@@ -819,6 +819,9 @@ function getContactChannel(value) {
     return { type, raw, href, ...meta };
 }
 
+</script>
+<style>
+
 /* Profile editor redesign — mobile bottom sheet + compact desktop dialog */
 #editAboutModal {
   position: fixed !important;
@@ -1049,6 +1052,9 @@ body.profile-editor-open { overflow: hidden !important; }
   #editAboutModal .premium-modal { max-height: min(820px, calc(100dvh - 48px)) !important; border-radius: 28px !important; }
   #editAboutModal .premium-modal::before { display: none; }
 }
+
+</style>
+<script>
 
 // Called by myprofile.js after profile data is loaded
 window.onProfileDataReady = function(profileData) {
