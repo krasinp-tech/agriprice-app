@@ -475,19 +475,19 @@ document.addEventListener("DOMContentLoaded", function () {
     setupAddressAutocomplete(addr2Editor);
 
     const contactTypeConfig = {
-        line: { placeholder: 'กรอก LINE ID', hint: 'กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์', inputMode: 'text' },
-        facebook: { placeholder: 'ชื่อเพจ ชื่อผู้ใช้ หรือลิงก์ Facebook', hint: 'ใส่ชื่อเพจหรือชื่อผู้ใช้ได้', inputMode: 'text' },
-        website: { placeholder: 'example.com', hint: 'กรอกชื่อเว็บไซต์หรือลิงก์', inputMode: 'url' },
-        email: { placeholder: 'name@example.com', hint: 'กรอกอีเมลสำหรับติดต่อเพิ่มเติม', inputMode: 'email' },
-        phone: { placeholder: '0812345678', hint: 'กรอกเบอร์โทรศัพท์เพิ่มเติม', inputMode: 'tel' }
+        line: { placeholderKey: 'contact_line_placeholder', placeholder: 'กรอก LINE ID', hintKey: 'contact_line_hint', hint: 'กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์', inputMode: 'text' },
+        facebook: { placeholderKey: 'contact_facebook_placeholder', placeholder: 'ชื่อเพจ ชื่อผู้ใช้ หรือลิงก์ Facebook', hintKey: 'contact_facebook_hint', hint: 'ใส่ชื่อเพจหรือชื่อผู้ใช้ได้', inputMode: 'text' },
+        website: { placeholder: 'example.com', hintKey: 'contact_website_hint', hint: 'กรอกชื่อเว็บไซต์หรือลิงก์', inputMode: 'url' },
+        email: { placeholder: 'name@example.com', hintKey: 'contact_email_hint', hint: 'กรอกอีเมลสำหรับติดต่อเพิ่มเติม', inputMode: 'email' },
+        phone: { placeholder: '0812345678', hintKey: 'contact_phone_hint', hint: 'กรอกเบอร์โทรศัพท์เพิ่มเติม', inputMode: 'tel' }
     };
 
     function updateContactEditor() {
         if (!linkTypeEditor || !linkEditor) return;
         const config = contactTypeConfig[linkTypeEditor.value] || contactTypeConfig.line;
-        linkEditor.placeholder = config.placeholder;
+        linkEditor.placeholder = config.placeholderKey && window.i18nT ? window.i18nT(config.placeholderKey, config.placeholder) : config.placeholder;
         linkEditor.inputMode = config.inputMode;
-        if (linkEditorHint) linkEditorHint.textContent = config.hint;
+        if (linkEditorHint) linkEditorHint.textContent = config.hintKey && window.i18nT ? window.i18nT(config.hintKey, config.hint) : config.hint;
     }
 
     linkTypeEditor?.addEventListener('change', updateContactEditor);

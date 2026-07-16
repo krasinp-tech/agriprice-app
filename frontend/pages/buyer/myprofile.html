@@ -232,16 +232,16 @@
                         <span class="material-icons-outlined">contact_page</span> ช่องทางติดต่อเพิ่มเติม
                     </label>
                     <div class="contact-channel-editor">
-                        <select id="linkTypeEditor" aria-label="ประเภทช่องทางติดต่อ">
-                            <option value="line">LINE ID</option>
-                            <option value="facebook">Facebook</option>
-                            <option value="website">เว็บไซต์</option>
-                            <option value="email">อีเมล</option>
-                            <option value="phone">เบอร์โทรเพิ่มเติม</option>
+                        <select id="linkTypeEditor" aria-label="ประเภทช่องทางติดต่อ" data-i18n-aria-label="contact_type_label">
+                            <option value="line" data-i18n="contact_line">LINE ID</option>
+                            <option value="facebook" data-i18n="contact_facebook">Facebook</option>
+                            <option value="website" data-i18n="contact_website">เว็บไซต์</option>
+                            <option value="email" data-i18n="email">อีเมล</option>
+                            <option value="phone" data-i18n="additional_phone">เบอร์โทรเพิ่มเติม</option>
                         </select>
-                        <input id="linkEditor" type="text" placeholder="กรอก LINE ID" autocomplete="off">
+                        <input id="linkEditor" type="text" placeholder="กรอกข้อมูลช่องทางติดต่อ" data-i18n-placeholder="contact_value_placeholder" autocomplete="off">
                     </div>
-                    <small class="contact-channel-hint" id="linkEditorHint">กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์</small>
+                    <small class="contact-channel-hint" id="linkEditorHint" data-i18n="contact_line_hint">กรอกเฉพาะ LINE ID ได้ ไม่จำเป็นต้องใส่ลิงก์</small>
                 </div>
             </div>
 
