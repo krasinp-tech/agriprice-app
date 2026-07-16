@@ -53,8 +53,8 @@ async function getTierUsage(userId) {
 
   if (offersError) throw offersError;
   const visibleActiveOffers = (activeRows || [])
-    .map(normalizeOffer)
-    .filter((offer) => String(offer?.name || offer?.category || '').trim());
+    .filter((row) => String(row?.variety_ref?.product_ref?.product_name || '').trim())
+    .map(normalizeOffer);
   const activeCount = visibleActiveOffers.length;
   return {
     tier,
