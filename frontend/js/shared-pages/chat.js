@@ -33,6 +33,9 @@
   function safeUrl(value, fallback = '') {
     const raw = String(value || '').trim();
     if (!raw || /^(javascript|data):/i.test(raw)) return fallback;
+    if (raw.includes('assets/images/')) {
+      return '../../' + raw.substring(raw.indexOf('assets/images/'));
+    }
     if (raw.startsWith('/uploads/')) {
       const base = api.getBase ? String(api.getBase() || '').replace(/\/$/, '') : '';
       return base ? `${base}${raw}` : fallback;
