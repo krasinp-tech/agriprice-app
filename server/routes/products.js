@@ -96,6 +96,7 @@ async function fetchOfferById(productId) {
     .maybeSingle();
 
   if (error) throw error;
+  if (data && data.is_active === null) return null;
   return data ? normalizeOffer(data) : null;
 }
 
@@ -190,6 +191,7 @@ router.get('/', async (req, res) => {
     let query = supabaseAdmin
       .from('buy_offers')
       .select(NORMALIZED_OFFER_SELECT)
+      .not('is_active', 'is', null)
       .order('created_at', { ascending: false });
 
     if (!user_id) query = query.eq('is_active', true);
@@ -319,7 +321,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
     const { error } = await supabaseAdmin
       .from('buy_offers')
-      .update({ is_active: false })
+      .update({ is_active: null })
       .eq('offer_id', req.params.id);
 
     if (error) throw error;

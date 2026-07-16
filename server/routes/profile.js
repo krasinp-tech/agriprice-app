@@ -72,7 +72,8 @@ async function attachProfileDetails(profile) {
     supabaseAdmin
       .from('buy_offers')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', profile.profile_id),
+      .eq('user_id', profile.profile_id)
+      .not('is_active', 'is', null),
   ]);
 
   return {
