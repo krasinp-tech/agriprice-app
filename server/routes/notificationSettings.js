@@ -48,8 +48,7 @@ router.patch('/', authMiddleware, async (req, res) => {
       .single();
 
     if (error) {
-      // ถ้าตารางไม่มี ให้ตอบ OK ไปก่อน
-      return res.json(response.success('บันทึกการตั้งค่าสำเร็จ', settings));
+      return res.status(500).json(response.error('บันทึกการตั้งค่าไม่สำเร็จ', error.message));
     }
     res.json(response.success('บันทึกการตั้งค่าสำเร็จ', data?.settings || settings));
   } catch (e) {

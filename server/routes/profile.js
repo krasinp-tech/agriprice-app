@@ -243,10 +243,16 @@ router.patch('/', authMiddleware, (req, res, next) => {
  */
 router.delete('/', authMiddleware, async (req, res) => {
   try {
-    const { error } = await supabaseAdmin.from('profiles').delete().eq('profile_id', req.user.id);
+    // Keep the profile row so existing bookings/offers retain valid foreign keys.
+    // A disabled account cannot log in and is the safe deletion model for historical data.
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ account_status: 'disabled' })
+      .eq('profile_id', req.user.id);
     if (error) throw error;
 
-    await supabaseAdmin.auth.admin.deleteUser(req.user.id).catch(() => {});
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(req.user.id);
+    if (authError) throw authError;
     res.json(response.success('ลบบัญชีสำเร็จ'));
   } catch (e) {
     res.status(500).json(response.error('ลบบัญชีไม่สำเร็จ'));

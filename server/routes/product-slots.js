@@ -156,10 +156,11 @@ router.post('/batch', authMiddleware, async (req, res) => {
     }));
 
     // แทนที่จะลบทิ้ง (ซึ่งอาจติด FK) ให้ Mark เป็น inactive ของเก่าออกก่อน
-    await supabaseAdmin
+    const { error: deactivateError } = await supabaseAdmin
       .from('offer_slots')
       .update({ is_active: false })
       .eq('offer_id', requestedOfferId);
+    if (deactivateError) throw deactivateError;
 
     // Insert คิวใหม่
     const { data, error } = await supabaseAdmin
@@ -172,10 +173,11 @@ router.post('/batch', authMiddleware, async (req, res) => {
     // Reactivate the parent buy offer if there's any active slot
     const hasActiveSlot = slotsToInsert.some(s => s.is_active);
     if (hasActiveSlot) {
-      await supabaseAdmin
+      const { error: reactivateError } = await supabaseAdmin
         .from('buy_offers')
         .update({ is_active: true })
         .eq('offer_id', requestedOfferId);
+      if (reactivateError) throw reactivateError;
     }
 
     const rows = (data || []).map((slot) => ({
