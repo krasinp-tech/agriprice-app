@@ -10,7 +10,8 @@
     const platform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
     const isNative = ['android', 'ios'].includes(platform)
       || ['capacitor:', 'ionic:'].includes(window.location.protocol)
-      || cap?.isNative === true;
+      || cap?.isNative === true
+      || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const path = (window.location.pathname || '').replace(/\\/g, '/');
     const pagesIndex = path.lastIndexOf('/pages/');
     const depth = pagesIndex >= 0

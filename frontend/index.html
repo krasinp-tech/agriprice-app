@@ -47,21 +47,21 @@
         }
     </style>
     <script>
-        // Check if running on native Capacitor app to bypass the WebView iframe IME input bug
+        // Mobile IMEs can lose composing characters inside the shell iframe. Use direct pages on native and mobile web.
         (function () {
             const cap = window.Capacitor;
             const capPlatform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
-            const isNative = (
+            const usesDirectMobileRouting = (
                 window.location.protocol === 'capacitor:' ||
                 window.location.protocol === 'ionic:' ||
                 (window.Capacitor && window.Capacitor.isNative) ||
                 capPlatform === 'android' ||
                 capPlatform === 'ios' ||
                 !!cap?.isNative ||
-                (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+                /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
             );
 
-            if (isNative) {
+            if (usesDirectMobileRouting) {
                 window.location.replace('home.html');
             }
         })();

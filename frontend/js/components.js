@@ -52,7 +52,7 @@
           capPlatform === 'android' ||
           capPlatform === 'ios' ||
           !!cap?.isNative ||
-          (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+          /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
         );
         window.location.href = baseRoot + (isNative ? 'home.html' : 'index.html');
         e.preventDefault();
@@ -330,7 +330,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       capPlatform === 'android' ||
       capPlatform === 'ios' ||
       !!cap?.isNative ||
-      (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.location.hostname === 'localhost' && window.location.port === '')
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
     );
 
     nav.querySelectorAll(".bottom-nav-item").forEach((a) => {
@@ -338,7 +338,7 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
       // Skip if already absolute, external, or special
       if (!href || /^(https?:\/\/|#|tel:|mailto:|\/)/i.test(href)) return;
 
-      // Swap index.html to home.html for native shell-less routing
+      // Swap index.html to home.html for native/mobile shell-less routing
       if (isNative && href.endsWith("index.html")) {
         href = href.replace("index.html", "home.html");
       }
@@ -731,7 +731,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const platform = typeof cap?.getPlatform === 'function' ? cap.getPlatform() : '';
     const isNative = ['android', 'ios'].includes(platform)
       || ['capacitor:', 'ionic:'].includes(window.location.protocol)
-      || cap?.isNative === true;
+      || cap?.isNative === true
+      || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const fallback = fallbackUrl || (baseRoot + (isNative ? 'home.html' : 'index.html'));
     const sameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
     const navigationEntries = typeof window.navigation?.entries === 'function'
