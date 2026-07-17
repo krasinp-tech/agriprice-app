@@ -1,4 +1,4 @@
-﻿/* js/auth/register1.js
+/* js/auth/register1.js
   - เลือกประเภทผู้ใช้ (farmer/buyer)
   - เล่นวิดีโออัตโนมัติ (ด้านบน + ในการ์ด)
   - ถัดไป -> เปิด modal ยืนยัน
@@ -44,7 +44,7 @@
     fallback.classList.toggle("is-show", !!on);
   }
 
-  function hardenVideo(v) {
+  function hardenVideo(v, autoplay = true) {
     if (!v) return;
     v.muted = true;
     v.loop = true;
@@ -52,7 +52,8 @@
     v.setAttribute("muted", "");
     v.setAttribute("loop", "");
     v.setAttribute("playsinline", "");
-    v.setAttribute("autoplay", "");
+    if (autoplay) v.setAttribute("autoplay", "");
+    else v.removeAttribute("autoplay");
     v.setAttribute("disablepictureinpicture", "");
     v.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
     v.removeAttribute("controls");
@@ -80,19 +81,20 @@
     hardenVideo(topVideo);
     safePlay(topVideo, (failed) => showFallback(!!failed));
 
-    // วิดีโอในการ์ด role
+    // Keep role previews idle until the user selects a card. Playing all three
+    // videos together causes heavy decoding and memory pressure on mobile.
     document.querySelectorAll(".role-video").forEach((v) => {
-      hardenVideo(v);
-      safePlay(v);
+      hardenVideo(v, false);
+      v.preload = "metadata";
+      v.pause();
     });
 
-    // พยายามเล่นต่อหาก browser หยุดเล่นเอง
     if (topVideo) {
-      topVideo.addEventListener("pause", () => {
-        topVideo.muted = true;
-        topVideo.play().catch(() => {});
-      });
       topVideo.addEventListener("error", () => showFallback(true));
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) topVideo.pause();
+        else safePlay(topVideo, (failed) => showFallback(!!failed));
+      });
     }
   }
 
@@ -103,6 +105,10 @@
       const is = c.dataset.role === role;
       c.classList.toggle("is-selected", is);
       c.setAttribute("aria-pressed", is ? "true" : "false");
+      const preview = c.querySelector(".role-video");
+      if (!preview) return;
+      if (is) safePlay(preview);
+      else preview.pause();
     });
 
     nextBtn.disabled = !role;

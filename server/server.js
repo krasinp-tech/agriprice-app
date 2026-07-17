@@ -117,7 +117,7 @@ app.use(express.static(FRONTEND_DIR, {
     const ext = path.extname(filePath).toLowerCase();
     if (ext === '.html') {
       res.setHeader('Cache-Control', 'no-cache');
-    } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.woff', '.woff2'].includes(ext)) {
+    } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.woff', '.woff2', '.mp4', '.webm', '.m4v'].includes(ext)) {
       res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
     } else if (['.js', '.css', '.json'].includes(ext)) {
       res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');

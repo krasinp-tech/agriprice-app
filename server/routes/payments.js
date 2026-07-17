@@ -8,22 +8,20 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 
 const PAYMENT_MAX_FILE_SIZE = 4 * 1024 * 1024;
-const PAYMENT_IMAGE_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-]);
+function detectPaymentImageType(buffer) {
+  if (!Buffer.isBuffer(buffer)) return null;
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+  if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buffer.length >= 6 && ['GIF87a', 'GIF89a'].includes(buffer.subarray(0, 6).toString('ascii'))) return 'image/gif';
+  if (buffer.length >= 12 && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
+  return null;
+}
 
 // Keep payment slips in memory until validation finishes. This avoids leaving
 // rejected temporary files on disk when UPLOAD_MODE=local.
 const paymentUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: PAYMENT_MAX_FILE_SIZE },
-  fileFilter: (_req, file, callback) => {
-    if (PAYMENT_IMAGE_TYPES.has(file.mimetype)) return callback(null, true);
-    return callback(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
-  },
 });
 
 function handlePaymentUploadError(error, _req, res, next) {
@@ -125,13 +123,22 @@ router.post('/promptpay/verify', authMiddleware, requireBuyer, paymentLimiter, p
   const amount = planAmount();
   if (!req.file) return res.status(400).json({ success: false, message: 'กรุณาแนบรูปสลิป' });
   if (req.file.size > 4 * 1024 * 1024) return res.status(400).json({ success: false, message: 'รูปสลิปต้องมีขนาดไม่เกิน 4 MB' });
+  const detectedMimeType = detectPaymentImageType(req.file.buffer);
+  if (!detectedMimeType) return res.status(400).json({ success: false, message: 'รองรับสลิปเฉพาะไฟล์ JPEG, PNG, WebP หรือ GIF' });
+  req.file.mimetype = detectedMimeType;
 
   let slipUrl = null;
   let verification = null;
   let verifyError = null;
   try {
-    easySlipConfig();
     slipUrl = await saveFile(req.file, `payment-slips/${userId}`);
+  } catch (error) {
+    console.error('[Payment Slip Upload Error]', error);
+    return res.status(500).json({ success: false, message: 'ส่งรูปสลิปไม่สำเร็จ กรุณาลองใหม่' });
+  }
+
+  try {
+    easySlipConfig();
     const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     verification = await easySlipRequest('/v2/verify/bank', {
       base64,

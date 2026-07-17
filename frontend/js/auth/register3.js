@@ -472,11 +472,13 @@
     video.muted = true;
     video.playsInline = true;
     const resumeVideo = () => video.play().catch(() => fallbk?.classList.add("is-show"));
-    resumeVideo();
-    video.addEventListener("canplay", resumeVideo, { once: true });
+    const startVideo = () => { if (!document.hidden) resumeVideo(); };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(startVideo, { timeout: 1200 });
+    else setTimeout(startVideo, 300);
     video.addEventListener("error", () => fallbk?.classList.add("is-show"));
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && video.paused) resumeVideo();
+      if (document.hidden) video.pause();
+      else if (video.paused) resumeVideo();
     });
   }
   if (otpTo) {

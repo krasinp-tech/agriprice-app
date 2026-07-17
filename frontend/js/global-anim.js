@@ -609,9 +609,11 @@
       document.body.classList.remove('page-ready');
       document.body.classList.add('page-exit');
     }
-    setTimeout(() => {
-      window.location.href = url;
-    }, 120); // match the 0.12s fade out
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || ['android', 'ios'].includes(window.Capacitor?.getPlatform?.());
+    const navigate = () => { window.location.href = url; };
+    if (isMobile) navigate();
+    else setTimeout(navigate, 120);
   };
 
   // 4. Haptics (Native Vibration)
