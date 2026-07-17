@@ -50,11 +50,48 @@ async function auth(req, res, next) {
       }
     }
 
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('account_status')
+      .eq('profile_id', payload.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('[Auth] Account status check failed:', profileError.message);
+      return res.status(503).json({ success: false, message: 'ไม่สามารถตรวจสอบสถานะบัญชีได้ กรุณาลองใหม่' });
+    }
+    if (!profile) {
+      return res.status(401).json({ success: false, code: 'ACCOUNT_NOT_FOUND', message: 'ไม่พบบัญชีผู้ใช้' });
+    }
+
+    if (profile.account_status === 'disabled') {
+      const requestPath = String(req.originalUrl || '').split('?')[0].replace(/\/$/, '');
+      const isProfileRoot = requestPath === '/api/profile';
+      const bodyKeys = Object.keys(req.body || {});
+      const isReactivation = isProfileRoot
+        && req.method === 'PATCH'
+        && bodyKeys.length === 1
+        && bodyKeys[0] === 'account_status'
+        && req.body.account_status === 'active';
+      const isRecoveryRequest = (isProfileRoot && ['GET', 'DELETE'].includes(req.method))
+        || isReactivation
+        || (requestPath === '/api/auth/logout' && req.method === 'POST');
+
+      if (!isRecoveryRequest) {
+        return res.status(403).json({
+          success: false,
+          code: 'ACCOUNT_DISABLED',
+          message: 'บัญชีนี้ถูกปิดใช้งานอยู่ กรุณาเปิดใช้งานบัญชีก่อน'
+        });
+      }
+    }
+
     req.user = {
       id:    payload.id,
       phone: payload.phone,
       role:  payload.role,
       sessionId: payload.session_id ? String(payload.session_id) : null,
+      accountStatus: profile.account_status || 'active',
     };
     next();
   } catch (err) {

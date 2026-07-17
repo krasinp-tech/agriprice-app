@@ -162,6 +162,28 @@ router.patch('/', authMiddleware, (req, res, next) => {
     const hasServicesUpdate = Object.prototype.hasOwnProperty.call(req.body, 'services');
     const fields = ['first_name','last_name','tagline','about','address_line1','address_line2','map_link','email','birth_date','account_status','lat','lng','hero_image'];
     const updates = {};
+
+    if (req.body.account_status !== undefined) {
+      if (!['active', 'disabled'].includes(req.body.account_status)) {
+        return res.status(400).json(response.error('สถานะบัญชีไม่ถูกต้อง'));
+      }
+      const nonStatusFields = Object.keys(req.body).filter(key => key !== 'account_status');
+      if (nonStatusFields.length > 0) {
+        return res.status(400).json(response.error('กรุณาเปลี่ยนสถานะบัญชีแยกจากการแก้ไขข้อมูลอื่น'));
+      }
+
+      if (req.body.account_status === 'active' && req.user.accountStatus === 'disabled') {
+        const { data: recoveryProfile, error: recoveryError } = await supabaseAdmin
+          .from('profiles')
+          .select('phone, password_hash')
+          .eq('profile_id', req.user.id)
+          .maybeSingle();
+        if (recoveryError) throw recoveryError;
+        if (!recoveryProfile?.password_hash || String(recoveryProfile.phone || '').startsWith('deleted-')) {
+          return res.status(410).json(response.error('บัญชีนี้ถูกลบถาวรแล้วและไม่สามารถเปิดใช้งานใหม่ได้'));
+        }
+      }
+    }
     fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
 
     if (req.body.phone) {
@@ -219,6 +241,37 @@ router.patch('/', authMiddleware, (req, res, next) => {
       return res.status(500).json(response.error('Database Error: ' + error.message));
     }
 
+    if (updates.account_status === 'disabled') {
+      const disableResults = await Promise.all([
+        supabaseAdmin.from('buy_offers').update({ is_active: false }).eq('user_id', req.user.id),
+        supabaseAdmin.from('profiles').update({ last_seen: null }).eq('profile_id', req.user.id)
+      ]);
+      const disableError = disableResults.find(result => result.error)?.error;
+      if (disableError) {
+        await supabaseAdmin
+          .from('profiles')
+          .update({ account_status: 'active' })
+          .eq('profile_id', req.user.id);
+        throw disableError;
+      }
+
+      const revokeQuery = supabaseAdmin
+        .from('device_sessions')
+        .delete()
+        .eq('user_id', req.user.id);
+      const { error: revokeError } = req.user.sessionId
+        ? await revokeQuery.neq('session_id', req.user.sessionId)
+        : await revokeQuery;
+
+      if (revokeError) {
+        await supabaseAdmin
+          .from('profiles')
+          .update({ account_status: 'active' })
+          .eq('profile_id', req.user.id);
+        throw new Error('ไม่สามารถออกจากระบบอุปกรณ์อื่นได้ กรุณาลองใหม่');
+      }
+    }
+
     if (hasLinksUpdate) await replaceProfileLinks(req.user.id, rawLinks);
     if (hasServicesUpdate) await replaceProfileServices(req.user.id, rawServices);
 
@@ -243,19 +296,68 @@ router.patch('/', authMiddleware, (req, res, next) => {
  */
 router.delete('/', authMiddleware, async (req, res) => {
   try {
-    // Keep the profile row so existing bookings/offers retain valid foreign keys.
-    // A disabled account cannot log in and is the safe deletion model for historical data.
+    // Keep an anonymized profile row so historical bookings retain valid foreign keys.
+    // Do not delete auth.users first: profiles.profile_id references auth.users.id,
+    // so that ordering leaves the account disabled and returns a foreign-key 500.
+    const tombstonePhone = `deleted-${req.user.id}`;
     const { error } = await supabaseAdmin
       .from('profiles')
-      .update({ account_status: 'disabled' })
+      .update({
+        phone: tombstonePhone,
+        first_name: '',
+        last_name: '',
+        password_hash: null,
+        avatar: null,
+        tagline: null,
+        about: null,
+        address_line1: null,
+        address_line2: null,
+        map_link: null,
+        hero_image: null,
+        email: null,
+        birth_date: null,
+        lat: null,
+        lng: null,
+        last_seen: null,
+        account_status: 'disabled',
+        tier: 'free',
+        pro_started_at: null,
+        pro_expires_at: null
+      })
       .eq('profile_id', req.user.id);
     if (error) throw error;
 
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(req.user.id);
+    const cleanupOperations = [
+      ['buy_offers', supabaseAdmin.from('buy_offers').update({ is_active: null }).eq('user_id', req.user.id)],
+      ['profile_links', supabaseAdmin.from('profile_links').delete().eq('profile_id', req.user.id)],
+      ['profile_services', supabaseAdmin.from('profile_services').delete().eq('profile_id', req.user.id)],
+      ['notification_settings', supabaseAdmin.from('notification_settings').delete().eq('user_id', req.user.id)],
+      ['profile_favorites', supabaseAdmin.from('profile_favorites').delete().or(`owner_id.eq.${req.user.id},target_profile_id.eq.${req.user.id}`)],
+      ['follows', supabaseAdmin.from('follows').delete().or(`follower_id.eq.${req.user.id},following_id.eq.${req.user.id}`)]
+    ];
+    const cleanupResults = await Promise.all(cleanupOperations.map(([, operation]) => operation));
+    const failedCleanupIndex = cleanupResults.findIndex(result => result.error);
+    if (failedCleanupIndex >= 0) {
+      const [cleanupName] = cleanupOperations[failedCleanupIndex];
+      throw new Error(`${cleanupName} cleanup failed: ${cleanupResults[failedCleanupIndex].error.message}`);
+    }
+
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
+      ban_duration: '876000h',
+      user_metadata: { account_deleted: true }
+    });
     if (authError) throw authError;
+
+    const { error: sessionError } = await supabaseAdmin
+      .from('device_sessions')
+      .delete()
+      .eq('user_id', req.user.id);
+    if (sessionError) throw sessionError;
+
     res.json(response.success('ลบบัญชีสำเร็จ'));
   } catch (e) {
-    res.status(500).json(response.error('ลบบัญชีไม่สำเร็จ'));
+    console.error('[Profile] Delete account failed:', e.message);
+    res.status(500).json(response.error('ลบบัญชีไม่สำเร็จ กรุณาลองใหม่'));
   }
 });
 
@@ -270,11 +372,12 @@ router.get('/:userId', async (req, res) => {
 
     const { data, error } = await supabaseAdmin
       .from('profiles')
-      .select('profile_id, phone, email, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, lat, lng')
+      .select('profile_id, phone, email, first_name, last_name, role, avatar, tagline, about, address_line1, address_line2, map_link, hero_image, followers_count, following_count, created_at, lat, lng, account_status')
       .eq('profile_id', req.params.userId)
       .single();
 
-    if (error) return res.status(404).json(response.error('ไม่พบผู้ใช้'));
+    if (error || data?.account_status !== 'active') return res.status(404).json(response.error('ไม่พบผู้ใช้'));
+    delete data.account_status;
     res.json(await attachProfileDetails(data));
   } catch (e) {
     res.status(500).json(response.error(e.message));
