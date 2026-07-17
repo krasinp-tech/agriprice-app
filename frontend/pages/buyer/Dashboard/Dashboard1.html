@@ -25,7 +25,7 @@
   <main class="dashboard-shell" id="dashboardShell" aria-busy="true">
     <section class="updated-row"><span id="periodLabel" data-i18n="overview_today">ภาพรวมวันนี้</span><span id="updatedAt" data-i18n="updating">กำลังอัปเดต...</span></section>
 
-    <section class="kpi-grid" aria-label="ตัวเลขสำคัญ">
+    <section class="kpi-grid" aria-label="ตัวเลขสำคัญ" data-i18n-aria-label="key_metrics">
       <button class="kpi-card blue" data-go="bookings"><span class="kpi-icon material-icons-outlined">event_note</span><span class="kpi-label" data-i18n="booking_title">การจอง</span><strong id="bookingsVal">—</strong><small id="bookingsTrend">—</small></button>
       <button class="kpi-card green" data-go="bookings"><span class="kpi-icon material-icons-outlined">task_alt</span><span class="kpi-label" data-i18n="success">สำเร็จ</span><strong id="successRateVal">—</strong><small id="successRateTrend">—</small></button>
       <button class="kpi-card orange" data-go="products"><span class="kpi-icon material-icons-outlined">visibility</span><span class="kpi-label" data-i18n="listing_views">คนเห็นประกาศ</span><strong id="viewsVal">—</strong><small id="viewsTrend">—</small></button>
@@ -42,7 +42,7 @@
 
     <section class="panel insight-panel"><div class="panel-heading"><div><span class="eyebrow" data-i18n="insights">ข้อมูลเชิงลึก</span><h2 data-i18n="booking_behavior">พฤติกรรมการจอง</h2></div></div><div class="insight-grid"><div><span class="material-icons-outlined">schedule</span><small data-i18n="peak_time">ช่วงยอดนิยม</small><b id="peakTimeVal">—</b></div><div><span class="material-icons-outlined">emoji_events</span><small data-i18n="most_booked">ประกาศเด่น</small><b id="mostBookedVal">—</b></div><div><span class="material-icons-outlined">speed</span><small data-i18n="daily_average">เฉลี่ยต่อวัน</small><b id="dailyAvgVal">—</b></div><div><span class="material-icons-outlined">person_add</span><small data-i18n="new_followers">ผู้ติดตามใหม่</small><b id="newFollowersVal">—</b></div></div></section>
 
-    <section class="panel"><div class="panel-heading"><div><span class="eyebrow" data-i18n="market">ตลาด</span><h2 id="competitorsHeaderTitle" data-i18n="competitor_count_label">คู่แข่งในพื้นที่</h2></div><strong id="competitorTotalVal">0 ราย</strong></div><div id="competitorList" class="simple-list"></div></section>
+    <section class="panel"><div class="panel-heading"><div><span class="eyebrow" data-i18n="market">ตลาด</span><h2 id="competitorsHeaderTitle" data-i18n="competitor_count_label">คู่แข่งในพื้นที่</h2></div><strong id="competitorTotalVal">-</strong></div><div id="competitorList" class="simple-list"></div></section>
     <section class="panel"><div class="panel-heading"><div><span class="eyebrow" data-i18n="price">ราคา</span><h2 data-i18n="price_comparison">ราคาเราเทียบกับตลาด</h2></div></div><div id="priceCompareList" class="price-list"></div></section>
   </main>
 

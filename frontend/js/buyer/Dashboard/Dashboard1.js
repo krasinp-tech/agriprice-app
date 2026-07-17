@@ -37,7 +37,7 @@
     const max = Math.max(1, ...bookings, ...views);
     const points = values => values.map((value, index) => `${padX + (labels.length === 1 ? (width - padX * 2) / 2 : index * (width - padX * 2) / (labels.length - 1))},${height - padY - (value / max) * (height - padY * 2)}`).join(' ');
     const labelEvery = labels.length > 10 ? Math.ceil(labels.length / 6) : 1;
-    mount.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟแนวโน้ม"><defs><linearGradient id="viewFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity=".22"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></linearGradient></defs><line x1="${padX}" y1="${height-padY}" x2="${width-padX}" y2="${height-padY}" class="axis"/><polyline points="${points(views)}" class="line views"/><polyline points="${points(bookings)}" class="line bookings"/>${labels.map((label,i)=>i%labelEvery===0?`<text x="${padX+(labels.length===1?(width-padX*2)/2:i*(width-padX*2)/(labels.length-1))}" y="${height-4}" text-anchor="middle">${label}</text>`:'').join('')}</svg>`;
+    mount.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${t('trend_chart', 'กราฟแนวโน้ม')}"><defs><linearGradient id="viewFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity=".22"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></linearGradient></defs><line x1="${padX}" y1="${height-padY}" x2="${width-padX}" y2="${height-padY}" class="axis"/><polyline points="${points(views)}" class="line views"/><polyline points="${points(bookings)}" class="line bookings"/>${labels.map((label,i)=>i%labelEvery===0?`<text x="${padX+(labels.length===1?(width-padX*2)/2:i*(width-padX*2)/(labels.length-1))}" y="${height-4}" text-anchor="middle">${label}</text>`:'').join('')}</svg>`;
   }
 
   function renderRecommendations(items = []) {
@@ -57,6 +57,11 @@
       } else if (item.icon === 'task_alt') {
         item.title = t('rec_all_good_title', 'สถานะโดยรวมเรียบร้อย');
         item.detail = t('rec_all_good_detail', 'ยังไม่มีรายการเร่งด่วนที่ต้องจัดการในช่วงนี้');
+      } else if (item.icon === 'trending_up') {
+        const product = String(item.title || '').replace(/\s*ทำผลงานดีที่สุด\s*$/, '') || t('product', 'สินค้า');
+        const bookings = String(item.detail || '').match(/\d+/)?.[0] || '0';
+        item.title = t('rec_best_product_title', `${product} ทำผลงานดีที่สุด`, { product, count: bookings });
+        item.detail = t('rec_best_product_detail', `ได้รับการจอง ${bookings} ครั้งในช่วงที่เลือก`, { product, count: bookings });
       }
       return `<button class="recommendation ${item.tone || ''}" ${item.action ? `data-go="${item.action}"` : ''}><span class="material-icons-outlined">${item.icon || 'tips_and_updates'}</span><span><b>${item.title}</b><small>${item.detail}</small></span>${item.action ? '<span class="material-icons-outlined arrow">chevron_right</span>' : ''}</button>`;
     }).join('');
@@ -65,6 +70,13 @@
   function renderList(id, items, renderer, emptyText) {
     const mount = $(id); if (!mount) return;
     mount.innerHTML = items?.length ? items.map(renderer).join('') : `<div class="empty-inline">${emptyText}</div>`;
+  }
+
+  function priceDifferenceText(item) {
+    const value = Number(item.diffPercent || 0);
+    if (value > 0) return t('above_market', `สูงกว่าตลาด +${value}%`, { percent: value });
+    if (value < 0) return t('below_market', `ต่ำกว่าตลาด ${value}%`, { percent: value });
+    return t('same_as_market', 'เท่าตลาด');
   }
 
   function render(stats) {
@@ -80,7 +92,7 @@
     text('updatedAt', `${t('updated', 'อัปเดต')} ${new Intl.DateTimeFormat(locale(),{hour:'2-digit',minute:'2-digit'}).format(new Date(stats.updatedAt || Date.now()))}`);
     renderChart(stats.trendChart); renderRecommendations(stats.recommendations);
     renderList('competitorList', stats.categoryCompetitors, item => `<div><span>${t('buying_label', 'รับซื้อ')}${t(item.category, item.category || t('product', 'สินค้า'))}</span><b>${count(item.count)} ${t('items_suffix', 'รายการ')}</b></div>`, t('no_competitor_data', 'ยังไม่มีข้อมูลคู่แข่งในพื้นที่'));
-    renderList('priceCompareList', stats.priceComparison, item => `<div class="price-item"><span><b>${t(item.name, item.name || t('product', 'สินค้า'))} ${item.variety ? `(${t(item.variety, item.variety)})` : ''}</b><small>${t('my_price', 'ราคาเรา')} ฿${Number(item.myPrice || 0)} • ${t('market', 'ตลาด')} ฿${Number(item.marketPrice || 0)}</small></span><em class="${Number(item.diffPercent)>=0?'up':'down'}">${item.diffText || t('same_as_market', 'เท่าตลาด')}</em></div>`, t('no_price_comparison', 'ยังไม่มีราคาที่เปรียบเทียบได้'));
+    renderList('priceCompareList', stats.priceComparison, item => `<div class="price-item"><span><b>${t(item.name, item.name || t('product', 'สินค้า'))} ${item.variety ? `(${t(item.variety, item.variety)})` : ''}</b><small>${t('my_price', 'ราคาเรา')} ฿${Number(item.myPrice || 0)} • ${t('market', 'ตลาด')} ฿${Number(item.marketPrice || 0)}</small></span><em class="${Number(item.diffPercent)>=0?'up':'down'}">${priceDifferenceText(item)}</em></div>`, t('no_price_comparison', 'ยังไม่มีราคาที่เปรียบเทียบได้'));
     document.querySelector('main').setAttribute('aria-busy','false');
   }
 

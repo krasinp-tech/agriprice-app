@@ -69,30 +69,58 @@ body {
 }
 
 /* ===== TOP MEDIA ===== */
-.media {
+.media{
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-
-  /* ใช้ vh เพื่อให้ tablet/landscape ขยับตาม */
   height: clamp(220px, 36vh, 360px);
-
   background: #0E8A3A;
-  /* โทนเขียวแบบในรูป */
 }
 
-.media-video {
+/* เพิ่มแสงแอนิเมชันวิ่งผ่านแบบล้ำๆ */
+.media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  background-size: 200% 200%;
+  animation: mediaShine 8s infinite linear;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.media-video{
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 
-  /* crop เล็กน้อย */
-  transform: scale(1.06);
-  transform-origin: 50% 38%;
-
+  transform-origin: 50% 50%;
+  animation: kenBurnsEffect 24s infinite ease-in-out;
   display: block;
+}
+
+@keyframes mediaShine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes kenBurnsEffect {
+  0% {
+    transform: scale(1.06) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.15) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1.06) translate(0, 0);
+  }
 }
 
 .media-fallback {

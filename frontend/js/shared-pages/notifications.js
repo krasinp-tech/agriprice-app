@@ -30,9 +30,56 @@
     return window.api || {};
   }
 
-  function t(key, fallback) {
-    if (window.i18nT) return window.i18nT(key, fallback);
+  function t(key, fallback, params) {
+    if (window.i18nT) return window.i18nT(key, fallback, params);
     return fallback || key;
+  }
+
+  const NOTIFICATION_TITLE_KEYS = {
+    'มีการจองคิวใหม่': 'notification_new_booking_title',
+    'มีการยกเลิกการจองคิว': 'notification_booking_cancelled_title',
+    'การจองคิวของคุณถูกยกเลิก': 'notification_your_booking_cancelled_title',
+    'ยืนยันการจองคิวสำเร็จ': 'notification_booking_confirmed_title',
+    'คิวจองผลผลิตเสร็จสิ้น': 'notification_booking_completed_title',
+    'การจองคิวถูกปฏิเสธ': 'notification_booking_rejected_title',
+    'เช็คอินคิวสำเร็จ': 'notification_checkin_success_title'
+  };
+
+  const NOTIFICATION_DETAIL_KEYS = {
+    'ถูกยกเลิกโดยเกษตรกร': 'notification_cancelled_by_farmer_detail',
+    'ถูกยกเลิกโดยผู้รับซื้อ': 'notification_cancelled_by_buyer_detail',
+    'ได้รับการยืนยันจากผู้รับซื้อแล้ว': 'notification_confirmed_by_buyer_detail',
+    'ดำเนินการชั่งน้ำหนักและลงบันทึกเสร็จสิ้นแล้ว': 'notification_completed_detail',
+    'ถูกปฏิเสธโดยผู้รับซื้อ': 'notification_rejected_by_buyer_detail',
+    'ได้รับการเช็คอินแล้ว': 'notification_checked_in_detail'
+  };
+
+  function translateNotificationText(value, field) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+
+    if (field === 'title' && NOTIFICATION_TITLE_KEYS[raw]) {
+      return t(NOTIFICATION_TITLE_KEYS[raw], raw);
+    }
+
+    const newBooking = raw.match(/^เลขที่\s+(.+?)\s+\((.+?)\)$/);
+    if (newBooking) {
+      return t('notification_new_booking_detail', raw, {
+        booking: newBooking[1],
+        queue: newBooking[2]
+      });
+    }
+
+    const bookingDetail = raw.match(/^คิวเลขที่\s+(.+?)\s+\(ใบจองเลขที่\s+(.+?)\)\s+(.+)$/);
+    if (bookingDetail && NOTIFICATION_DETAIL_KEYS[bookingDetail[3]]) {
+      return t(NOTIFICATION_DETAIL_KEYS[bookingDetail[3]], raw, {
+        queue: bookingDetail[1],
+        booking: bookingDetail[2]
+      });
+    }
+
+    // Also supports future rows that store an i18n key instead of display text.
+    return t(raw, raw);
   }
 
   function escapeHtml(s) {
@@ -160,8 +207,8 @@
               <span class="material-icons-outlined">${getIconName(type)}</span>
             </div>
             <div class="noti-item-body">
-              <div class="noti-item-title">${escapeHtml(n.title)}</div>
-              <div class="noti-item-desc">${escapeHtml(n.message || n.content || n.description)}</div>
+              <div class="noti-item-title">${escapeHtml(translateNotificationText(n.title, 'title'))}</div>
+              <div class="noti-item-desc">${escapeHtml(translateNotificationText(n.message || n.content || n.description, 'detail'))}</div>
               <div class="noti-item-time">${formatRelativeTime(n.created_at)}</div>
             </div>
             ${isUnread ? `<div class="noti-unread-dot" style="width:8px; height:8px; background:var(--brand); border-radius:50%; margin-left:8px;"></div>` : ''}
@@ -378,7 +425,7 @@
         e.stopPropagation();
         const notiId = wrapper.dataset.id;
         const confirmMsg = t('confirm_delete_notification', 'คุณต้องการลบการแจ้งเตือนนี้ใช่หรือไม่?');
-        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+        const showConfirm = window.showConfirm;
 
         showConfirm(confirmMsg, async (confirmed) => {
           if (confirmed) {
@@ -407,6 +454,10 @@
           } else {
             resetSwipe();
           }
+        }, {
+          variant: 'danger',
+          title: t('delete_notification', 'ลบการแจ้งเตือน'),
+          confirmText: t('delete', 'ลบ')
         });
       });
     });
@@ -437,7 +488,7 @@
     }
 
     const confirmMsg = t('confirm_delete_all_read', 'คุณต้องการลบการแจ้งเตือนที่อ่านแล้วทั้งหมดใช่หรือไม่?');
-    const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+    const showConfirm = window.showConfirm;
 
     showConfirm(confirmMsg, async (confirmed) => {
       if (confirmed) {
@@ -454,6 +505,10 @@
           if (window.showToast) window.showToast(t('error_delete_read', 'ลบการแจ้งเตือนที่อ่านแล้วไม่สำเร็จ'), 'error');
         }
       }
+    }, {
+      variant: 'danger',
+      title: t('delete_read_notifications', 'ลบการแจ้งเตือนที่อ่านแล้ว'),
+      confirmText: t('delete_all', 'ลบทั้งหมด')
     });
   }
 

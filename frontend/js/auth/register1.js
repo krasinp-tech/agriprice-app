@@ -7,6 +7,7 @@
 */
 
 (function () {
+  const t = (key, fallback, params) => window.i18nT ? window.i18nT(key, fallback, params) : fallback.replace('{role}', params?.role || '');
   const KEY_ROLE = "reg_role";
 
   const cards = Array.from(document.querySelectorAll(".role-card"));
@@ -27,6 +28,7 @@
     farmer: "เกษตรกร",
     buyer: "ผู้รับซื้อ",
   };
+  const getRoleName = (role) => t(`role_${role}_name`, roleNameMap[role] || role);
 
   const ROUTES = {
     register2: "./register2.html",
@@ -70,7 +72,10 @@
   function setupVideos() {
     // อนาคต: เปิดให้เปลี่ยนวิดีโอตาม config ได้
     const customTop = window.REGISTER_VIDEO_URL;
-    if (customTop && topSource) topSource.src = customTop;
+    if (customTop && topSource) {
+      topSource.src = customTop;
+      topVideo?.load();
+    }
 
     hardenVideo(topVideo);
     safePlay(topVideo, (failed) => showFallback(!!failed));
@@ -101,7 +106,9 @@
     });
 
     nextBtn.disabled = !role;
-    setHint(role ? `เลือกแล้ว: ${roleNameMap[role]} - กดถัดไปเพื่อยืนยัน` : "กรุณาเลือกประเภทผู้ใช้งาน");
+    setHint(role
+      ? t('selected_role_hint', 'เลือกแล้ว: {role} - กดถัดไปเพื่อยืนยัน', { role: getRoleName(role) })
+      : t('select_role_prompt', 'กรุณาเลือกประเภทผู้ใช้งาน'));
   }
 
   function restoreSelection() {
@@ -116,7 +123,7 @@
     modal.setAttribute("aria-hidden", "false");
     modal.dataset.role = role;
 
-    modalText.textContent = `คุณต้องการสมัครเป็น “${roleNameMap[role]}” ใช่หรือไม่?`;
+    modalText.textContent = t('confirm_register_role', 'คุณต้องการสมัครเป็น “{role}” ใช่หรือไม่?', { role: getRoleName(role) });
   }
 
   function closeModal() {
@@ -134,7 +141,7 @@
     nextBtn.addEventListener("click", () => {
       const role = sessionStorage.getItem(KEY_ROLE);
       if (!role) {
-        setHint("กรุณาเลือกประเภทผู้ใช้งานก่อน");
+        setHint(t('select_role_prompt', 'กรุณาเลือกประเภทผู้ใช้งานก่อน'));
         return;
       }
       openModal(role);
@@ -165,4 +172,3 @@
   bindEvents();
   restoreSelection();
 })();
-

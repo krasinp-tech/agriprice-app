@@ -383,6 +383,99 @@ body{
 }
 .primary-btn:active{ transform: translateY(1px); }
 
+.offer-limit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(5, 24, 14, .62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.offer-limit-overlay[hidden] { display: none; }
+.offer-limit-dialog {
+  position: relative;
+  width: min(390px, 100%);
+  padding: 30px 24px 22px;
+  overflow: hidden;
+  text-align: center;
+  color: var(--text-main, #142019);
+  background: linear-gradient(165deg, #fff 35%, #f2fff7 100%);
+  border: 1px solid rgba(11, 133, 60, .14);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(0, 35, 17, .34);
+  animation: offerLimitIn .28s cubic-bezier(.2,.85,.3,1.15);
+}
+.offer-limit-dialog::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  top: -130px;
+  left: -70px;
+  border-radius: 50%;
+  background: rgba(20, 197, 90, .10);
+}
+.offer-limit-close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  color: #557064;
+  background: rgba(11, 133, 60, .08);
+}
+.offer-limit-visual { position: relative; height: 82px; }
+.offer-limit-ring {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(145deg, #16c75d, #087b38);
+  box-shadow: 0 14px 30px rgba(11, 133, 60, .28);
+  transform: rotate(-4deg);
+}
+.offer-limit-ring .material-icons-outlined { font-size: 38px; }
+.offer-limit-spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #f7bd22; }
+.spark-one { top: 4px; left: calc(50% - 58px); }
+.spark-two { right: calc(50% - 62px); bottom: 12px; width: 6px; height: 6px; }
+.offer-limit-plan {
+  display: inline-flex;
+  margin-top: 5px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  color: #087b38;
+  background: #e8f9ef;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+.offer-limit-dialog h2 { margin: 13px 0 8px; font-size: 23px; line-height: 1.2; }
+.offer-limit-dialog > p { margin: 0 auto; max-width: 310px; color: #607068; font-size: 14px; line-height: 1.55; }
+.offer-limit-meter { margin: 20px 0; padding: 14px; border-radius: 17px; background: rgba(11, 133, 60, .06); }
+.offer-limit-usage { margin-bottom: 9px; color: #27543d; font-size: 13px; font-weight: 800; }
+.offer-limit-track { height: 8px; overflow: hidden; border-radius: 999px; background: #dcebe2; }
+.offer-limit-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #18ca60, #f0b323); transition: width .35s ease; }
+.offer-limit-actions { display: grid; gap: 10px; }
+.offer-limit-actions button { min-height: 51px; border-radius: 16px; font: inherit; font-weight: 900; cursor: pointer; }
+.offer-limit-upgrade { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; color: #fff; background: linear-gradient(135deg, #0b853c, #13b955); box-shadow: 0 12px 24px rgba(11, 133, 60, .22); }
+.offer-limit-upgrade[hidden] { display: none; }
+.offer-limit-manage { border: 1px solid rgba(11, 133, 60, .24); color: #0b853c; background: transparent; }
+[data-theme="dark"] .offer-limit-dialog { color: #f4fff8; background: linear-gradient(165deg, #17211b, #102519); border-color: rgba(91, 226, 142, .22); }
+[data-theme="dark"] .offer-limit-dialog > p { color: #b4c8bb; }
+[data-theme="dark"] .offer-limit-meter { background: rgba(90, 220, 140, .09); }
+[data-theme="dark"] .offer-limit-usage { color: #b9dfc8; }
+[data-theme="dark"] .offer-limit-track { background: #294033; }
+@keyframes offerLimitIn { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+
 /* Modal */
 .modal-overlay{
   position:fixed;

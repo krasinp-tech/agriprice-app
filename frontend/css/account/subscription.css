@@ -323,3 +323,15 @@ body {
   color: var(--text-muted);
   line-height: 1.5;
 }
+
+.pro-plan .plan-price {
+  margin-bottom: 8px;
+}
+
+.plan-term-note {
+  margin: 0 0 22px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}

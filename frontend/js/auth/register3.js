@@ -1,5 +1,6 @@
 /* js/auth/register3.js - Firebase OTP verification */
 (function () {
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
   const getApiBase = () => window.api?.getBase ? window.api.getBase() : (window.API_BASE_URL || "").replace(/\/$/, "");
   const DEBUG_OTP = !!window.AGRIPRICE_DEBUG;
   const DEBUG_REDIRECT_DELAY_MS = DEBUG_OTP ? 3500 : 0;
@@ -128,7 +129,7 @@
       if (remaining === 0) {
         clearInterval(timerId);
         if (resendB) resendB.disabled = false;
-        setHint("รหัสหมดอายุ กรุณาขอรหัสใหม่ได้");
+        setHint(t('otp_expired_request_new', 'รหัสหมดอายุ กรุณาขอรหัสใหม่ได้'));
       }
     }, 1000);
   }
@@ -175,6 +176,8 @@
   }
 
   async function initFirebaseOtp() {
+    if (window.FirebaseCompatReady) await window.FirebaseCompatReady;
+    if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const config = window.FIREBASE_CONFIG || null;
     if (!window.firebase || !config) {
       throw new Error("ยังไม่ได้ตั้งค่า Firebase บนหน้าเว็บ");
@@ -201,7 +204,7 @@
   }
 
   async function sendWebFirebaseOtp(phone, reason) {
-    setHint(reason || "กำลังส่งรหัส OTP ผ่าน Firebase...");
+    setHint(reason || t('sending_otp_firebase', 'กำลังส่งรหัส OTP ผ่าน Firebase...'));
     await initFirebaseOtp();
     const cleanPhone = toE164(phone);
     otpProvider = "firebase";
@@ -209,7 +212,7 @@
     logOtp("firebase.send.start", { phone: cleanPhone });
     confirmationResult = await firebaseAuth.signInWithPhoneNumber(cleanPhone, recaptchaVerifier);
     logOtp("firebase.send.success");
-    setHint("ส่งรหัส OTP เข้ามือถือของคุณแล้ว");
+    setHint(t('otp_sent_to_phone', 'ส่งรหัส OTP เข้ามือถือของคุณแล้ว'));
     startTimer(120);
   }
 
@@ -269,7 +272,7 @@
       confirmationResult = { provider: "native-firebase" };
       otpProvider = "native-firebase";
       logOtp("native.phoneCodeSent", { hasVerificationId: !!nativeVerificationId });
-      setHint("ส่งรหัส OTP เข้ามือถือของคุณแล้ว");
+      setHint(t('otp_sent_to_phone', 'ส่งรหัส OTP เข้ามือถือของคุณแล้ว'));
       startTimer(120);
     });
 
@@ -299,7 +302,7 @@
       body: JSON.stringify({ idToken, phone }),
     });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.success) throw new Error(json.message || "ยืนยัน OTP ไม่สำเร็จ");
+    if (!res.ok || !json.success) throw new Error(window.i18nApiMessage?.(json.message, 'otp_invalid') || t('otp_invalid', "ยืนยัน OTP ไม่สำเร็จ"));
     return json.data || json;
   }
 
@@ -347,7 +350,7 @@
         const nativeAuth = getNativeFirebaseAuth();
         if (!nativeAuth) throw new Error("ไม่พบ Firebase Authentication plugin");
         await ensureNativeOtpListeners();
-        setHint("กำลังส่งรหัส OTP ผ่าน Firebase Native...");
+        setHint(t('sending_otp_firebase_native', 'กำลังส่งรหัส OTP ผ่าน Firebase Native...'));
         const cleanPhone = toE164(phone);
         otpProvider = "native-firebase";
         nativeVerificationId = "";
@@ -427,7 +430,7 @@
       setLoad(true);
       await verifyOtp(otp);
       if (DEBUG_REDIRECT_DELAY_MS > 0) {
-        setHint("ยืนยันสำเร็จ กำลังไปหน้าถัดไป...");
+        setHint(t('otp_verified_redirecting', 'ยืนยันสำเร็จ กำลังไปหน้าถัดไป...'));
         setTimeout(() => {
           if (window.navigateWithTransition) window.navigateWithTransition(NEXT_ROUTE);
           else window.location.href = NEXT_ROUTE;
@@ -467,11 +470,17 @@
 
   if (video) {
     video.muted = true;
-    video.play().catch(() => fallbk?.classList.add("is-show"));
+    video.playsInline = true;
+    const resumeVideo = () => video.play().catch(() => fallbk?.classList.add("is-show"));
+    resumeVideo();
+    video.addEventListener("canplay", resumeVideo, { once: true });
     video.addEventListener("error", () => fallbk?.classList.add("is-show"));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && video.paused) resumeVideo();
+    });
   }
   if (otpTo) {
-    otpTo.innerHTML = 'ส่งรหัสไปที่หมายเลข <span class="to-num">' + maskPhone(getPhone()) + "</span>";
+    otpTo.innerHTML = t('otp_sent_to_number', 'ส่งรหัสไปที่หมายเลข') + ' <span class="to-num">' + maskPhone(getPhone()) + "</span>";
   }
 
   setConfigSourceStatus();

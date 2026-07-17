@@ -125,6 +125,33 @@
     </main>
   </div>
 
+  <div class="offer-limit-overlay" id="offerLimitModal" hidden>
+    <section class="offer-limit-dialog" role="dialog" aria-modal="true" aria-labelledby="offerLimitTitle">
+      <button class="offer-limit-close" id="offerLimitClose" type="button" aria-label="ปิด" data-i18n-aria-label="close_label">
+        <span class="material-icons-outlined">close</span>
+      </button>
+      <div class="offer-limit-visual" aria-hidden="true">
+        <div class="offer-limit-ring"><span class="material-icons-outlined">workspace_premium</span></div>
+        <span class="offer-limit-spark spark-one"></span>
+        <span class="offer-limit-spark spark-two"></span>
+      </div>
+      <div class="offer-limit-plan" id="offerLimitPlan">FREE</div>
+      <h2 id="offerLimitTitle" data-i18n="offer_limit_title">รายการรับซื้อครบตามแพ็กเกจ</h2>
+      <p data-i18n="offer_limit_description">คุณสามารถปิดรายการเดิมเพื่อสร้างรายการใหม่ หรืออัปเกรดเพื่อเพิ่มจำนวนรายการรับซื้อ</p>
+      <div class="offer-limit-meter">
+        <div class="offer-limit-usage" id="offerLimitUsage">3 / 3</div>
+        <div class="offer-limit-track"><span id="offerLimitFill"></span></div>
+      </div>
+      <div class="offer-limit-actions">
+        <button class="offer-limit-upgrade" id="offerLimitUpgrade" type="button">
+          <span class="material-icons-outlined">diamond</span>
+          <span data-i18n="view_pro_package">ดูแพ็กเกจ PRO</span>
+        </button>
+        <button class="offer-limit-manage" id="offerLimitManage" type="button" data-i18n="manage_buy_offers">จัดการรายการรับซื้อ</button>
+      </div>
+    </section>
+  </div>
+
   <!-- Modal: Add Round -->
   <div class="modal-overlay" id="roundModal" inert>
     <div class="modal bottom-sheet" role="dialog" aria-modal="true" aria-label="เพิ่มรอบคิวใหม่" data-i18n-aria-label="add_new_round_title">

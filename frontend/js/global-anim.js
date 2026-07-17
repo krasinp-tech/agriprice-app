@@ -244,6 +244,14 @@
       background: rgba(0, 122, 255, 0.1);
       color: #007aff;
     }
+    .agri-alert-icon-wrap.warning {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+    }
+    .agri-alert-icon-wrap.danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
     .agri-alert-icon-wrap span {
       font-size: 28px;
     }
@@ -289,8 +297,14 @@
       border-color: rgba(255, 255, 255, 0.08);
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     }
+    [data-theme="dark"] .agri-alert-backdrop {
+      background: rgba(2, 6, 12, 0.66);
+    }
     [data-theme="dark"] .agri-alert-title {
       color: #f8fafc;
+    }
+    [data-theme="dark"] .agri-alert-message {
+      color: #cbd5e1;
     }
     [data-theme="dark"] .agri-alert-footer {
       border-top-color: rgba(255, 255, 255, 0.08);
@@ -320,8 +334,14 @@
     .agri-alert-footer.confirm-footer .confirm-btn {
       color: #0B853C;
     }
+    .agri-alert-footer.confirm-footer .confirm-btn.danger-btn {
+      color: #dc2626;
+    }
     [data-theme="dark"] .agri-alert-footer.confirm-footer .confirm-btn {
       color: #22c55e;
+    }
+    [data-theme="dark"] .agri-alert-footer.confirm-footer .confirm-btn.danger-btn {
+      color: #f87171;
     }
 
     /* ── Page Transition Animations ── */
@@ -372,7 +392,7 @@
 
     toast.innerHTML = `
       <span class="material-icons-outlined">${icon}</span>
-      <span class="toast-message">${message}</span>
+      <span class="toast-message">${escapeDialogText(message)}</span>
     `;
 
     container.appendChild(toast);
@@ -385,17 +405,27 @@
   }
 
   // 2. Alert/Modal Replacement System
-  function showCustomAlert(message, titleOrType = 'แจ้งเตือน', typeOrCallback = null, callback = null) {
-    let title = 'แจ้งเตือน';
+  const globalT = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
+
+  const escapeDialogText = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  function showCustomAlert(message, titleOrType = 'info', typeOrCallback = null, callback = null) {
+    let title = globalT('alert_title', 'แจ้งเตือน');
     let type = 'info';
     let cb = null;
 
     // Smart parameter parsing
-    if (['success', 'error', 'info'].includes(titleOrType)) {
+    if (['success', 'error', 'info', 'warning'].includes(titleOrType)) {
       type = titleOrType;
-      if (type === 'success') title = 'สำเร็จ';
-      else if (type === 'error') title = 'เกิดข้อผิดพลาด';
-      else title = 'แจ้งเตือน';
+      if (type === 'success') title = globalT('success', 'สำเร็จ');
+      else if (type === 'error') title = globalT('error', 'เกิดข้อผิดพลาด');
+      else if (type === 'warning') title = globalT('warning', 'โปรดทราบ');
+      else title = globalT('alert_title', 'แจ้งเตือน');
       if (typeof typeOrCallback === 'function') {
         cb = typeOrCallback;
       }
@@ -421,16 +451,16 @@
     const dialog = document.createElement('div');
     dialog.className = 'agri-alert-dialog';
 
-    const icon = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : 'info');
+    const icon = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : (type === 'warning' ? 'warning_amber' : 'info'));
 
     dialog.innerHTML = `
       <div class="agri-alert-icon-wrap ${type}">
         <span class="material-icons-outlined">${icon}</span>
       </div>
-      <h3 class="agri-alert-title">${title}</h3>
-      <p class="agri-alert-message">${message}</p>
+      <h3 class="agri-alert-title">${escapeDialogText(title)}</h3>
+      <p class="agri-alert-message">${escapeDialogText(message)}</p>
       <div class="agri-alert-footer">
-        <button class="agri-alert-btn">ตกลง</button>
+        <button class="agri-alert-btn">${globalT('confirm', 'ตกลง')}</button>
       </div>
     `;
 
@@ -446,6 +476,7 @@
     }, 10);
 
     const dismiss = () => {
+      document.removeEventListener('keydown', onKeyDown);
       backdrop.classList.remove('open');
       document.body.style.overflow = '';
       setTimeout(() => {
@@ -454,14 +485,24 @@
       }, 300);
     };
 
-    dialog.querySelector('.agri-alert-btn').addEventListener('click', dismiss);
+    const actionButton = dialog.querySelector('.agri-alert-btn');
+    actionButton.addEventListener('click', dismiss);
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) dismiss();
     });
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape' || event.key === 'Enter') {
+        event.preventDefault();
+        document.removeEventListener('keydown', onKeyDown);
+        dismiss();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    actionButton.focus();
   }
 
   // Custom Confirm Dialog
-  function showCustomConfirm(message, callback) {
+  function showCustomConfirm(message, callback, options = {}) {
     const activeConfirm = document.getElementById('agri-custom-confirm');
     if (activeConfirm) activeConfirm.remove();
 
@@ -472,15 +513,21 @@
     const dialog = document.createElement('div');
     dialog.className = 'agri-alert-dialog';
 
+    const variant = ['info', 'warning', 'danger'].includes(options.variant) ? options.variant : 'info';
+    const icon = options.icon || (variant === 'danger' ? 'delete_outline' : (variant === 'warning' ? 'warning_amber' : 'help_outline'));
+    const title = options.title || globalT('confirm', 'ยืนยัน');
+    const cancelText = options.cancelText || globalT('cancel', 'ยกเลิก');
+    const confirmText = options.confirmText || globalT('confirm', 'ตกลง');
+
     dialog.innerHTML = `
-      <div class="agri-alert-icon-wrap info">
-        <span class="material-icons-outlined">help_outline</span>
+      <div class="agri-alert-icon-wrap ${variant}">
+        <span class="material-icons-outlined">${escapeDialogText(icon)}</span>
       </div>
-      <h3 class="agri-alert-title">ยืนยัน</h3>
-      <p class="agri-alert-message">${message}</p>
+      <h3 class="agri-alert-title">${escapeDialogText(title)}</h3>
+      <p class="agri-alert-message">${escapeDialogText(message)}</p>
       <div class="agri-alert-footer confirm-footer">
-        <button class="agri-alert-btn cancel-btn">ยกเลิก</button>
-        <button class="agri-alert-btn confirm-btn">ตกลง</button>
+        <button class="agri-alert-btn cancel-btn">${escapeDialogText(cancelText)}</button>
+        <button class="agri-alert-btn confirm-btn ${variant === 'danger' ? 'danger-btn' : ''}">${escapeDialogText(confirmText)}</button>
       </div>
     `;
 
@@ -493,7 +540,11 @@
       backdrop.classList.add('open');
     }, 10);
 
+    let settled = false;
     const dismiss = (result) => {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener('keydown', onKeyDown);
       backdrop.classList.remove('open');
       document.body.style.overflow = '';
       setTimeout(() => {
@@ -508,6 +559,17 @@
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) dismiss(false);
     });
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        dismiss(false);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        dismiss(true);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    dialog.querySelector('.confirm-btn').focus();
   }
 
   // Global override for window.alert()
@@ -520,8 +582,8 @@
   window.showConfirm = showCustomConfirm;
   window.appNotify = showToast; // standard alias
 
-  window.appConfirm = function(message) {
-    return new Promise((resolve) => showCustomConfirm(message, resolve));
+  window.appConfirm = function(message, options = {}) {
+    return new Promise((resolve) => showCustomConfirm(message, resolve, options));
   };
 
   window.openExternalInApp = async function(url) {

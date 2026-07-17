@@ -27,8 +27,7 @@
     <link rel="stylesheet" href="../../css/dark-mode-patch.css">
 
     <!-- Leaflet for Map Picker -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../../js/utils/leaflet-loader.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="../../js/global-anim.js"></script>
     <script src="../../js/permission-manager.js"></script>
@@ -40,13 +39,13 @@
     <button class="profile-back-btn" onclick="if(window.navigateWithTransition) window.navigateWithTransition('../account/account.html'); else window.location.href='../account/account.html';" aria-label="ย้อนกลับ" data-i18n-aria-label="profile_back">
         <span class="material-icons-outlined">arrow_back</span>
     </button>
-    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="ภาพปก" data-i18n-alt="hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนภาพปก">
+    <img class="profile-hero-img" id="heroImage" src="../../assets/images/hero.png" alt="ภาพปก" data-i18n-alt="hero_alt" onerror="this.onerror=null;this.src='../../assets/images/hero.png';" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนภาพปก" data-i18n-title="change_cover_hint">
 </section>
 
 <!-- MAIN CONTENT CARD -->
 <div class="profile-content-card">
     <!-- Avatar (with edit button overlay) -->
-    <div class="profile-avatar-box" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+    <div class="profile-avatar-box" style="cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์" data-i18n-title="change_avatar_hint">
         <img id="profileAvatar" src="../../assets/images/avatar-guest.svg" alt="รูปโปรไฟล์" data-i18n-alt="profile_avatar_alt" onerror="this.onerror=null;this.src='../../assets/images/avatar-guest.svg';">
     </div>
 
@@ -54,8 +53,8 @@
     <div class="profile-header-info">
         <h2 class="profile-name" id="profileName"></h2>
         <div class="profile-tagline-text" id="profileTagline"></div>
-        <div class="profile-status">
-            <span class="status-dot"></span> <span data-i18n="profile_online">ออนไลน์</span>
+        <div class="profile-status" id="ownProfilePresence">
+            <span class="status-dot" aria-hidden="true"></span> <span id="ownProfilePresenceText" data-i18n="checking_status">กำลังตรวจสอบ...</span>
         </div>
     </div>
 
@@ -147,88 +146,93 @@
 <!-- Edit Profile Modal -->
 <div id="editAboutModal" class="modal" hidden>
     <div class="modal-backdrop"></div>
-    <div class="modal-content premium-modal">
+    <div class="modal-content premium-modal" role="dialog" aria-modal="true" aria-labelledby="editProfileDialogTitle">
         <div class="modal-header-premium">
             <div class="edit-profile-heading">
                 <span class="edit-profile-heading-icon material-icons-outlined">manage_accounts</span>
                 <div>
-                    <h3 data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
-                    <p>ทำให้ข้อมูลร้านครบ เพื่อให้เกษตรกรติดต่อได้ง่ายขึ้น</p>
+                    <h3 id="editProfileDialogTitle" data-i18n="edit_profile_title">แก้ไขโปรไฟล์</h3>
+                    <p data-i18n="complete_shop_profile_hint">ทำให้ข้อมูลร้านครบ เพื่อให้เกษตรกรติดต่อได้ง่ายขึ้น</p>
                 </div>
             </div>
-            <button type="button" class="modal-close-btn" data-close-profile-modal aria-label="ปิดหน้าแก้ไขโปรไฟล์">
+            <button type="button" class="modal-close-btn" data-close-profile-modal aria-label="ปิดหน้าแก้ไขโปรไฟล์" data-i18n-aria-label="close_profile_editor">
                 <span class="material-icons-outlined">close</span>
             </button>
         </div>
 
         <!-- Tab Buttons inside Modal -->
-        <div class="modal-tab-bar">
-            <button type="button" class="modal-tab-btn active" data-modal-tab="general">
+        <div class="modal-tab-bar" role="tablist">
+            <button type="button" class="modal-tab-btn active" data-modal-tab="general" role="tab" aria-controls="modal-panel-general" aria-selected="true">
                 <span class="modal-step-number">1</span>
-                <span class="modal-step-copy"><strong>ข้อมูลร้าน</strong><small>ชื่อและรายละเอียด</small></span>
+                <span class="modal-step-copy"><strong data-i18n="shop_information">ข้อมูลร้าน</strong><small data-i18n="name_and_details">ชื่อและรายละเอียด</small></span>
             </button>
-            <button type="button" class="modal-tab-btn" data-modal-tab="contact">
+            <button type="button" class="modal-tab-btn" data-modal-tab="contact" role="tab" aria-controls="modal-panel-contact" aria-selected="false">
                 <span class="modal-step-number">2</span>
-                <span class="modal-step-copy"><strong>การติดต่อ</strong><small>โทรและช่องทางอื่น</small></span>
+                <span class="modal-step-copy"><strong data-i18n="contact_information">การติดต่อ</strong><small data-i18n="phone_and_other_channels">โทรและช่องทางอื่น</small></span>
             </button>
-            <button type="button" class="modal-tab-btn" data-modal-tab="services">
+            <button type="button" class="modal-tab-btn" data-modal-tab="services" role="tab" aria-controls="modal-panel-services" aria-selected="false">
                 <span class="modal-step-number">3</span>
-                <span class="modal-step-copy"><strong>ที่อยู่</strong><small>บริการและพิกัด</small></span>
+                <span class="modal-step-copy"><strong data-i18n="address">ที่อยู่</strong><small data-i18n="services_and_location">บริการและพิกัด</small></span>
             </button>
         </div>
 
+        <div class="profile-editor-progress" aria-hidden="true">
+            <span id="profileEditorProgressFill"></span>
+        </div>
+        <div class="profile-editor-step-status" id="profileEditorStepStatus" aria-live="polite">ขั้นตอน 1 จาก 3</div>
+
         <div class="modal-form-body">
             <!-- Section 1: General -->
-            <div class="modal-tab-panel active" id="modal-panel-general">
+            <div class="modal-tab-panel active" id="modal-panel-general" role="tabpanel">
                 <div class="profile-form-intro">
                     <span class="material-icons-outlined">storefront</span>
-                    <div><h4>ข้อมูลร้านของคุณ</h4><p>ข้อมูลนี้จะแสดงบนหน้าโปรไฟล์และรายการรับซื้อ</p></div>
+                    <div><h4 data-i18n="your_shop_information">ข้อมูลร้านของคุณ</h4><p data-i18n="shop_information_visibility_hint">ข้อมูลนี้จะแสดงบนหน้าโปรไฟล์และรายการรับซื้อ</p></div>
                 </div>
                 <div class="form-group-premium">
                     <label data-i18n="shop_name">
                         <span class="material-icons-outlined">store</span> ชื่อร้าน
                     </label>
-                    <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder">
-                    <small class="profile-field-help">ใช้ชื่อร้านหรือชื่อที่ลูกค้าจดจำได้ง่าย</small>
+                    <input id="nameEditor" type="text" placeholder="ชื่อโปรไฟล์" data-i18n-placeholder="tagline_placeholder" autocomplete="organization" maxlength="80" required>
+                    <small class="profile-field-help" data-i18n="shop_name_help">ใช้ชื่อร้านหรือชื่อที่ลูกค้าจดจำได้ง่าย</small>
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="tagline_label">
                         <span class="material-icons-outlined">subtitles</span> Tagline / คำอธิบายสั้น
                     </label>
-                    <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint">
+                    <input id="taglineEditor" type="text" placeholder="รับซื้อผลไม้สดถึงสวน • ให้บริการ 15 ปี" data-i18n-placeholder="tagline_hint" maxlength="120">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="about_label">
                         <span class="material-icons-outlined">info</span> รายละเอียดเกี่ยวกับร้าน
                     </label>
-                    <textarea id="aboutEditor" rows="4" placeholder="ระบุรายละเอียดเพิ่มเติมเกี่ยวกับร้านค้าของคุณ..."></textarea>
+                    <textarea id="aboutEditor" rows="4" placeholder="ระบุรายละเอียดเพิ่มเติมเกี่ยวกับร้านค้าของคุณ..." data-i18n-placeholder="about_shop_placeholder" maxlength="800"></textarea>
                 </div>
             </div>
 
             <!-- Section 2: Contact -->
-            <div class="modal-tab-panel" id="modal-panel-contact">
+            <div class="modal-tab-panel" id="modal-panel-contact" role="tabpanel">
                 <div class="profile-form-intro">
                     <span class="material-icons-outlined">contact_phone</span>
-                    <div><h4>ช่องทางติดต่อ</h4><p>เลือกข้อมูลที่สะดวกสำหรับให้เกษตรกรติดต่อ</p></div>
+                    <div><h4 data-i18n="contact_channels">ช่องทางติดต่อ</h4><p data-i18n="contact_channels_hint">เลือกข้อมูลที่สะดวกสำหรับให้เกษตรกรติดต่อ</p></div>
                 </div>
                 <div class="form-group-premium">
                     <label data-i18n="phone_label">
                         <span class="material-icons-outlined">phone</span> โทรศัพท์
                     </label>
-                    <input id="phoneEditor" type="text" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
+                    <input id="phoneEditor" type="tel" inputmode="tel" autocomplete="tel" placeholder="เบอร์โทรศัพท์" data-i18n-placeholder="phone_label">
                 </div>
 
                 <div class="form-group-premium">
                     <label data-i18n="email_label">
                         <span class="material-icons-outlined">email</span> อีเมล
                     </label>
-                    <input id="emailEditor" type="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
+                    <input id="emailEditor" type="email" inputmode="email" autocomplete="email" placeholder="อีเมล" data-i18n-placeholder="email_label">
                 </div>
 
                 <div class="form-group-premium">
-                    <label>
+                    <label data-i18n="additional_contact_channel">
                         <span class="material-icons-outlined">contact_page</span> ช่องทางติดต่อเพิ่มเติม
                     </label>
                     <div class="contact-channel-editor">
@@ -246,10 +250,10 @@
             </div>
 
             <!-- Section 3: Services & Location -->
-            <div class="modal-tab-panel" id="modal-panel-services">
+            <div class="modal-tab-panel" id="modal-panel-services" role="tabpanel">
                 <div class="profile-form-intro">
                     <span class="material-icons-outlined">location_on</span>
-                    <div><h4>บริการและสถานที่</h4><p>ที่อยู่และพิกัดจะช่วยคำนวณระยะทางในรายการแนะนำ</p></div>
+                    <div><h4 data-i18n="services_and_location_title">บริการและสถานที่</h4><p data-i18n="location_distance_hint">ที่อยู่และพิกัดจะช่วยคำนวณระยะทางในรายการแนะนำ</p></div>
                 </div>
                 <div class="form-group-premium">
                     <label data-i18n="address_label">
@@ -326,12 +330,45 @@
 
         <div class="modal-actions-premium">
             <button id="cancelAboutBtn" class="modal-btn-cancel" type="button" data-i18n="cancel_btn">ยกเลิก</button>
-            <button id="saveAboutBtn" class="modal-btn-save" type="button">
+            <div class="profile-editor-navigation">
+                <button id="prevProfileStepBtn" class="modal-btn-back" type="button" hidden>
+                    <span class="material-icons-outlined">arrow_back</span>
+                    <span data-i18n="previous_step">ก่อนหน้า</span>
+                </button>
+                <button id="nextProfileStepBtn" class="modal-btn-next" type="button">
+                    <span data-i18n="next_step">ถัดไป</span>
+                    <span class="material-icons-outlined">arrow_forward</span>
+                </button>
+            </div>
+            <button id="saveAboutBtn" class="modal-btn-save" type="button" hidden>
                 <span class="material-icons-outlined">check_circle</span>
                 <span data-i18n="save_btn">บันทึกโปรไฟล์</span>
             </button>
         </div>
     </div>
+</div>
+
+<div class="profile-limit-overlay" id="profileOfferLimitModal" hidden>
+    <section class="profile-limit-dialog" role="dialog" aria-modal="true" aria-labelledby="profileOfferLimitTitle">
+        <button class="profile-limit-close" id="profileOfferLimitClose" type="button" aria-label="ปิด" data-i18n-aria-label="close_label">
+            <span class="material-icons-outlined">close</span>
+        </button>
+        <div class="profile-limit-visual" aria-hidden="true">
+            <div class="profile-limit-ring"><span class="material-icons-outlined">workspace_premium</span></div>
+            <i class="profile-limit-spark one"></i><i class="profile-limit-spark two"></i>
+        </div>
+        <div class="profile-limit-plan" id="profileOfferLimitPlan">FREE</div>
+        <h2 id="profileOfferLimitTitle" data-i18n="offer_limit_title">รายการรับซื้อครบตามแพ็กเกจ</h2>
+        <p data-i18n="offer_limit_description">คุณสามารถปิดรายการเดิมเพื่อสร้างรายการใหม่ หรืออัปเกรดเพื่อเพิ่มจำนวนรายการรับซื้อ</p>
+        <div class="profile-limit-meter">
+            <strong id="profileOfferLimitUsage">3 / 3</strong>
+            <div><span id="profileOfferLimitFill"></span></div>
+        </div>
+        <div class="profile-limit-actions">
+            <button class="profile-limit-upgrade" id="profileOfferLimitUpgrade" type="button"><span class="material-icons-outlined">diamond</span><span data-i18n="view_pro_package">ดูแพ็กเกจ PRO</span></button>
+            <button class="profile-limit-manage" id="profileOfferLimitManage" type="button" data-i18n="manage_buy_offers">จัดการรายการรับซื้อ</button>
+        </div>
+    </section>
 </div>
 
 <style>
@@ -495,6 +532,7 @@
 
 .form-group-premium input[type="text"],
 .form-group-premium input[type="email"],
+.form-group-premium input[type="tel"],
 .form-group-premium input[type="url"],
 .form-group-premium textarea {
   width: 100% !important;
@@ -693,6 +731,7 @@
 
 [data-theme="dark"] .form-group-premium input[type="text"],
 [data-theme="dark"] .form-group-premium input[type="email"],
+[data-theme="dark"] .form-group-premium input[type="tel"],
 [data-theme="dark"] .form-group-premium input[type="url"],
 [data-theme="dark"] .form-group-premium textarea {
   background: #0f172a !important;
@@ -852,6 +891,8 @@ function getContactChannel(value) {
   background: var(--bg-card) !important;
   box-shadow: 0 -18px 55px rgba(4, 40, 20, .22) !important;
   overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 #editAboutModal .premium-modal::before {
@@ -957,7 +998,47 @@ function getContactChannel(value) {
   padding: 14px 16px 24px !important;
   background: color-mix(in srgb, var(--bg-page) 65%, var(--bg-card)) !important;
   overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
+
+.profile-editor-progress {
+  height: 4px;
+  margin: 0 16px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--border-light));
+}
+
+.profile-editor-progress > span {
+  display: block;
+  width: 33.333%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), #37b66b);
+  transition: width .25s ease;
+}
+
+.profile-editor-step-status {
+  padding: 7px 18px 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.profile-form-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border-light));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-card));
+}
+
 
 .profile-form-intro {
   display: flex;
@@ -990,6 +1071,7 @@ function getContactChannel(value) {
 
 #editAboutModal .form-group-premium input[type="text"],
 #editAboutModal .form-group-premium input[type="email"],
+#editAboutModal .form-group-premium input[type="tel"],
 #editAboutModal .form-group-premium input[type="url"],
 #editAboutModal .form-group-premium textarea,
 #editAboutModal .contact-channel-editor select {
@@ -1013,28 +1095,64 @@ function getContactChannel(value) {
 }
 
 #editAboutModal .modal-actions-premium {
-  position: sticky !important;
-  bottom: 0 !important;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
   background: color-mix(in srgb, var(--bg-card) 94%, transparent) !important;
   backdrop-filter: blur(12px) !important;
   box-shadow: 0 -8px 24px rgba(15, 42, 26, .07) !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  gap: 10px !important;
 }
 
 #editAboutModal .modal-btn-cancel,
-#editAboutModal .modal-btn-save {
+#editAboutModal .modal-btn-save,
+#editAboutModal .modal-btn-back,
+#editAboutModal .modal-btn-next {
   min-height: 50px !important;
   border-radius: 15px !important;
 }
 
+#editAboutModal [hidden] { display: none !important; }
+
+.profile-editor-navigation {
+  display: flex;
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#editAboutModal .modal-btn-back,
+#editAboutModal .modal-btn-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 800;
+}
+
+#editAboutModal .modal-btn-back {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+#editAboutModal .modal-btn-next {
+  min-width: 132px;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
 #editAboutModal .modal-btn-save {
-  display: flex !important;
+  display: flex;
   align-items: center !important;
   justify-content: center !important;
   gap: 7px !important;
   background: var(--primary) !important;
+  min-width: 150px;
 }
-
 #editAboutModal .modal-btn-save .material-icons-outlined { font-size: 19px; }
 
 body.profile-editor-open { overflow: hidden !important; }
@@ -1045,6 +1163,57 @@ body.profile-editor-open { overflow: hidden !important; }
   .modal-step-copy { text-align: center; }
   .edit-profile-heading p { max-width: 245px; }
   #editAboutModal .services-editor-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  #editAboutModal .modal-actions-premium {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  #editAboutModal .modal-actions-premium > .modal-btn-cancel {
+    flex: 0 1 104px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 50px !important;
+    overflow: visible !important;
+    color: var(--text-main) !important;
+    white-space: nowrap !important;
+  }
+  #editAboutModal .modal-btn-cancel::before { content: none !important; }
+  #editAboutModal .profile-editor-navigation {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-self: stretch !important;
+    width: auto !important;
+    min-width: 0 !important;
+    justify-content: stretch !important;
+  }
+  #editAboutModal .profile-editor-navigation .modal-btn-back,
+  #editAboutModal .profile-editor-navigation .modal-btn-next {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 50px !important;
+    padding: 0 8px !important;
+  }
+  #editAboutModal .modal-actions-premium > .modal-btn-save {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 50px !important;
+    padding: 0 8px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  #editAboutModal { place-items: stretch !important; }
+  #editAboutModal .premium-modal {
+    width: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  #editAboutModal .premium-modal::before { display: none; }
+  #editAboutModal .modal-header-premium { padding-top: calc(12px + env(safe-area-inset-top)) !important; }
 }
 
 @media (min-width: 640px) {
@@ -1054,6 +1223,7 @@ body.profile-editor-open { overflow: hidden !important; }
 }
 
 </style>
+<link rel="stylesheet" href="../../css/buyer/profile-editor-simple.css">
 <script>
 
 // Called by myprofile.js after profile data is loaded
@@ -1085,7 +1255,7 @@ window.onProfileDataReady = function(profileData) {
                     <div class="contact-item-row">
                         <span class="material-icons-outlined">${channel.icon}</span>
                         <div class="contact-channel-value"><small>${channel.label}</small>${valueHtml}</div>
-                        <button type="button" class="copy-contact-btn" data-copy-contact="${escapeContactHtml(channel.raw)}" aria-label="คัดลอก ${channel.label}">
+                        <button type="button" class="copy-contact-btn" data-copy-contact="${escapeContactHtml(channel.raw)}" aria-label="${escapeContactHtml(window.i18nT ? window.i18nT('copy_contact_value', 'คัดลอก {label}', { label: channel.label }) : `คัดลอก ${channel.label}`)}">
                             <span class="material-icons-outlined">content_copy</span>
                         </button>
                     </div>`);
@@ -1097,9 +1267,9 @@ window.onProfileDataReady = function(profileData) {
                 const value = button.dataset.copyContact || '';
                 try {
                     await navigator.clipboard.writeText(value);
-                    if (window.showToast) window.showToast('คัดลอกข้อมูลติดต่อแล้ว', 'success');
+                    if (window.showToast) window.showToast(window.i18nT ? window.i18nT('contact_copied', 'คัดลอกข้อมูลติดต่อแล้ว') : 'คัดลอกข้อมูลติดต่อแล้ว', 'success');
                 } catch (_) {
-                    window.prompt('คัดลอกข้อมูลติดต่อ', value);
+                    window.prompt(window.i18nT ? window.i18nT('copy_contact', 'คัดลอกข้อมูลติดต่อ') : 'คัดลอกข้อมูลติดต่อ', value);
                 }
             });
         });

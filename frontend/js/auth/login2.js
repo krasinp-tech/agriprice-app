@@ -3,6 +3,7 @@
 */
 
 (function () {
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
   const form = document.getElementById("loginForm");
   const idEl = document.getElementById("identifier");
   const pwEl = document.getElementById("password");
@@ -19,7 +20,7 @@
 
   function showError(msg) {
     if (!errBox) return;
-    errBox.textContent = msg || "เกิดข้อผิดพลาด";
+    errBox.textContent = msg || t("error", "เกิดข้อผิดพลาด");
     errBox.classList.add("is-show");
   }
   function clearError() {
@@ -48,11 +49,11 @@
     let ok = true;
 
     if (!identifier) {
-      if (idHelp) idHelp.textContent = "กรุณากรอกอีเมลหรือเบอร์โทรศัพท์";
+      if (idHelp) idHelp.textContent = t("identifier_required", "กรุณากรอกอีเมลหรือเบอร์โทรศัพท์");
       ok = false;
     }
     if (!password) {
-      if (pwHelp) pwHelp.textContent = "กรุณากรอกรหัสผ่าน";
+      if (pwHelp) pwHelp.textContent = t("password_required", "กรุณากรอกรหัสผ่าน");
       ok = false;
     }
 
@@ -88,7 +89,7 @@
     if (!ok) return;
 
     if (!window.api || !window.api.login) {
-      showError("ระบบ API ยังไม่พร้อมใช้งาน");
+      showError(t("api_not_ready", "ระบบ API ยังไม่พร้อมใช้งาน"));
       return;
     }
 
@@ -100,7 +101,7 @@
       const result = await window.api.login(identifier, password);
 
       if (!result.token) {
-        throw new Error(result.message || "ไม่ได้รับ Token จากเซิร์ฟเวอร์");
+        throw new Error(window.i18nApiMessage?.(result.message, 'token_not_received') || t("token_not_received", "ไม่ได้รับ Token จากเซิร์ฟเวอร์"));
       }
 
       // 2. Persist using unified logic (handled inside api.login, but we ensure state)
@@ -116,7 +117,7 @@
         }
       } catch (_) {}
 
-      if (window.showToast) window.showToast("เข้าสู่ระบบสำเร็จ", "success");
+      if (window.showToast) window.showToast(t("login_success", "เข้าสู่ระบบสำเร็จ"), "success");
 
       // 4. Unified Redirect
       setTimeout(() => {
@@ -129,9 +130,9 @@
 
     } catch (err) {
       if (window.appNotify) {
-        window.appNotify(err?.message || "เข้าสู่ระบบไม่สำเร็จ", "error");
+        window.appNotify(err?.message || t("login_failed", "เข้าสู่ระบบไม่สำเร็จ"), "error");
       } else {
-        showError(err?.message || "เข้าสู่ระบบไม่สำเร็จ");
+        showError(err?.message || t("login_failed", "เข้าสู่ระบบไม่สำเร็จ"));
       }
     } finally {
       setLoading(false);

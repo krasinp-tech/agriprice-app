@@ -109,12 +109,25 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/device-sessions', require('./middlewares/auth'), require('./routes/deviceSessions').router);
 
 // --- 5. Serve Frontend Static Files ---
-// [ADDED] ให้ Express เสิร์ฟไฟล์จากโฟลเดอร์ frontend โดยตรง
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Keep HTML fresh while allowing repeat visits to reuse heavier static assets.
+const FRONTEND_DIR = path.join(__dirname, '../frontend');
+app.use(express.static(FRONTEND_DIR, {
+  etag: true,
+  setHeaders(res, filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    if (ext === '.html') {
+      res.setHeader('Cache-Control', 'no-cache');
+    } else if (['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.woff', '.woff2'].includes(ext)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+    } else if (['.js', '.css', '.json'].includes(ext)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    }
+  }
+}));
 
 // Handle root access -> index.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
 });
 
 // --- 5. Public / Help Endpoints ---
@@ -140,6 +153,11 @@ app.listen(PORT, '0.0.0.0', async () => {
 
   // สั่งรันระบบ Background Worker (ทำงานเบื้องหลังอัตโนมัติ)
   // 1. อัปเดตสถานะคิวจองที่เลยเวลาให้สำเร็จอัตโนมัติ
+  if (process.env.DISABLE_BACKGROUND_JOBS === 'true') {
+    logger.info('Background automation disabled for this process');
+    return;
+  }
+
   autoCompleteDueBookings();
   setInterval(autoCompleteDueBookings, AUTO_SUCCESS_SCAN_MS);
 

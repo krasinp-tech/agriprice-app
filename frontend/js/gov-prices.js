@@ -93,7 +93,7 @@
       const json = await res.json();
 
       if (!json.success) {
-        throw new Error(json.message || (window.i18nT ? window.i18nT('no_result', 'ไม่พบข้อมูล') : 'ไม่พบข้อมูล'));
+        throw new Error(window.i18nApiMessage?.(json.message, 'no_result') || (window.i18nT ? window.i18nT('no_result', 'ไม่พบข้อมูล') : 'ไม่พบข้อมูล'));
       }
 
       document.getElementById('govPriceLoader').style.display = 'none';

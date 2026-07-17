@@ -2,10 +2,40 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../utils/supabase');
 const authMiddleware = require('../middlewares/auth');
-const upload = require('../middlewares/upload');
 const { saveFile } = require('../services/fileService');
 const { signToken } = require('../utils/helpers');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+
+const PAYMENT_MAX_FILE_SIZE = 4 * 1024 * 1024;
+const PAYMENT_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
+// Keep payment slips in memory until validation finishes. This avoids leaving
+// rejected temporary files on disk when UPLOAD_MODE=local.
+const paymentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: PAYMENT_MAX_FILE_SIZE },
+  fileFilter: (_req, file, callback) => {
+    if (PAYMENT_IMAGE_TYPES.has(file.mimetype)) return callback(null, true);
+    return callback(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+  },
+});
+
+function handlePaymentUploadError(error, _req, res, next) {
+  if (!(error instanceof multer.MulterError)) return next(error);
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, message: 'รูปสลิปต้องมีขนาดไม่เกิน 4 MB' });
+  }
+  if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ success: false, message: 'รองรับสลิปเฉพาะไฟล์ JPEG, PNG, WebP หรือ GIF' });
+  }
+  return res.status(400).json({ success: false, message: error.message });
+}
 
 const paymentLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -15,7 +45,18 @@ const paymentLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const planAmount = () => Number(process.env.PRO_PLAN_PRICE || 499);
+const configuredPlanAmount = Number(process.env.PRO_PLAN_PRICE || 499);
+if (!Number.isFinite(configuredPlanAmount) || configuredPlanAmount <= 0) {
+  throw new Error('PRO_PLAN_PRICE must be a positive number');
+}
+const PLAN_AMOUNT = Number(configuredPlanAmount.toFixed(2));
+const planAmount = () => PLAN_AMOUNT;
+const requireBuyer = (req, res, next) => {
+  if (req.user?.role !== 'buyer') {
+    return res.status(403).json({ success: false, message: 'แพ็กเกจ PRO นี้สำหรับบัญชีผู้รับซื้อเท่านั้น' });
+  }
+  next();
+};
 
 function easySlipConfig() {
   const apiKey = String(process.env.EASYSLIP_API_KEY || '').trim();
@@ -46,7 +87,7 @@ async function easySlipRequest(path, body) {
   return result;
 }
 
-async function issueProToken(userId) {
+async function issueProToken(userId, sessionId) {
   const startedAt = new Date();
   const expiresAt = new Date(startedAt);
   expiresAt.setMonth(expiresAt.getMonth() + 1);
@@ -58,13 +99,17 @@ async function issueProToken(userId) {
     .single();
   if (error || !data) throw new Error(error?.message || 'ไม่พบบัญชีผู้ใช้');
   return {
-    token: signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'pro' }),
+    token: signToken({ id: data.profile_id, phone: data.phone, role: data.role, tier: 'pro', session_id: sessionId }),
     startedAt: data.pro_started_at,
     expiresAt: data.pro_expires_at,
   };
 }
 
-router.get('/promptpay/qr', authMiddleware, paymentLimiter, async (req, res) => {
+router.get('/plan', (_req, res) => {
+  res.json({ success: true, data: { plan: 'pro', amount: planAmount(), duration_months: 1, auto_renew: false } });
+});
+
+router.get('/promptpay/qr', authMiddleware, requireBuyer, paymentLimiter, async (req, res) => {
   try {
     const { msisdn } = easySlipConfig();
     const amount = planAmount();
@@ -75,7 +120,7 @@ router.get('/promptpay/qr', authMiddleware, paymentLimiter, async (req, res) => 
   }
 });
 
-router.post('/promptpay/verify', authMiddleware, paymentLimiter, upload.single('slip'), upload.handleMulterError, async (req, res) => {
+router.post('/promptpay/verify', authMiddleware, requireBuyer, paymentLimiter, paymentUpload.single('slip'), handlePaymentUploadError, async (req, res) => {
   const userId = req.user.id;
   const amount = planAmount();
   if (!req.file) return res.status(400).json({ success: false, message: 'กรุณาแนบรูปสลิป' });
@@ -130,7 +175,7 @@ router.post('/promptpay/verify', authMiddleware, paymentLimiter, upload.single('
     }
 
     if (status === 'approved') {
-      const membership = await issueProToken(userId);
+      const membership = await issueProToken(userId, req.user.sessionId);
       return res.json({ success: true, message: 'ตรวจสอบสลิปสำเร็จ อัปเกรดเป็น PRO แล้ว', data: { ...submission, token: membership.token, tier: 'pro', pro_started_at: membership.startedAt, pro_expires_at: membership.expiresAt } });
     }
 
@@ -145,7 +190,7 @@ router.post('/promptpay/verify', authMiddleware, paymentLimiter, upload.single('
   }
 });
 
-router.get('/promptpay/status', authMiddleware, async (req, res) => {
+router.get('/promptpay/status', authMiddleware, requireBuyer, async (req, res) => {
   const { data, error } = await supabaseAdmin
     .from('payment_submissions')
     .select('payment_id,status,amount,review_note,created_at,verified_at')
@@ -155,40 +200,6 @@ router.get('/promptpay/status', authMiddleware, async (req, res) => {
     .maybeSingle();
   if (error) return res.status(500).json({ success: false, message: error.message });
   res.json({ success: true, data });
-});
-
-router.post('/cancel', authMiddleware, async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('profiles')
-      .select('profile_id, phone, role, tier, pro_expires_at')
-      .eq('profile_id', req.user.id)
-      .single();
-    if (error || !data) throw new Error(error?.message || 'User not found');
-
-    const expiresAt = data.pro_expires_at ? new Date(data.pro_expires_at) : null;
-    const isActive = String(data.tier || '').toLowerCase() === 'pro'
-      && (!expiresAt || expiresAt > new Date());
-    const tier = isActive ? 'pro' : 'free';
-
-    if (!isActive && String(data.tier || '').toLowerCase() !== 'free') {
-      await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('profile_id', req.user.id);
-    }
-
-    const token = signToken({
-      id: data.profile_id,
-      phone: data.phone,
-      role: data.role,
-      tier,
-      session_id: req.user.sessionId,
-    });
-    res.json({
-      success: true,
-      message: isActive ? 'ยกเลิกการต่ออายุแล้ว คุณยังใช้ PRO ได้จนถึงวันหมดอายุ' : 'แพ็กเกจ PRO หมดอายุแล้ว',
-      data: { tier, token, pro_expires_at: data.pro_expires_at },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
 });
 
 module.exports = router;

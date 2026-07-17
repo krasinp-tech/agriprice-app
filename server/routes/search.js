@@ -16,6 +16,7 @@ async function searchProfiles(term, limit) {
     const { data, error } = await supabaseAdmin
       .from('profiles')
       .select(select)
+      .eq('account_status', 'active')
       .limit(limit);
     if (error) throw error;
     return data || [];
@@ -25,11 +26,13 @@ async function searchProfiles(term, limit) {
     supabaseAdmin
       .from('profiles')
       .select(select)
+      .eq('account_status', 'active')
       .ilike('first_name', `%${term}%`)
       .limit(limit),
     supabaseAdmin
       .from('profiles')
       .select(select)
+      .eq('account_status', 'active')
       .ilike('last_name', `%${term}%`)
       .limit(limit),
   ]);
@@ -88,11 +91,13 @@ async function searchOffers(term, limit) {
     supabaseAdmin
       .from('profiles')
       .select('profile_id')
+      .eq('account_status', 'active')
       .ilike('first_name', pattern)
       .limit(lookupLimit),
     supabaseAdmin
       .from('profiles')
       .select('profile_id')
+      .eq('account_status', 'active')
       .ilike('last_name', pattern)
       .limit(lookupLimit),
   ]);

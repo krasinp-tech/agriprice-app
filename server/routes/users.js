@@ -19,12 +19,14 @@ router.get('/search', authMiddleware, async (req, res) => {
       supabaseAdmin
         .from('profiles')
         .select(select)
+        .eq('account_status', 'active')
         .ilike('first_name', `%${term}%`)
         .neq('profile_id', req.user.id)
         .limit(safeLimit),
       supabaseAdmin
         .from('profiles')
         .select(select)
+        .eq('account_status', 'active')
         .ilike('last_name', `%${term}%`)
         .neq('profile_id', req.user.id)
         .limit(safeLimit),

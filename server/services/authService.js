@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { supabase, supabaseAdmin } = require('../utils/supabase');
 const { toE164, signToken, signTempToken, getDefaultAvatarByRole } = require('../utils/helpers');
+const { collectAccountFileUrls, deleteFilesByUrls } = require('./fileService');
 
 const DEV_OTP_MODE = process.env.OTP_MOCK === 'true';
 
@@ -21,17 +22,22 @@ class AuthService {
 
   async checkPhoneAvailability(phone) {
     const cleanPhone = toE164(phone);
-    const profile = await this.getRegisteredProfileByPhone(cleanPhone);
+    const [profile, authUser] = await Promise.all([
+      this.getRegisteredProfileByPhone(cleanPhone),
+      this.findAuthUserByPhone(cleanPhone),
+    ]);
+    const isLegacyDeletedAccount = authUser?.user_metadata?.account_deleted === true;
+    const activeProfile = isLegacyDeletedAccount ? null : profile;
     return {
       phone: cleanPhone,
-      available: !profile,
-      exists: !!profile,
-      user: profile ? {
-        id: profile.profile_id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        role: profile.role,
-        tier: profile.tier || 'free'
+      available: !activeProfile,
+      exists: !!activeProfile,
+      user: activeProfile ? {
+        id: activeProfile.profile_id,
+        first_name: activeProfile.first_name,
+        last_name: activeProfile.last_name,
+        role: activeProfile.role,
+        tier: activeProfile.tier || 'free'
       } : null
     };
   }
@@ -79,7 +85,8 @@ class AuthService {
     ]);
 
     const existing = profileResult?.data || null;
-    const hasRegisteredProfile = !!(existing && existing.password_hash);
+    const isLegacyDeletedAccount = authUser?.user_metadata?.account_deleted === true;
+    const hasRegisteredProfile = !!(existing && existing.password_hash && !isLegacyDeletedAccount);
     const isNewUser = !hasRegisteredProfile;
     const temp_token = signTempToken(cleanPhone);
 
@@ -168,16 +175,20 @@ class AuthService {
     }
     verifiedPhone = firebasePhone;
 
-    const profileResult = await supabaseAdmin
-      .from('profiles')
-      .select('profile_id, first_name, last_name, role, tier, password_hash')
-      .eq('phone', verifiedPhone)
-      .maybeSingle();
+    const [profileResult, authUser] = await Promise.all([
+      supabaseAdmin
+        .from('profiles')
+        .select('profile_id, first_name, last_name, role, tier, password_hash')
+        .eq('phone', verifiedPhone)
+        .maybeSingle(),
+      this.findAuthUserByPhone(verifiedPhone),
+    ]);
 
     if (profileResult.error) throw profileResult.error;
 
     const existing = profileResult?.data || null;
-    const hasRegisteredProfile = !!(existing && existing.password_hash);
+    const isLegacyDeletedAccount = authUser?.user_metadata?.account_deleted === true;
+    const hasRegisteredProfile = !!(existing && existing.password_hash && !isLegacyDeletedAccount);
     const isNewUser = !hasRegisteredProfile;
     const temp_token = signTempToken(verifiedPhone);
 
@@ -203,37 +214,97 @@ class AuthService {
       throw new Error('Token ยืนยัน OTP หมดอายุหรือไมถูกต้อง');
     }
 
-    const registeredProfile = await this.getRegisteredProfileByPhone(verifiedPhone);
-    if (registeredProfile) {
+    const [registeredProfile, authUserForPhone] = await Promise.all([
+      this.getRegisteredProfileByPhone(verifiedPhone),
+      this.findAuthUserByPhone(verifiedPhone),
+    ]);
+    const isLegacyDeletedAccount = authUserForPhone?.user_metadata?.account_deleted === true;
+
+    if (registeredProfile && !isLegacyDeletedAccount) {
       const err = new Error('เบอร์โทรนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทนการสมัครใหม่');
       err.statusCode = 409;
       throw err;
     }
 
+    // Old delete flow only banned the Auth user. Even if a later registration
+    // recreated password_hash, account_deleted remains the reliable tombstone.
+    if (authUserForPhone && isLegacyDeletedAccount) {
+      const { data: legacyProfile, error: legacyProfileError } = await supabaseAdmin
+        .from('profiles')
+        .select('profile_id')
+        .eq('profile_id', authUserForPhone.id)
+        .maybeSingle();
+      if (legacyProfileError) throw legacyProfileError;
+
+      let legacyFileUrls = [];
+      if (legacyProfile) {
+        legacyFileUrls = await collectAccountFileUrls(authUserForPhone.id);
+        const { error: cleanupError } = await supabaseAdmin
+          .rpc('delete_user_account_data', { p_user_id: authUserForPhone.id });
+        if (cleanupError) throw cleanupError;
+      }
+
+      const { error: deleteLegacyAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserForPhone.id, false);
+      if (deleteLegacyAuthError) throw deleteLegacyAuthError;
+      try {
+        await deleteFilesByUrls(legacyFileUrls);
+      } catch (fileError) {
+        console.error('[AuthService] Legacy account rows deleted but file cleanup failed:', fileError.message);
+      }
+    }
+
     const password_hash = await bcrypt.hash(password, 10);
     const fakeEmail = `${verifiedPhone.replace('+', '')}@agriprice.app`;
-
-    const { data: authUser, error: supaErr } = await supabaseAdmin.auth.admin.createUser({
+    const authPayload = {
       email: fakeEmail,
       email_confirm: true,
       phone: verifiedPhone,
       phone_confirm: true,
       password,
-    });
+    };
 
-    let userId = null;
+    let { data: authUser, error: supaErr } = await supabaseAdmin.auth.admin.createUser(authPayload);
     if (supaErr) {
       const msg = supaErr.message.toLowerCase();
-      if (msg.includes('already exists') || msg.includes('already been registered')) {
-        const u = await this.findAuthUserByPhone(verifiedPhone);
-        if (!u) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
-        userId = u.id;
-      } else {
+      if (!msg.includes('already exists') && !msg.includes('already been registered')) {
         throw new Error(supaErr.message);
       }
-    } else {
-      userId = authUser.user.id;
+
+      // OTP has proved ownership of the phone and no complete profile exists.
+      // Purge a legacy/partial account instead of reusing its UUID and data.
+      const existingAuthUser = await this.findAuthUserByPhone(verifiedPhone);
+      if (!existingAuthUser) throw new Error('ผู้ใช้นี้มีอยู่ในระบบแล้ว แต่ไม่สามารถดึงข้อมูลได้');
+
+      const { data: leftoverProfile, error: leftoverProfileError } = await supabaseAdmin
+        .from('profiles')
+        .select('profile_id')
+        .eq('profile_id', existingAuthUser.id)
+        .maybeSingle();
+      if (leftoverProfileError) throw leftoverProfileError;
+
+      let leftoverFileUrls = [];
+      if (leftoverProfile) {
+        leftoverFileUrls = await collectAccountFileUrls(existingAuthUser.id);
+        const { error: cleanupError } = await supabaseAdmin
+          .rpc('delete_user_account_data', { p_user_id: existingAuthUser.id });
+        if (cleanupError) throw cleanupError;
+      }
+
+      const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id, false);
+      if (deleteAuthError) throw deleteAuthError;
+      try {
+        await deleteFilesByUrls(leftoverFileUrls);
+      } catch (fileError) {
+        console.error('[AuthService] Partial account rows deleted but file cleanup failed:', fileError.message);
+      }
+
+      const retry = await supabaseAdmin.auth.admin.createUser(authPayload);
+      if (retry.error) throw new Error(retry.error.message);
+      authUser = retry.data;
+      supaErr = null;
     }
+
+    const userId = authUser.user.id;
 
     const defaultAvatar = getDefaultAvatarByRole(role);
 
@@ -254,9 +325,7 @@ class AuthService {
       }, { onConflict: 'profile_id' });
 
     if (upsertErr) {
-      // Don't delete auth user if they already existed (e.g. partial registration)
-      // but if we just created them, we might want to cleanup.
-      // For simplicity, we just throw.
+      await supabaseAdmin.auth.admin.deleteUser(userId, false).catch(() => {});
       throw new Error(upsertErr.message);
     }
 

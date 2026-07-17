@@ -151,13 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let userProfile = { name: '', phone: '', address: '' };
 
     const vehicleTypes = {
-        "pickup-4": { name: "รถกระบะทั่วไป (4 ล้อ)", weight: "9.5" },
-        "pickup-cage-4": { name: "รถพ่วง/เทรลเลอร์", weight: "9.5" },
-        "truck-6": { name: "รถ 6 ล้อ", weight: "15" },
-        "truck-10": { name: "รถ 10 ล้อ", weight: "25" },
-        "trailer": { name: "รถพ่วง/เทรลเลอร์ (6 เพลา 22 ล้อ)", weight: "50.5" },
-        "motorcycle": { name: "มอเตอร์ไซค์พ่วงข้าง", weight: "0.5" },
-        "other": { name: "อื่นๆ", weight: "" }
+        "pickup-4": { name: t('pickup_4', "รถกระบะทั่วไป (4 ล้อ)"), weight: "9.5" },
+        "pickup-cage-4": { name: t('pickup_cage_4', "รถกระบะคอก/รั้ว"), weight: "9.5" },
+        "truck-6": { name: t('truck_6', "รถ 6 ล้อ"), weight: "15" },
+        "truck-10": { name: t('truck_10', "รถ 10 ล้อ"), weight: "25" },
+        "trailer": { name: t('trailer_large', "รถพ่วง/เทรลเลอร์ (6 เพลา 22 ล้อ)"), weight: "50.5" },
+        "motorcycle": { name: t('motorcycle_sidecar', "มอเตอร์ไซค์พ่วงข้าง"), weight: "0.5" },
+        "other": { name: t('other_vehicle', "อื่นๆ"), weight: "" }
     };
 
     // ================================

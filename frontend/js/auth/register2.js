@@ -5,6 +5,7 @@
 */
 
 (function () {
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
   const KEY_PROFILE = "reg_profile";
   const KEY_ROLE = "reg_role"; // มาจาก register1
   const NEXT_ROUTE = "./register3.html";
@@ -30,7 +31,7 @@
 
   function showError(msg){
     if (!errBox) return;
-    errBox.textContent = msg || "เกิดข้อผิดพลาด";
+    errBox.textContent = msg || t("error", "เกิดข้อผิดพลาด");
     errBox.classList.add("is-show");
   }
   function clearError(){
@@ -78,22 +79,22 @@
     let ok = true;
 
     if (!fn || fn.length < 2){
-      firstNameHelp.textContent = "กรุณากรอกชื่อให้ครบถ้วน";
+      firstNameHelp.textContent = t("first_name_required", "กรุณากรอกชื่อให้ครบถ้วน");
       ok = false;
     }
     if (!ln || ln.length < 2){
-      lastNameHelp.textContent = "กรุณากรอกนามสกุลให้ครบถ้วน";
+      lastNameHelp.textContent = t("last_name_required", "กรุณากรอกนามสกุลให้ครบถ้วน");
       ok = false;
     }
     if (em && !isValidEmail(em)){
-      emailHelp.textContent = "รูปแบบอีเมลไม่ถูกต้อง";
+      emailHelp.textContent = t("invalid_email_format", "รูปแบบอีเมลไม่ถูกต้อง");
       ok = false;
     }
     if (!ph){
-      phoneHelp.textContent = "กรุณากรอกเบอร์โทร";
+      phoneHelp.textContent = t("phone_required", "กรุณากรอกเบอร์โทร");
       ok = false;
     } else if (!isValidThaiPhone(ph)){
-      phoneHelp.textContent = "กรุณากรอกเบอร์โทร 10 หลัก (ขึ้นต้นด้วย 0)";
+      phoneHelp.textContent = t("thai_phone_format", "กรุณากรอกเบอร์โทร 10 หลัก (ขึ้นต้นด้วย 0)");
       ok = false;
     }
 
@@ -117,11 +118,17 @@
   function setupVideo(){
     if (!topVideo) return;
     topVideo.muted = true;
-    topVideo.play().catch(() => {
+    topVideo.playsInline = true;
+    const resumeVideo = () => topVideo.play().catch(() => {
       if (fallback) fallback.classList.add("is-show");
     });
+    resumeVideo();
+    topVideo.addEventListener("canplay", resumeVideo, { once: true });
     topVideo.addEventListener("error", () => {
       if (fallback) fallback.classList.add("is-show");
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && topVideo.paused) resumeVideo();
     });
   }
 
@@ -129,18 +136,18 @@
     e.preventDefault();
     const v = validate();
     if (!v.ok){
-      showError("กรุณาตรวจสอบข้อมูลที่กรอก");
+      showError(t("check_form_information", "กรุณาตรวจสอบข้อมูลที่กรอก"));
       return;
     }
 
     try {
-      setHint("กำลังตรวจสอบเบอร์โทร...");
+      setHint(t("checking_phone", "กำลังตรวจสอบเบอร์โทร..."));
       const phoneCheck = await window.api.checkPhone(v.ph);
       const exists = !!(phoneCheck?.data?.exists || phoneCheck?.exists);
       if (exists) {
-        phoneHelp.textContent = "เบอร์นี้มีบัญชีอยู่แล้ว";
-        showError("เบอร์โทรนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทนการสมัครใหม่");
-        setHint("กำลังพาไปหน้าเข้าสู่ระบบ...");
+        phoneHelp.textContent = t("phone_already_registered", "เบอร์นี้มีบัญชีอยู่แล้ว");
+        showError(t("phone_login_instead", "เบอร์โทรนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบแทนการสมัครใหม่"));
+        setHint(t("redirecting_to_login", "กำลังพาไปหน้าเข้าสู่ระบบ..."));
         goLoginSoon();
         return;
       }
@@ -150,7 +157,7 @@
     }
 
     // [NEW] Request location before proceeding
-    setHint("กำลังตรวจสอบตำแหน่ง...");
+    setHint(t("checking_location", "กำลังตรวจสอบตำแหน่ง..."));
     let userLoc = null;
     if (window.LocationHelper && typeof window.LocationHelper.getUserLocation === 'function') {
       try {

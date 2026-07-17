@@ -37,13 +37,23 @@ function parseSearchDate(value) {
 async function getTierUsage(userId) {
   const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
-    .select('tier')
+    .select('tier, pro_expires_at')
     .eq('profile_id', userId)
     .single();
 
   if (profileError) throw new Error('Profile not found');
 
-  const tier = (profile?.tier || 'free').toLowerCase();
+  let tier = (profile?.tier || 'free').toLowerCase();
+  const proExpired = tier === 'pro'
+    && profile?.pro_expires_at
+    && new Date(profile.pro_expires_at) <= new Date();
+  if (proExpired) {
+    tier = 'free';
+    await supabaseAdmin
+      .from('profiles')
+      .update({ tier: 'free' })
+      .eq('profile_id', userId);
+  }
   const limit = tier === 'pro' ? 10 : 3;
   const { data: activeRows, error: offersError } = await supabaseAdmin
     .from('buy_offers')

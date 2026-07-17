@@ -86,28 +86,134 @@
   const categoryImageMap = {
     'ทุเรียน': 'durian.png',
     'ลองกอง': 'longkong.png',
+    'ลางสาด': 'longkong.png',
+    'ลำไย': 'longan.png',
+    'ลิ้นจี่': 'longan.png',
     'มังคุด': 'mangosteen.png',
     'เงาะ': 'rambutan.png',
+    'ปาล์มน้ำมัน': 'oil-bottle.png',
+    'น้ำมัน': 'oil-bottle.png',
     'ปาล์ม': 'palm.png',
     'ยางพารา': 'rubber.png',
     'ผักสด': 'fresh-vegetables.png',
+    'ผัก': 'fresh-vegetables.png',
+    'คะน้า': 'fresh-vegetables.png',
+    'กวางตุ้ง': 'fresh-vegetables.png',
+    'กะหล่ำ': 'fresh-vegetables.png',
+    'บรอกโคลี': 'fresh-vegetables.png',
+    'แตงกวา': 'fresh-vegetables.png',
+    'ถั่วฝักยาว': 'fresh-vegetables.png',
+    'ฟัก': 'fresh-vegetables.png',
+    'มะเขือเทศ': 'fresh-vegetables.png',
+    'แตงโม': 'watermelon.png',
+    'เมลอน': 'fresh-vegetables.png',
+    'แก้วมังกร': 'dragon-fruit.png',
+    'สละ': 'fresh-vegetables.png',
+    'ระกำ': 'fresh-vegetables.png',
+    'องุ่น': 'grape.png',
+    'สตรอว์เบอร์รี': 'strawberry.png',
     'เมล็ดพันธุ์': 'seedlings.png',
+    'งา': 'seedlings.png',
+    'ทานตะวัน': 'seedlings.png',
+    'ละหุ่ง': 'seedlings.png',
+    'เห็ด': 'mushroom.png',
     'ไม้ประดับ': 'ornamental-plants.png',
     'สมุนไพร': 'herbs.png',
+    'ขิง': 'herbs.png',
+    'ข่า': 'herbs.png',
+    'ขมิ้น': 'herbs.png',
+    'ตะไคร้': 'herbs.png',
+    'โหระพา': 'herbs.png',
+    'กะเพรา': 'herbs.png',
+    'มะกรูด': 'herbs.png',
+    'เตย': 'herbs.png',
+    'กระชาย': 'herbs.png',
+    'มะรุม': 'herbs.png',
+    'กล้วย': 'banana.png',
+    'มะม่วง': 'mango.png',
+    'มะละกอ': 'papaya.png',
+    'มันสำปะหลัง': 'cassava.png',
+    'อ้อย': 'sugarcane.png',
+    'สับปะรด': 'pineapple.png',
+    'ขนุน': 'mango.png',
+    'มะขาม': 'mango.png',
+    'ละมุด': 'mango.png',
+    'พลับ': 'mango.png',
+    'มะพร้าว': 'coconut.png',
+    'ลูกตาล': 'coconut.png',
+    'สาเก': 'coconut.png',
+    'ส้ม': 'orange.png',
+    'มะนาว': 'lime.png',
+    'ข้าวโพด': 'corn.png',
+    'พริก': 'chili.png',
+    'ข้าว': 'rice.png',
   };
 
   // Map Thai names → i18n keys so labels change when language is switched
   const categoryI18nKeyMap = {
     'ทุเรียน': 'durian',
     'ลองกอง': 'longkong',
+    'ลางสาด': 'longkong',
+    'ลำไย': 'longan',
+    'ลิ้นจี่': 'longan',
     'มังคุด': 'mangosteen',
     'เงาะ': 'rambutan',
+    'ปาล์มน้ำมัน': 'oil_bottle',
+    'น้ำมัน': 'oil_bottle',
     'ปาล์ม': 'palm',
     'ยางพารา': 'rubber',
     'ผักสด': 'vegetable',
+    'ผัก': 'vegetable',
+    'คะน้า': 'vegetable',
+    'กวางตุ้ง': 'vegetable',
+    'กะหล่ำ': 'vegetable',
+    'บรอกโคลี': 'vegetable',
+    'แตงกวา': 'vegetable',
+    'ถั่วฝักยาว': 'vegetable',
+    'ฟัก': 'vegetable',
+    'มะเขือเทศ': 'vegetable',
+    'แตงโม': 'watermelon',
+    'เมลอน': 'melon',
+    'แก้วมังกร': 'dragon_fruit',
+    'สละ': 'salak',
+    'ระกำ': 'salak',
+    'องุ่น': 'grape',
+    'สตรอว์เบอร์รี': 'strawberry',
     'เมล็ดพันธุ์': 'seedlings',
+    'งา': 'seedlings',
+    'ทานตะวัน': 'seedlings',
+    'ละหุ่ง': 'seedlings',
+    'เห็ด': 'mushroom',
     'ไม้ประดับ': 'ornamental_plants',
     'สมุนไพร': 'herbs',
+    'ขิง': 'herbs',
+    'ข่า': 'herbs',
+    'ขมิ้น': 'herbs',
+    'ตะไคร้': 'herbs',
+    'โหระพา': 'herbs',
+    'กะเพรา': 'herbs',
+    'มะกรูด': 'herbs',
+    'เตย': 'herbs',
+    'กระชาย': 'herbs',
+    'มะรุม': 'herbs',
+    'กล้วย': 'banana',
+    'มะม่วง': 'mango',
+    'มะละกอ': 'papaya',
+    'มันสำปะหลัง': 'cassava',
+    'อ้อย': 'sugarcane',
+    'สับปะรด': 'pineapple',
+    'ขนุน': 'mango',
+    'มะขาม': 'mango',
+    'ละมุด': 'mango',
+    'พลับ': 'mango',
+    'มะพร้าว': 'coconut',
+    'ลูกตาล': 'coconut',
+    'สาเก': 'coconut',
+    'ส้ม': 'orange',
+    'มะนาว': 'lime',
+    'ข้าวโพด': 'corn',
+    'พริก': 'chili',
+    'ข้าว': 'rice',
   };
 
   // --- 1. Hero Slider ---
@@ -118,12 +224,24 @@
 
     const slides = Array.from(carousel.querySelectorAll(".hero-slide"));
     if (!slides.length) return;
+    const videos = slides.map((slide) => slide.querySelector("video"));
+
+    videos.forEach((video) => {
+      if (!video) return;
+      video.muted = true;
+      video.playsInline = true;
+      video.addEventListener("error", () => video.classList.add("is-unavailable"));
+    });
 
     indicator.innerHTML = "";
     slides.forEach((_, i) => {
       const dot = document.createElement("span");
       dot.className = "dot" + (i === 0 ? " active" : "");
-      dot.addEventListener("click", () => goTo(i, true));
+      dot.addEventListener("click", () => {
+        goTo(i, true);
+        stopAuto();
+        autoTimer = setTimeout(startAuto, 450);
+      });
       indicator.appendChild(dot);
     });
     const dots = Array.from(indicator.querySelectorAll(".dot"));
@@ -131,10 +249,29 @@
     const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
     const slideWidth = () => carousel.getBoundingClientRect().width || 1;
     const getIndex = () => clamp(Math.round(carousel.scrollLeft / slideWidth()), 0, slides.length - 1);
+    let activeMediaIndex = -1;
+
+    function syncMedia(force = false) {
+      const idx = getIndex();
+      if (!force && idx === activeMediaIndex) return;
+      activeMediaIndex = idx;
+
+      videos.forEach((video, videoIndex) => {
+        if (!video) return;
+        if (videoIndex === idx) {
+          const playAttempt = video.play();
+          if (playAttempt && typeof playAttempt.catch === "function") playAttempt.catch(() => {});
+          return;
+        }
+        video.pause();
+        try { video.currentTime = 0; } catch (_) { /* metadata is not ready yet */ }
+      });
+    }
 
     function syncDots() {
       const idx = getIndex();
       dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+      syncMedia();
     }
 
     function goTo(index, smooth) {
@@ -147,15 +284,32 @@
 
     let isDown = false, startX = 0, startLeft = 0, autoTimer = null;
 
+    function getAutoDelay() {
+      const activeVideo = videos[getIndex()];
+      const duration = Number(activeVideo?.duration);
+      return Number.isFinite(duration) && duration > 0
+        ? Math.max(5000, Math.ceil(duration * 1000))
+        : 5000;
+    }
+
     function startAuto() {
       stopAuto();
-      autoTimer = setInterval(() => {
+      autoTimer = setTimeout(() => {
         const idx = getIndex();
         goTo((idx + 1) % slides.length, true);
-      }, 5000);
+        autoTimer = setTimeout(startAuto, 450);
+      }, getAutoDelay());
     }
-    function stopAuto() { if (autoTimer) clearInterval(autoTimer); autoTimer = null; }
+    function stopAuto() { if (autoTimer) clearTimeout(autoTimer); autoTimer = null; }
 
+    videos.forEach((video, videoIndex) => {
+      if (!video) return;
+      video.addEventListener("loadedmetadata", () => {
+        if (getIndex() === videoIndex) startAuto();
+      }, { once: true });
+    });
+
+    syncDots();
     startAuto();
 
     carousel.addEventListener("pointerdown", (e) => {
@@ -180,6 +334,15 @@
     carousel.addEventListener("pointerup", endDrag);
     carousel.addEventListener("pointercancel", endDrag);
     carousel.addEventListener("scroll", syncDots);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stopAuto();
+        videos.forEach((video) => video?.pause());
+        return;
+      }
+      syncMedia(true);
+      startAuto();
+    });
   }
 
   // --- 2. Category Tabs ---

@@ -20,11 +20,7 @@
     },
     "Camera": {
       "presentationStyle": "fullscreen",
-      "saveToGallery": false,
-      "promptLabelHeader": "เลือกรูปภาพ",
-      "promptLabelCancel": "ยกเลิก",
-      "promptLabelPhoto": "เลือกจากคลัง",
-      "promptLabelPicture": "ถ่ายรูป"
+      "saveToGallery": false
     },
     "LocalNotifications": {
       "smallIcon": "ic_stat_icon_config_sample",

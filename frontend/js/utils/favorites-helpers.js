@@ -1,4 +1,5 @@
 (function initFavoritesHelpers() {
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
   // uses global resolveUserId / resolveProfileId from utils/id-resolver.js
   function resolveId(...ids) {
     if (typeof window.resolveUserId === "function") return window.resolveUserId(...ids);
@@ -50,7 +51,7 @@
         .map((item) => ({
           id: resolveId(item?.user_id, item?.profile_id, item?.id),
           kind: "seller",
-          title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || "ไม่ทราบชื่อ",
+          title: `${item?.first_name || ""} ${item?.last_name || ""}`.trim() || t('booking_unknown_name', "ไม่ทราบชื่อ"),
           subtitle: item?.tagline || "",
           avatar: item?.avatar || "",
           source: "favorite",
@@ -94,7 +95,7 @@
             return {
               id,
               kind,
-              title: item?.name || item?.sellerName || item?.title || "ไม่ทราบชื่อ",
+              title: item?.name || item?.sellerName || item?.title || t('booking_unknown_name', "ไม่ทราบชื่อ"),
               subtitle: item?.sub || item?.sellerSub || item?.subtitle || "",
               sellerName: item?.name || item?.sellerName || item?.title || "",
               productName: item?.productName || item?.sub || item?.sellerSub || item?.subtitle || "",

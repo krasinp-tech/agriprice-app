@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   "use strict";
 
+  if (window.AuthGuard && !window.AuthGuard.isLoggedIn()) return;
+  const signedInRole = window.api?.getRole?.() || localStorage.getItem('role');
+  if (String(signedInRole || '').toLowerCase() !== 'buyer') {
+    window.location.replace('account.html');
+    return;
+  }
+
   const backBtn = document.getElementById('backBtn');
   const upgradeBtn = document.getElementById('upgradeBtn');
   const carousel = document.querySelector('.plans-carousel');
@@ -23,8 +30,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Bind navigation immediately so a fast tap cannot happen before the
+  // asynchronous profile request finishes. The disabled state still blocks
+  // this action when PRO is already the current package.
+  if (upgradeBtn) {
+    upgradeBtn.addEventListener('click', () => {
+      if (!upgradeBtn.disabled && currentTier !== 'pro') {
+        window.location.href = 'payment.html';
+      }
+    });
+  }
+
   // Check current subscription from API
   async function checkCurrentSubscription() {
+    try {
+      const planResponse = await api.call?.('GET', '/api/payments/plan');
+      const plan = planResponse?.data || planResponse;
+      if (Number.isFinite(Number(plan?.amount))) {
+        document.querySelectorAll('.pro-plan .amount').forEach(el => {
+          el.textContent = Number(plan.amount).toLocaleString('th-TH');
+        });
+      }
+    } catch (_) {}
+
     try {
       if (api.getProfile) {
         const profile = await api.getProfile();
@@ -32,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
           currentTier = profile.tier.toLowerCase();
           proStartedAt = profile.pro_started_at || null;
           proExpiresAt = profile.pro_expires_at || null;
+          if (currentTier === 'pro' && proExpiresAt && new Date(proExpiresAt) <= new Date()) {
+            currentTier = 'free';
+          }
           
           // Update user_data in localStorage
           const rawUser = localStorage.getItem("user_data");
@@ -59,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderUI() {
     const freeBtn = document.querySelector('.free-plan .plan-btn');
     const proBtn = document.querySelector('.pro-plan .plan-btn');
-    const cancelSubWrap = document.getElementById('cancelSubWrap');
-    const cancelSubLink = document.getElementById('cancelSubLink');
 
     let periodEl = document.getElementById('proMembershipPeriod');
     const proCard = document.querySelector('.pro-plan');
@@ -73,8 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (periodEl) {
       if (currentTier === 'pro' && proStartedAt && proExpiresAt) {
-        const formatDate = value => new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(value));
-        periodEl.textContent = `เริ่ม ${formatDate(proStartedAt)} • หมดอายุ ${formatDate(proExpiresAt)}`;
+        const lang = localStorage.getItem('lang') || 'th';
+        const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
+        const formatDate = value => new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(value));
+        periodEl.textContent = t('subscription_period', 'เริ่ม {start} • หมดอายุ {end}')
+          .replace('{start}', formatDate(proStartedAt)).replace('{end}', formatDate(proExpiresAt));
         periodEl.style.display = 'block';
       } else {
         periodEl.style.display = 'none';
@@ -95,65 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         proBtn.textContent = t('current_plan_btn', 'แพ็กเกจปัจจุบัน');
         proBtn.disabled = true;
         proBtn.className = 'plan-btn btn-current';
-        proBtn.onclick = null;
       }
 
-      // Show cancel link below Pro card
-      if (cancelSubWrap) cancelSubWrap.style.display = 'block';
-      if (cancelSubLink) {
-        cancelSubLink.onclick = async (e) => {
-          e.preventDefault();
-          const confirmText = t('confirm_cancel_sub', 'คุณแน่ใจหรือไม่ที่จะยกเลิกแพ็กเกจ PRO?');
-
-          const runCancel = async () => {
-            cancelSubLink.style.pointerEvents = 'none';
-            cancelSubLink.textContent = t('processing', 'กำลังดำเนินการ...');
-            try {
-              let res;
-              if (api.call) {
-                res = await api.call('POST', '/api/payments/cancel');
-              } else {
-                const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-                const token = localStorage.getItem('token');
-                const response = await fetch(currentBase + '/api/payments/cancel', {
-                  method: 'POST',
-                  headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-                });
-                res = await response.json();
-              }
-
-              if (res && res.success) {
-                if (res.data && res.data.token) {
-                  localStorage.setItem('token', res.data.token);
-                  const rawUser = localStorage.getItem("user_data");
-                  if (rawUser) {
-                    const user = JSON.parse(rawUser);
-                    user.tier = res.data.tier || currentTier;
-                    localStorage.setItem("user_data", JSON.stringify(user));
-                  }
-                }
-                alert(res.message || t('cancel_success', 'ยกเลิกการต่ออายุแล้ว คุณยังใช้ PRO ได้จนถึงวันหมดอายุ'));
-                window.location.reload();
-              } else {
-                throw new Error(res?.error || res?.message || 'Cancel rejected');
-              }
-            } catch (err) {
-              console.error('[Subscription] Cancel failed:', err);
-              alert(err.message || t('error_occurred', 'เกิดข้อผิดพลาด'));
-              cancelSubLink.style.pointerEvents = 'auto';
-              cancelSubLink.textContent = t('cancel_sub_btn', 'ยกเลิกการสมัคร PRO');
-            }
-          };
-
-          if (window.showConfirm) {
-            window.showConfirm(confirmText, (agreed) => {
-              if (agreed) runCancel();
-            });
-          } else {
-            window.showAlert?.(confirmText, 'info');
-          }
-        };
-      }
     } else {
       // Free Plan card -> Current package status
       if (freeBtn) {
@@ -168,13 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
         proBtn.textContent = t('upgrade_pro_btn', 'อัปเกรดเป็น Pro');
         proBtn.disabled = false;
         proBtn.className = 'plan-btn btn-upgrade';
-        proBtn.onclick = () => {
-          window.location.href = 'payment.html';
-        };
       }
 
-      // Hide cancel link below Pro card
-      if (cancelSubWrap) cancelSubWrap.style.display = 'none';
     }
   }
 

@@ -189,7 +189,7 @@
     <!-- ========== Phase 1: Loading ========== -->
     <div id="loadingSec">
       <div class="loading-spinner"></div>
-      <p class="loading-text" id="loadingMsg">กำลังดึงข้อมูลการจอง...</p>
+      <p class="loading-text" id="loadingMsg" data-i18n="fetching_booking_data">กำลังดึงข้อมูลการจอง...</p>
     </div>
 
     <!-- ========== Phase 2: CONFIRM CHECK-IN (waiting) ========== -->
@@ -199,30 +199,30 @@
       </div>
       <div class="status-badge badge-waiting">
         <span class="material-icons-outlined" style="font-size:15px;">hourglass_empty</span>
-        รอการเช็คอิน
+        <span data-i18n="waiting_checkin">รอการเช็คอิน</span>
       </div>
-      <h2 class="card-title">ยืนยันการเช็คอิน</h2>
-      <p class="card-sub">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว<br>ก่อนกดยืนยันการรับเข้า</p>
+      <h2 class="card-title" data-i18n="confirm_checkin_title">ยืนยันการเช็คอิน</h2>
+      <p class="card-sub" data-i18n="confirm_checkin_subtitle">กรุณาตรวจสอบข้อมูลเกษตรกรและคิว ก่อนกดยืนยันการรับเข้า</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label" data-i18n="queue_number">หมายเลขคิว</span>
           <span class="info-value queue-big" id="prevQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label" data-i18n="farmer_name">ชื่อเกษตรกร</span>
           <span class="info-value" id="prevFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label" data-i18n="product">สินค้า</span>
           <span class="info-value" id="prevProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">จำนวน</span>
+          <span class="info-label" data-i18n="amount">จำนวน</span>
           <span class="info-value" id="prevAmount">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">วันที่จอง</span>
+          <span class="info-label" data-i18n="booking_date">วันที่จอง</span>
           <span class="info-value" id="prevDate">-</span>
         </div>
       </div>
@@ -230,11 +230,11 @@
       <div class="action-group">
         <button id="btnConfirm" class="btn btn-primary">
           <span class="material-icons-outlined">check_circle</span>
-          <span>ยืนยันการรับเข้า</span>
+          <span data-i18n="confirm_entry">ยืนยันการรับเข้า</span>
         </button>
         <button id="btnCancel" class="btn btn-secondary">
           <span class="material-icons-outlined">close</span>
-          <span>ยกเลิก</span>
+          <span data-i18n="cancel">ยกเลิก</span>
         </button>
       </div>
     </div>
@@ -244,32 +244,32 @@
       <div class="status-icon-wrap icon-success">
         <span class="material-icons-outlined">verified</span>
       </div>
-      <h2 class="card-title">เช็คอินสำเร็จ!</h2>
-      <p class="card-sub">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว<br>ยินดีต้อนรับเข้าสู่ระบบ</p>
+      <h2 class="card-title" data-i18n="checkin_success_title">เช็คอินสำเร็จ!</h2>
+      <p class="card-sub" data-i18n="checkin_success_subtitle">บันทึกข้อมูลการรับเข้าคิวเรียบร้อยแล้ว ยินดีต้อนรับเข้าสู่ระบบ</p>
 
       <div class="success-queue-box">
-        <div class="success-queue-label">หมายเลขคิวของคุณ</div>
+        <div class="success-queue-label" data-i18n="your_queue_number">หมายเลขคิวของคุณ</div>
         <div class="success-queue-number" id="resQueue">-</div>
       </div>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label" data-i18n="farmer_name">ชื่อเกษตรกร</span>
           <span class="info-value" id="resFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label" data-i18n="product">สินค้า</span>
           <span class="info-value" id="resProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สถานะ</span>
-          <span class="info-value" style="color:#0B853C;">✅ เช็คอินสำเร็จ</span>
+          <span class="info-label" data-i18n="status">สถานะ</span>
+          <span class="info-value" style="color:#0B853C;" data-i18n="checked_in_status">✅ เช็คอินสำเร็จ</span>
         </div>
       </div>
 
       <button id="btnDone" class="btn btn-primary">
         <span class="material-icons-outlined">home</span>
-        <span>กลับหน้าหลัก</span>
+        <span data-i18n="back_home">กลับหน้าหลัก</span>
       </button>
     </div>
 
@@ -280,33 +280,33 @@
       </div>
       <div class="status-badge badge-already">
         <span class="material-icons-outlined" style="font-size:15px;">info</span>
-        เช็คอินแล้ว
+        <span data-i18n="checked_in_badge">เช็คอินแล้ว</span>
       </div>
-      <h2 class="card-title">คิวนี้เช็คอินแล้ว</h2>
-      <p class="card-sub">การเช็คอินคิวนี้ถูกบันทึกไปแล้ว<br>ไม่สามารถสแกนซ้ำได้</p>
+      <h2 class="card-title" data-i18n="already_checked_in_title">คิวนี้เช็คอินแล้ว</h2>
+      <p class="card-sub" data-i18n="already_checked_in_subtitle">การเช็คอินคิวนี้ถูกบันทึกไปแล้ว ไม่สามารถสแกนซ้ำได้</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label" data-i18n="queue_number">หมายเลขคิว</span>
           <span class="info-value queue-big" id="alreadyQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label" data-i18n="farmer_name">ชื่อเกษตรกร</span>
           <span class="info-value" id="alreadyFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label" data-i18n="product">สินค้า</span>
           <span class="info-value" id="alreadyProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สถานะ</span>
-          <span class="info-value" style="color:#2D9CDB;">✔ เสร็จสิ้นแล้ว</span>
+          <span class="info-label" data-i18n="status">สถานะ</span>
+          <span class="info-value" style="color:#2D9CDB;" data-i18n="completed_status">✔ เสร็จสิ้นแล้ว</span>
         </div>
       </div>
 
       <button data-back class="btn btn-secondary">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span data-i18n="back">กลับ</span>
       </button>
     </div>
 
@@ -317,26 +317,26 @@
       </div>
       <div class="status-badge badge-cancel">
         <span class="material-icons-outlined" style="font-size:15px;">block</span>
-        ยกเลิกแล้ว
+        <span data-i18n="cancelled_status">ยกเลิกแล้ว</span>
       </div>
-      <h2 class="card-title">คิวนี้ถูกยกเลิกแล้ว</h2>
-      <p class="card-sub">ไม่สามารถเช็คอินคิวที่ถูกยกเลิกได้</p>
+      <h2 class="card-title" data-i18n="cancelled_queue_title">คิวนี้ถูกยกเลิกแล้ว</h2>
+      <p class="card-sub" data-i18n="cancelled_queue_subtitle">ไม่สามารถเช็คอินคิวที่ถูกยกเลิกได้</p>
 
       <div class="info-box">
         <div class="info-row">
-          <span class="info-label">หมายเลขคิว</span>
+          <span class="info-label" data-i18n="queue_number">หมายเลขคิว</span>
           <span class="info-value queue-big" style="color:#E53935;" id="cancelQueue">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">ชื่อเกษตรกร</span>
+          <span class="info-label" data-i18n="farmer_name">ชื่อเกษตรกร</span>
           <span class="info-value" id="cancelFarmer">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">สินค้า</span>
+          <span class="info-label" data-i18n="product">สินค้า</span>
           <span class="info-value" id="cancelProduct">-</span>
         </div>
         <div class="info-row">
-          <span class="info-label">วันที่จอง</span>
+          <span class="info-label" data-i18n="booking_date">วันที่จอง</span>
           <span class="info-value" id="cancelDate">-</span>
         </div>
       </div>
@@ -345,9 +345,9 @@
       <div class="cancel-reason-box" id="cancelReasonBox">
         <div class="cancel-reason-label">
           <span class="material-icons-outlined">info</span>
-          สาเหตุการยกเลิก
+          <span data-i18n="cancellation_reason">สาเหตุการยกเลิก</span>
         </div>
-        <div class="cancel-reason-text" id="cancelReasonText">ไม่ระบุสาเหตุ</div>
+        <div class="cancel-reason-text" id="cancelReasonText" data-i18n="no_reason_specified">ไม่ระบุสาเหตุ</div>
         <div class="cancel-who-badge" id="cancelWhoBadge">
           <span class="material-icons-outlined">person</span>
           <span id="cancelWhoText">-</span>
@@ -356,7 +356,7 @@
 
       <button data-back class="btn btn-danger">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span data-i18n="back">กลับ</span>
       </button>
     </div>
 
@@ -365,13 +365,13 @@
       <div class="status-icon-wrap icon-error">
         <span class="material-icons-outlined">warning_amber</span>
       </div>
-      <h2 class="card-title" id="errorTitle">เกิดข้อผิดพลาด</h2>
-      <p class="card-sub" id="errorMsg">ไม่สามารถดำเนินการได้ในขณะนี้</p>
+      <h2 class="card-title" id="errorTitle" data-i18n="error">เกิดข้อผิดพลาด</h2>
+      <p class="card-sub" id="errorMsg" data-i18n="error_cannot_proceed">ไม่สามารถดำเนินการได้ในขณะนี้</p>
 
       <div class="action-group">
         <button data-back class="btn btn-primary">
           <span class="material-icons-outlined">refresh</span>
-          <span>ลองสแกนใหม่</span>
+          <span data-i18n="scan_again">ลองสแกนใหม่</span>
         </button>
       </div>
     </div>
@@ -381,11 +381,11 @@
       <div class="status-icon-wrap icon-forbidden">
         <span class="material-icons-outlined">lock</span>
       </div>
-      <h2 class="card-title">ไม่มีสิทธิ์</h2>
-      <p class="card-sub">คิวนี้ไม่ได้อยู่ในรายการของคุณ<br>กรุณาสแกน QR ที่ถูกต้อง</p>
+      <h2 class="card-title" data-i18n="no_permission">ไม่มีสิทธิ์</h2>
+      <p class="card-sub" data-i18n="forbidden_queue_subtitle">คิวนี้ไม่ได้อยู่ในรายการของคุณ กรุณาสแกน QR ที่ถูกต้อง</p>
       <button data-back class="btn btn-secondary">
         <span class="material-icons-outlined">arrow_back</span>
-        <span>กลับ</span>
+        <span data-i18n="back">กลับ</span>
       </button>
     </div>
 
@@ -435,19 +435,19 @@
       // Determine cancel reason & who cancelled
       function getCancelInfo(b) {
         // The notification text stored in bookingService helps us guess:
-        // If cancelled by farmer โ’ notification goes to buyer (offer_owner_id)
-        // If cancelled by buyer  โ’ notification goes to farmer (buyer_id)
+        // If cancelled by farmer → notification goes to buyer (offer_owner_id)
+        // If cancelled by buyer → notification goes to farmer (buyer_id)
         // We approximate from the cancel_note or just show generic reason
         const note = b.cancel_note || b.cancel_reason || b.note || null;
         const cancelledByFarmer = b.cancelled_by === 'farmer' || b.cancel_by === 'farmer';
         const cancelledByBuyer  = b.cancelled_by === 'buyer'  || b.cancel_by === 'buyer';
 
         let who = '';
-        if (cancelledByFarmer)      who = `ยกเลิกโดย: เกษตรกร (${farmerName(b)})`;
-        else if (cancelledByBuyer)  who = `ยกเลิกโดย: ผู้รับซื้อ`;
-        else                        who = `ยกเลิกโดย: ไม่ทราบฝ่าย`;
+        if (cancelledByFarmer)      who = `${t('cancelled_by_farmer', 'ยกเลิกโดย: เกษตรกร')} (${farmerName(b)})`;
+        else if (cancelledByBuyer)  who = t('cancelled_by_buyer', 'ยกเลิกโดย: ผู้รับซื้อ');
+        else                        who = t('cancelled_by_unknown', 'ยกเลิกโดย: ไม่ทราบฝ่าย');
 
-        const reason = note || 'ไม่ได้ระบุสาเหตุ';
+        const reason = note || t('no_reason_specified', 'ไม่ได้ระบุสาเหตุ');
         return { reason, who };
       }
 
@@ -460,7 +460,7 @@
 
       if (!bid || !TOKEN || !API_BASE) {
         showSection('errorSec');
-        setText('errorTitle', 'ข้อมูลไม่ครบถ้วน');
+        setText('errorTitle', t('incomplete_information', 'ข้อมูลไม่ครบถ้วน'));
         setText('errorMsg', t('invalid_info_rescan', 'ข้อมูลไม่ครบถ้วน กรุณาสแกนใหม่อีกครั้ง'));
         return;
       }
@@ -484,14 +484,14 @@
         if (!res.ok || !json.data) {
           showSection('errorSec');
           setText('errorTitle', t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
-          setText('errorMsg', json.message || t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
+          setText('errorMsg', window.i18nApiMessage?.(json.message, 'booking_not_found') || t('booking_not_found', 'ไม่พบข้อมูลการจอง'));
           return;
         }
 
         booking = json.data;
       } catch (e) {
         showSection('errorSec');
-        setText('errorTitle', 'เชื่อมต่อไม่ได้');
+        setText('errorTitle', t('connection_failed', 'เชื่อมต่อไม่ได้'));
         setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาลองใหม่'));
         return;
       }
@@ -526,7 +526,7 @@
         return;
       }
 
-      // --- WAITING โ’ SHOW PREVIEW ---
+      // --- WAITING → SHOW PREVIEW ---
       setText('prevQueue',   booking.queue_no);
       setText('prevFarmer',  farmerName(booking));
       setText('prevProduct', productName(booking));
@@ -559,11 +559,11 @@
           } else {
             showSection('errorSec');
             setText('errorTitle', t('checkin_failed', 'เช็คอินไม่สำเร็จ'));
-            setText('errorMsg', json.message || t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน'));
+            setText('errorMsg', window.i18nApiMessage?.(json.message, 'checkin_error') || t('checkin_error', 'เกิดข้อผิดพลาดในการเช็คอิน'));
           }
         } catch (e) {
           showSection('errorSec');
-          setText('errorTitle', 'เชื่อมต่อไม่ได้');
+          setText('errorTitle', t('connection_failed', 'เชื่อมต่อไม่ได้'));
           setText('errorMsg', t('server_connection_failed', 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'));
         }
       });

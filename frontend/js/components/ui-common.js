@@ -89,8 +89,9 @@ window.showLoading = function(show = true) {
 };
 
 // Empty State
-window.showEmptyState = function(container, msg = 'ไม่มีข้อมูล') {
+window.showEmptyState = function(container, msg) {
   if (!container) return;
+  msg = msg || (window.i18nT ? window.i18nT('no_data', 'ไม่มีข้อมูล') : 'ไม่มีข้อมูล');
   let el = container.querySelector('.empty-state');
   if (!el) {
     el = document.createElement('div');
@@ -113,7 +114,9 @@ window.showConfirm = window.showConfirm || function(msg, onConfirm) {
     el = document.createElement('div');
     el.id = 'globalConfirm';
     el.className = 'global-confirm';
-    el.innerHTML = '<div class="global-confirm-modal"><div class="msg"></div><div class="actions"><button id="confirmYes">ตกลง</button><button id="confirmNo">ยกเลิก</button></div></div>';
+    const confirmText = window.i18nT ? window.i18nT('confirm', 'ตกลง') : 'ตกลง';
+    const cancelText = window.i18nT ? window.i18nT('cancel', 'ยกเลิก') : 'ยกเลิก';
+    el.innerHTML = `<div class="global-confirm-modal"><div class="msg"></div><div class="actions"><button id="confirmYes">${confirmText}</button><button id="confirmNo">${cancelText}</button></div></div>`;
     document.body.appendChild(el);
   }
   el.querySelector('.msg').textContent = msg;

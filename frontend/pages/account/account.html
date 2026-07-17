@@ -54,7 +54,10 @@
           <div class="profile-name" id="profileName">
             <div class="shimmer" style="width: 120px; height: 20px; border-radius: 4px; margin: 0 auto;"></div>
           </div>
-          <span id="proBadge" class="badge-pro" style="display: none;">PRO</span>
+          <span id="proBadge" class="badge-pro" role="status" aria-label="สมาชิก AGRIPRICE PRO" style="display: none;">
+            <span class="badge-pro-icon" aria-hidden="true"><span class="material-icons-outlined">workspace_premium</span></span>
+            <span class="badge-pro-label">PRO</span>
+          </span>
         </div>
         <div class="profile-sub" id="profileSub">
           <div class="shimmer" style="width: 160px; height: 14px; border-radius: 4px; margin: 4px auto 0;"></div>
@@ -84,7 +87,7 @@
         </div>
       </section>
 
-      <section class="menu-card" aria-label="เมนูบัญชี">
+      <section class="menu-card" aria-label="เมนูบัญชี" data-i18n-aria-label="account_menu">
         <a class="menu-item" href="manage-accounts/my-account.html">
           <span class="menu-icon-wrap">
             <span class="material-icons-outlined mi">person_outline</span>
@@ -185,7 +188,7 @@
         </a>
       </section>
 
-      <section class="menu-card" aria-label="ข้อมูลเพิ่มเติม">
+      <section class="menu-card" aria-label="ข้อมูลเพิ่มเติม" data-i18n-aria-label="additional_information">
         <a class="menu-item" id="addressBookLink" href="manage-address/address-book.html">
           <span class="menu-icon-wrap"><span class="material-icons-outlined mi">location_on</span></span>
           <div class="menu-text">
@@ -205,7 +208,7 @@
         </a>
       </section>
 
-      <section class="menu-card" aria-label="ออกจากระบบ">
+      <section class="menu-card" aria-label="ออกจากระบบ" data-i18n-aria-label="logout">
 
         <button class="logout-item" id="logoutBtn" type="button">
           <span class="logout-text" data-i18n="logout">ออกจากระบบ</span>

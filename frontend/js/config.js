@@ -4,12 +4,24 @@
 	if (typeof window.AGRIPRICE_CONFIG_LOADED !== 'undefined') return;
 	window.AGRIPRICE_CONFIG_LOADED = true;
 
+	// Storage can be unavailable in privacy-restricted browsers or embedded webviews.
+	// Keep configuration bootable and let native preferences continue to work.
+	const storageGet = (key) => {
+		try { return window.localStorage.getItem(key); } catch (_) { return null; }
+	};
+	const storageSet = (key, value) => {
+		try { window.localStorage.setItem(key, value); return true; } catch (_) { return false; }
+	};
+	const storageRemove = (key) => {
+		try { window.localStorage.removeItem(key); return true; } catch (_) { return false; }
+	};
+
 	const DEFAULT_URL = (() => {
 		const normalize = (v) => String(v || '').replace(/\/$/, '');
 
 		// 1. Manual override from localStorage (Highest priority)
 		try {
-			const runtimeBase = localStorage.getItem('agriprice_api_base_url');
+			const runtimeBase = storageGet('agriprice_api_base_url');
 			if (runtimeBase) {
 				if (window.AGRIPRICE_DEBUG) console.log('[config] Using manual override API URL:', runtimeBase);
 				return normalize(runtimeBase);
@@ -27,7 +39,7 @@
 			capPlatform === 'ios' ||
 			!!cap?.isNative
 		);
-		const useLocalApi = localStorage.getItem('agriprice_use_local') === '1';
+		const useLocalApi = storageGet('agriprice_use_local') === '1';
 
 		if (useLocalApi) {
 			if (window.AGRIPRICE_DEBUG) console.log('[config] Local API override enabled: Using http://localhost:5000');
@@ -47,7 +59,7 @@
 	window.API_BASE_URL = window.API_BASE_URL || DEFAULT_URL;
 	window.AGRIPRICE_DEBUG = window.AGRIPRICE_DEBUG ?? (
 		new URLSearchParams(window.location.search).has('debug') || 
-		localStorage.getItem('agriprice_debug') === '1'
+		storageGet('agriprice_debug') === '1'
 	);
 
 	// Helper function for other scripts to get the latest API URL
@@ -62,7 +74,7 @@
 		USER_DATA: window.AUTH_USER_KEY,
 		ROLE: window.AUTH_ROLE_KEY,
 		THEME: 'agriprice_theme',
-		LANGUAGE: 'language',
+		LANGUAGE: 'lang',
 		AVATAR: (role) => `profile_avatar_dataurl_${role || 'guest'}`,
 		PROFILE: (role) => `myprofile_data_${role || 'guest'}`
 	};
@@ -124,7 +136,7 @@
 		return window.location.origin;
 	})();
 
-	const savedTheme = localStorage.getItem('agriprice_theme');
+	const savedTheme = storageGet('agriprice_theme');
 	const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 	const themeToApply = savedTheme || (systemDark ? 'dark' : 'light');
 	document.documentElement.setAttribute('data-theme', themeToApply);
@@ -156,8 +168,8 @@
 		let initialized = false;
 
 		async function setPreference(key, value) {
-			if (value == null) localStorage.removeItem(key);
-			else localStorage.setItem(key, String(value));
+			if (value == null) storageRemove(key);
+			else storageSet(key, String(value));
 			if (!isNative() || !plugins().Preferences) return;
 			try {
 				if (value == null) await plugins().Preferences.remove({ key });
@@ -170,13 +182,13 @@
 			for (const key of PREFERENCE_KEYS) {
 				try {
 					const { value } = await plugins().Preferences.get({ key });
-					const webValue = localStorage.getItem(key);
-					if (value != null) localStorage.setItem(key, value);
+					const webValue = storageGet(key);
+					if (value != null) storageSet(key, value);
 					else if (webValue != null) await plugins().Preferences.set({ key, value: webValue });
 				} catch (_) {}
 			}
 
-			const restoredTheme = localStorage.getItem('agriprice_theme');
+			const restoredTheme = storageGet('agriprice_theme');
 			if (restoredTheme) document.documentElement.setAttribute('data-theme', restoredTheme);
 			window.dispatchEvent(new CustomEvent('agriprice:preferences-ready'));
 		}

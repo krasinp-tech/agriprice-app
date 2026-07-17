@@ -22,6 +22,13 @@
   const addRoundBtn = document.getElementById("addRoundBtn");
   const saveAllBtn = document.getElementById("saveAllBtn");
   const debugBox = document.getElementById("debugBox");
+  const offerLimitModal = document.getElementById("offerLimitModal");
+  const offerLimitClose = document.getElementById("offerLimitClose");
+  const offerLimitPlan = document.getElementById("offerLimitPlan");
+  const offerLimitUsage = document.getElementById("offerLimitUsage");
+  const offerLimitFill = document.getElementById("offerLimitFill");
+  const offerLimitUpgrade = document.getElementById("offerLimitUpgrade");
+  const offerLimitManage = document.getElementById("offerLimitManage");
 
   const modal = document.getElementById("roundModal");
   const closeModalBtn = document.getElementById("closeModalBtn");
@@ -35,6 +42,41 @@
   roundNameSuggestions.id = 'roundNameSuggestions';
   roundName.setAttribute('list', roundNameSuggestions.id);
   roundName.after(roundNameSuggestions);
+
+  function showOfferLimitModal(usage = {}) {
+    if (!offerLimitModal) return;
+    const tier = String(usage.tier || 'free').toLowerCase();
+    const limit = Number(usage.limit || (tier === 'pro' ? 10 : 3));
+    const used = Math.max(0, Number(usage.activeCount ?? usage.used ?? limit));
+    offerLimitPlan.textContent = window.i18nT
+      ? window.i18nT(tier === 'pro' ? 'current_pro_plan' : 'current_free_plan')
+      : tier.toUpperCase();
+    offerLimitUsage.textContent = window.i18nT
+      ? window.i18nT('offer_limit_usage', { used, limit })
+      : `${used} / ${limit}`;
+    offerLimitFill.style.width = `${Math.min(100, Math.round((used / Math.max(1, limit)) * 100))}%`;
+    offerLimitUpgrade.hidden = tier === 'pro';
+    offerLimitModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => offerLimitClose?.focus());
+  }
+
+  function closeOfferLimitModal() {
+    if (!offerLimitModal) return;
+    offerLimitModal.hidden = true;
+    document.body.style.overflow = '';
+    saveAllBtn?.focus();
+  }
+
+  offerLimitClose?.addEventListener('click', closeOfferLimitModal);
+  offerLimitModal?.addEventListener('click', (event) => {
+    if (event.target === offerLimitModal) closeOfferLimitModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && offerLimitModal && !offerLimitModal.hidden) closeOfferLimitModal();
+  });
+  offerLimitManage?.addEventListener('click', () => { window.location.href = '../myprofile.html'; });
+  offerLimitUpgrade?.addEventListener('click', () => { window.location.href = '../../account/subscription.html'; });
 
   function refreshRoundNameSuggestions() {
     const saved = JSON.parse(localStorage.getItem('agriprice_round_names') || '[]');
@@ -212,7 +254,19 @@
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || (method === "POST" ? (window.i18nT ? window.i18nT('save_error', 'สร้างสินค้าไม่สำเร็จ') : 'สร้างสินค้าไม่สำเร็จ') : (window.i18nT ? window.i18nT('save_error', 'แก้ไขสินค้าไม่สำเร็จ') : 'แก้ไขสินค้าไม่สำเร็จ')));
+        const legacyTierLimit = /accounts can create up to \d+ active buy offers/i.test(String(err.message || ''));
+        const errorCode = err.code || (legacyTierLimit ? 'TIER_OFFER_LIMIT' : '');
+        const inferredTier = err.data?.tier || (/^PRO\b/i.test(String(err.message || '')) ? 'pro' : 'free');
+        const localizedMessage = errorCode === 'TIER_OFFER_LIMIT'
+          ? (window.i18nT ? window.i18nT(inferredTier === 'pro' ? 'error_pro_limit' : 'error_free_limit') : err.message)
+          : (window.i18nApiMessage?.(err.message, 'save_error') || err.message);
+        const error = new Error(localizedMessage || (window.i18nT ? window.i18nT('save_error', 'บันทึกสินค้าไม่สำเร็จ') : 'บันทึกสินค้าไม่สำเร็จ'));
+        error.code = errorCode;
+        error.status = res.status;
+        error.data = err.data || (errorCode === 'TIER_OFFER_LIMIT'
+          ? { tier: inferredTier, limit: inferredTier === 'pro' ? 10 : 3, activeCount: inferredTier === 'pro' ? 10 : 3, remaining: 0 }
+          : null);
+        throw error;
       }
       return await res.json();
     }
@@ -464,8 +518,9 @@
 
     } catch (error) {
       console.error("Error saving:", error);
+      if (error.code === 'TIER_OFFER_LIMIT') showOfferLimitModal(error.data);
       const errorMsg = window.i18nT ? window.i18nT('save_error', 'เกิดข้อผิดพลาด: ไม่สามารถบันทึกได้') : 'เกิดข้อผิดพลาด: ไม่สามารถบันทึกได้';
-      window.appNotify(errorMsg + ": " + (error.message || ""), "error");
+      window.appNotify(error.code === 'TIER_OFFER_LIMIT' ? error.message : errorMsg + ": " + (error.message || ""), "error");
       saveAllBtn.disabled = false;
       saveAllBtn.textContent = window.i18nT ? window.i18nT('save_btn', 'บันทึก') : 'บันทึก';
     }
@@ -476,6 +531,37 @@
     loadStep1();
     renderStep1Summary();
     renderRounds();
+
+    const quotaOfferId = state.step1.product?.offer_id || state.step1.product?.offerId
+      || state.step1.editSource?.offer_id || state.step1.editSource?.offerId
+      || state.step1.editSource?.product_id;
+    const isEditing = state.step1.editSource?.isEdit && quotaOfferId && !isNaN(quotaOfferId);
+    if (!isEditing) {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || '{}');
+        const userId = storedUser.profile_id || storedUser.id || '';
+        const tier = String(storedUser.tier || 'free').toLowerCase();
+        const limit = tier === 'pro' ? 10 : 3;
+        const productResult = userId
+          ? await apiCall('GET', `/api/products?user_id=${encodeURIComponent(userId)}&limit=50`)
+          : null;
+        const visibleActiveOffers = (productResult?.data || []).filter(item =>
+          item?.is_active === true && String(item?.name || item?.category || '').trim()
+        );
+        const usage = { tier, limit, activeCount: visibleActiveOffers.length, remaining: Math.max(0, limit - visibleActiveOffers.length) };
+        if (usage.remaining <= 0) {
+          const limitMessage = window.i18nT
+            ? window.i18nT(usage.tier === 'pro' ? 'error_pro_limit' : 'error_free_limit')
+            : 'Active buy-offer limit reached';
+          saveAllBtn.disabled = true;
+          saveAllBtn.textContent = window.i18nT ? window.i18nT('offer_limit_reached') : 'Limit reached';
+          showOfferLimitModal(usage);
+          window.appNotify?.(limitMessage, 'warning');
+        }
+      } catch (error) {
+        if (window.AGRIPRICE_DEBUG) console.warn('[Set booking] Could not check offer limit:', error);
+      }
+    }
 
     // [FIXED] ตรวจสอบว่าเป็นหมายเลข ID จริงหรือไม่ (กันกรณีเป็นชื่อสินค้าจาก Fallback)
     const isNumericId = (id) => id && !isNaN(id) && Number.isSafeInteger(Number(id));

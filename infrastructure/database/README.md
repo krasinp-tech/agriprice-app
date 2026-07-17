@@ -17,6 +17,7 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 - `migrations/seed-thai-fruits-and-varieties.sql`: Seeds the reusable Thai fruit and variety catalog used by the buy-offer dropdown.
 - `migrations/normalize-compound-fruit-products.sql`: Separates legacy combined product/variety names without breaking existing offers.
 - `migrations/finalize-project-database.sql`: Final compatibility pass for PRO dates, follow counters, constraints, and indexes used by the current API.
+- `migrations/hard-delete-user-account-data.sql`: Adds transactional permanent account-data deletion used by the delete-account API.
 - `maintenance/SUPABASE_OPTIMIZE.sql`: Safe indexes and update timestamp triggers for the current normalized schema.
 - `maintenance/verify_submission_constraints.sql`: Final check for unique constraints required by normalized tables.
 
@@ -38,8 +39,9 @@ This directory contains SQL scripts for setting up and optimizing the Supabase d
 10. Run `migrations/add-pro-subscription-dates.sql`.
 11. Run `migrations/exclude-own-offer-impressions.sql`.
 12. Run `migrations/finalize-project-database.sql`.
-13. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
-14. Run `maintenance/verify_submission_constraints.sql` and confirm every returned status is `ok`.
-15. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
+13. Run `migrations/hard-delete-user-account-data.sql`.
+14. Run `maintenance/SUPABASE_OPTIMIZE.sql`.
+15. Run `maintenance/verify_submission_constraints.sql` and confirm every returned status is `ok`.
+16. Optionally run `maintenance/audit_unused_tables_rows.sql` to inspect unused rows. Do not delete audit candidates unless you intentionally want to clean data.
 
 The files in `schemas/` are references for documentation. For an existing Supabase project, use the migration files above instead of recreating all tables.

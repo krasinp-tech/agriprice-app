@@ -13,7 +13,17 @@
 
       if (isHome) {
         // Show confirm dialog or block exit
-        if (window.navigator && window.navigator.notification && window.navigator.notification.confirm) {
+        if (window.showConfirm) {
+          const message = window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?';
+          window.showConfirm(message, function(agreed) {
+            if (agreed) navigator.app.exitApp();
+          }, {
+            variant: 'warning',
+            icon: 'logout',
+            title: window.i18nT ? window.i18nT('exit_app_title', 'ออกจากแอป') : 'ออกจากแอป',
+            confirmText: window.i18nT ? window.i18nT('exit_app_title', 'ออกจากแอป') : 'ออกจากแอป'
+          });
+        } else if (window.navigator && window.navigator.notification && window.navigator.notification.confirm) {
           window.navigator.notification.confirm(
             window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?',
             function(buttonIndex) {
@@ -27,13 +37,6 @@
               window.i18nT ? window.i18nT('cancel', 'ยกเลิก') : 'ยกเลิก'
             ]
           );
-        } else {
-          const message = window.i18nT ? window.i18nT('exit_app_confirm', 'คุณต้องการออกจากแอพหรือไม่?') : 'คุณต้องการออกจากแอพหรือไม่?';
-          if (window.showConfirm) {
-            window.showConfirm(message, function(agreed) {
-              if (agreed) navigator.app.exitApp();
-            });
-          }
         }
         e.preventDefault();
         return false;
@@ -875,6 +878,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
     // Global unread chat badge.
     let updateChatBadgeInFlight = false;
+    let chatBadgeInterval = null;
+    let chatBadgeTimeout = null;
     async function updateChatBadgeGlobal() {
       if (updateChatBadgeInFlight || document.hidden) return;
       updateChatBadgeInFlight = true;
@@ -912,9 +917,25 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
         updateChatBadgeInFlight = false;
       });
     }
+    function stopChatBadgePolling() {
+      clearTimeout(chatBadgeTimeout);
+      clearInterval(chatBadgeInterval);
+      chatBadgeTimeout = null;
+      chatBadgeInterval = null;
+    }
+    function startChatBadgePolling() {
+      stopChatBadgePolling();
+      if (IS_EMBEDDED_FRAME || document.hidden) return;
+      chatBadgeTimeout = setTimeout(updateChatBadgeGlobal, 5000);
+      chatBadgeInterval = setInterval(updateChatBadgeGlobal, 60000);
+    }
     if (!IS_EMBEDDED_FRAME) {
-      setTimeout(updateChatBadgeGlobal, 5000);
-      setInterval(updateChatBadgeGlobal, 30000);
+      startChatBadgePolling();
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopChatBadgePolling();
+        else startChatBadgePolling();
+      });
+      window.addEventListener('beforeunload', stopChatBadgePolling);
     }
 
     fixBottomNavPaths();

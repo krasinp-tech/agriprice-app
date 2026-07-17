@@ -123,8 +123,21 @@ class AuthController {
     }
   }
 
-  async logout(_req, res) {
-    res.json(response.success('Logged out'));
+  async logout(req, res) {
+    try {
+      const { supabaseAdmin } = require('../utils/supabase');
+      const query = supabaseAdmin
+        .from('device_sessions')
+        .delete()
+        .eq('user_id', req.user.id);
+      const { error } = req.user.sessionId
+        ? await query.eq('session_id', req.user.sessionId)
+        : await query;
+      if (error) throw error;
+      res.json(response.success('Logged out'));
+    } catch (e) {
+      res.status(500).json(response.error('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่'));
+    }
   }
 }
 

@@ -14,7 +14,7 @@
         const numeric = Number(match ? match[0] : raw);
         if (!Number.isFinite(numeric) || numeric <= 0) return '';
 
-        if (raw.includes('บ.') || raw.includes('Baht')) return raw;
+        if (raw.includes('บ.') || raw.includes('Baht') || raw.includes('泰铢') || raw.includes('铢')) return raw;
         return `${numeric} ${unitSuffix}`;
     }
 
@@ -37,8 +37,9 @@
      * @param {string} unitSuffix - Suffix for price
      * @returns {string} - HTML string
      */
-    function render(data, unitSuffix = 'บ./กก.') {
+    function render(data, unitSuffix) {
         if (!data) return '';
+        unitSuffix = unitSuffix || (window.i18nT ? window.i18nT('baht_per_kg', 'บาท/กก.') : 'บาท/กก.');
 
         const relationGrades = getRelationGrades(data);
         const rawGrades = relationGrades.length ? relationGrades : [

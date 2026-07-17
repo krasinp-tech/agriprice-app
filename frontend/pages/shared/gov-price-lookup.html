@@ -540,7 +540,7 @@
     <div class="lookup-card">
       <div class="field-wrap">
         <label class="lookup-label"><span class="material-icons-outlined" style="font-size: 16px">category</span> <span data-i18n="select_product_type">เลือกชนิดสินค้า</span></label>
-        <input id="productGuess" class="select-field" type="text" list="productGuessList" autocomplete="off" placeholder="พิมพ์ชื่อสินค้า" oninput="onProductGuess()">
+          <input id="productGuess" class="select-field" type="text" list="productGuessList" autocomplete="off" placeholder="พิมพ์ชื่อสินค้า" data-i18n-placeholder="type_product_name" oninput="onProductGuess()">
         <datalist id="productGuessList"></datalist>
         <select id="productSelect" class="select-field" onchange="onProductChange()" hidden aria-hidden="true">
           <option value="" data-i18n="please_select">-- กรุณาเลือก --</option>
@@ -782,7 +782,7 @@
           rawDetails = null;
           selectedVarietyName = '';
           if (vGroup) {
-            vGroup.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--red, #ef4444); font-weight:600;">ไม่มีข้อมูลราคากลางสำหรับช่วงวันที่คุณเลือก</div>`;
+            vGroup.innerHTML = `<div style="padding:10px; font-size:12px; color:var(--red, #ef4444); font-weight:600;">${window.i18nT ? window.i18nT('no_price_for_date_range', 'ไม่มีข้อมูลราคากลางสำหรับช่วงวันที่คุณเลือก') : 'ไม่มีข้อมูลราคากลางสำหรับช่วงวันที่คุณเลือก'}</div>`;
           }
           renderNoDataResult();
         }
@@ -898,7 +898,7 @@
         <div class="price-premium-card" style="margin-bottom: 20px;">
           <div class="price-card-header">
             <span class="category-badge">${productCategory}</span>
-            <span class="price-date-badge">ข้อมูลล่าสุด: ${dateStr}</span>
+            <span class="price-date-badge">${t('latest_data_label', 'ข้อมูลล่าสุด')}: ${dateStr}</span>
           </div>
           <div class="price-commodity-info">
             <h3 class="commodity-title">${productLabel}</h3>
@@ -906,7 +906,7 @@
           </div>
           <div class="price-divider"></div>
           <div class="price-value-container">
-            <div class="price-label">ราคาเฉลี่ยล่าสุด (Latest Average Price)</div>
+            <div class="price-label">${t('latest_average_price', 'ราคาเฉลี่ยล่าสุด')}</div>
             <div class="price-value-row">
               <span class="currency-symbol">฿</span>
               <span class="price-amount">${latestRow.avg.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -923,17 +923,17 @@
         <div class="price-premium-card" style="padding: 18px;">
           <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
             <span class="material-icons-outlined" style="font-size: 18px; color: var(--primary);">trending_up</span>
-            <span>ประวัติราคาและแนวโน้มในช่วงวันที่เลือก</span>
+            <span>${t('selected_price_history', 'ประวัติราคาและแนวโน้มในช่วงวันที่เลือก')}</span>
           </h4>
           <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
               <thead>
                 <tr style="border-bottom: 2px solid var(--card-border); color: var(--text-muted); font-weight: 700;">
-                  <th style="padding: 6px 4px;">วันที่</th>
-                  <th style="padding: 6px 4px; text-align: right;">ต่ำสุด</th>
-                  <th style="padding: 6px 4px; text-align: right;">สูงสุด</th>
-                  <th style="padding: 6px 4px; text-align: right;">เฉลี่ย</th>
-                  <th style="padding: 6px 4px; text-align: center;">เปลี่ยนแปลง</th>
+                  <th style="padding: 6px 4px;">${t('date', 'วันที่')}</th>
+                  <th style="padding: 6px 4px; text-align: right;">${t('min_price', 'ต่ำสุด')}</th>
+                  <th style="padding: 6px 4px; text-align: right;">${t('max_price', 'สูงสุด')}</th>
+                  <th style="padding: 6px 4px; text-align: right;">${t('average', 'เฉลี่ย')}</th>
+                  <th style="padding: 6px 4px; text-align: center;">${t('price_change', 'เปลี่ยนแปลง')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -953,13 +953,13 @@
       view.innerHTML = `
         <div class="price-premium-card">
           <div class="price-card-header">
-            <span class="category-badge" style="background: var(--card-border); color: var(--text-muted);">ไม่มีข้อมูล</span>
+            <span class="category-badge" style="background: var(--card-border); color: var(--text-muted);">${t('no_data', 'ไม่มีข้อมูล')}</span>
           </div>
           <div class="price-commodity-info" style="text-align: center; padding: 20px 0;">
             <h3 class="commodity-title" style="color: var(--text-muted);">${productLabel}</h3>
             <p style="margin-top: 10px; color: #ef4444; font-size: 13px; font-weight: 700;">
               <span class="material-icons-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">error_outline</span>
-              ไม่มีข้อมูลราคากลางในช่วงเวลาที่เลือก
+              ${t('no_price_for_date_range', 'ไม่มีข้อมูลราคากลางในช่วงเวลาที่เลือก')}
             </p>
           </div>
         </div>

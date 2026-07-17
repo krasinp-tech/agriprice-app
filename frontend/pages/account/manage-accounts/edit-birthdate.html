@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -51,11 +51,21 @@
         <form id="birthDateForm" class="detail-form" novalidate>
           <div class="field-group">
             <label class="field-label" for="birthDateInput" data-i18n="birth_date">วันเดือนปีเกิด</label>
+            <div class="birthdate-select-row" style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <select class="field-input" id="birthDaySelect" style="flex: 1;" required>
+                <option value="" disabled selected data-i18n="day_label">วัน</option>
+              </select>
+              <select class="field-input" id="birthMonthSelect" style="flex: 2;" required>
+                <option value="" disabled selected data-i18n="month_label">เดือน</option>
+              </select>
+              <select class="field-input" id="birthYearSelect" style="flex: 1.5;" required>
+                <option value="" disabled selected data-i18n="year_label">ปี</option>
+              </select>
+            </div>
             <input
-              class="field-input"
               id="birthDateInput"
               name="birthDate"
-              type="date"
+              type="hidden"
               required
             />
             <p class="field-hint" id="birthDatePreview"><span data-i18n="selected_birthdate">วันที่เลือก</span>: -</p>

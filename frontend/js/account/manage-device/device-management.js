@@ -54,7 +54,7 @@
       headers: authHeaders()
     });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(json.message || "Failed to load device sessions");
+    if (!res.ok) throw new Error(window.i18nApiMessage?.(json.message, 'load_devices_failed') || t('load_devices_failed', "Failed to load device sessions"));
     return normalizeSessions(json);
   }
 
@@ -112,7 +112,7 @@
       body: JSON.stringify({ password })
     });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(json.message || "Failed to log out device");
+    if (!res.ok) throw new Error(window.i18nApiMessage?.(json.message, 'logout_device_failed') || t('logout_device_failed', "Failed to log out device"));
     return json;
   }
 

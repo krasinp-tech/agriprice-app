@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -102,13 +102,23 @@
             <div class="product-summary">
               <div class="product-icon-wrapper">
                 <img src="../../../assets/images/durian.png" alt="ทุเรียน" class="product-img" id="productImg">
+                <div class="product-icon-placeholder" id="productIconPlaceholder" style="display: none;">
+                  <span class="material-icons-outlined placeholder-icon" id="productPlaceholderIcon">inventory_2</span>
+                </div>
               </div>
               <div class="product-details">
-                <div class="product-name" id="productName">-</div>
-                <div class="product-info">
-                  <span id="summaryWeight">-</span> <span data-i18n="kg">กก.</span>
-                  <span class="dot">โ€ข</span>
-                  <span id="productType">-</span>
+                <div class="product-title-row" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                  <div class="product-name" id="productName" style="margin-bottom: 0;">-</div>
+                  <span class="meta-badge variety-badge" id="productTypeBadge" style="margin-top: 0;">
+                    <span class="material-icons-outlined badge-icon">local_offer</span>
+                    <span id="productType">-</span>
+                  </span>
+                </div>
+                <div class="product-meta-row" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <span class="meta-badge weight-badge">
+                    <span class="material-icons-outlined badge-icon">scale</span>
+                    <span id="summaryWeight">-</span>&nbsp;<span data-i18n="kg">กก.</span>
+                  </span>
                 </div>
               </div>
             </div>

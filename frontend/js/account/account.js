@@ -161,7 +161,7 @@
             title.setAttribute('data-i18n', 'manage_package');
           }
           if (sub) {
-            sub.textContent = window.i18nT ? window.i18nT('manage_package_desc', 'ดูรายละเอียดการสมัครสมาชิก หรือยกเลิก') : 'ดูรายละเอียดการสมัครสมาชิก หรือยกเลิก';
+            sub.textContent = window.i18nT ? window.i18nT('manage_package_desc', 'ดูรายละเอียดแพ็กเกจและวันหมดอายุ') : 'ดูรายละเอียดแพ็กเกจและวันหมดอายุ';
             sub.setAttribute('data-i18n', 'manage_package_desc');
           }
         } else {

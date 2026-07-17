@@ -245,7 +245,7 @@
     // Grades Row (Use ProductGrade if available)
     const gradesContainer = card.querySelector("[data-bind='gradesContainer']");
     if (gradesContainer && window.ProductGrade) {
-        const gradesHtml = window.ProductGrade.render(data, 'บ./กก.');
+        const gradesHtml = window.ProductGrade.render(data, window.i18nT ? window.i18nT('baht_per_kg', 'บาท/กก.') : 'บาท/กก.');
         safeHtml(gradesContainer, gradesHtml || '');
     } else {
         // Fallback to manual binding if ProductGrade not available

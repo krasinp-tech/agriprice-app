@@ -170,21 +170,22 @@
   }
 
   // ===================== DATA LOADERS (API) =====================
-  // รายชื่อผลไม้สำรอง (แสดงเมื่อ API ยังไม่มีข้อมูล)
-  const FRUIT_FALLBACK = [
-    'กล้วยหอม','กล้วยน้ำว้า','ทุเรียน','มะม่วงน้ำดอกไม้','มะม่วงอกร่อง',
-    'มังคุด','ลองกอง','เงาะโรงเรียน','ส้มเขียวหวาน','ส้มโอ',
-    'แตงโม','สับปะรด','ลำไย','ยางพารา','ปาล์ม','ผักสด',
+  // รายชื่อสินค้าเกษตรสำรอง (แสดงเมื่อ API ยังไม่มีข้อมูล)
+  const PRODUCT_FALLBACK = [
+    'ทุเรียน','มะม่วง','มังคุด','ลำไย','เงาะ','กล้วย','สับปะรด',
+    'ข้าว','ข้าวโพดเลี้ยงสัตว์','มันสำปะหลัง','อ้อย','ถั่วเหลือง','ถั่วเขียว','ถั่วลิสง',
+    'คะน้า','ผักบุ้งจีน','ผักกาดขาว','กะหล่ำปลี','พริก','มะเขือเทศ','แตงกวา','ถั่วฝักยาว','ฟักทอง',
+    'ปาล์มน้ำมัน','งา','ทานตะวัน','ยางพารา','ขมิ้นชัน','ขิง','ตะไคร้','กระชาย',
   ].map(n => ({ id: n, name: n }));
 
   async function loadProducts(query = "") {
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const currentBase = CONFIG.getApiBase();
-    let items = FRUIT_FALLBACK;
+    let items = PRODUCT_FALLBACK;
 
     if (currentBase) {
       try {
-        const url = currentBase + '/api/fruits';
+        const url = currentBase + '/api/product-types';
         const token = localStorage.getItem(window.AUTH_TOKEN_KEY || 'token') || '';
         const res = await fetch(url, token ? { headers: { 'Authorization': 'Bearer ' + token } } : {});
         if (res.ok) {
@@ -198,7 +199,7 @@
           }
         }
       } catch (e) {
-        if (window.AGRIPRICE_DEBUG) console.warn('[setbooking-step1] fruits API failed, using fallback:', e.message);
+        if (window.AGRIPRICE_DEBUG) console.warn('[setbooking-step1] products API failed, using fallback:', e.message);
       }
     }
 
@@ -556,7 +557,7 @@
                   window.location.href = '../myprofile.html';
                 }
               } else {
-                alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));
+                window.showAlert?.(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'), 'warning');
                 window.location.href = '../myprofile.html';
               }
               return; // หยุดการแสดงผล step1

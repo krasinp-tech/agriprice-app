@@ -8,8 +8,8 @@
           <img data-bind="avatar" alt="">
         </div>
         <div class="pc-seller-text">
-          <div class="pc-name" data-bind="sellerName">ชื่อร้าน</div>
-          <div class="pc-sub" data-bind="sellerSub">สินค้า</div>
+          <div class="pc-name" data-bind="sellerName" data-i18n="shop_name">ชื่อร้าน</div>
+          <div class="pc-sub" data-bind="sellerSub" data-i18n="product">สินค้า</div>
         </div>
       </div>
 
@@ -22,7 +22,7 @@
         </div>
         <!-- Options Menu (Shown only for Owner) -->
         <div class="pc-options-menu" style="display:none;">
-          <button class="pc-options-btn" type="button" data-action="toggle-options" aria-label="จัดการ" title="จัดการ">
+          <button class="pc-options-btn" type="button" data-action="toggle-options" aria-label="จัดการ" title="จัดการ" data-i18n-aria-label="manage" data-i18n-title="manage">
             <span class="material-icons-outlined">more_vert</span>
           </button>
           <div class="pc-dropdown-menu" style="display:none;">
@@ -73,7 +73,7 @@
       
       <!-- Owner actions (Buyer/My Profile view) -->
       <button class="pc-btn-status btn-contact" type="button" data-action="toggle-status" style="display:none;">
-        <span class="status-text">ปิด การรับซื้อ</span>
+        <span class="status-text" data-i18n="close_buying">ปิด การรับซื้อ</span>
       </button>
       <button class="pc-btn-edit btn-book" type="button" data-action="edit-purchase" style="display:none;" data-i18n="edit_purchase">แก้ไขการรับซื้อ</button>
     </div>

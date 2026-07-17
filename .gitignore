@@ -29,3 +29,6 @@ frontend/android/local.properties
 
 # Local node runtime
 .node/
+
+.openai/
+source-assets/

@@ -39,7 +39,7 @@
 <body>
   <main class="ud-page">
     <header class="ud-header">
-      <a class="ud-back" href="../manage-security/security.html" aria-label="ย้อนกลับ">
+      <a class="ud-back" href="../manage-security/security.html" aria-label="ย้อนกลับ" data-i18n-aria-label="back">
         <span class="material-icons-outlined">chevron_left</span>
       </a>
       <h1 class="ud-title" data-i18n="device_title">จัดการอุปกรณ์</h1>
@@ -47,9 +47,9 @@
 
     <section class="device-card">
       <div class="device-list-title" data-i18n="device_list_title">กิจกรรมการเข้าสู่ระบบของบัญชี</div>
-      <div class="device-list-desc">ขณะนี้คุณเข้าสู่ระบบอยู่บนอุปกรณ์เหล่านี้:</div>
+      <div class="device-list-desc" data-i18n="device_logged_in_desc">ขณะนี้คุณเข้าสู่ระบบอยู่บนอุปกรณ์เหล่านี้:</div>
       <div id="deviceCurrent"></div>
-      <div class="device-other-title">การเข้าสู่ระบบอุปกรณ์อื่นๆ</div>
+      <div class="device-other-title" data-i18n="other_device_logins">การเข้าสู่ระบบอุปกรณ์อื่นๆ</div>
       <div id="deviceOther"></div>
     </section>
 
@@ -57,10 +57,10 @@
     <div id="logoutModal" class="modal">
       <div class="modal-content">
         <span class="modal-close" id="modalCloseBtn">&times;</span>
-        <div class="modal-title">ออกจากระบบอุปกรณ์นี้</div>
-        <div class="modal-desc">กรุณาใส่รหัสผ่านเพื่อยืนยัน</div>
-        <input type="password" id="modalPassword" class="modal-input" placeholder="รหัสผ่าน" />
-        <button id="modalLogoutBtn" class="modal-btn">ออกจากระบบ</button>
+        <div class="modal-title" data-i18n="logout_this_device">ออกจากระบบอุปกรณ์นี้</div>
+        <div class="modal-desc" data-i18n="password_confirm_prompt">กรุณาใส่รหัสผ่านเพื่อยืนยัน</div>
+        <input type="password" id="modalPassword" class="modal-input" placeholder="รหัสผ่าน" data-i18n-placeholder="password" />
+        <button id="modalLogoutBtn" class="modal-btn" data-i18n="logout">ออกจากระบบ</button>
         <div id="modalError" class="modal-error"></div>
       </div>
     </div>

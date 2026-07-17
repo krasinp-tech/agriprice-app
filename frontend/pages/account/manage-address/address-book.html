@@ -65,18 +65,18 @@
   <div class="addr-modal-backdrop" id="addrModalBackdrop">
     <div class="addr-modal" id="addrModal" role="dialog" aria-modal="true" aria-labelledby="addrModalTitle">
       <div class="addr-modal-drag"></div>
-      <h2 class="addr-modal-title" id="addrModalTitle">เพิ่มที่อยู่ใหม่</h2>
+      <h2 class="addr-modal-title" id="addrModalTitle" data-i18n="add_new_address">เพิ่มที่อยู่ใหม่</h2>
 
       <!-- Tag Selector -->
       <div class="tag-selector" id="tagSelector">
         <button type="button" class="tag-btn active" data-tag="Home" id="tagHome">
-          <span class="material-icons-outlined" style="font-size:18px;">home</span> บ้าน
+          <span class="material-icons-outlined" style="font-size:18px;">home</span> <span data-i18n="home_label">บ้าน</span>
         </button>
         <button type="button" class="tag-btn" data-tag="Work" id="tagWork">
-          <span class="material-icons-outlined" style="font-size:18px;">work</span> ที่ทำงาน
+          <span class="material-icons-outlined" style="font-size:18px;">work</span> <span data-i18n="work_label">ที่ทำงาน</span>
         </button>
         <button type="button" class="tag-btn" data-tag="Other" id="tagOther">
-          <span class="material-icons-outlined" style="font-size:18px;">place</span> อื่นๆ
+          <span class="material-icons-outlined" style="font-size:18px;">place</span> <span data-i18n="other_label">อื่นๆ</span>
         </button>
       </div>
 
@@ -84,31 +84,31 @@
       <div class="addr-field-group">
         <div class="addr-field-row">
           <div class="addr-field">
-            <label for="addrFirstName">ชื่อ</label>
-            <input type="text" id="addrFirstName" placeholder="ชื่อ" autocomplete="given-name">
+            <label for="addrFirstName" data-i18n="first_name">ชื่อ</label>
+            <input type="text" id="addrFirstName" placeholder="ชื่อ" data-i18n-placeholder="first_name" autocomplete="given-name">
           </div>
           <div class="addr-field">
-            <label for="addrLastName">นามสกุล</label>
-            <input type="text" id="addrLastName" placeholder="นามสกุล" autocomplete="family-name">
+            <label for="addrLastName" data-i18n="last_name">นามสกุล</label>
+            <input type="text" id="addrLastName" placeholder="นามสกุล" data-i18n-placeholder="last_name" autocomplete="family-name">
           </div>
         </div>
         <div class="addr-field">
-          <label for="addrPhone">เบอร์โทรศัพท์</label>
+          <label for="addrPhone" data-i18n="phone_number">เบอร์โทรศัพท์</label>
           <input type="tel" id="addrPhone" placeholder="0812345678" autocomplete="tel">
         </div>
         <div class="addr-field">
-          <label for="addrLine1">ที่อยู่</label>
-          <input type="text" id="addrLine1" placeholder="บ้านเลขที่ ถนน ซอย" autocomplete="address-line1">
+          <label for="addrLine1" data-i18n="address_label">ที่อยู่</label>
+          <input type="text" id="addrLine1" placeholder="บ้านเลขที่ ถนน ซอย" data-i18n-placeholder="address_line1_placeholder" autocomplete="address-line1">
         </div>
         <div class="addr-field">
-          <label for="addrLine2">ตำบล / อำเภอ / จังหวัด</label>
-          <input type="text" id="addrLine2" placeholder="ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false">
+          <label for="addrLine2" data-i18n="address_cont_label">ตำบล / อำเภอ / จังหวัด</label>
+          <input type="text" id="addrLine2" placeholder="ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" data-i18n-placeholder="address_line2_full_placeholder" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false">
         </div>
       </div>
 
       <!-- Default Toggle -->
       <div class="addr-default-row">
-        <span class="addr-default-label">ตั้งเป็นที่อยู่เริ่มต้น</span>
+        <span class="addr-default-label" data-i18n="set_default_address">ตั้งเป็นที่อยู่เริ่มต้น</span>
         <label class="notify-switch">
           <input type="checkbox" id="addrIsDefault">
           <span class="notify-slider"></span>
@@ -117,8 +117,8 @@
 
       <!-- Action Buttons -->
       <div class="addr-modal-actions">
-        <button type="button" class="addr-btn-cancel" id="addrCancelBtn">ยกเลิก</button>
-        <button type="button" class="addr-btn-save" id="addrSaveBtn">บันทึก</button>
+        <button type="button" class="addr-btn-cancel" id="addrCancelBtn" data-i18n="cancel_btn">ยกเลิก</button>
+        <button type="button" class="addr-btn-save" id="addrSaveBtn" data-i18n="save_btn">บันทึก</button>
       </div>
     </div>
   </div>

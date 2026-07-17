@@ -348,6 +348,12 @@ body {
     object-fit: cover;
     object-position: center;
 }
+.profile-status.is-offline {
+    color: #94a3b8;
+}
+.profile-status.is-offline .status-dot {
+    background: #94a3b8;
+}
 
 .pc-seller-text {
     display: flex;

@@ -5,6 +5,7 @@ const upload = require('../middlewares/upload');
 const response = require('../utils/response');
 const { supabaseAdmin } = require('../utils/supabase');
 const { toE164 } = require('../utils/helpers');
+const { collectAccountFileUrls, deleteFilesByUrls } = require('../services/fileService');
 
 function parseMaybeJson(value) {
   if (value == null || value === '') return [];
@@ -119,6 +120,7 @@ async function replaceProfileServices(profileId, rawServices) {
     .insert(services.map((service_name) => ({ profile_id: profileId, service_name })));
   if (error) throw error;
 }
+
 
 /**
  * GET /api/profile (Current User)
@@ -296,68 +298,32 @@ router.patch('/', authMiddleware, (req, res, next) => {
  */
 router.delete('/', authMiddleware, async (req, res) => {
   try {
-    // Keep an anonymized profile row so historical bookings retain valid foreign keys.
-    // Do not delete auth.users first: profiles.profile_id references auth.users.id,
-    // so that ordering leaves the account disabled and returns a foreign-key 500.
-    const tombstonePhone = `deleted-${req.user.id}`;
-    const { error } = await supabaseAdmin
-      .from('profiles')
-      .update({
-        phone: tombstonePhone,
-        first_name: '',
-        last_name: '',
-        password_hash: null,
-        avatar: null,
-        tagline: null,
-        about: null,
-        address_line1: null,
-        address_line2: null,
-        map_link: null,
-        hero_image: null,
-        email: null,
-        birth_date: null,
-        lat: null,
-        lng: null,
-        last_seen: null,
-        account_status: 'disabled',
-        tier: 'free',
-        pro_started_at: null,
-        pro_expires_at: null
-      })
-      .eq('profile_id', req.user.id);
-    if (error) throw error;
+    const fileUrls = await collectAccountFileUrls(req.user.id);
 
-    const cleanupOperations = [
-      ['buy_offers', supabaseAdmin.from('buy_offers').update({ is_active: null }).eq('user_id', req.user.id)],
-      ['profile_links', supabaseAdmin.from('profile_links').delete().eq('profile_id', req.user.id)],
-      ['profile_services', supabaseAdmin.from('profile_services').delete().eq('profile_id', req.user.id)],
-      ['notification_settings', supabaseAdmin.from('notification_settings').delete().eq('user_id', req.user.id)],
-      ['profile_favorites', supabaseAdmin.from('profile_favorites').delete().or(`owner_id.eq.${req.user.id},target_profile_id.eq.${req.user.id}`)],
-      ['follows', supabaseAdmin.from('follows').delete().or(`follower_id.eq.${req.user.id},following_id.eq.${req.user.id}`)]
-    ];
-    const cleanupResults = await Promise.all(cleanupOperations.map(([, operation]) => operation));
-    const failedCleanupIndex = cleanupResults.findIndex(result => result.error);
-    if (failedCleanupIndex >= 0) {
-      const [cleanupName] = cleanupOperations[failedCleanupIndex];
-      throw new Error(`${cleanupName} cleanup failed: ${cleanupResults[failedCleanupIndex].error.message}`);
-    }
+    // All relational cleanup runs atomically inside PostgreSQL.
+    const { data: cleanupData, error: cleanupError } = await supabaseAdmin
+      .rpc('delete_user_account_data', { p_user_id: req.user.id });
+    if (cleanupError) throw cleanupError;
 
-    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
-      ban_duration: '876000h',
-      user_metadata: { account_deleted: true }
-    });
+    // profiles.profile_id references auth.users, so Auth is removed afterward.
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(req.user.id, false);
     if (authError) throw authError;
 
-    const { error: sessionError } = await supabaseAdmin
-      .from('device_sessions')
-      .delete()
-      .eq('user_id', req.user.id);
-    if (sessionError) throw sessionError;
+    let filesDeleted = 0;
+    try {
+      const fileCleanup = await deleteFilesByUrls(fileUrls);
+      filesDeleted = fileCleanup.deleted;
+    } catch (fileError) {
+      console.error('[Profile] Account rows deleted but file cleanup failed:', fileError.message);
+    }
 
-    res.json(response.success('ลบบัญชีสำเร็จ'));
+    res.json(response.success('ลบบัญชีและข้อมูลทั้งหมดสำเร็จ', {
+      cleanup: cleanupData,
+      files_deleted: filesDeleted,
+    }));
   } catch (e) {
     console.error('[Profile] Delete account failed:', e.message);
-    res.status(500).json(response.error('ลบบัญชีไม่สำเร็จ กรุณาลองใหม่'));
+    res.status(500).json(response.error('ลบบัญชีและข้อมูลไม่สำเร็จ กรุณาลองใหม่', e.message));
   }
 });
 

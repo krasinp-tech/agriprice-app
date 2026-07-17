@@ -20,6 +20,31 @@
     return fallback || key;
   }
 
+  function renderRoomPresence(presence) {
+    const status = document.getElementById('roomSub');
+    if (!status) return;
+    const online = presence === true || presence?.online === true;
+    status.textContent = window.AgriPresence?.formatStatus?.(presence)
+      || (online ? t('online', 'ออนไลน์') : t('offline', 'ออฟไลน์'));
+    status.classList.toggle('is-offline', !online);
+    status.removeAttribute('data-i18n');
+  }
+
+  async function refreshRoomPresence() {
+    if (!ACTIVE_TARGET_ID || !api.getUserPresence || document.hidden || navigator.onLine === false) {
+      renderRoomPresence(false);
+      return;
+    }
+    try {
+      const response = await api.getUserPresence(ACTIVE_TARGET_ID);
+      const presence = response?.data || response || {};
+      renderRoomPresence(presence);
+    } catch (_) {
+      renderRoomPresence(false);
+    }
+  }
+  const currentLocale = () => ({ en: 'en-US', zh: 'zh-CN', th: 'th-TH' }[localStorage.getItem('lang')] || 'th-TH');
+
   function esc(s) {
     if (window.AgriPriceUI) return window.AgriPriceUI.escapeHtml(s);
     return String(s || '')
@@ -145,7 +170,7 @@
     listMount.innerHTML = rooms.map(r => {
       const other = r.other_user || {};
       const name = `${other.first_name || ''} ${other.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
-      const lastMsg = r.last_message || (r.last_message_type === 'image' ? '🖼️ [ส่งรูปภาพ]' : '');
+      const lastMsg = r.last_message || (r.last_message_type === 'image' ? `🖼️ [${t('sent_an_image', 'ส่งรูปภาพ')}]` : '');
       const avatar = safeUrl(other.avatar, '../../assets/images/avatar-guest.svg');
       const isUnread = r.unread_count > 0;
       const isActive = String(r.room_id) === String(ACTIVE_ROOM_ID);
@@ -155,9 +180,13 @@
         const d = new Date(r.last_message_at);
         const today = new Date();
         if (d.toDateString() === today.toDateString()) {
-          timeStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          const lang = localStorage.getItem('lang') || 'th';
+          const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
+          timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
         } else {
-          timeStr = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+          const lang = localStorage.getItem('lang') || 'th';
+          const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
+          timeStr = d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
         }
       }
 
@@ -376,7 +405,7 @@
         e.stopPropagation();
         const roomId = wrapper.dataset.id;
         const confirmMsg = t('confirm_delete_chat', 'คุณต้องการลบการสนทนานี้ใช่หรือไม่?');
-        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+        const showConfirm = window.showConfirm;
 
         showConfirm(confirmMsg, async (confirmed) => {
           if (confirmed) {
@@ -399,6 +428,10 @@
           } else {
             resetSwipe();
           }
+        }, {
+          variant: 'danger',
+          title: t('delete_chat', 'ลบการสนทนา'),
+          confirmText: t('delete', 'ลบ')
         });
       });
     });
@@ -410,6 +443,8 @@
   async function openChat(roomId, targetId, roomInfo) {
     ACTIVE_ROOM_ID = roomId;
     ACTIVE_TARGET_ID = targetId;
+    renderRoomPresence(false);
+    refreshRoomPresence();
 
     // Mobile UI: show room, hide list
     document.querySelector('.chat-shell').classList.add('room-active');
@@ -423,10 +458,32 @@
 
     // Header Info
     const other = roomInfo?.other_user || {};
-    if (roomName) roomName.textContent = `${other.first_name || ''} ${other.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
-    if (roomAvatarContainer) {
-      const avatarUrl = safeUrl(other.avatar, '../../assets/images/avatar-guest.svg');
-      roomAvatarContainer.innerHTML = `<img src="${esc(avatarUrl)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt="">`;
+
+    function updateHeaderUI(userObj) {
+      if (roomName) {
+        roomName.textContent = `${userObj.first_name || ''} ${userObj.last_name || ''}`.trim() || t('booking_unknown_name', 'ไม่ทราบชื่อ');
+      }
+      if (roomAvatarContainer) {
+        const avatarUrl = safeUrl(userObj.avatar, '../../assets/images/avatar-guest.svg');
+        roomAvatarContainer.innerHTML = `<img src="${esc(avatarUrl)}" onerror="this.src='../../assets/images/avatar-guest.svg'" alt="">`;
+      }
+    }
+
+    updateHeaderUI(other);
+
+    // Fallback: If other user name is empty, fetch profile details using targetId
+    if ((!other.first_name && !other.last_name) && targetId && api.getProfileById) {
+      api.getProfileById(targetId).then(profile => {
+        if (profile) {
+          other.first_name = profile.first_name || '';
+          other.last_name = profile.last_name || '';
+          other.avatar = profile.avatar || '';
+          other.phone = profile.phone || profile.telephone || profile.phone_number || '';
+          updateHeaderUI(other);
+        }
+      }).catch(err => {
+        console.error('[Chat] Fallback profile fetch failed:', err);
+      });
     }
 
     // Call Action Handler
@@ -448,7 +505,7 @@
           const msg = t('no_phone_number', 'ไม่พบเบอร์โทรศัพท์ของผู้ใช้งานรายนี้');
           if (window.showToast) window.showToast(msg, 'error');
           else if (window.appNotify) window.appNotify(msg, 'error');
-          else alert(msg);
+          else window.showAlert?.(msg, 'error');
         }
       };
     }
@@ -494,7 +551,7 @@
 
     roomMessages.innerHTML = items.map(m => {
       const isMe = String(m.sender_id) === String(me);
-      const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+      const time = m.created_at ? new Date(m.created_at).toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' }) : '';
       const messageText = String(m.message || '').trim();
       let contentHtml = '';
       if (m.message_type === 'image' || m.image_url) {
@@ -537,6 +594,7 @@
       if (ACTIVE_ROOM_ID === chatId) {
         loadMessages(chatId);
         loadConversations(); // Update list unreads
+        refreshRoomPresence();
       }
     }, 30000);
   }
@@ -635,8 +693,14 @@
     roomBackBtn?.addEventListener('click', () => {
       stopPolling();
       ACTIVE_ROOM_ID = null;
+      ACTIVE_TARGET_ID = null;
       document.querySelector('.chat-shell').classList.remove('room-active');
       document.body.classList.remove('chat-room-open');
+    });
+
+    window.addEventListener('offline', () => renderRoomPresence(false));
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && ACTIVE_TARGET_ID) refreshRoomPresence();
     });
 
     // Deep link from URL (?chatId=...)

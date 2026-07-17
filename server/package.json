@@ -21,9 +21,17 @@
     "pg": "^8.22.0"
   },
   "devDependencies": {
+    "brace-expansion": "^5.0.7",
     "nodemon": "^3.1.4"
   },
+  "overrides": {
+    "nodemon": {
+      "chokidar": {
+        "picomatch": "2.3.2"
+      }
+    }
+  },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }

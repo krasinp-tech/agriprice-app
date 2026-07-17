@@ -358,23 +358,34 @@ document.addEventListener("DOMContentLoaded", () => {
     qrCanvas.innerHTML = `<div style="width:110px;height:110px;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;text-align:center;border:1px solid #ddd;border-radius:4px;">${escapeHtml(t("qr_unavailable", "ไม่สามารถสร้าง QR ได้"))}</div>`;
   }
 
+  let pendingQrText = "";
   function generateQRCode(text) {
     if (!qrCanvas) return;
+    const qrText = String(text || "");
+    pendingQrText = qrText;
+    if (typeof window.QRCode !== "function") {
+      drawQrUnavailable();
+      return;
+    }
     try {
       qrCanvas.innerHTML = "";
-      new QRCode(qrCanvas, {
-        text: String(text || ""),
+      new window.QRCode(qrCanvas, {
+        text: qrText,
         width: 110,
         height: 110,
         colorDark: "#000000",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M,
+        correctLevel: window.QRCode.CorrectLevel.M,
       });
     } catch (error) {
       console.error("Error generating QR code:", error);
       drawQrUnavailable();
     }
   }
+
+  document.getElementById("qrCodeLibrary")?.addEventListener("load", () => {
+    if (pendingQrText) generateQRCode(pendingQrText);
+  }, { once: true });
 
   async function loadSuccessData() {
     const bookingData = await BookingAPI.loadConfirmedBooking();
@@ -500,6 +511,11 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.style.border = "1.5px solid rgba(229,57,53,0.4)";
             btn.style.color = "#E53935";
             selected = reasonOptions[Number(btn.dataset.idx)];
+            card.querySelectorAll('[data-idx]').forEach((other) => {
+              const isSelected = other === btn;
+              other.classList.toggle('is-selected', isSelected);
+              other.setAttribute('aria-pressed', String(isSelected));
+            });
             card.querySelector("#reasonFreeText").value = "";
           });
         });

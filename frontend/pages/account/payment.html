@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <title>ชำระเงิน | AGRIPRICE</title>
+  <title data-i18n="payment_title">ชำระเงิน | AGRIPRICE</title>
   <script>(function(){const t=localStorage.getItem('agriprice_theme')||'light';document.documentElement.setAttribute('data-theme',t)})();</script>
   <meta name="theme-color" content="#0B853C">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,44 +16,63 @@
 </head>
 <body>
   <header class="payment-header">
-    <button class="back-btn" data-back aria-label="ย้อนกลับ"><span class="material-icons-outlined">chevron_left</span></button>
-    <h1>ชำระเงิน</h1>
+    <button class="back-btn" data-back aria-label="ย้อนกลับ" data-i18n-aria-label="back"><span class="material-icons-outlined">chevron_left</span></button>
+    <h1 data-i18n="payment_title">ชำระเงิน</h1>
   </header>
   <main class="payment-container fade-slide">
     <section class="plan-summary">
-      <h2 class="section-title">แผนการสมัคร</h2>
+      <h2 class="section-title" data-i18n="subscription_plans">แผนการสมัคร</h2>
       <div class="plan-card">
-        <div class="plan-info"><span class="plan-name">AgriPrice Premium (Pro)</span><span class="plan-desc">เข้าถึงฟีเจอร์ทั้งหมด</span></div>
-        <div class="plan-price"><span class="currency">฿</span><span class="amount">499</span><span class="period">/เดือน</span></div>
+        <div class="plan-info"><span class="plan-name">AgriPrice Premium (Pro)</span><span class="plan-desc" data-i18n="all_features">เข้าถึงฟีเจอร์ทั้งหมด</span></div>
+        <div class="plan-price"><span class="currency">฿</span><span class="amount" id="planPriceAmount">499</span><span class="period" data-i18n="per_month">/เดือน</span></div>
       </div>
     </section>
     <section class="payment-methods">
-      <h2 class="section-title">ชำระด้วย PromptPay</h2>
-      <div class="method-tabs single-method"><button type="button" class="tab-btn active"><span class="material-icons-outlined">qr_code</span><span>พร้อมเพย์</span></button></div>
+      <h2 class="section-title" data-i18n="payment_promptpay">ชำระด้วย PromptPay</h2>
+      <div class="method-tabs single-method"><button type="button" class="tab-btn active"><span class="material-icons-outlined">qr_code</span><span>PromptPay</span></button></div>
       <div class="tab-content active" id="qrTabContent">
         <div class="qr-container">
           <div class="promptpay-qr-card">
-            <div class="pp-header"><div class="pp-logo-wrap"><span class="pp-title">Prompt Pay</span></div><span class="pp-sub">พร้อมเพย์</span></div>
-            <div class="pp-body"><div class="qr-loading" id="qrLoading">กำลังสร้าง QR...</div><img class="qr-code-image" id="promptpayQr" alt="QR Code พร้อมเพย์" hidden></div>
-            <div class="pp-footer"><span class="pp-amount-label">ยอดชำระเงิน</span><span class="pp-amount-val" id="promptpayAmount">฿499.00</span></div>
+            <div class="pp-header"><div class="pp-logo-wrap"><span class="pp-title">PromptPay</span></div><span class="pp-sub">PromptPay</span></div>
+            <div class="pp-body"><div class="qr-loading" id="qrLoading" data-i18n="generating_qr">กำลังสร้าง QR...</div><img class="qr-code-image" id="promptpayQr" alt="PromptPay QR Code" hidden></div>
+            <div class="pp-footer"><span class="pp-amount-label" data-i18n="payment_amount">ยอดชำระเงิน</span><span class="pp-amount-val" id="promptpayAmount">฿499.00</span></div>
           </div>
         </div>
-        <div class="countdown-timer">กรุณาชำระเงินภายใน <span class="timer-digits" id="timerDigits">15:00</span> นาที</div>
+        <div class="countdown-timer"><span data-i18n="payment_within">กรุณาชำระเงินภายใน</span> <span class="timer-digits" id="timerDigits">15:00</span> <span data-i18n="minutes">นาที</span></div>
         <div class="slip-upload">
           <input type="file" id="slipInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-          <button type="button" class="slip-picker" id="slipPicker"><span class="material-icons-outlined">add_photo_alternate</span><span id="slipPickerText">แนบรูปสลิปการโอนเงิน</span></button>
-          <img id="slipPreview" class="slip-preview" alt="ตัวอย่างสลิป" hidden>
-          <p class="slip-note">ระบบจะตรวจยอด 499 บาท บัญชีผู้รับ และป้องกันการใช้สลิปซ้ำ</p>
+          <button type="button" class="slip-picker" id="slipPicker"><span class="material-icons-outlined">add_photo_alternate</span><span id="slipPickerText" data-i18n="attach_slip">แนบรูปสลิปการโอนเงิน</span></button>
+          <img id="slipPreview" class="slip-preview" alt="ตัวอย่างสลิป" data-i18n-alt="slip_preview_alt" hidden>
+          <p class="slip-note" id="slipVerificationNote" data-i18n="slip_verification_note">ระบบจะตรวจยอดชำระ บัญชีผู้รับ และป้องกันการใช้สลิปซ้ำ</p>
         </div>
       </div>
-      <div class="secure-info"><span class="material-icons-outlined">verified_user</span><span>สลิปถูกส่งผ่านเซิร์ฟเวอร์อย่างปลอดภัยและตรวจสอบอัตโนมัติ</span></div>
-      <button class="btn btn-primary" id="checkoutBtn"><span class="btn-text">ตรวจสอบสลิปและยืนยัน</span></button>
+      <div class="secure-info"><span class="material-icons-outlined">verified_user</span><span data-i18n="secure_slip_info">สลิปถูกส่งผ่านเซิร์ฟเวอร์อย่างปลอดภัยและตรวจสอบอัตโนมัติ</span></div>
+      <button class="btn btn-primary" id="checkoutBtn"><span class="btn-text" data-i18n="verify_slip">ตรวจสอบสลิปและยืนยัน</span></button>
     </section>
   </main>
+
+  <section class="payment-success-overlay" id="paymentSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="paymentSuccessTitle" hidden>
+    <div class="success-confetti" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="payment-success-card">
+      <div class="success-icon-shell" aria-hidden="true">
+        <span class="material-icons-outlined">check</span>
+      </div>
+      <p class="success-kicker">AGRIPRICE PRO</p>
+      <h2 id="paymentSuccessTitle" data-i18n="payment_success">ชำระเงินสำเร็จ! บัญชีของคุณอัปเกรดเป็น PRO เรียบร้อยแล้ว</h2>
+      <button type="button" class="success-continue-btn" id="successContinueBtn" data-i18n="current_plan_btn">แพ็กเกจปัจจุบัน</button>
+      <div class="success-progress" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
+
   <script src="../../js/config.js"></script>
   <script src="../../js/global-anim.js"></script>
   <script src="../../js/components/i18n.js"></script>
   <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth/guard.js"></script>
+  <script>window.AuthGuard.requireLogin();</script>
   <script src="../../js/account/payment.js"></script>
 </body>
 </html>

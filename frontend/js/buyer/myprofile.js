@@ -11,6 +11,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const helpers = window.ProfileHelpers || {};
     const ui = window.AgriPriceUI || {};
     const esc = (s) => ui.escapeHtml ? ui.escapeHtml(s) : s;
+    const t = (key, fallback, params) => window.i18nT ? window.i18nT(key, fallback, params) : fallback;
+
+    function renderOwnPresence(online) {
+        const row = document.getElementById('ownProfilePresence');
+        const text = document.getElementById('ownProfilePresenceText');
+        row?.classList.toggle('is-offline', !online);
+        if (text) {
+            text.textContent = online ? t('online', 'ออนไลน์') : t('offline', 'ออฟไลน์');
+            text.removeAttribute('data-i18n');
+        }
+    }
+
+    window.addEventListener('agriprice:presence-self', event => renderOwnPresence(event.detail?.online === true));
+    window.addEventListener('offline', () => renderOwnPresence(false));
+    window.addEventListener('online', () => window.AgriPresence?.ping?.());
+    renderOwnPresence(false);
+    window.AgriPresence?.ping?.();
 
     // ── Storage Keys ────────────────────────────────────────────────────────
     const role = api.getRole ? api.getRole() : 'buyer';
@@ -170,20 +187,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Update Badge
                 const badge = card.querySelector('.status-badge');
                 if (badge) {
-                    badge.textContent = newStatus ? 'เปิดรับซื้อ' : 'ปิดรับซื้อ';
+                    badge.textContent = newStatus ? t('status_open', 'เปิดรับซื้อ') : t('status_closed', 'ปิดรับซื้อ');
                     badge.className = `status-badge ${newStatus ? 'open' : 'closed'}`;
                 }
                 // Update Button Text
                 const btnText = card.querySelector('.status-text');
                 if (btnText) {
-                    btnText.textContent = newStatus ? 'ปิด การรับซื้อ' : 'เปิด การรับซื้อ';
+                    btnText.textContent = newStatus ? t('close_buying', 'ปิด การรับซื้อ') : t('open_buying', 'เปิด การรับซื้อ');
                 }
 
-                if (window.showToast) window.showToast('อัปเดตสถานะสำเร็จ');
+                if (window.showToast) window.showToast(t('status_update_success', 'อัปเดตสถานะสำเร็จ'));
             }
         } catch (err) {
             console.error('[MyProfile] Toggle status error:', err);
-            if (window.showToast) window.showToast('อัปเดตสถานะล้มเหลว');
+            if (window.showToast) window.showToast(t('status_update_failed', 'อัปเดตสถานะล้มเหลว'));
         } finally {
             if (btn) btn.disabled = false;
         }
@@ -251,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ? window.i18nT('confirm_delete_purchase', 'คุณต้องการลบการรับซื้อนี้ใช่หรือไม่?')
             : 'คุณต้องการลบการรับซื้อนี้ใช่หรือไม่?';
 
-        const showConfirm = window.showConfirm || ((msg, cb) => cb(confirm(msg)));
+        const showConfirm = window.showConfirm;
 
         showConfirm(confirmMsg, async (confirmed) => {
             if (!confirmed) return;
@@ -267,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     : 'ลบรายการรับซื้อสำเร็จ';
                 if (window.showToast) window.showToast(successMsg, 'success');
                 else if (window.appNotify) window.appNotify(successMsg, 'success');
-                else alert(successMsg);
+                else window.showAlert?.(successMsg, 'success');
 
                 await loadProducts();
             } catch (err) {
@@ -277,8 +294,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     : 'ลบรายการรับซื้อไม่สำเร็จ';
                 if (window.showToast) window.showToast(errorMsg, 'error');
                 else if (window.appNotify) window.appNotify(errorMsg, 'error');
-                else alert(errorMsg);
+                else window.showAlert?.(errorMsg, 'error');
             }
+        }, {
+            variant: 'danger',
+            title: t('delete_item', 'ลบรายการ'),
+            confirmText: t('delete', 'ลบ')
         });
     }
 
@@ -332,6 +353,55 @@ document.addEventListener("DOMContentLoaded", function () {
     const addr2Editor = document.getElementById('addr2Editor');
     const mapLatEditor = document.getElementById('mapLatEditor');
     const mapLngEditor = document.getElementById('mapLngEditor');
+    const prevProfileStepBtn = document.getElementById('prevProfileStepBtn');
+    const nextProfileStepBtn = document.getElementById('nextProfileStepBtn');
+    const profileEditorProgressFill = document.getElementById('profileEditorProgressFill');
+    const profileEditorStepStatus = document.getElementById('profileEditorStepStatus');
+    const profileEditorSteps = ['general', 'contact', 'services'];
+    let currentProfileStep = 0;
+
+    function activateProfileStep(index, focusPanel = false) {
+        currentProfileStep = Math.max(0, Math.min(profileEditorSteps.length - 1, index));
+        const targetTab = profileEditorSteps[currentProfileStep];
+
+        editAboutModal?.querySelectorAll('.modal-tab-btn').forEach(button => {
+            const active = button.dataset.modalTab === targetTab;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-selected', String(active));
+            button.tabIndex = active ? 0 : -1;
+        });
+        editAboutModal?.querySelectorAll('.modal-tab-panel').forEach(panel => {
+            const active = panel.id === `modal-panel-${targetTab}`;
+            panel.classList.toggle('active', active);
+            panel.setAttribute('aria-hidden', String(!active));
+        });
+
+        const progress = ((currentProfileStep + 1) / profileEditorSteps.length) * 100;
+        if (profileEditorProgressFill) profileEditorProgressFill.style.width = `${progress}%`;
+        if (profileEditorStepStatus) {
+            profileEditorStepStatus.textContent = t('profile_step_progress', `ขั้นตอน ${currentProfileStep + 1} จาก ${profileEditorSteps.length}`, {
+                current: currentProfileStep + 1,
+                total: profileEditorSteps.length
+            });
+        }
+        if (prevProfileStepBtn) prevProfileStepBtn.hidden = currentProfileStep === 0;
+        if (nextProfileStepBtn) nextProfileStepBtn.hidden = currentProfileStep === profileEditorSteps.length - 1;
+        if (saveAboutBtn) saveAboutBtn.hidden = currentProfileStep !== profileEditorSteps.length - 1;
+
+        editAboutModal?.querySelector('.modal-form-body')?.scrollTo({ top: 0, behavior: 'smooth' });
+        if (focusPanel) {
+            document.getElementById(`modal-panel-${targetTab}`)?.querySelector('input, textarea, select, button')?.focus({ preventScroll: true });
+        }
+    }
+
+    function canLeaveCurrentProfileStep() {
+        const panel = document.getElementById(`modal-panel-${profileEditorSteps[currentProfileStep]}`);
+        const invalidField = panel?.querySelector('input:invalid, textarea:invalid, select:invalid');
+        if (!invalidField) return true;
+        invalidField.reportValidity?.();
+        invalidField.focus();
+        return false;
+    }
 
     function setupAddressAutocomplete(input) {
         if (!input) return;
@@ -517,18 +587,11 @@ document.addEventListener("DOMContentLoaded", function () {
             cb.checked = profileData.services.includes(cb.value);
         });
 
-        // Reset to first tab when opening
-        const firstTabBtn = editAboutModal.querySelector('.modal-tab-btn[data-modal-tab="general"]');
-        if (firstTabBtn) {
-            editAboutModal.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
-            editAboutModal.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
-            firstTabBtn.classList.add('active');
-            const panel = document.getElementById('modal-panel-general');
-            if (panel) panel.classList.add('active');
-        }
+        activateProfileStep(0);
 
         editAboutModal.hidden = false;
         document.body.classList.add('profile-editor-open');
+        requestAnimationFrame(() => editAboutModal.querySelector('.modal-close-btn')?.focus());
     }
 
     if (editAboutBtn) editAboutBtn.addEventListener("click", openEditModal);
@@ -536,6 +599,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!editAboutModal) return;
         editAboutModal.hidden = true;
         document.body.classList.remove('profile-editor-open');
+        editAboutBtn?.focus();
     }
 
     if (cancelAboutBtn) cancelAboutBtn.addEventListener("click", closeEditModal);
@@ -548,21 +612,32 @@ document.addEventListener("DOMContentLoaded", function () {
     // Modal tab switching logic
     document.querySelectorAll('.modal-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const targetTab = btn.dataset.modalTab;
-            document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            const panel = document.getElementById(`modal-panel-${targetTab}`);
-            if (panel) panel.classList.add('active');
+            const targetIndex = profileEditorSteps.indexOf(btn.dataset.modalTab);
+            if (targetIndex < 0 || (targetIndex > currentProfileStep && !canLeaveCurrentProfileStep())) return;
+            activateProfileStep(targetIndex);
         });
+    });
+
+    prevProfileStepBtn?.addEventListener('click', () => activateProfileStep(currentProfileStep - 1, true));
+    nextProfileStepBtn?.addEventListener('click', () => {
+        if (canLeaveCurrentProfileStep()) activateProfileStep(currentProfileStep + 1, true);
     });
 
     if (saveAboutBtn) {
         saveAboutBtn.addEventListener("click", async () => {
+            const invalidField = editAboutModal?.querySelector('input:invalid, textarea:invalid, select:invalid');
+            if (invalidField) {
+                const invalidPanel = invalidField.closest('.modal-tab-panel');
+                const invalidStep = profileEditorSteps.findIndex(step => invalidPanel?.id === `modal-panel-${step}`);
+                if (invalidStep >= 0) activateProfileStep(invalidStep);
+                invalidField.reportValidity?.();
+                invalidField.focus();
+                return;
+            }
             const btn = saveAboutBtn;
             const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span class="material-icons-outlined">hourglass_top</span><span>กำลังบันทึก...</span>';
+            btn.innerHTML = `<span class="material-icons-outlined">hourglass_top</span><span>${esc(t('saving_btn', 'กำลังบันทึก...'))}</span>`;
 
             const selectedServices = Array.from(document.querySelectorAll('#servicesEditor input[type="checkbox"]:checked')).map(cb => cb.value);
 
@@ -588,13 +663,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (res) {
                     await syncProfile();
                     closeEditModal();
-                    if (window.showToast) window.showToast('บันทึกข้อมูลเรียบร้อยแล้ว');
+                    if (window.showToast) window.showToast(t('profile_save_success', 'บันทึกข้อมูลเรียบร้อยแล้ว'));
                 } else {
                     throw new Error('Update failed');
                 }
             } catch (err) {
                 console.error('[MyProfile] Save error:', err);
-                if (window.showToast) window.showToast('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่');
+                if (window.showToast) window.showToast(t('profile_save_failed', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่'));
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
@@ -615,11 +690,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const res = await api.updateProfile(fd);
             if (res) {
                 await syncProfile();
-                if (window.showToast) window.showToast('อัปโหลดรูปภาพสำเร็จ');
+                if (window.showToast) window.showToast(t('image_upload_success', 'อัปโหลดรูปภาพสำเร็จ'));
             }
         } catch (err) {
             console.error('[MyProfile] Upload error:', err);
-            if (window.showToast) window.showToast('อัปโหลดรูปภาพล้มเหลว');
+            if (window.showToast) window.showToast(t('image_upload_failed', 'อัปโหลดรูปภาพล้มเหลว'));
         }
     }
 
@@ -643,17 +718,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const mapPickerContainer = document.getElementById('mapPickerContainer');
     const getCurrentLocationBtn = document.getElementById('getCurrentLocationBtn');
 
-    function initMap() {
-        if (map) return;
+    async function initMap() {
+        if (map) return true;
+        try {
+            if (window.LeafletReady) await window.LeafletReady;
+        } catch (error) {
+            window.showAlert?.(error.message || t('map_unavailable', 'ไม่สามารถโหลดแผนที่ได้'), 'warning');
+            return false;
+        }
+        if (!window.L?.map) {
+            window.showAlert?.(t('map_unavailable', 'ไม่สามารถโหลดแผนที่ได้'), 'warning');
+            return false;
+        }
         const lat = parseFloat(mapLatEditor.value) || 13.7563;
         const lng = parseFloat(mapLngEditor.value) || 100.5018;
 
-        map = L.map('leafletMapDiv').setView([lat, lng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        map = window.L.map('leafletMapDiv').setView([lat, lng], 13);
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        marker = window.L.marker([lat, lng], { draggable: true }).addTo(map);
 
         marker.on('dragend', function (e) {
             const pos = e.target.getLatLng();
@@ -666,6 +751,7 @@ document.addEventListener("DOMContentLoaded", function () {
             mapLatEditor.value = e.latlng.lat.toFixed(6);
             mapLngEditor.value = e.latlng.lng.toFixed(6);
         });
+        return true;
     }
 
     if (openMapPickerBtn) {
@@ -673,9 +759,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const isHidden = mapPickerContainer.style.display === 'none';
             mapPickerContainer.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
-                setTimeout(() => {
-                    initMap();
-                    map.invalidateSize();
+                setTimeout(async () => {
+                    const ready = await initMap();
+                    if (ready) map.invalidateSize();
                 }, 100);
             }
         });
@@ -693,12 +779,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, maximumAge: 300000 });
                     });
                 } else {
-                    alert('เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง');
+                    window.showAlert?.(t('geolocation_not_supported', 'เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง'), 'warning');
                     return;
                 }
 
                 if (!pos) {
-                    alert('ไม่สามารถเข้าถึงตำแหน่งของคุณได้');
+                    window.showAlert?.(t('location_access_failed', 'ไม่สามารถเข้าถึงตำแหน่งของคุณได้'), 'error');
                     return;
                 }
 
@@ -712,13 +798,55 @@ document.addEventListener("DOMContentLoaded", function () {
                     marker.setLatLng([lat, lng]);
                 }
             } catch (_) {
-                alert('ไม่สามารถเข้าถึงตำแหน่งของคุณได้');
+                window.showAlert?.(t('location_access_failed', 'ไม่สามารถเข้าถึงตำแหน่งของคุณได้'), 'error');
             }
         });
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     const addPurchaseBtn = document.getElementById('addPurchaseBtn');
+    const profileOfferLimitModal = document.getElementById('profileOfferLimitModal');
+    const profileOfferLimitClose = document.getElementById('profileOfferLimitClose');
+    const profileOfferLimitPlan = document.getElementById('profileOfferLimitPlan');
+    const profileOfferLimitUsage = document.getElementById('profileOfferLimitUsage');
+    const profileOfferLimitFill = document.getElementById('profileOfferLimitFill');
+    const profileOfferLimitUpgrade = document.getElementById('profileOfferLimitUpgrade');
+    const profileOfferLimitManage = document.getElementById('profileOfferLimitManage');
+
+    function openProfileOfferLimit(usage = {}) {
+        if (!profileOfferLimitModal) return;
+        const tier = String(usage.tier || 'free').toLowerCase();
+        const limit = Number(usage.limit || (tier === 'pro' ? 10 : 3));
+        const used = Math.max(0, Number(usage.activeCount ?? limit));
+        profileOfferLimitPlan.textContent = t(tier === 'pro' ? 'current_pro_plan' : 'current_free_plan', tier.toUpperCase());
+        profileOfferLimitUsage.textContent = t('offer_limit_usage', `${used} / ${limit}`, { used, limit });
+        profileOfferLimitFill.style.width = `${Math.min(100, Math.round((used / Math.max(1, limit)) * 100))}%`;
+        profileOfferLimitUpgrade.hidden = tier === 'pro';
+        profileOfferLimitModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => profileOfferLimitClose?.focus());
+    }
+
+    function closeProfileOfferLimit() {
+        if (!profileOfferLimitModal) return;
+        profileOfferLimitModal.hidden = true;
+        document.body.style.overflow = '';
+        addPurchaseBtn?.focus();
+    }
+
+    profileOfferLimitClose?.addEventListener('click', closeProfileOfferLimit);
+    profileOfferLimitModal?.addEventListener('click', event => {
+        if (event.target === profileOfferLimitModal) closeProfileOfferLimit();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && profileOfferLimitModal && !profileOfferLimitModal.hidden) closeProfileOfferLimit();
+    });
+    profileOfferLimitUpgrade?.addEventListener('click', () => { window.location.href = '../account/subscription.html'; });
+    profileOfferLimitManage?.addEventListener('click', () => {
+        closeProfileOfferLimit();
+        document.getElementById('productListContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
     if (addPurchaseBtn) {
         addPurchaseBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -726,21 +854,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const limit = tier === 'pro' ? 10 : 3;
             const currentCount = profileData.products ? profileData.products.filter(p => p.is_active !== false).length : 0;
             if (currentCount >= limit) {
-                const t = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
-                if (tier === 'free') {
-                    const confirmMsg = t('error_free_limit', 'บัญชี FREE จำกัดการสร้างรายการรับซื้อสูงสุด 3 รายการ ต้องการอัปเกรดเป็น PRO เพื่อรับสิทธิ์เพิ่มรายการได้สูงสุด 10 รายการหรือไม่?');
-                    if (window.showConfirm) {
-                        window.showConfirm(confirmMsg, (agreed) => {
-                            if (agreed) {
-                                window.location.href = '../account/subscription.html';
-                            }
-                        });
-                    } else {
-                        window.showAlert?.(confirmMsg, 'info');
-                    }
-                } else {
-                    alert(t('error_pro_limit', 'ขออภัย บัญชี PRO จำกัดการสร้างรายการรับซื้อสูงสุด 10 รายการเท่านั้น'));
-                }
+                openProfileOfferLimit({ tier, limit, activeCount: currentCount });
             } else {
                 window.location.href = "setbooking/setbooking-step1.html";
             }

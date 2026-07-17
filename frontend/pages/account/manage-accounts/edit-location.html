@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
    
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ระบุตำแหน่งล้ง | AGRIPRICE</title>
+  <title data-i18n="pin_yard_location">ระบุตำแหน่งล้ง | AGRIPRICE</title>
     <meta name="theme-color" content="#0B853C">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <!-- Leaflet CSS (Map) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="../../../js/utils/leaflet-loader.js"></script>
 
   <link rel="stylesheet" href="../../../css/global.css" />
   <link rel="stylesheet" href="../../../css/dark-mode-patch.css" />
@@ -81,30 +81,28 @@
       <button class="back-btn" data-back>
         <span class="material-icons-outlined">chevron_left</span>
       </button>
-      <h1 class="title">ปักหมุดตำแหน่งล้ง</h1>
+      <h1 class="title" data-i18n="pin_yard_location">ปักหมุดตำแหน่งล้ง</h1>
     </header>
 
     <div id="map"></div>
 
     <div class="info-card">
-      <div class="info-label">พิกัดปัจจุบันที่เลือก</div>
-      <div class="info-val" id="coordsText">กรุณาเลือกตำแหน่งบนแผนที่</div>
+      <div class="info-label" data-i18n="selected_coordinates">พิกัดปัจจุบันที่เลือก</div>
+      <div class="info-val" id="coordsText" data-i18n="select_map_location">กรุณาเลือกตำแหน่งบนแผนที่</div>
     </div>
 
     <button class="btn-gps" onclick="useCurrentLocation()">
       <span class="material-icons-outlined">my_location</span>
-      ใช้ตำแหน่งปัจจุบันของฉัน
+      <span data-i18n="use_my_current_location">ใช้ตำแหน่งปัจจุบันของฉัน</span>
     </button>
 
     <button class="btn-save" id="saveBtn" onclick="saveLocation()" disabled>
-      บันทึกตำแหน่งที่ตั้ง
+      <span data-i18n="save_location">บันทึกตำแหน่งที่ตั้ง</span>
     </button>
   </main>
 
   <!-- Leaflet JS -->
  
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
   <!-- Core Scripts -->
  
     <script src="../../../js/config.js"></script>
@@ -114,14 +112,13 @@
     <script src="../../../js/api-client.js"></script>
  
     <script src="../../../js/auth/guard.js"></script>
+    <script src="../../../js/components/i18n.js"></script>
   <script>window.AuthGuard.requireLogin();</script>
 
   <!-- Component & Page Scripts -->
  
     <script src="../../../js/global-anim.js"></script>
     <script src="../../../js/permission-manager.js"></script>
- 
-    <script src="../../../js/components/i18n.js"></script>
  
     <script src="../../../js/components.js"></script>
  
@@ -134,6 +131,17 @@
     async function init() {
       // รอจนกว่า Config จะพร้อม
       await window.APP_CONFIG_READY;
+      try {
+        if (window.LeafletReady) await window.LeafletReady;
+        if (!window.L?.map) throw new Error('Leaflet unavailable');
+      } catch (error) {
+        const message = error.message || 'ไม่สามารถโหลดแผนที่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+        const mapElement = document.getElementById('map');
+        if (mapElement) mapElement.textContent = message;
+        if (window.appNotify) window.appNotify(message, 'error');
+        else console.warn(message);
+        return;
+      }
       
       // พิกัดเริ่มต้น (กรุงเทพฯ หรือค่าที่เคยบันทึกไว้)
       let initialLat = 13.7563, initialLng = 100.5018;
@@ -152,7 +160,7 @@
 
       map = L.map('map').setView([initialLat, initialLng], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'ยฉ OpenStreetMap contributors'
+        attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
       // สร้าง Marker ถ้ามีตำแหน่งเดิม
@@ -253,7 +261,7 @@
       if (!selectedLat || !selectedLng) return;
       
       const saveBtn = document.getElementById('saveBtn');
-      saveBtn.innerText = 'กำลังบันทึก...';
+      saveBtn.textContent = window.i18nT ? window.i18nT('processing', 'กำลังดำเนินการ...') : 'กำลังดำเนินการ...';
       saveBtn.disabled = true;
 
       try {
@@ -278,7 +286,7 @@
           if (window.AccountManageStore) {
             await window.AccountManageStore.syncFromServer();
           }
-          const okMsg = 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
+          const okMsg = window.i18nT ? window.i18nT('location_save_success', 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว') : 'บันทึกตำแหน่งล้งเรียบร้อยแล้ว';
           if (window.appNotify) window.appNotify(okMsg, 'success');
           history.back();
         } else {
@@ -288,12 +296,15 @@
         const failMsg = 'เกิดข้อผิดพลาด: ' + err.message;
         if (window.appNotify) window.appNotify(failMsg, 'error');
         else console.error(failMsg);
-        saveBtn.innerText = 'บันทึกตำแหน่งที่ตั้ง';
+        saveBtn.textContent = window.i18nT ? window.i18nT('save_location', 'บันทึกตำแหน่งที่ตั้ง') : 'บันทึกตำแหน่งที่ตั้ง';
         saveBtn.disabled = false;
       }
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+      window.i18nInit?.();
+      init();
+    });
   </script>
 </body>
 </html>

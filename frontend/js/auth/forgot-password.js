@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
   // Elements
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Firebase Initialization ---
   async function initFirebaseOtp() {
+    if (window.FirebaseCompatReady) await window.FirebaseCompatReady;
     if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
     const FIREBASE_CONFIG = window.FIREBASE_CONFIG || null;
     if (!window.firebase || !FIREBASE_CONFIG) {
@@ -112,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
           tempToken = res.data.temp_token;
           goToStep(3);
         } else {
-          showError(2, res.message || 'รหัส OTP ไม่ถูกต้อง');
+          showError(2, window.i18nApiMessage?.(res.message, 'otp_invalid') || t('otp_invalid', 'รหัส OTP ไม่ถูกต้อง'));
         }
       } else if (confirmationResult) {
         // Firebase verification
@@ -127,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
           body: JSON.stringify({ idToken, phone: currentPhone }),
         });
         const json = await verifyRes.json().catch(() => ({}));
-        if (!verifyRes.ok) throw new Error(json.message || 'ยืนยัน OTP กับระบบไม่สำเร็จ');
+        if (!verifyRes.ok) throw new Error(window.i18nApiMessage?.(json.message, 'otp_invalid') || t('otp_invalid', 'ยืนยัน OTP กับระบบไม่สำเร็จ'));
 
         tempToken = json.temp_token || (json.data && json.data.temp_token);
         goToStep(3);
@@ -168,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (res.success) {
         goToStep('success');
       } else {
-        showError(3, res.message || 'เกิดข้อผิดพลาดในการตั้งรหัสผ่านใหม่');
+        showError(3, window.i18nApiMessage?.(res.message, 'password_save_error') || t('password_save_error', 'เกิดข้อผิดพลาดในการตั้งรหัสผ่านใหม่'));
       }
     } catch (err) {
       console.error('[ForgotPwd] Step 3 Error:', err);
@@ -199,15 +201,15 @@ document.addEventListener('DOMContentLoaded', function () {
         step1.classList.add('active');
         step1.removeAttribute('hidden');
       }
-      stepTitle.textContent = 'ลืมรหัสผ่าน?';
-      stepSub.textContent = 'ไม่ต้องกังวล เราจะช่วยคุณกู้คืนบัญชี';
+      stepTitle.textContent = t('forgot_pwd_title', 'ลืมรหัสผ่าน?');
+      stepSub.textContent = t('forgot_pwd_sub', 'ไม่ต้องกังวล เราจะช่วยคุณกู้คืนบัญชี');
     } else if (step === 2) {
       if (step2) {
         step2.classList.add('active');
         step2.removeAttribute('hidden');
       }
-      stepTitle.textContent = 'ยืนยันตัวตน';
-      stepSub.textContent = 'กรอกรหัส 6 หลักที่ส่งไปทาง SMS';
+      stepTitle.textContent = t('verify_identity', 'ยืนยันตัวตน');
+      stepSub.textContent = t('enter_sms_code', 'กรอกรหัส 6 หลักที่ส่งไปทาง SMS');
       if (otpInputs && otpInputs[0]) {
         otpInputs[0].focus();
       } else {
@@ -219,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function () {
         step3.classList.add('active');
         step3.removeAttribute('hidden');
       }
-      stepTitle.textContent = 'ตั้งรหัสผ่านใหม่';
-      stepSub.textContent = 'เลือกใช้รหัสผ่านที่คุณจำได้ง่ายและปลอดภัย';
+      stepTitle.textContent = t('set_new_password', 'ตั้งรหัสผ่านใหม่');
+      stepSub.textContent = t('choose_secure_password', 'เลือกใช้รหัสผ่านที่คุณจำได้ง่ายและปลอดภัย');
     } else if (step === 'success') {
       if (stepSuccess) {
         stepSuccess.classList.add('active');

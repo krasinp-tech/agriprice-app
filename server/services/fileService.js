@@ -57,6 +57,78 @@ async function saveFile(file, folder = 'misc') {
   return data.publicUrl;
 }
 
+async function collectAccountFileUrls(userId) {
+  const [profileResult, offersResult, paymentsResult, roomsResult] = await Promise.all([
+    supabaseAdmin.from('profiles').select('avatar, hero_image').eq('profile_id', userId).maybeSingle(),
+    supabaseAdmin.from('buy_offers').select('image').eq('user_id', userId),
+    supabaseAdmin.from('payment_submissions').select('slip_url').eq('user_id', userId),
+    supabaseAdmin.from('chat_rooms').select('room_id').or(`user1_id.eq.${userId},user2_id.eq.${userId}`),
+  ]);
+
+  const failedResult = [profileResult, offersResult, paymentsResult, roomsResult].find(result => result.error);
+  if (failedResult?.error) throw failedResult.error;
+
+  const roomIds = (roomsResult.data || []).map(room => room.room_id).filter(Boolean);
+  let chatImages = [];
+  if (roomIds.length > 0) {
+    const { data, error } = await supabaseAdmin
+      .from('chat_messages')
+      .select('image_url')
+      .in('room_id', roomIds);
+    if (error) throw error;
+    chatImages = data || [];
+  }
+
+  return [
+    profileResult.data?.avatar,
+    profileResult.data?.hero_image,
+    ...(offersResult.data || []).map(row => row.image),
+    ...(paymentsResult.data || []).map(row => row.slip_url),
+    ...chatImages.map(row => row.image_url),
+  ].filter(Boolean);
+}
+function getStoredFilePath(fileUrl) {
+  const value = String(fileUrl || '').trim();
+  if (!value) return null;
+
+  if (value.startsWith('/uploads/')) {
+    return decodeURIComponent(value.slice('/uploads/'.length));
+  }
+
+  try {
+    const parsed = new URL(value);
+    const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+    const markerIndex = parsed.pathname.indexOf(marker);
+    if (markerIndex === -1) return null;
+    return decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+  } catch (_) {
+    return null;
+  }
+}
+
+async function deleteFilesByUrls(fileUrls) {
+  const storedPaths = [...new Set((fileUrls || []).map(getStoredFilePath).filter(Boolean))];
+  if (storedPaths.length === 0) return { deleted: 0 };
+
+  if (UPLOAD_MODE === 'local') {
+    const uploadRoot = path.resolve(UPLOAD_DIR);
+    let deleted = 0;
+    for (const storedPath of storedPaths) {
+      const targetPath = path.resolve(uploadRoot, storedPath);
+      if (!targetPath.startsWith(uploadRoot + path.sep)) continue;
+      if (!fs.existsSync(targetPath)) continue;
+      fs.unlinkSync(targetPath);
+      deleted += 1;
+    }
+    return { deleted };
+  }
+
+  const { error } = await supabaseAdmin.storage
+    .from(STORAGE_BUCKET)
+    .remove(storedPaths);
+  if (error) throw new Error('ลบไฟล์จาก Storage ไม่สำเร็จ: ' + error.message);
+  return { deleted: storedPaths.length };
+}
 function guessExt(mimetype) {
   const map = {
     'image/jpeg':      '.jpg',
@@ -68,4 +140,4 @@ function guessExt(mimetype) {
   return map[mimetype] || '';
 }
 
-module.exports = { saveFile };
+module.exports = { saveFile, collectAccountFileUrls, deleteFilesByUrls };

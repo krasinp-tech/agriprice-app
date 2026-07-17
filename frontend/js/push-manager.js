@@ -121,10 +121,12 @@
 
   function autoRegisterWhenLoggedIn() {
     if (!localStorage.getItem('token')) return;
-    setTimeout(() => {
+    const register = () => {
       attachPushListeners();
       registerPush();
-    }, 600);
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(register, { timeout: 3000 });
+    else setTimeout(register, 1500);
   }
 
   window.AgriPushManager = {

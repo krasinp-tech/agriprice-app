@@ -2,6 +2,7 @@
   "use strict";
 
   const api = window.api || {};
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
 
   let currentEditId = null;
   let currentTag = 'Home';
@@ -146,7 +147,7 @@
     currentEditId = isEdit && addr ? (addr.id || null) : null;
 
     // Title
-    $('addrModalTitle').textContent = isEdit ? 'แก้ไขที่อยู่' : 'เพิ่มที่อยู่ใหม่';
+    $('addrModalTitle').textContent = isEdit ? t('edit_address', 'แก้ไขที่อยู่') : t('add_new_address', 'เพิ่มที่อยู่ใหม่');
 
     // Reset or fill values
     if (isEdit && addr) {
@@ -218,7 +219,7 @@
     } catch (err) {
       list.innerHTML = '';
       console.error('[AddressBook] Load failed:', err);
-      toast('โหลดที่อยู่ไม่สำเร็จ', 'error');
+      toast(t('address_load_failed', 'โหลดที่อยู่ไม่สำเร็จ'), 'error');
     }
   }
 
@@ -237,18 +238,18 @@
           <span class="material-icons-outlined">${icon}</span>
         </div>
         <div class="address-info">
-          <div class="address-tag">${tag}${addr.is_default ? '<span class="default-badge">เริ่มต้น</span>' : ''}</div>
+          <div class="address-tag">${tag}${addr.is_default ? `<span class="default-badge">${t('default', 'เริ่มต้น')}</span>` : ''}</div>
           <div class="address-name">${fullName}</div>
           ${addr.phone ? `<div class="address-detail" style="margin-bottom:4px;">${addr.phone}</div>` : ''}
           <div class="address-detail">${detail || '-'}</div>
         </div>
       </div>
       <div class="address-actions">
-        <button class="action-btn edit" data-id="${addr.id}" aria-label="แก้ไขที่อยู่">
-          <span class="material-icons-outlined" style="font-size:16px;">edit</span> แก้ไข
+        <button class="action-btn edit" data-id="${addr.id}" aria-label="${t('edit_address', 'แก้ไขที่อยู่')}">
+          <span class="material-icons-outlined" style="font-size:16px;">edit</span> ${t('edit', 'แก้ไข')}
         </button>
-        <button class="action-btn delete" data-id="${addr.id}" aria-label="ลบที่อยู่">
-          <span class="material-icons-outlined" style="font-size:16px;">delete</span> ลบ
+        <button class="action-btn delete" data-id="${addr.id}" aria-label="${t('delete_address', 'ลบที่อยู่')}">
+          <span class="material-icons-outlined" style="font-size:16px;">delete</span> ${t('delete', 'ลบ')}
         </button>
       </div>
     `;
@@ -273,12 +274,12 @@
     };
 
     if (!body.first_name || !body.address_line1) {
-      toast('กรุณากรอกชื่อและที่อยู่', 'error');
+      toast(t('name_address_required', 'กรุณากรอกชื่อและที่อยู่'), 'error');
       return;
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = 'กำลังบันทึก...';
+    saveBtn.textContent = t('saving_btn', 'กำลังบันทึก...');
 
     try {
       if (currentEditId) {
@@ -292,7 +293,7 @@
             body: JSON.stringify(body)
           });
         }
-        toast('แก้ไขที่อยู่สำเร็จ');
+        toast(t('address_update_success', 'แก้ไขที่อยู่สำเร็จ'));
       } else {
         // Add mode
         if (api.createAddress) {
@@ -304,17 +305,17 @@
             body: JSON.stringify(body)
           });
         }
-        toast('เพิ่มที่อยู่สำเร็จ');
+        toast(t('address_add_success', 'เพิ่มที่อยู่สำเร็จ'));
       }
 
       closeModal();
       await loadAddresses();
     } catch (err) {
       console.error('[AddressBook] Save failed:', err);
-      toast('บันทึกไม่สำเร็จ กรุณาลองใหม่', 'error');
+      toast(t('save_retry_failed', 'บันทึกไม่สำเร็จ กรุณาลองใหม่'), 'error');
     } finally {
       saveBtn.disabled = false;
-      saveBtn.textContent = 'บันทึก';
+      saveBtn.textContent = t('save', 'บันทึก');
     }
   }
 
@@ -333,17 +334,17 @@
             headers: getAuthHeader()
           });
         }
-        toast('ลบที่อยู่สำเร็จ');
+        toast(t('address_deleted', 'ลบที่อยู่สำเร็จ'));
         await loadAddresses();
       } catch (err) {
         console.error('[AddressBook] Delete failed:', err);
         cardEl.style.opacity = '1';
         cardEl.style.pointerEvents = '';
-        toast('ลบไม่สำเร็จ กรุณาลองใหม่', 'error');
+        toast(t('address_delete_failed', 'ลบไม่สำเร็จ กรุณาลองใหม่'), 'error');
       }
     };
 
-    const msg = 'ต้องการลบที่อยู่นี้ใช่หรือไม่?';
+    const msg = t('address_delete_confirm', 'ต้องการลบที่อยู่นี้ใช่หรือไม่?');
     if (window.showConfirm) {
       window.showConfirm(msg, (agreed) => {
         if (agreed) runDelete();

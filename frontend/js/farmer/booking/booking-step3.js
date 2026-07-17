@@ -211,6 +211,119 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load Summary Data
   // ================================
   async function loadSummaryData() {
+    const categoryImageMap = {
+      'ทุเรียน': 'durian.png',
+      'ลองกอง': 'longkong.png',
+      'ลางสาด': 'longkong.png',
+      'ลำไย': 'longan.png',
+      'ลิ้นจี่': 'longan.png',
+      'มังคุด': 'mangosteen.png',
+      'เงาะ': 'rambutan.png',
+      'ปาล์มน้ำมัน': 'oil-bottle.png',
+      'น้ำมัน': 'oil-bottle.png',
+      'ปาล์ม': 'palm.png',
+      'ยางพารา': 'rubber.png',
+      'ผักสด': 'fresh-vegetables.png',
+      'ผัก': 'fresh-vegetables.png',
+      'คะน้า': 'fresh-vegetables.png',
+      'กวางตุ้ง': 'fresh-vegetables.png',
+      'กะหล่ำ': 'fresh-vegetables.png',
+      'บรอกโคลี': 'fresh-vegetables.png',
+      'แตงกวา': 'fresh-vegetables.png',
+      'ถั่วฝักยาว': 'fresh-vegetables.png',
+      'ฟัก': 'fresh-vegetables.png',
+      'มะเขือเทศ': 'fresh-vegetables.png',
+      'แตงโม': 'watermelon.png',
+      'เมลอน': 'fresh-vegetables.png',
+      'แก้วมังกร': 'dragon-fruit.png',
+      'สละ': 'fresh-vegetables.png',
+      'ระกำ': 'fresh-vegetables.png',
+      'องุ่น': 'grape.png',
+      'สตรอว์เบอร์รี': 'strawberry.png',
+      'เมล็ดพันธุ์': 'seedlings.png',
+      'งา': 'seedlings.png',
+      'ทานตะวัน': 'seedlings.png',
+      'ละหุ่ง': 'seedlings.png',
+      'เห็ด': 'mushroom.png',
+      'ไม้ประดับ': 'ornamental-plants.png',
+      'สมุนไพร': 'herbs.png',
+      'ขิง': 'herbs.png',
+      'ข่า': 'herbs.png',
+      'ขมิ้น': 'herbs.png',
+      'ตะไคร้': 'herbs.png',
+      'โหระพา': 'herbs.png',
+      'กะเพรา': 'herbs.png',
+      'มะกรูด': 'herbs.png',
+      'เตย': 'herbs.png',
+      'กระชาย': 'herbs.png',
+      'มะรุม': 'herbs.png',
+      'กล้วย': 'banana.png',
+      'มะม่วง': 'mango.png',
+      'มะละกอ': 'papaya.png',
+      'มันสำปะหลัง': 'cassava.png',
+      'อ้อย': 'sugarcane.png',
+      'สับปะรด': 'pineapple.png',
+      'ขนุน': 'mango.png',
+      'มะขาม': 'mango.png',
+      'ละมุด': 'mango.png',
+      'พลับ': 'mango.png',
+      'มะพร้าว': 'coconut.png',
+      'ลูกตาล': 'coconut.png',
+      'สาเก': 'coconut.png',
+      'ส้ม': 'orange.png',
+      'มะนาว': 'lime.png',
+      'ข้าวโพด': 'corn.png',
+      'พริก': 'chili.png',
+      'ข้าว': 'rice.png',
+    };
+
+    function getFallbackImage(productName, category) {
+      const name = String(productName || '').trim();
+      const cat = String(category || '').trim();
+      for (const key of Object.keys(categoryImageMap)) {
+        if (name.includes(key) || cat.includes(key)) {
+          return '../../../assets/images/' + categoryImageMap[key];
+        }
+      }
+      return null;
+    }
+
+    function resolveImageUrl(imagePath, productName, category) {
+      const val = String(imagePath || '').trim();
+      if (val) {
+        if (/^(https?:\/\/|data:|blob:)/i.test(val)) return val;
+        const currentBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
+        if (val.startsWith('/uploads/') || val.startsWith('uploads/')) {
+          const cleanPath = val.startsWith('/') ? val : '/' + val;
+          return currentBase + cleanPath;
+        }
+      }
+      return getFallbackImage(productName, category);
+    }
+
+    function getCategoryStyle(productName, category) {
+      const name = String(productName || '').trim();
+      const cat = String(category || '').trim();
+
+      const categoryStyleMap = {
+        'พืชผัก': { icon: 'spa', bg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)', color: '#2e7d32' },
+        'ผัก': { icon: 'spa', bg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)', color: '#2e7d32' },
+        'พืชไร่': { icon: 'agriculture', bg: 'linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%)', color: '#4e342e' },
+        'พืชอุตสาหกรรม': { icon: 'precision_manufacturing', bg: 'linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%)', color: '#37474f' },
+        'ข้าว': { icon: 'grass', bg: 'linear-gradient(135deg, #fffde7 0%, #fff9c4 100%)', color: '#f57f17' },
+        'สมุนไพร': { icon: 'local_pharmacy', bg: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)', color: '#00695c' },
+        'เห็ด': { icon: 'wb_cloudy', bg: 'linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%)', color: '#33691e' },
+        'ผลไม้': { icon: 'eco', bg: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', color: '#e65100' },
+      };
+
+      for (const key of Object.keys(categoryStyleMap)) {
+        if (name.includes(key) || cat.includes(key)) {
+          return categoryStyleMap[key];
+        }
+      }
+      return { icon: 'inventory_2', bg: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)', color: '#616161' };
+    }
+
     try {
       // 🔘 โหลดข้อมูลผ่าน API Layer (รองรับ Database)
       const bookingData = await BookingAPI.loadBookingSummary();
@@ -257,27 +370,59 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Render product details
+      let finalProductName = '-';
+      let finalVarietyName = null;
+      let finalCategoryName = '';
+      let rawImage = '';
+
       if (productDetails) {
-        // Product name
-        if (productName) productName.textContent = productDetails.name || '-';
-        // Product type
-        if (productType) productType.textContent = productDetails.type || '-';
-        // Product image
-        if (productImg) {
-          productImg.src = productDetails.image_url || '../../../assets/images/durian.png';
-          productImg.alt = productDetails.name || t('product', 'ผลผลิต');
-        }
-        // Weight
-        if (summaryWeight) summaryWeight.textContent = step2Data.productAmount || '-';
+        finalProductName = productDetails.name || '-';
+        finalVarietyName = productDetails.variety || null;
+        finalCategoryName = productDetails.category || '';
+        rawImage = productDetails.image || '';
       } else {
-        // Fallback to step1/localStorage
-        if (productName) productName.textContent = step1Data.productName || '-';
-        if (productType) productType.textContent = '-';
+        finalProductName = step1Data.productName || '-';
+        finalVarietyName = null;
+        finalCategoryName = '';
+        rawImage = '';
+      }
+
+      const resolvedImageUrl = resolveImageUrl(rawImage, finalProductName, finalCategoryName);
+
+      if (productName) productName.textContent = finalProductName;
+
+      const placeholderEl = document.getElementById("productIconPlaceholder");
+      const placeholderIconEl = document.getElementById("productPlaceholderIcon");
+
+      if (resolvedImageUrl) {
         if (productImg) {
-          productImg.src = '../../../assets/images/durian.png';
-          productImg.alt = step1Data.productName || t('product', 'ผลผลิต');
+          productImg.src = resolvedImageUrl;
+          productImg.alt = finalProductName;
+          productImg.style.display = "block";
         }
-        if (summaryWeight) summaryWeight.textContent = step2Data.productAmount || '-';
+        if (placeholderEl) placeholderEl.style.display = "none";
+      } else {
+        if (productImg) productImg.style.display = "none";
+        if (placeholderEl) {
+          placeholderEl.style.display = "flex";
+          const matchedStyle = getCategoryStyle(finalProductName, finalCategoryName);
+          placeholderEl.style.background = matchedStyle.bg;
+          placeholderEl.style.color = matchedStyle.color;
+          if (placeholderIconEl) {
+            placeholderIconEl.textContent = matchedStyle.icon;
+          }
+        }
+      }
+
+      // Show/Hide Variety Badge
+      const varietyBadge = document.getElementById("productTypeBadge");
+      if (varietyBadge) {
+        if (finalVarietyName && finalVarietyName.trim() && finalVarietyName !== '-') {
+          if (productType) productType.textContent = finalVarietyName;
+          varietyBadge.style.display = "inline-flex";
+        } else {
+          varietyBadge.style.display = "none";
+        }
       }
 
       // ชื่อล้ง/ผู้รับซื้อ จาก step1

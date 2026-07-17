@@ -28,17 +28,17 @@ router.get('/:userId', async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('profiles')
-      .select('last_seen')
+      .select('last_seen, account_status')
       .eq('profile_id', req.params.userId)
       .single();
 
     if (error) throw error;
     
-    const isOnline = data?.last_seen
+    const isOnline = data?.account_status === 'active' && data?.last_seen
       ? (Date.now() - new Date(data.last_seen).getTime()) < 2 * 60 * 1000
       : false;
 
-    res.json({ online: isOnline, last_seen: data?.last_seen || null });
+    res.json({ online: isOnline, last_seen: data?.account_status === 'active' ? (data?.last_seen || null) : null });
   } catch (e) {
     res.status(500).json(response.error(e.message));
   }

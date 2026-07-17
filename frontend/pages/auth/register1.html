@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <script src="../../js/config.js"></script>
@@ -46,7 +46,7 @@
           controlslist="nodownload noplaybackrate noremoteplayback"
           disablepictureinpicture
         >
-          <!-- <source id="topVideoSource" src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+          <source id="topVideoSource" src="../../assets/videos/register-role-selection.mp4" type="video/mp4" />
         </video>
         <div class="media-fallback" id="mediaFallback" aria-hidden="true"></div>
       </div>
@@ -75,7 +75,7 @@
                 disablepictureinpicture
                 tabindex="-1"
               >
-                <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+                <source src="../../assets/videos/farmer-role.mp4" type="video/mp4" />
               </video>
             </div>
             <div class="role-name" data-i18n="role_farmer_name">เกษตรกร</div>
@@ -86,6 +86,7 @@
           <button class="role-card" type="button" data-role="buyer" aria-pressed="false" id="roleBuyer">
             <div class="role-illus" aria-hidden="true">
               <video
+                id="buyerRoleVideo"
                 class="role-video"
                 autoplay
                 muted
@@ -96,7 +97,7 @@
                 disablepictureinpicture
                 tabindex="-1"
               >
-                <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+                <source src="../../assets/videos/buyer-role.mp4" type="video/mp4" />
               </video>
             </div>
             <div class="role-name" data-i18n="role_buyer_name">ผู้รับซื้อ</div>
@@ -133,6 +134,9 @@
     </div>
   </div>
 
+  <script>
+    window.REGISTER_VIDEO_URL = '../../assets/videos/banner.car.mp4?v=20260717-h264';
+  </script>
   <script src="../../js/components/i18n.js"></script>
   <script src="../../js/auth/register1.js"></script>
   <script>

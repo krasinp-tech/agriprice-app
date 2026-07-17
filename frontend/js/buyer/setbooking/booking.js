@@ -16,6 +16,7 @@
     if (window.i18nT) return window.i18nT(key, fallback);
     return fallback || key;
   }
+  const currentLocale = () => ({ en: 'en-US', zh: 'zh-CN', th: 'th-TH' }[localStorage.getItem('lang')] || 'th-TH');
 
   function esc(input) {
     if (window.AgriPriceUI) return window.AgriPriceUI.escapeHtml(input);
@@ -96,8 +97,10 @@
     let createdAt = "-";
     if (b.created_at) {
       const d = new Date(b.created_at);
+      const lang = localStorage.getItem('lang') || 'th';
+      const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
       createdAt = !isNaN(d.getTime()) 
-        ? d.toLocaleDateString('th-TH') + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        ? d.toLocaleDateString(locale) + ' ' + d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
         : b.created_at;
     }
 
@@ -107,7 +110,7 @@
     } else if (b.scheduled_time) {
       const d = new Date(b.scheduled_time);
       timeStr = !isNaN(d.getTime())
-        ? d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        ? d.toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' })
         : b.scheduled_time;
     }
 
@@ -188,7 +191,7 @@
           ${t('booking_id', 'เลขที่การจอง')}: <b>${esc(b.bookingId)}</b> • ${t('scheduled_time', 'เวลานัดคิว')}: <b>${esc(b.time)} น.</b>
         </div>
 
-        ${b.productName ? `<div class="meta">${esc(b.productName)} — <b>${Number(b.quantityKg).toLocaleString()} กก.</b></div>` : ''}
+        ${b.productName ? `<div class="meta">${esc(b.productName)} — <b>${Number(b.quantityKg).toLocaleString()} ${esc(t('unit_kg', 'กก.'))}</b></div>` : ''}
 
         ${b.vehicles.length > 0 ? `
           <div class="vehicleInfo">
@@ -296,7 +299,7 @@
           granted = req.camera === 'granted';
         }
         if (!granted) {
-          alert(t('error_permission_camera', 'กรุณาอนุญาตสิทธิ์การเข้าถึงกล้องเพื่อทำการสแกน'));
+          window.showAlert?.(t('error_permission_camera', 'กรุณาอนุญาตสิทธิ์การเข้าถึงกล้องเพื่อทำการสแกน'), 'warning');
           return;
         }
 
@@ -321,7 +324,7 @@
       } catch (err) {
         console.error("[Native Scan] Error:", err);
         stop();
-        alert(t('error_camera', 'ไม่สามารถเริ่มสแกนเนอร์ได้'));
+        window.showAlert?.(t('error_camera', 'ไม่สามารถเริ่มสแกนเนอร์ได้'), 'error');
       }
     }
 
@@ -359,7 +362,7 @@
       } catch (err) {
         console.error("[Web Scan] Error:", err);
         stop();
-        alert(t('error_camera', 'ไม่สามารถเปิดกล้องได้'));
+        window.showAlert?.(t('error_camera', 'ไม่สามารถเปิดกล้องได้'), 'error');
       }
     }
 
@@ -449,7 +452,7 @@
     if (manualBtn) manualBtn.onclick = () => {
       const v = manualInput.value.trim();
       if (v) handleDetected(v);
-      else alert(t('error_enter_code', 'กรุณากรอกรหัสการจอง'));
+      else window.showAlert?.(t('error_enter_code', 'กรุณากรอกรหัสการจอง'), 'warning');
     };
     modal.onclick = (e) => { if (e.target === modal) stop(); };
 

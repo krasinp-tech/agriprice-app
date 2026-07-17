@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="th">
 <head>
   <meta charset="utf-8" />
@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0B853C">
-  <title>ยินดีต้อนรับ | Agriprice</title>
+  <title data-i18n="welcome_title">ยินดีต้อนรับ | Agriprice</title>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('agriprice_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
@@ -103,11 +103,10 @@
           loop
           playsinline
           preload="auto"
-          poster="../../assets/images/story-1.jpg"
           controlslist="nodownload noplaybackrate noremoteplayback"
           disablepictureinpicture
         >
-          <!-- <source src="../../assets/video/agripricenav.mp4" type="video/mp4" /> -->
+          <source src="../../assets/videos/welcome.mp4" type="video/mp4" />
         </video>
       </div>
 
@@ -146,20 +145,31 @@
       const hint = document.getElementById("hintText");
       const goLogin = document.getElementById("goLogin");
       const goRegister = document.getElementById("goRegister");
+      const welcomeVideo = document.getElementById("welcomeVideo");
+
+      if (welcomeVideo) {
+        welcomeVideo.muted = true;
+        welcomeVideo.playsInline = true;
+        const resumeWelcomeVideo = () => welcomeVideo.play().catch(() => {});
+        welcomeVideo.addEventListener("canplay", resumeWelcomeVideo, { once: true });
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden && welcomeVideo.paused) resumeWelcomeVideo();
+        });
+      }
 
       const params = new URLSearchParams(window.location.search);
       const nextParam = params.get("next") || "";
 
       goLogin.addEventListener("click", function (e) {
         e.preventDefault();
-        hint.textContent = "กำลังไปยังหน้าเข้าสู่ระบบ…";
+        hint.textContent = window.i18nT ? window.i18nT('going_to_login', 'กำลังไปยังหน้าเข้าสู่ระบบ…') : 'กำลังไปยังหน้าเข้าสู่ระบบ…';
         const url = nextParam ? `./login2.html?next=${encodeURIComponent(nextParam)}` : "./login2.html";
         window.location.href = url;
       });
 
       goRegister.addEventListener("click", function (e) {
         e.preventDefault();
-        hint.textContent = "กำลังไปยังหน้าสมัครสมาชิก…";
+        hint.textContent = window.i18nT ? window.i18nT('going_to_register', 'กำลังไปยังหน้าสมัครสมาชิก…') : 'กำลังไปยังหน้าสมัครสมาชิก…';
         const url = nextParam ? `./register1.html?next=${encodeURIComponent(nextParam)}` : "./register1.html";
         window.location.href = url;
       });

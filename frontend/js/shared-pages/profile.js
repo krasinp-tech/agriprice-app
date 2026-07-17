@@ -3,10 +3,43 @@
 
   const api = window.api || {};
   const helpers = window.ProfileHelpers || {};
+  let presenceTimer = null;
 
   function t(key, fallback) {
     if (window.i18nT) return window.i18nT(key, fallback);
     return fallback || key;
+  }
+
+  function renderPresence(presence) {
+    const row = document.getElementById('profilePresence');
+    const text = document.getElementById('onlineStatusText');
+    const online = presence === true || presence?.online === true;
+    row?.classList.toggle('is-offline', !online);
+    if (text) {
+      text.textContent = window.AgriPresence?.formatStatus?.(presence)
+        || (online ? t('online', 'ออนไลน์') : t('offline', 'ออฟไลน์'));
+      text.removeAttribute('data-i18n');
+    }
+  }
+
+  async function refreshPresence(uid) {
+    if (!uid || !api.getUserPresence || document.hidden || navigator.onLine === false) {
+      renderPresence(false);
+      return;
+    }
+    try {
+      const response = await api.getUserPresence(uid);
+      const presence = response?.data || response || {};
+      renderPresence(presence);
+    } catch (_) {
+      renderPresence(false);
+    }
+  }
+
+  function watchPresence(uid) {
+    clearInterval(presenceTimer);
+    refreshPresence(uid);
+    presenceTimer = setInterval(() => refreshPresence(uid), 30 * 1000);
   }
 
   function escapeHtml(value) {
@@ -205,8 +238,7 @@
         const taglineEl = document.getElementById('profileTagline') || document.getElementById('heroBadgeTitle');
         if (taglineEl) taglineEl.textContent = data.tagline || roleLabel;
         
-        const statusText = document.getElementById('onlineStatusText');
-        if (statusText) statusText.textContent = t('online', 'ออนไลน์');
+        watchPresence(uid);
 
         // Setup Actions
         const myId = api.getUser()?.id;
@@ -285,5 +317,12 @@
     
     if (userId) loadProfile(userId);
   });
+
+  document.addEventListener('visibilitychange', () => {
+    const userId = new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window.location.search).get('uid');
+    if (!document.hidden && userId) refreshPresence(userId);
+  });
+  window.addEventListener('offline', () => renderPresence(false));
+  window.addEventListener('beforeunload', () => clearInterval(presenceTimer));
 
 })();

@@ -6,10 +6,34 @@
   const pwEl = document.getElementById("password");
   const cfEl = document.getElementById("confirmPassword");
   const btn = document.getElementById("finishBtn");
+  const t = (key, fallback) => window.i18nT ? window.i18nT(key, fallback) : fallback;
+  const video = document.getElementById("registerVideo");
+  const videoFallback = document.getElementById("mediaFallback");
 
   function setLoading(on) {
     if (window.setBtnLoading) window.setBtnLoading(btn, on);
     else if (btn) btn.disabled = !!on;
+  }
+
+  function setupVideo() {
+    if (!video) return;
+    video.muted = true;
+    video.playsInline = true;
+
+    const resumeVideo = () => {
+      const playAttempt = video.play();
+      if (!playAttempt || typeof playAttempt.then !== "function") return;
+      playAttempt
+        .then(() => videoFallback?.classList.remove("is-show"))
+        .catch(() => videoFallback?.classList.add("is-show"));
+    };
+
+    resumeVideo();
+    video.addEventListener("canplay", resumeVideo, { once: true });
+    video.addEventListener("error", () => videoFallback?.classList.add("is-show"));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && video.paused) resumeVideo();
+    });
   }
 
   async function onSubmit(e) {
@@ -18,11 +42,11 @@
     const confirm = cfEl.value.trim();
 
     if (password.length < 8) {
-      if (window.showToast) window.showToast("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร", "error");
+      if (window.showToast) window.showToast(t("password_min_8", "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"), "error");
       return;
     }
     if (password !== confirm) {
-      if (window.showToast) window.showToast("รหัสผ่านไม่ตรงกัน", "error");
+      if (window.showToast) window.showToast(t("password_mismatch", "รหัสผ่านไม่ตรงกัน"), "error");
       return;
     }
 
@@ -31,7 +55,7 @@
     const profileRaw = sessionStorage.getItem("reg_profile");
 
     if (!tempToken || !role || !profileRaw) {
-      if (window.showToast) window.showToast("ข้อมูลการสมัครไม่ครบถ้วน กรุณาเริ่มใหม่", "error");
+      if (window.showToast) window.showToast(t("registration_data_incomplete", "ข้อมูลการสมัครไม่ครบถ้วน กรุณาเริ่มใหม่"), "error");
       setTimeout(() => window.location.href = "register1.html", 1500);
       return;
     }
@@ -49,7 +73,7 @@
         sessionStorage.removeItem("reg_role");
         sessionStorage.removeItem("reg_profile");
 
-        if (window.showToast) window.showToast("ลงทะเบียนสำเร็จ!", "success");
+        if (window.showToast) window.showToast(t("registration_success", "ลงทะเบียนสำเร็จ!"), "success");
 
         // [CLEANUP] Use unified redirect from AuthGuard
         setTimeout(() => {
@@ -60,7 +84,7 @@
           }
         }, 800);
       } else {
-        throw new Error(result.message || "การลงทะเบียนไม่สำเร็จ");
+        throw new Error(window.i18nApiMessage?.(result.message, 'registration_failed') || t("registration_failed", "การลงทะเบียนไม่สำเร็จ"));
       }
     } catch (err) {
       if (window.appNotify) window.appNotify(err.message, "error");
@@ -81,4 +105,5 @@
   }
   toggle1 && toggle1.addEventListener("click", () => toggleInputType(pwEl));
   toggle2 && toggle2.addEventListener("click", () => toggleInputType(cfEl));
+  setupVideo();
 })();

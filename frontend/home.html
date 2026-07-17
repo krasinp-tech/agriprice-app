@@ -49,11 +49,15 @@
         <!-- ── Hero Carousel ──────────────────────────────────── -->
         <section class="hero-background">
             <div class="hero-carousel" id="heroCarousel">
-                <div class="hero-slide"><img src="assets/images/story-1.jpg" alt="เกษตรกร" fetchpriority="high" decoding="async"
-                        data-i18n-alt="slider_farmer"></div>
-                <div class="hero-slide"><img src="assets/images/hero.png" alt="ผลผลิตสดใหม่" loading="lazy" decoding="async"
+                <div class="hero-slide hero-video-slide">
+                    <video id="homeHeroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
+                        aria-hidden="true" controlslist="nodownload noplaybackrate noremoteplayback" disablepictureinpicture>
+                        <source src="assets/videos/home-hero.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-slide"><img src="assets/images/hero-optimized.jpg" alt="ผลผลิตสดใหม่" width="960" height="640" loading="lazy" decoding="async"
                         data-i18n-alt="slider_fresh_produce"></div>
-                <div class="hero-slide"><img src="assets/images/promo-hero-1.png" alt="โปรโมชัน" loading="lazy" decoding="async"
+                <div class="hero-slide"><img src="assets/images/promo-hero-1-optimized.jpg" alt="โปรโมชัน" width="960" height="795" loading="lazy" decoding="async"
                         data-i18n-alt="slider_promotion"></div>
             </div>
             <div class="hero-indicator" id="heroIndicator"></div>
@@ -64,7 +68,7 @@
             <div class="search-box" id="homeSearchBox" role="link" tabindex="0">
                 <input type="text" placeholder="ค้นหาผู้รับซื้อ หรือผลผลิต..." class="search-input" id="searchInput"
                     data-i18n-placeholder="search_buyer" readonly aria-label="เปิดหน้าค้นหา">
-                <button type="button" class="search-button" id="searchBtn" aria-label="เปิดหน้าค้นหา">
+                <button type="button" class="search-button" id="searchBtn" aria-label="เปิดหน้าค้นหา" data-i18n-aria-label="open_search">
                     <span class="material-icons-outlined" style="color: #fff; font-size: 24px;">search</span>
                 </button>
             </div>
@@ -77,32 +81,32 @@
             </div>
             <div class="product-grid">
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=fruit">
-                    <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้"
+                    <div class="cat-icon"><img src="assets/images/durian.png" alt="ผลไม้" data-i18n-alt="fruit"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="fruit">ผลไม้</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=vegetable">
-                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด"
+                    <div class="cat-icon"><img src="assets/images/fresh-vegetables.png" alt="ผักสด" data-i18n-alt="vegetable"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="vegetable">ผักสด</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=rice">
-                    <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่"
+                    <div class="cat-icon"><img src="assets/images/rice.png" alt="ข้าว/พืชไร่" data-i18n-alt="rice_crops"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="rice_crops">ข้าว/พืชไร่</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=oil">
-                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน"
+                    <div class="cat-icon"><img src="assets/images/oil-bottle.png" alt="น้ำมัน" data-i18n-alt="oil"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="oil">น้ำมัน</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=organic">
-                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์"
+                    <div class="cat-icon"><img src="assets/images/seedlings.png" alt="อินทรีย์" data-i18n-alt="organic"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="organic">อินทรีย์</span>
                 </a>
                 <a class="product-item" href="pages/shared/gov-price-lookup.html?category=seedlings">
-                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์"
+                    <div class="cat-icon"><img src="assets/images/herbs.png" alt="พืชพันธุ์" data-i18n-alt="seedlings"
                             style="width:40px;height:40px;object-fit:contain;"></div>
                     <span data-i18n="seedlings">พืชพันธุ์</span>
                 </a>
