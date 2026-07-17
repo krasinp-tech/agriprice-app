@@ -10,10 +10,26 @@
     try { return window.self !== window.top; } catch (_) { return true; }
   })();
 
+  const storageGet = (key) => {
+    try { return window.localStorage.getItem(key); } catch (_) { return null; }
+  };
+  const storageSet = (key, value) => {
+    try { window.localStorage.setItem(key, value); return true; } catch (_) { return false; }
+  };
+  const storageRemove = (key) => {
+    try { window.localStorage.removeItem(key); return true; } catch (_) { return false; }
+  };
+  const sessionGet = (key) => {
+    try { return window.sessionStorage.getItem(key); } catch (_) { return null; }
+  };
+  const sessionSet = (key, value) => {
+    try { window.sessionStorage.setItem(key, value); return true; } catch (_) { return false; }
+  };
+
   // ใช้ helper function เพื่อให้ได้ค่า BASE ล่าสุดเสมอ (เผื่อมีการสลับไป Render fallback)
   const getBase = () => {
     const rawBase = window.getAgriPriceApiUrl ? window.getAgriPriceApiUrl() : (window.API_BASE_URL || '').replace(/\/$/, '');
-    if (sessionStorage.getItem('agriprice_local_failed') === 'true') {
+    if (sessionGet('agriprice_local_failed') === 'true') {
       if (rawBase.includes('localhost') || rawBase.includes('127.0.0.1')) {
         return 'https://agriprice-app.onrender.com';
       }
@@ -21,6 +37,7 @@
     return rawBase;
   };
   const KEYS = window.STORAGE_KEYS || { TOKEN: 'token', ROLE: 'role', USER_DATA: 'user_data' };
+  const ACCOUNT_CACHE_KEY = 'account_manage_data_v1';
 
   // --- 1. Helpers (ตัวช่วยจัดการ Authentication & Token) ---
 
@@ -40,36 +57,55 @@
     return 'pages/auth/login1.html';
   }
 
-  const getToken = () => localStorage.getItem(KEYS.TOKEN) || '';
-  const setToken = t => localStorage.setItem(KEYS.TOKEN, t);
-  const getRole = () => String(localStorage.getItem(KEYS.ROLE) || 'guest').toLowerCase();
-  const setRole = r => localStorage.setItem(KEYS.ROLE, String(r || 'guest').toLowerCase());
+  function getDisabledAccountUrl() {
+    const path = (window.location.pathname || '').replace(/\\/g, '/');
+    const dir = path.endsWith('/') ? path : path.substring(0, path.lastIndexOf('/') + 1);
+    const pagesIdx = dir.lastIndexOf('/pages/');
+    if (pagesIdx !== -1) {
+      const afterPages = dir.substring(pagesIdx + '/pages/'.length);
+      const depth = afterPages.split('/').filter(Boolean).length;
+      return '../'.repeat(depth) + 'account/manage-accounts/deactivate-account.html';
+    }
+    return 'pages/account/manage-accounts/deactivate-account.html';
+  }
+
+  const getToken = () => storageGet(KEYS.TOKEN) || '';
+  const setToken = t => storageSet(KEYS.TOKEN, t);
+  const getRole = () => String(storageGet(KEYS.ROLE) || 'guest').toLowerCase();
+  const setRole = r => storageSet(KEYS.ROLE, String(r || 'guest').toLowerCase());
   const getUser = () => {
     try {
-      const raw = localStorage.getItem(KEYS.USER_DATA);
+      const raw = storageGet(KEYS.USER_DATA);
       return raw ? JSON.parse(raw) : null;
     } catch (err) {
       if (window.AGRIPRICE_DEBUG) console.warn('[API] Error parsing user data:', err);
       return null;
     }
   };
-  const setUser = u => localStorage.setItem(KEYS.USER_DATA, JSON.stringify(u));
+  const setUser = u => storageSet(KEYS.USER_DATA, JSON.stringify(u));
   const isLoggedIn = () => !!getToken() && getRole() !== 'guest';
 
   const clearAuth = () => {
-    localStorage.removeItem(KEYS.TOKEN);
-    localStorage.removeItem(KEYS.USER_DATA);
-    localStorage.removeItem(KEYS.ROLE);
+    storageRemove(KEYS.TOKEN);
+    storageRemove(KEYS.USER_DATA);
+    storageRemove(KEYS.ROLE);
     // Option: ล้างค่าอื่นๆ ที่เกี่ยวข้องกับ Session
-    localStorage.removeItem('agriprice_favorites_v1');
+    storageRemove('agriprice_favorites_v1');
+    storageRemove(ACCOUNT_CACHE_KEY);
   };
 
   const persistAuth = (token, user) => {
+    const previousUserId = String(getUser()?.id || getUser()?.profile_id || '');
+    const nextUserId = String(user?.id || user?.profile_id || '');
+    if (nextUserId && previousUserId !== nextUserId) {
+      storageRemove(ACCOUNT_CACHE_KEY);
+    }
     if (token) setToken(token);
     if (user) {
       setUser(user);
       if (user.role) setRole(user.role);
     }
+    window.AgriPresence?.refresh?.();
   };
 
   const t_helper = (k, f) => window.i18nT ? window.i18nT(k, f) : f;
@@ -79,10 +115,10 @@
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const isCacheable = (method, path) => method === 'GET' && CACHEABLE_GET.some(rule => rule.test(path));
   function readCache(path) {
-    try { return JSON.parse(localStorage.getItem(CACHE_PREFIX + path) || 'null')?.data || null; } catch (_) { return null; }
+    try { return JSON.parse(storageGet(CACHE_PREFIX + path) || 'null')?.data || null; } catch (_) { return null; }
   }
   function writeCache(path, data) {
-    try { localStorage.setItem(CACHE_PREFIX + path, JSON.stringify({ savedAt: Date.now(), data })); } catch (_) {}
+    try { storageSet(CACHE_PREFIX + path, JSON.stringify({ savedAt: Date.now(), data })); } catch (_) {}
   }
   function cachedResponse(path) {
     const cached = readCache(path);
@@ -142,7 +178,7 @@
       // [FIX] Auto-fallback to Render if Local fails
       if (currentBase.includes('127.0.0.1') || currentBase.includes('localhost')) {
         if (window.AGRIPRICE_DEBUG) console.warn('[API] Local server unreachable. Switching to Render backend...');
-        sessionStorage.setItem('agriprice_local_failed', 'true');
+        sessionSet('agriprice_local_failed', 'true');
 
         try {
           const fallbackBase = 'https://agriprice-app.onrender.com';
@@ -179,8 +215,26 @@
     const json = await res.json().catch(() => ({}));
 
     if (!res.ok) {
+      if (json.code === 'ACCOUNT_DISABLED') {
+        const target = getDisabledAccountUrl();
+        const currentPath = (window.location.pathname || '').replace(/\\/g, '/');
+        if (!currentPath.endsWith('/pages/account/manage-accounts/deactivate-account.html')) {
+          window.dispatchEvent(new CustomEvent('agriprice:account-disabled'));
+          if (window.navigateWithTransition) window.navigateWithTransition(target);
+          else window.location.href = target;
+        }
+      }
       if (window.AGRIPRICE_DEBUG) console.error(`[API] ${res.status} Error:`, json.message || 'Unknown error');
-      throw new Error(json.message || `${t_helper('error_occurred', 'เกิดข้อผิดพลาด')} (${res.status})`);
+      const serverMessage = String(json.message || '').trim();
+      const currentLang = String(storageGet('lang') || 'th').toLowerCase();
+      const safeServerMessage = serverMessage && currentLang !== 'th' && /[ก-๙]/.test(serverMessage)
+        ? (window.i18nApiMessage
+            ? window.i18nApiMessage(serverMessage, 'error_occurred', 'เกิดข้อผิดพลาด')
+            : t_helper('error_occurred', 'An error occurred'))
+        : serverMessage;
+      throw new Error(
+        safeServerMessage || `${t_helper('error_occurred', 'เกิดข้อผิดพลาด')} (${res.status})`
+      );
     }
 
     if (isCacheable(method, path)) writeCache(path, json);
@@ -344,14 +398,105 @@
     search, getDashboard, getAnnouncements, submitAppReview
   };
 
+  // --- Presence heartbeat: keep the signed-in user's online state truthful ---
+  const PRESENCE_PING_MS = 45 * 1000;
+  let presenceTimer = null;
+  let presencePingInFlight = false;
+
+  async function pingPresenceSilently() {
+    if (presencePingInFlight || document.hidden || navigator.onLine === false || !getToken()) return false;
+    presencePingInFlight = true;
+    try {
+      if (window.APP_CONFIG_READY) await window.APP_CONFIG_READY;
+      const base = getBase();
+      if (!base) return false;
+      const response = await fetch(base.replace(/\/$/, '') + '/api/presence/ping', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + getToken(),
+          'Content-Type': 'application/json'
+        },
+        body: '{}',
+        cache: 'no-store'
+      });
+      const online = response.ok;
+      window.dispatchEvent(new CustomEvent('agriprice:presence-self', { detail: { online } }));
+      return online;
+    } catch (_) {
+      window.dispatchEvent(new CustomEvent('agriprice:presence-self', { detail: { online: false } }));
+      return false;
+    } finally {
+      presencePingInFlight = false;
+    }
+  }
+
+  function startPresenceHeartbeat() {
+    clearInterval(presenceTimer);
+    presenceTimer = null;
+    if (!getToken() || document.hidden || navigator.onLine === false) return;
+    pingPresenceSilently();
+    presenceTimer = setInterval(pingPresenceSilently, PRESENCE_PING_MS);
+  }
+
+  function stopPresenceHeartbeat() {
+    clearInterval(presenceTimer);
+    presenceTimer = null;
+  }
+
+  function formatPresenceStatus(presence) {
+    if (presence === true || presence?.online === true) return t_helper('online', 'ออนไลน์');
+    const lastSeen = presence && typeof presence === 'object' ? presence.last_seen : null;
+    const timestamp = lastSeen ? new Date(lastSeen).getTime() : NaN;
+    if (!Number.isFinite(timestamp)) return t_helper('offline', 'ออฟไลน์');
+
+    const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+    if (seconds < 60) return t_helper('active_just_now', 'ใช้งานเมื่อสักครู่');
+    if (seconds < 3600) {
+      return t_helper('active_minutes_ago', 'ใช้งานเมื่อ {count} นาทีที่แล้ว').replace('{count}', Math.floor(seconds / 60));
+    }
+    if (seconds < 86400) {
+      return t_helper('active_hours_ago', 'ใช้งานเมื่อ {count} ชั่วโมงที่แล้ว').replace('{count}', Math.floor(seconds / 3600));
+    }
+    if (seconds < 7 * 86400) {
+      return t_helper('active_days_ago', 'ใช้งานเมื่อ {count} วันที่แล้ว').replace('{count}', Math.floor(seconds / 86400));
+    }
+    return t_helper('inactive_some_time', 'ไม่ได้ใช้งานมาระยะหนึ่ง');
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopPresenceHeartbeat();
+    else startPresenceHeartbeat();
+  });
+  window.addEventListener('online', startPresenceHeartbeat);
+  window.addEventListener('offline', () => {
+    stopPresenceHeartbeat();
+    window.dispatchEvent(new CustomEvent('agriprice:presence-self', { detail: { online: false } }));
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === (window.AUTH_TOKEN_KEY || 'token')) startPresenceHeartbeat();
+  });
+  window.AgriPresence = {
+    ping: pingPresenceSilently,
+    refresh: startPresenceHeartbeat,
+    stop: stopPresenceHeartbeat,
+    formatStatus: formatPresenceStatus,
+    intervalMs: PRESENCE_PING_MS
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPresenceHeartbeat, { once: true });
+  } else {
+    startPresenceHeartbeat();
+  }
+
   // --- 12. Background Notification Polling & Triggering ---
   let lastSeenNotificationId = null;
   let notiPollInterval = null;
+  let notiPollTimeout = null;
   let notiPollInFlight = false;
 
   async function checkNotificationsBackground() {
     if (notiPollInFlight || document.hidden) return;
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) return;
     notiPollInFlight = true;
 
@@ -367,7 +512,9 @@
         if (unread.length === 0) return;
 
         const latest = unread[0];
-        const latestId = String(latest.id || latest.notification_id);
+        const latestIdValue = latest.id ?? latest.notification_id;
+        if (latestIdValue == null) return;
+        const latestId = String(latestIdValue);
 
         if (lastSeenNotificationId === null) {
           lastSeenNotificationId = latestId;
@@ -376,7 +523,7 @@
 
         if (latestId !== lastSeenNotificationId) {
           lastSeenNotificationId = latestId;
-          showBackgroundNotification(latest.title, latest.message || latest.content || latest.description);
+          await showBackgroundNotification(latest.title, latest.message || latest.content || latest.description);
           window.dispatchEvent(new CustomEvent('agriprice:notifications-refresh', { detail: { latest } }));
           if (typeof window.loadNotifications === 'function') {
             window.loadNotifications();
@@ -384,22 +531,27 @@
         }
       }
     } catch (err) {
-      console.warn('[API Background] Notification check failed:', err.message);
+      console.warn('[API Background] Notification check failed:', err?.message || err);
     } finally {
       notiPollInFlight = false;
     }
   }
 
-  function showBackgroundNotification(title, body) {
-    const isLocalNotifSupported = window.Capacitor && window.Capacitor.isPluginAvailable('LocalNotifications');
+  async function showBackgroundNotification(title, body) {
+    const safeTitle = String(title || t_helper('notification', 'การแจ้งเตือน'));
+    const safeBody = String(body || '');
+    const isLocalNotifSupported = (
+      typeof window.Capacitor?.isPluginAvailable === 'function' &&
+      window.Capacitor.isPluginAvailable('LocalNotifications')
+    );
     if (isLocalNotifSupported) {
       try {
         const { LocalNotifications } = window.Capacitor.Plugins;
-        LocalNotifications.schedule({
+        await LocalNotifications.schedule({
           notifications: [
             {
-              title: title,
-              body: body,
+              title: safeTitle,
+              body: safeBody,
               id: Math.floor(Math.random() * 100000),
               schedule: { at: new Date(Date.now() + 100) }
             }
@@ -412,29 +564,46 @@
     }
 
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body });
-      return;
+      try {
+        new Notification(safeTitle, { body: safeBody });
+        return;
+      } catch (e) {
+        console.error('[API Background] Web notification failed:', e);
+      }
     }
 
     if (window.showToast) {
-      window.showToast(`${title}: ${body}`, 'success');
+      window.showToast(`${safeTitle}: ${safeBody}`, 'success');
     } else {
-      if (window.AGRIPRICE_DEBUG) console.log(`[Background Notification] ${title}: ${body}`);
+      if (window.AGRIPRICE_DEBUG) console.log(`[Background Notification] ${safeTitle}: ${safeBody}`);
     }
   }
 
   function startNotificationPolling() {
-    if (notiPollInterval) clearInterval(notiPollInterval);
-    notiPollInterval = setInterval(checkNotificationsBackground, 30000);
-    setTimeout(checkNotificationsBackground, 12000);
+    stopNotificationPolling();
+    if (document.hidden || !getToken()) return;
+    notiPollInterval = setInterval(checkNotificationsBackground, 60000);
+    notiPollTimeout = setTimeout(checkNotificationsBackground, 12000);
   }
 
-  if (!IS_EMBEDDED_FRAME && localStorage.getItem('token')) {
+  function stopNotificationPolling() {
+    clearInterval(notiPollInterval);
+    clearTimeout(notiPollTimeout);
+    notiPollInterval = null;
+    notiPollTimeout = null;
+  }
+
+  if (!IS_EMBEDDED_FRAME && getToken()) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', startNotificationPolling);
     } else {
       startNotificationPolling();
     }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopNotificationPolling();
+      else startNotificationPolling();
+    });
+    window.addEventListener('beforeunload', stopNotificationPolling);
   }
 
   if (window.AGRIPRICE_DEBUG) console.log('[API] ✅ Connected to:', getBase());

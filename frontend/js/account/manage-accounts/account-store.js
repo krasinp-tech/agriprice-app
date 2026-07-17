@@ -3,9 +3,10 @@
 
   const STORAGE_KEY = "account_manage_data_v1";
   const DEFAULT_DATA = {
-    phone: "+66*******361",
+    ownerId: "",
+    phone: "",
     email: "",
-    birthDate: "2004-01-01",
+    birthDate: "",
     accountStatus: "active",
     passwordUpdatedAt: "",
   };
@@ -33,6 +34,7 @@
   function mapProfileToStore(profile) {
     if (!profile || typeof profile !== "object") return null;
     return normalize({
+      ownerId: profile.profile_id || profile.id || getCurrentUserId(),
       phone: profile.phone,
       email: profile.email,
       birthDate: profile.birth_date,
@@ -46,6 +48,7 @@
 
   function saveLocal(data) {
     const next = normalize(data);
+    next.ownerId = getCurrentUserId();
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch (_) {}
@@ -53,11 +56,20 @@
   }
 
   function cloneDefaults() {
-    return { ...DEFAULT_DATA };
+    return { ...DEFAULT_DATA, ownerId: getCurrentUserId() };
   }
 
   function asText(value) {
     return typeof value === "string" ? value.trim() : "";
+  }
+
+  function getCurrentUserId() {
+    try {
+      const user = JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || "user_data") || "null");
+      return asText(user?.id || user?.profile_id);
+    } catch (_) {
+      return "";
+    }
   }
 
   function normalize(data) {
@@ -65,6 +77,7 @@
     if (!data || typeof data !== "object") return base;
 
     const merged = { ...base, ...data };
+    merged.ownerId = asText(merged.ownerId);
     merged.phone = asText(merged.phone) || base.phone;
     merged.email = asText(merged.email);
     merged.birthDate = asText(merged.birthDate) || base.birthDate;
@@ -76,9 +89,13 @@
 
   function getData() {
     try {
+      const currentUserId = getCurrentUserId();
+      if (!currentUserId) return cloneDefaults();
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return cloneDefaults();
-      return normalize(JSON.parse(raw));
+      const cached = normalize(JSON.parse(raw));
+      if (cached.ownerId !== currentUserId) return cloneDefaults();
+      return cached;
     } catch (_) {
       return cloneDefaults();
     }
@@ -100,7 +117,9 @@
     const profile = (res && typeof res === 'object' && res.data) ? res.data : res;
     const mapped = mapProfileToStore(profile);
     if (!mapped) return getData();
-    return saveLocal({ ...getData(), ...mapped });
+    // The authenticated profile is authoritative. Never merge fields from a
+    // previous account into the newly authenticated user's cache.
+    return saveLocal(mapped);
   }
 
   async function updateProfileOnServer(payload) {
@@ -160,9 +179,10 @@
 
   function formatThaiDate(dateValue) {
     const value = asText(dateValue);
-    if (!value) return "-";
+    const t = (k, f) => (window.i18nT ? window.i18nT(k, f) : f);
+    if (!value) return t('unspecified', 'ไม่ได้ระบุ');
     const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return "-";
+    if (Number.isNaN(parsed.getTime())) return t('unspecified', 'ไม่ได้ระบุ');
     const lang = localStorage.getItem('lang') || 'th';
     const locale = lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : 'th-TH';
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(parsed);

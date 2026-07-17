@@ -48,7 +48,8 @@
       return;
     }
 
-    const isValid = /^\+?[0-9*][0-9*\s-]{7,20}$/.test(value);
+    const digits = value.replace(/\D/g, "");
+    const isValid = /^0\d{9}$/.test(digits) || /^66\d{9}$/.test(digits);
     if (!isValid) {
       showMessage(t('invalid_phone_format', "รูปแบบหมายเลขโทรศัพท์ไม่ถูกต้อง"), "error");
       phoneInput.focus();

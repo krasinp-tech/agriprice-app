@@ -36,7 +36,7 @@
   <main class="detail-page">
     <section class="detail-shell">
       <header class="detail-header">
-        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน">
+        <a class="detail-back" href="my-account.html" aria-label="ย้อนกลับหน้าบัญชีของฉัน" data-i18n-aria-label="back_to_account">
           <span class="material-icons-outlined">chevron_left</span>
         </a>
         <div>
@@ -47,7 +47,7 @@
 
       <section class="detail-card">
         <h2 class="detail-section-title" data-i18n="update_phone">อัปเดตหมายเลขโทรศัพท์</h2>
-        <p class="detail-note"><span data-i18n="current_phone">หมายเลขปัจจุบัน:</span> <strong id="currentPhoneValue">+66*******361</strong></p>
+        <p class="detail-note"><span data-i18n="current_phone">หมายเลขปัจจุบัน:</span> <strong id="currentPhoneValue">-</strong></p>
 
         <form id="phoneForm" class="detail-form" novalidate>
           <div class="field-group">
@@ -58,7 +58,7 @@
               name="phone"
               type="tel"
               autocomplete="tel"
-              placeholder="เช่น +66812345678"
+              placeholder="เช่น +66812345678" data-i18n-placeholder="phone_example_placeholder"
               required
             />
             <p class="field-hint" data-i18n="phone_format_hint">รองรับรูปแบบ +66XXXXXXXXX หรือรูปแบบที่มีขีดคั่น</p>
