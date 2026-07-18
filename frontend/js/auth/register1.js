@@ -81,19 +81,32 @@
     hardenVideo(topVideo);
     safePlay(topVideo, (failed) => showFallback(!!failed));
 
-    // Keep role previews idle until the user selects a card. Playing all three
-    // videos together causes heavy decoding and memory pressure on mobile.
-    document.querySelectorAll(".role-video").forEach((v) => {
+    // Play previews only while they are visible. This keeps every video visible
+    // without decoding off-screen media in the mobile WebView.
+    const roleVideos = Array.from(document.querySelectorAll(".role-video"));
+    roleVideos.forEach((v) => {
       hardenVideo(v, false);
       v.preload = "metadata";
-      v.pause();
     });
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.1 && !document.hidden) safePlay(video);
+          else video.pause();
+        });
+      }, { threshold: [0, 0.1] });
+      [topVideo, ...roleVideos].filter(Boolean).forEach((video) => observer.observe(video));
+    } else {
+      roleVideos.forEach((video) => safePlay(video));
+    }
 
     if (topVideo) {
       topVideo.addEventListener("error", () => showFallback(true));
       document.addEventListener("visibilitychange", () => {
-        if (document.hidden) topVideo.pause();
-        else safePlay(topVideo, (failed) => showFallback(!!failed));
+        if (document.hidden) [topVideo, ...roleVideos].forEach((video) => video?.pause());
+        else [topVideo, ...roleVideos].filter((video) => video?.getBoundingClientRect().bottom > 0 && video.getBoundingClientRect().top < window.innerHeight).forEach((video) => safePlay(video));
       });
     }
   }

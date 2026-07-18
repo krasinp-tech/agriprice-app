@@ -217,7 +217,10 @@
         localStorage.setItem("bookingProductId", offerId);
       }
       
-      const role = (JSON.parse(localStorage.getItem('user_data') || '{}').role || 'farmer').toLowerCase();
+      let role = String(window.api?.getRole?.() || localStorage.getItem(window.AUTH_ROLE_KEY || 'role') || '').toLowerCase();
+      if (!role || role === 'guest') {
+        try { role = String(JSON.parse(localStorage.getItem(window.AUTH_USER_KEY || 'user_data') || '{}').role || '').toLowerCase(); } catch (_) {}
+      }
       const next = role === 'buyer' ? '../buyer/setbooking/booking.html' : '../farmer/booking/booking-step1.html';
       window.location.href = next;
     }

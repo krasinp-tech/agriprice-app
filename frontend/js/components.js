@@ -75,6 +75,25 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     try { return window.self !== window.top; } catch (_) { return true; }
   })();
 
+  function resolveAuthenticatedRole() {
+    const normalize = (value) => String(value || '').trim().toLowerCase();
+    const apiRole = normalize(window.api?.getRole?.());
+    if (apiRole === 'buyer' || apiRole === 'farmer') return apiRole;
+
+    const roleKey = window.AUTH_ROLE_KEY || window.STORAGE_KEYS?.ROLE || 'role';
+    const storedRole = normalize(localStorage.getItem(roleKey));
+    if (storedRole === 'buyer' || storedRole === 'farmer') return storedRole;
+
+    try {
+      const userKey = window.AUTH_USER_KEY || window.STORAGE_KEYS?.USER_DATA || 'user_data';
+      const raw = localStorage.getItem(userKey);
+      const userRole = normalize(raw ? JSON.parse(raw)?.role : '');
+      return userRole === 'buyer' || userRole === 'farmer' ? userRole : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   // ===== Shared business rules =====
   window.AgriPriceRules = window.AgriPriceRules || {
     STALE_DAYS: 7,
@@ -359,12 +378,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const nav = document.getElementById("bottomNav");
     if (!nav) return;
 
-    let role = "farmer";
-    try {
-      const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-      const u = raw ? JSON.parse(raw) : null;
-      if (u && u.role) role = String(u.role);
-    } catch (_) { }
+    const role = resolveAuthenticatedRole();
+
 
     const base = getRelativePrefixToRoot();
 
@@ -422,18 +437,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
      Product Card delegation (GLOBAL)
   ---------------------------- */
   function initProductCardsDelegation() {
-    function getCurrentRole() {
-      try {
-        const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-        const user = raw ? JSON.parse(raw) : null;
-        return String(user?.role || "").toLowerCase();
-      } catch (_) {
-        return "";
-      }
-    }
-
     function isBuyerRole() {
-      return getCurrentRole() === "buyer";
+      return resolveAuthenticatedRole() === "buyer";
     }
 
     function getGradePrice(card, grade) {
@@ -619,12 +624,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
         const pagesPrefix = getRelativePrefixToPages();
 
-        let role = "farmer";
-        try {
-          const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-          const u = raw ? JSON.parse(raw) : null;
-          if (u && u.role) role = String(u.role);
-        } catch (_) { }
+        const role = resolveAuthenticatedRole();
+
 
         const nextHref = role === "buyer"
           ? pagesPrefix + "buyer/setbooking/booking.html"
@@ -810,12 +811,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
     const mount = document.getElementById("favoritesPlaceholder");
     if (!mount) return;
 
-    let role = "";
-    try {
-      const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-      const user = raw ? JSON.parse(raw) : null;
-      role = String(user?.role || "").toLowerCase();
-    } catch (_) { }
+    const role = resolveAuthenticatedRole();
+
     if (role === "buyer") {
       mount.remove();
       return;
@@ -841,12 +838,8 @@ if (window.__AGRIPRICE_COMPONENTS_READY) {
 
     // Sync favorites from API on startup.
     (function syncFavoritesFromApi() {
-      let role = "";
-      try {
-        const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-        const user = raw ? JSON.parse(raw) : null;
-        role = String(user?.role || "").toLowerCase();
-      } catch (_) { }
+      const role = resolveAuthenticatedRole();
+
       if (!role || role === "buyer") return;
 
       const sync = async () => {

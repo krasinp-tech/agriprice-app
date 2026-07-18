@@ -20,12 +20,14 @@
   }
 
   function getRole() {
+    const canonicalRole = String(window.api?.getRole?.() || localStorage.getItem(window.AUTH_ROLE_KEY || "role") || "").toLowerCase();
+    if (canonicalRole === "buyer" || canonicalRole === "farmer") return canonicalRole;
     try {
       const raw = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-      const user = raw ? JSON.parse(raw) : null;
-      if (user?.role) return String(user.role).toLowerCase();
+      const userRole = String((raw ? JSON.parse(raw) : null)?.role || "").toLowerCase();
+      if (userRole === "buyer" || userRole === "farmer") return userRole;
     } catch (_) {}
-    return (localStorage.getItem("role") || "guest").toLowerCase();
+    return "guest";
   }
 
   function getRelativePrefixToPages() {

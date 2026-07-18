@@ -790,9 +790,14 @@
           const node = window.ProductCard.createCardEl(data, {}, templateHtml);
           
           // Favorite sync for home page (if not buyer)
-          const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
-          const user = rawUser ? JSON.parse(rawUser) : null;
-          const isBuyer = user?.role?.toLowerCase() === "buyer";
+          let currentRole = String(window.api?.getRole?.() || localStorage.getItem(window.AUTH_ROLE_KEY || "role") || "").toLowerCase();
+          if (!currentRole || currentRole === "guest") {
+            try {
+              const rawUser = localStorage.getItem(window.AUTH_USER_KEY || "user_data");
+              currentRole = String((rawUser ? JSON.parse(rawUser) : null)?.role || "").toLowerCase();
+            } catch (_) {}
+          }
+          const isBuyer = currentRole === "buyer";
 
           if (!isBuyer) {
             const favId = item.offerId || item.productId || item.sellerId;
